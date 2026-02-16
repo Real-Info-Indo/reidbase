@@ -1,0 +1,5 @@
+
+ALTER TABLE public.properties_2025 ALTER COLUMN years TYPE NUMERIC;
+ALTER TABLE public.properties_2025 ALTER COLUMN bedrooms TYPE NUMERIC;
+ALTER TABLE public.properties_2025 ALTER COLUMN bathrooms TYPE NUMERIC;
+ALTER TABLE public.properties_2025 ALTER COLUMN days_listed TYPE NUMERIC;

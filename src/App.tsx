@@ -11,6 +11,7 @@ import MarketReports from "./pages/MarketReports";
 import LocationReports from "./pages/LocationReports";
 import AppraisalRequest from "./pages/AppraisalRequest";
 import NotFound from "./pages/NotFound";
+import ImportData from "./pages/ImportData";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="/location-reports" element={<LocationReports />} />
               <Route path="/appraisal-request" element={<AppraisalRequest />} />
             </Route>
+            <Route path="/import-data" element={<ImportData />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

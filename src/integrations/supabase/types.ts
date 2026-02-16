@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      properties_2025: {
+        Row: {
+          availability: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          build_size_sqm: number | null
+          contract_type: string | null
+          days_listed: number | null
+          fsr: string | null
+          id: string | null
+          land_size_sqm: number | null
+          location: string | null
+          off_plan: string | null
+          price_idr: number | null
+          price_per_sqm_usd: number | null
+          price_per_year_usd: number | null
+          price_usd: number | null
+          property_type: string | null
+          region: string | null
+          scrape_date: string | null
+          sold_date: string | null
+          uqid: number
+          years: number | null
+        }
+        Insert: {
+          availability?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          build_size_sqm?: number | null
+          contract_type?: string | null
+          days_listed?: number | null
+          fsr?: string | null
+          id?: string | null
+          land_size_sqm?: number | null
+          location?: string | null
+          off_plan?: string | null
+          price_idr?: number | null
+          price_per_sqm_usd?: number | null
+          price_per_year_usd?: number | null
+          price_usd?: number | null
+          property_type?: string | null
+          region?: string | null
+          scrape_date?: string | null
+          sold_date?: string | null
+          uqid: number
+          years?: number | null
+        }
+        Update: {
+          availability?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          build_size_sqm?: number | null
+          contract_type?: string | null
+          days_listed?: number | null
+          fsr?: string | null
+          id?: string | null
+          land_size_sqm?: number | null
+          location?: string | null
+          off_plan?: string | null
+          price_idr?: number | null
+          price_per_sqm_usd?: number | null
+          price_per_year_usd?: number | null
+          price_usd?: number | null
+          property_type?: string | null
+          region?: string | null
+          scrape_date?: string | null
+          sold_date?: string | null
+          uqid?: number
+          years?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

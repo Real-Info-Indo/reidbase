@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -103,6 +104,8 @@ export default function NewAnalysis() {
   const [mode, setMode] = useState<SearchMode>("rag");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const paramConvoId = searchParams.get("c");
 
   const startNew = useCallback(() => {
     setMessages([]);
@@ -113,19 +116,24 @@ export default function NewAnalysis() {
     window.history.replaceState({}, "", url.toString());
   }, []);
 
-  // Load conversation from URL search params
+  // Load conversation whenever the ?c= param changes
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("c");
-    if (id) {
-      const convo = getConversation(id);
+    if (paramConvoId) {
+      const convo = getConversation(paramConvoId);
       if (convo) {
         setConversationId(convo.id);
         setMessages(convo.messages);
         setMode(convo.mode);
+        return;
       }
     }
-  }, []);
+    // If no param or convo not found, reset
+    if (!paramConvoId && conversationId) {
+      setMessages([]);
+      setConversationId(null);
+      setQuery("");
+    }
+  }, [paramConvoId]);
 
   // Listen for reset event from sidebar "New Analysis" click
   useEffect(() => {

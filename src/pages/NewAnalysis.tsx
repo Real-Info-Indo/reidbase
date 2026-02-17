@@ -358,7 +358,7 @@ export default function NewAnalysis() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            placeholder="Ask a follow-up question..."
+            placeholder="Enter a prompt..."
             disabled={isLoading}
             className="w-full rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50" />
 

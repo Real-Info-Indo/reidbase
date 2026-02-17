@@ -218,7 +218,7 @@ export default function NewAnalysis() {
             </h1>
             <p className="text-2xl text-muted-foreground mb-6">what would you like to discover?</p>
             <ModeToggle mode={mode} setMode={setMode} className="mb-8" />
-            <div className="relative mb-12 shadow-md">
+            <div className="relative mb-12">
               <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -236,12 +236,12 @@ export default function NewAnalysis() {
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {suggestions.map((s) =>
             <button
               key={s.title}
               onClick={() => send(s.desc)}
-              className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group">
+              className="items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight">
 
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <s.icon className="h-5 w-5 text-primary" />

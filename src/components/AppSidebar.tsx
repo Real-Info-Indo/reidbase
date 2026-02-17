@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
-  Search, ChevronLeft, ChevronRight, MessageSquare, User,
+  Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useTier, tierLabels } from "@/contexts/TierContext";
 import { cn } from "@/lib/utils";
+import { getConversations, deleteConversation, type Conversation } from "@/lib/conversations";
 
 const navItems = [
   { title: "New Analysis", url: "/", icon: PlusCircle },
@@ -15,16 +17,31 @@ const navItems = [
   { title: "Appraisal Request", url: "/appraisal-request", icon: ClipboardEdit },
 ];
 
-const recentAnalysis = [
-  "Canggu villa market Q3",
-  "Seminyak rental yield",
-  "Ubud land price trends",
-  "Berawa development ROI",
-];
-
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { tier, userName } = useTier();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const activeConvoId = searchParams.get("c");
+
+  const refresh = () => setConversations(getConversations());
+
+  useEffect(() => {
+    refresh();
+    const handler = () => refresh();
+    window.addEventListener("conversations-updated", handler);
+    return () => window.removeEventListener("conversations-updated", handler);
+  }, []);
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    deleteConversation(id);
+    refresh();
+    if (activeConvoId === id) navigate("/");
+  };
+
+  const openConvo = (id: string) => navigate(`/?c=${id}`);
 
   return (
     <aside
@@ -63,21 +80,31 @@ export function AppSidebar() {
           </NavLink>
         ))}
 
-        {/* Recent Analysis */}
-        {!collapsed && (
+        {/* Recent conversations */}
+        {!collapsed && conversations.length > 0 && (
           <div className="mt-8 px-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sidebar-muted mb-3">
               <Search className="h-3.5 w-3.5" />
               Recent Analysis
             </div>
-            <div className="space-y-1">
-              {recentAnalysis.map((item) => (
+            <div className="space-y-0.5">
+              {conversations.slice(0, 10).map((convo) => (
                 <button
-                  key={item}
-                  className="flex items-center gap-2 w-full text-left text-xs text-sidebar-foreground/60 hover:text-sidebar-foreground py-1.5 px-2 rounded-md hover:bg-sidebar-accent transition-colors"
+                  key={convo.id}
+                  onClick={() => openConvo(convo.id)}
+                  className={cn(
+                    "flex items-center gap-2 w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors group",
+                    activeConvoId === convo.id
+                      ? "bg-sidebar-accent text-sidebar-foreground"
+                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                  )}
                 >
                   <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{item}</span>
+                  <span className="truncate flex-1">{convo.title}</span>
+                  <Trash2
+                    className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
+                    onClick={(e) => handleDelete(e, convo.id)}
+                  />
                 </button>
               ))}
             </div>

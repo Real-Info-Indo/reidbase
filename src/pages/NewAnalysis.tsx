@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
-
-type Msg = { role: "user" | "assistant"; content: string };
-type SearchMode = "rag" | "analytical";
+import {
+  type Msg, type SearchMode, type Conversation,
+  getConversation, saveConversation, generateId, deriveTitle,
+} from "@/lib/conversations";
 
 const suggestions = [
   { title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
@@ -76,7 +77,6 @@ async function streamChat({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
@@ -101,11 +101,53 @@ export default function NewAnalysis() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<SearchMode>("rag");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load conversation from URL search params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("c");
+    if (id) {
+      const convo = getConversation(id);
+      if (convo) {
+        setConversationId(convo.id);
+        setMessages(convo.messages);
+        setMode(convo.mode);
+      }
+    }
+  }, []);
+
+  // Persist conversation on message changes
+  const persistRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const id = conversationId ?? generateId();
+    if (!conversationId) {
+      setConversationId(id);
+      // Update URL without reload
+      const url = new URL(window.location.href);
+      url.searchParams.set("c", id);
+      window.history.replaceState({}, "", url.toString());
+    }
+    persistRef.current = id;
+    saveConversation({ id, title: deriveTitle(messages), mode, messages, updatedAt: Date.now() });
+    // Dispatch event so sidebar updates
+    window.dispatchEvent(new Event("conversations-updated"));
+  }, [messages, mode, conversationId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const startNew = useCallback(() => {
+    setMessages([]);
+    setConversationId(null);
+    setQuery("");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("c");
+    window.history.replaceState({}, "", url.toString());
+  }, []);
 
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
@@ -150,8 +192,11 @@ export default function NewAnalysis() {
     <div className="flex flex-col h-screen">
       {hasConversation && (
         <div className="border-b border-border px-8 py-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">Conversation name ▾</span>
-          <ModeToggle mode={mode} setMode={setMode} />
+          <span className="text-sm font-medium text-muted-foreground">{deriveTitle(messages)}</span>
+          <div className="flex items-center gap-3">
+            <button onClick={startNew} className="text-xs text-primary hover:underline">+ New chat</button>
+            <ModeToggle mode={mode} setMode={setMode} />
+          </div>
         </div>
       )}
 
@@ -162,17 +207,13 @@ export default function NewAnalysis() {
               Welcome to <span className="text-primary">REID</span>,
             </h1>
             <p className="text-2xl text-muted-foreground mb-6">what would you like to discover?</p>
-
-            {/* Mode toggle */}
             <ModeToggle mode={mode} setMode={setMode} className="mb-8" />
-
-            {/* Input area */}
             <div className="relative mb-12">
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
-                placeholder={mode === "analytical" 
+                placeholder={mode === "analytical"
                   ? "Ask a data question — e.g. 'What is the median price per sqm in Canggu?'"
                   : "Ask about Bali real estate markets, trends, yields..."}
                 className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50"
@@ -185,8 +226,6 @@ export default function NewAnalysis() {
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
             </div>
-
-            {/* Suggestion cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {suggestions.map((s) => (
                 <button
@@ -239,7 +278,6 @@ export default function NewAnalysis() {
         )}
       </div>
 
-      {/* Bottom input bar */}
       {hasConversation && (
         <div className="border-t border-border px-8 py-4">
           <div className="max-w-3xl mx-auto relative">

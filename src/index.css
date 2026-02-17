@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,17 +32,17 @@
     --input: 39 25% 88%;
     --ring: 36 97% 74%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 30 20% 18%;
-    --sidebar-foreground: 39 40% 90%;
-    --sidebar-primary: 36 97% 74%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 30 15% 24%;
-    --sidebar-accent-foreground: 39 40% 90%;
-    --sidebar-border: 30 12% 28%;
-    --sidebar-ring: 36 97% 74%;
-    --sidebar-muted: 30 10% 45%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 36 97% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 15%;
+    --sidebar-border: 0 0% 0% / 0.08;
+    --sidebar-ring: 36 97% 50%;
+    --sidebar-muted: 0 0% 45%;
   }
 
   * {
@@ -52,8 +51,5 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-  }
-  .dark {
-    --radius: 0.5rem;
   }
 }

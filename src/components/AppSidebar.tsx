@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
-  Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2,
+  Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2, Pin,
 } from "lucide-react";
 import reidLogo from "@/assets/REID_Base_Black.svg";
 import { NavLink } from "@/components/NavLink";
@@ -107,7 +107,7 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                       : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                   )}
                 >
-                  <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                   {convo.pinned ? <Pin className="h-3.5 w-3.5 shrink-0 text-primary" /> : <MessageSquare className="h-3.5 w-3.5 shrink-0" />}
                   <span className="truncate flex-1">{convo.title}</span>
                   <Trash2
                     className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"

@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2 } from "lucide-react";
+import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2, ChevronDown, Pin, Pencil } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
   type Msg, type SearchMode, type Conversation,
-  getConversation, saveConversation, generateId, deriveTitle } from
-"@/lib/conversations";
+  getConversation, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
+} from "@/lib/conversations";
 
 const suggestions = [
 { title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
@@ -103,6 +106,10 @@ export default function NewAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<SearchMode>("rag");
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState<string | null>(null);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
+  const [isPinned, setIsPinned] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
@@ -124,6 +131,8 @@ export default function NewAnalysis() {
         setConversationId(convo.id);
         setMessages(convo.messages);
         setMode(convo.mode);
+        setCustomTitle(convo.title !== deriveTitle(convo.messages) ? convo.title : null);
+        setIsPinned(!!convo.pinned);
         return;
       }
     }
@@ -154,9 +163,33 @@ export default function NewAnalysis() {
       window.history.replaceState({}, "", url.toString());
     }
     persistRef.current = id;
-    saveConversation({ id, title: deriveTitle(messages), mode, messages, updatedAt: Date.now() });
+    saveConversation({ id, title: customTitle || deriveTitle(messages), mode, messages, updatedAt: Date.now(), pinned: isPinned });
     window.dispatchEvent(new Event("conversations-updated"));
   }, [messages, mode, conversationId]);
+
+  const displayTitle = customTitle || deriveTitle(messages);
+
+  const handlePin = () => {
+    if (!conversationId) return;
+    togglePin(conversationId);
+    setIsPinned(!isPinned);
+    window.dispatchEvent(new Event("conversations-updated"));
+    toast.success(isPinned ? "Unpinned" : "Pinned to top");
+  };
+
+  const handleRename = () => {
+    setRenameValue(displayTitle);
+    setIsRenaming(true);
+  };
+
+  const submitRename = () => {
+    if (!conversationId || !renameValue.trim()) return;
+    renameConversation(conversationId, renameValue.trim());
+    setCustomTitle(renameValue.trim());
+    setIsRenaming(false);
+    window.dispatchEvent(new Event("conversations-updated"));
+    toast.success("Conversation renamed");
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -205,7 +238,37 @@ export default function NewAnalysis() {
     <div className="flex flex-col h-screen">
       {hasConversation &&
       <div className="border-b border-border px-8 py-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">{deriveTitle(messages)}</span>
+          {isRenaming ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submitRename()}
+                className="text-sm font-medium border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
+                autoFocus
+              />
+              <button onClick={submitRename} className="text-xs text-primary font-medium hover:underline">Save</button>
+              <button onClick={() => setIsRenaming(false)} className="text-xs text-muted-foreground hover:underline">Cancel</button>
+            </div>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none">
+                {isPinned && <Pin className="h-3 w-3 text-primary" />}
+                {displayTitle}
+                <ChevronDown className="h-3.5 w-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="bg-popover">
+                <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
+                  <Pin className="h-4 w-4 mr-2" />
+                  {isPinned ? "Unpin" : "Pin to top"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleRename} className="cursor-pointer">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Rename
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <ModeToggle mode={mode} setMode={setMode} />
         </div>
       }

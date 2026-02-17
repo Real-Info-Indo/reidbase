@@ -7,6 +7,7 @@ export interface Conversation {
   mode: SearchMode;
   messages: Msg[];
   updatedAt: number;
+  pinned?: boolean;
 }
 
 const STORAGE_KEY = "reid_conversations";
@@ -25,7 +26,29 @@ function writeAll(convos: Conversation[]) {
 }
 
 export function getConversations(): Conversation[] {
-  return readAll().sort((a, b) => b.updatedAt - a.updatedAt);
+  return readAll().sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return b.updatedAt - a.updatedAt;
+  });
+}
+
+export function togglePin(id: string) {
+  const all = readAll();
+  const convo = all.find((c) => c.id === id);
+  if (convo) {
+    convo.pinned = !convo.pinned;
+    writeAll(all);
+  }
+}
+
+export function renameConversation(id: string, newTitle: string) {
+  const all = readAll();
+  const convo = all.find((c) => c.id === id);
+  if (convo) {
+    convo.title = newTitle;
+    writeAll(all);
+  }
 }
 
 export function getConversation(id: string): Conversation | undefined {

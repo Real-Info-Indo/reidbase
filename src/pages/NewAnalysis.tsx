@@ -104,6 +104,15 @@ export default function NewAnalysis() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const startNew = useCallback(() => {
+    setMessages([]);
+    setConversationId(null);
+    setQuery("");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("c");
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
   // Load conversation from URL search params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -118,6 +127,13 @@ export default function NewAnalysis() {
     }
   }, []);
 
+  // Listen for reset event from sidebar "New Analysis" click
+  useEffect(() => {
+    const handler = () => startNew();
+    window.addEventListener("new-analysis-reset", handler);
+    return () => window.removeEventListener("new-analysis-reset", handler);
+  }, [startNew]);
+
   // Persist conversation on message changes
   const persistRef = useRef<string | null>(null);
   useEffect(() => {
@@ -125,29 +141,18 @@ export default function NewAnalysis() {
     const id = conversationId ?? generateId();
     if (!conversationId) {
       setConversationId(id);
-      // Update URL without reload
       const url = new URL(window.location.href);
       url.searchParams.set("c", id);
       window.history.replaceState({}, "", url.toString());
     }
     persistRef.current = id;
     saveConversation({ id, title: deriveTitle(messages), mode, messages, updatedAt: Date.now() });
-    // Dispatch event so sidebar updates
     window.dispatchEvent(new Event("conversations-updated"));
   }, [messages, mode, conversationId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const startNew = useCallback(() => {
-    setMessages([]);
-    setConversationId(null);
-    setQuery("");
-    const url = new URL(window.location.href);
-    url.searchParams.delete("c");
-    window.history.replaceState({}, "", url.toString());
-  }, []);
 
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
@@ -193,10 +198,7 @@ export default function NewAnalysis() {
       {hasConversation && (
         <div className="border-b border-border px-8 py-3 flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">{deriveTitle(messages)}</span>
-          <div className="flex items-center gap-3">
-            <button onClick={startNew} className="text-xs text-primary hover:underline">+ New chat</button>
-            <ModeToggle mode={mode} setMode={setMode} />
-          </div>
+          <ModeToggle mode={mode} setMode={setMode} />
         </div>
       )}
 

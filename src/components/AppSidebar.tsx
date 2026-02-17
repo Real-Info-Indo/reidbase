@@ -18,7 +18,7 @@ const navItems = [
   { title: "Appraisal Request", url: "/appraisal-request", icon: ClipboardEdit },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
   const { tier, userName } = useTier();
   const navigate = useNavigate();
@@ -42,14 +42,14 @@ export function AppSidebar() {
     if (activeConvoId === id) navigate("/");
   };
 
-  const openConvo = (id: string) => navigate(`/?c=${id}`);
+  const openConvo = (id: string) => { navigate(`/?c=${id}`); onNavigate?.(); };
 
   const handleNavClick = (url: string) => {
     if (url === "/") {
-      // Reset conversation state by navigating to clean landing page
       navigate("/");
       window.dispatchEvent(new Event("new-analysis-reset"));
     }
+    onNavigate?.();
   };
 
   return (

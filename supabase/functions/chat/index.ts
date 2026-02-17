@@ -114,7 +114,7 @@ serve(async (req) => {
       let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
       
       // Clean up SQL - remove markdown fences if present
-      sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").trim();
+      sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").replace(/;\s*$/, "").trim();
 
       console.log("Generated SQL:", sql);
 

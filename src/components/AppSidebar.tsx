@@ -4,6 +4,7 @@ import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
   Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2,
 } from "lucide-react";
+import reidLogo from "@/assets/REID_Base_Black.svg";
 import { NavLink } from "@/components/NavLink";
 import { useTier, tierLabels } from "@/contexts/TierContext";
 import { cn } from "@/lib/utils";
@@ -54,16 +55,14 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 shrink-0",
+        "flex flex-col backdrop-blur-xl text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 shrink-0 bg-white/70",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo + collapse */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed && (
-          <span className="text-lg font-bold tracking-wide">
-            <span className="text-sidebar-primary">REID</span> BASE
-          </span>
+          <img src={reidLogo} alt="REID Base" className="h-6" />
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

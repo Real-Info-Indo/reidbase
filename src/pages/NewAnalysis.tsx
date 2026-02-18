@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2, ChevronDown, Pin, Pencil } from "lucide-react";
+import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Database, MessageSquare, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import {
   type Msg, type SearchMode, type Conversation,
   getConversation, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
+  getFolders, moveToFolder, type Folder,
 } from "@/lib/conversations";
 
 const suggestions = [
@@ -266,6 +267,30 @@ export default function NewAnalysis() {
                   <Pencil className="h-4 w-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
+                {(() => {
+                  const allFolders = getFolders();
+                  if (allFolders.length === 0) return null;
+                  return (
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="cursor-pointer">
+                        <FolderInput className="h-4 w-4 mr-2" />
+                        Move to folder
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="bg-popover">
+                        {allFolders.map((f) => (
+                          <DropdownMenuItem key={f.id} onClick={() => { if (conversationId) { moveToFolder(conversationId, f.id); window.dispatchEvent(new Event("conversations-updated")); toast.success(`Moved to ${f.name}`); } }} className="cursor-pointer text-xs">
+                            <FolderIcon className="h-3.5 w-3.5 mr-2" />
+                            {f.name}
+                          </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => { if (conversationId) { moveToFolder(conversationId, undefined); window.dispatchEvent(new Event("conversations-updated")); toast.success("Removed from folder"); } }} className="cursor-pointer text-xs">
+                          Remove from folder
+                        </DropdownMenuItem>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  );
+                })()}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

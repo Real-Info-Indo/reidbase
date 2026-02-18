@@ -3,12 +3,20 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
   Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2, Pin,
+  FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil,
 } from "lucide-react";
 import reidLogo from "@/assets/REID_Base_Black.svg";
 import { NavLink } from "@/components/NavLink";
 import { useTier, tierLabels } from "@/contexts/TierContext";
 import { cn } from "@/lib/utils";
-import { getConversations, deleteConversation, type Conversation } from "@/lib/conversations";
+import {
+  getConversations, deleteConversation, getFolders, createFolder,
+  renameFolder, deleteFolder, moveToFolder,
+  type Conversation, type Folder as FolderType,
+} from "@/lib/conversations";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { title: "New Analysis", url: "/", icon: PlusCircle },
@@ -24,9 +32,16 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [folders, setFolders] = useState<FolderType[]>([]);
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [folderRenameValue, setFolderRenameValue] = useState("");
   const activeConvoId = searchParams.get("c");
 
-  const refresh = () => setConversations(getConversations());
+  const refresh = () => {
+    setConversations(getConversations());
+    setFolders(getFolders());
+  };
 
   useEffect(() => {
     refresh();
@@ -51,6 +66,91 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
     }
     onNavigate?.();
   };
+
+  const toggleFolder = (id: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const handleCreateFolder = () => {
+    const folder = createFolder("New Folder");
+    refresh();
+    setExpandedFolders((prev) => new Set(prev).add(folder.id));
+    setRenamingFolderId(folder.id);
+    setFolderRenameValue(folder.name);
+  };
+
+  const submitFolderRename = (id: string) => {
+    if (folderRenameValue.trim()) {
+      renameFolder(id, folderRenameValue.trim());
+      refresh();
+    }
+    setRenamingFolderId(null);
+  };
+
+  const handleDeleteFolder = (id: string) => {
+    deleteFolder(id);
+    refresh();
+    window.dispatchEvent(new Event("conversations-updated"));
+  };
+
+  const handleMoveToFolder = (convoId: string, folderId: string | undefined) => {
+    moveToFolder(convoId, folderId);
+    refresh();
+    window.dispatchEvent(new Event("conversations-updated"));
+  };
+
+  const unfolderedConvos = conversations.filter((c) => !c.folderId);
+  const convosInFolder = (folderId: string) => conversations.filter((c) => c.folderId === folderId);
+
+  const ConvoItem = ({ convo }: { convo: Conversation }) => (
+    <div
+      className={cn(
+        "flex items-center gap-2 w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors group cursor-pointer",
+        activeConvoId === convo.id
+          ? "bg-sidebar-accent text-sidebar-foreground"
+          : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+      )}
+    >
+      <button onClick={() => openConvo(convo.id)} className="flex items-center gap-2 flex-1 min-w-0">
+        {convo.pinned ? <Pin className="h-3.5 w-3.5 shrink-0 text-primary" /> : <MessageSquare className="h-3.5 w-3.5 shrink-0" />}
+        <span className="truncate flex-1">{convo.title}</span>
+      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <button className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5">
+            <MoreHorizontal className="h-3 w-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-popover min-w-[140px]">
+          {folders.length > 0 && (
+            <>
+              {folders.map((f) => (
+                <DropdownMenuItem key={f.id} onClick={() => handleMoveToFolder(convo.id, f.id)} className="cursor-pointer text-xs">
+                  <Folder className="h-3.5 w-3.5 mr-2" />
+                  {f.name}
+                </DropdownMenuItem>
+              ))}
+              {convo.folderId && (
+                <DropdownMenuItem onClick={() => handleMoveToFolder(convo.id, undefined)} className="cursor-pointer text-xs">
+                  <Folder className="h-3.5 w-3.5 mr-2 opacity-40" />
+                  Remove from folder
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(e as unknown as React.MouseEvent, convo.id); }} className="cursor-pointer text-xs text-destructive">
+            <Trash2 className="h-3.5 w-3.5 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 
   return (
     <aside
@@ -91,29 +191,83 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
         {/* Recent conversations */}
         {!collapsed && conversations.length > 0 && (
           <div className="mt-8 px-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sidebar-muted mb-3">
-              <Search className="h-3.5 w-3.5" />
-              Recent Analysis
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sidebar-muted">
+                <Search className="h-3.5 w-3.5" />
+                Recent Analysis
+              </div>
+              <button
+                onClick={handleCreateFolder}
+                className="p-1 rounded hover:bg-sidebar-accent transition-colors text-sidebar-muted hover:text-sidebar-foreground"
+                title="New folder"
+              >
+                <FolderPlus className="h-3.5 w-3.5" />
+              </button>
             </div>
-            <div className="space-y-0.5">
-              {conversations.slice(0, 10).map((convo) => (
-                <button
-                  key={convo.id}
-                  onClick={() => openConvo(convo.id)}
-                  className={cn(
-                    "flex items-center gap-2 w-full text-left text-xs py-1.5 px-2 rounded-md transition-colors group",
-                    activeConvoId === convo.id
-                      ? "bg-sidebar-accent text-sidebar-foreground"
-                      : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+
+            {/* Folders */}
+            {folders.map((folder) => {
+              const folderConvos = convosInFolder(folder.id);
+              const isExpanded = expandedFolders.has(folder.id);
+              return (
+                <div key={folder.id} className="mb-1">
+                  <div className="flex items-center gap-1 group">
+                    <button
+                      onClick={() => toggleFolder(folder.id)}
+                      className="flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground py-1 px-1 rounded transition-colors"
+                    >
+                      {isExpanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                      <Folder className="h-3.5 w-3.5 shrink-0" />
+                      {renamingFolderId === folder.id ? (
+                        <input
+                          value={folderRenameValue}
+                          onChange={(e) => setFolderRenameValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") submitFolderRename(folder.id); if (e.key === "Escape") setRenamingFolderId(null); }}
+                          onBlur={() => submitFolderRename(folder.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-transparent border-b border-primary/50 focus:outline-none text-xs w-full"
+                          autoFocus
+                        />
+                      ) : (
+                        <span className="truncate">{folder.name}</span>
+                      )}
+                      <span className="text-[10px] text-sidebar-muted ml-auto">{folderConvos.length}</span>
+                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5">
+                          <MoreHorizontal className="h-3 w-3" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover min-w-[120px]">
+                        <DropdownMenuItem onClick={() => { setRenamingFolderId(folder.id); setFolderRenameValue(folder.name); }} className="cursor-pointer text-xs">
+                          <Pencil className="h-3.5 w-3.5 mr-2" />
+                          Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteFolder(folder.id)} className="cursor-pointer text-xs text-destructive">
+                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  {isExpanded && (
+                    <div className="ml-4 space-y-0.5 mt-0.5">
+                      {folderConvos.length === 0 ? (
+                        <p className="text-[10px] text-sidebar-muted italic px-2 py-1">Empty</p>
+                      ) : (
+                        folderConvos.map((convo) => <ConvoItem key={convo.id} convo={convo} />)
+                      )}
+                    </div>
                   )}
-                >
-                   {convo.pinned ? <Pin className="h-3.5 w-3.5 shrink-0 text-primary" /> : <MessageSquare className="h-3.5 w-3.5 shrink-0" />}
-                  <span className="truncate flex-1">{convo.title}</span>
-                  <Trash2
-                    className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
-                    onClick={(e) => handleDelete(e, convo.id)}
-                  />
-                </button>
+                </div>
+              );
+            })}
+
+            {/* Unfoldered conversations */}
+            <div className="space-y-0.5">
+              {unfolderedConvos.slice(0, 10).map((convo) => (
+                <ConvoItem key={convo.id} convo={convo} />
               ))}
             </div>
           </div>

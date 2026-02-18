@@ -1,6 +1,11 @@
 export type Msg = { role: "user" | "assistant"; content: string };
 export type SearchMode = "rag" | "analytical";
 
+export interface Folder {
+  id: string;
+  name: string;
+}
+
 export interface Conversation {
   id: string;
   title: string;
@@ -8,9 +13,11 @@ export interface Conversation {
   messages: Msg[];
   updatedAt: number;
   pinned?: boolean;
+  folderId?: string;
 }
 
 const STORAGE_KEY = "reid_conversations";
+const FOLDERS_KEY = "reid_folders";
 
 function readAll(): Conversation[] {
   try {
@@ -24,6 +31,49 @@ function readAll(): Conversation[] {
 function writeAll(convos: Conversation[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(convos));
 }
+
+/* ── Folders ── */
+
+export function getFolders(): Folder[] {
+  try {
+    const raw = localStorage.getItem(FOLDERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeFolders(folders: Folder[]) {
+  localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
+}
+
+export function createFolder(name: string): Folder {
+  const folder: Folder = { id: crypto.randomUUID(), name };
+  writeFolders([...getFolders(), folder]);
+  return folder;
+}
+
+export function renameFolder(id: string, name: string) {
+  writeFolders(getFolders().map((f) => (f.id === id ? { ...f, name } : f)));
+}
+
+export function deleteFolder(id: string) {
+  writeFolders(getFolders().filter((f) => f.id !== id));
+  const all = readAll();
+  all.forEach((c) => { if (c.folderId === id) c.folderId = undefined; });
+  writeAll(all);
+}
+
+export function moveToFolder(conversationId: string, folderId: string | undefined) {
+  const all = readAll();
+  const convo = all.find((c) => c.id === conversationId);
+  if (convo) {
+    convo.folderId = folderId;
+    writeAll(all);
+  }
+}
+
+/* ── Conversations ── */
 
 export function getConversations(): Conversation[] {
   return readAll().sort((a, b) => {

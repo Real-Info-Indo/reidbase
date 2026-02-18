@@ -1,5 +1,4 @@
 export type Msg = { role: "user" | "assistant"; content: string };
-export type SearchMode = "rag" | "analytical";
 
 export interface Folder {
   id: string;
@@ -9,7 +8,6 @@ export interface Folder {
 export interface Conversation {
   id: string;
   title: string;
-  mode: SearchMode;
   messages: Msg[];
   updatedAt: number;
   pinned?: boolean;

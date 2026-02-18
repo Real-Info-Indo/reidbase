@@ -6,13 +6,311 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/* ── Global Rules (Section 0 from RAG documents) ── */
+const GLOBAL_RULES = `
+OPERATIONAL DATA RULES (apply to ALL responses):
+- Currency: All financial data is in USD ($). Never use IDR unless the user explicitly asks.
+- Measurements: All area measurements are in Square Meters (SQM).
+- Tenure Definitions: Leasehold (Private Contractual) and Freehold (Hak Milik) are structurally distinct and must NOT be compared as like-for-like.
+- Leasehold Focus: Leasehold represents ~80% of Bali's transactional volume. You must qualify all responses by mentioning this Leasehold focus when relevant.
+- Market Phase: The market is in a phase of 'Decisive Recalibration' and 'Structural Consolidation'.
+- Asset Shift: A major trend is the pivot toward compact assets (1-2 bedroom formats), now leading market volume at over 53%.
+- Price Interpretation: Any softening in median prices is compositional (due to smaller assets being sold) rather than a loss in actual property value.
+`;
+
+/* ── MEMBER RAG CONTENT ── */
+const MEMBER_RAG = `
+2025 REID Base RAG - Member Edition
+Source: REID 2025 Bali Real Estate Report (Macro-Market Summary)
+Scope: This document contains macro-market summaries. It does NOT contain granular neighborhood-level data or raw database entries.
+
+KEY INSIGHTS:
+1. Total market median prices softened, falling -3%. Downward pressure from off-plan and apartment sales nudged prices slightly lower.
+2. Market composition shifted: 1&2 Bed assets now lead sales volume at over 53%. Heavier concentration of smaller asset sales has materially affected market medians.
+3. Rental occupancies performed up to 3% above 2024 levels, averaging around 54% across the entire market for 2025.
+4. Rental competition intensified with 12% growth in total available supply, placing downward pressure on rates & revenues.
+5. Over 4,800 property transactions in 2025. Total transactions fell ~5% YoY.
+6. Combined sales value over $2B in 2025, fell -9% YoY. Main driver was increased buyer demand for smaller, lower-value assets.
+7. 160,000 sqm of new property launched in 2025, well below the 244,000 sqm peak in 2024.
+8. Rental revenue declined to $1.2B for 2025. Despite 2% rise in occupancy, total revenue fell -15%.
+
+SUPPLY TRENDS:
+- Over 12,300 total properties for sale; -7% YoY
+- 2 Bedroom market share = 32%; +8% YoY
+- Leasehold 80.6% of total supply, Freehold 19.4%
+- Two-bedroom (27.8%) and three-bedroom (29.4%) assets lead listings
+- One-bedroom units: 15.7% of supply
+- Over 3,230 total 'off-plan' properties for sale; -9% YoY
+- Apartment market share up to 13.8%; +44% YoY
+- Off-plan villas: 2,390 (-12% YoY); Off-plan apartments: 800 (-55% YoY)
+- North Badung: largest supply (34.9%) but -22% YoY
+- South Badung: 22% of listings, +13% YoY growth
+
+SALES TRENDS:
+- 2 Bed: 31.9% of sales; 3 Bed: 26.4%; 1 Bed: 20.8%
+- 1-2 bedroom assets: 53% of 2025 transactions, +51% over 36 months
+- Over 4,800 total sales; -5% YoY
+- Median Leasehold price = $280k; -5% over 36 months (compositional, not value decline)
+- Median Freehold price = $505k; +10% over 36 months
+
+PRICE BY BEDROOM (Leasehold 2025):
+- 1 Bed: $161k (+0.6% YoY)
+- 2 Bed: $246k (-0.0%)
+- 3 Bed: $347k (+0.3%)
+- 4 Bed: $530k (+4.7%)
+- 5 Bed: $795k (+1.1%)
+- 6 Bed: $800k (-0.0%)
+- Overall Median: $280k (-2.1%)
+
+PRICE BY REGION (2025):
+- Central Badung: $289k (-2.0%)
+- Denpasar: $320k (-2.4%)
+- Gianyar: $290k (-2.7%)
+- Mengwi: $295k (-3.3%)
+- North Badung: $295k (-0.7%)
+- South Badung: $247k (0.0%)
+- Tabanan: $259k (-6.2%)
+
+BUILT TRENDS:
+- Average property size: 201 sqm; -18% over 36 months
+- Average FSR: 83%; +3% YoY
+- Average villa size: 229 sqm; -3% YoY
+- 160,000 sqm total new build; -35% YoY
+- $2,210 market average sqm price; +2% YoY
+- $3,400 apartment average sqm price; -1% YoY
+
+AVERAGE SQM PRICE BY REGION & BEDROOM:
+| Region | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED |
+| Central Badung | $3,950 | $1,990 | $1,565 | $1,605 | $1,745 | $1,695 |
+| Denpasar | $3,180 | $1,770 | $2,160 | $1,615 | $1,995 | $1,250 |
+| Gianyar | $2,290 | $1,910 | $1,685 | $1,915 | $2,400 | $1,940 |
+| Mengwi | $2,535 | $1,905 | $1,740 | $2,045 | $2,275 | $2,205 |
+| North Badung | $3,130 | $1,955 | $1,740 | $1,855 | $2,080 | $2,010 |
+| South Badung | $3,170 | $2,090 | $2,050 | $1,985 | $2,045 | $2,155 |
+| Tabanan | $2,745 | $1,785 | $1,520 | $1,640 | $1,800 | $1,980 |
+
+AVERAGE PROPERTY SIZE BY REGION & BEDROOM (SQM):
+| Region | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED |
+| Central Badung | 57 | 155 | 251 | 350 | 496 | 470 |
+| Denpasar | 48 | 160 | 219 | 393 | 406 | 517 |
+| Gianyar | 87 | 158 | 246 | 427 | 427 | 487 |
+| Mengwi | 76 | 148 | 248 | 333 | 514 | 628 |
+| North Badung | 65 | 145 | 229 | 348 | 481 | 575 |
+| South Badung | 62 | 137 | 213 | 388 | 477 | 563 |
+| Tabanan | 65 | 147 | 244 | 373 | 531 | 701 |
+
+RENTAL TRENDS:
+- Rental supply by region: North Badung 46.9%, South Badung 17%, Gianyar 12.2%, Central Badung 10.8%, Denpasar 6.2%, Mengwi 4.1%, Tabanan 2.7%
+- 53% market average occupancy; +2% YoY
+- 44,490 total rental properties; +107% over 36 months
+- 57% 1-bedroom occupancy in South Badung; +7% YoY
+- 55% average 3-bedroom occupancy; -8% YoY
+- $1.21B total rental revenue; -15% YoY
+- South Badung revenue share: 18%; +17% YoY
+- $178 market average daily rate; -15% YoY
+- $226 professionally managed ADR; -26% YoY
+
+AVERAGE DAILY RATE BY REGION & BEDROOM:
+| Region | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED |
+| Central Badung | $70 | $106 | $173 | $273 | $369 | $596 |
+| Denpasar | $63 | $118 | $208 | $352 | $503 | $563 |
+| Gianyar | $64 | $106 | $201 | $291 | $382 | $514 |
+| Mengwi | $78 | $105 | $169 | $285 | $655 | $944 |
+| North Badung | $87 | $117 | $195 | $320 | $485 | $752 |
+| South Badung | $103 | $154 | $254 | $411 | $619 | $779 |
+| Tabanan | $74 | $129 | $186 | $292 | $569 | $938 |
+
+REGULATORY LANDSCAPE:
+- Foreign freehold ownership not available; investment requires structured approach (Hak Pakai, PT PMA/HGB, or Leasehold)
+- Authorities actively reviewing compliance: zoning (RDTR), building approvals (PBG), tourism licenses
+- Properties need PBG (building approval), SLF (certificate of proper function)
+- Rental operations require NIB (Business ID Number) and tourism license
+- OSS (Online Single Submission) registration required for all business licensing
+- Hak Pakai: state-recognised right for foreign individuals with KITAS/KITAP
+- HGB via PT PMA: right to build, 30 years extendable to ~80 years
+- Leasehold: private contractual, not state-recognised land title; depends on contract quality
+`;
+
+/* ── PRO RAG CONTENT (includes Member content + Key Markets + Emerging Markets) ── */
+const PRO_RAG = `
+${MEMBER_RAG}
+
+ADDITIONAL PRO-TIER DATA: KEY MARKETS & EMERGING MARKETS
+
+ANALYTIC DIRECTIVES:
+- Market Engine: Canggu remains the liquidity engine and sets structural benchmarks.
+- Premium Corridors: Umalas and Pererenan have consolidated into upper-tier residential brackets with larger villa formats.
+- Emerging Dynamics: Seseh and Nyanyi represent high-value coastal niches undergoing strategic recalibration.
+- Regional Specificity: When queried about a specific neighborhood, prioritize data from Key Markets and Emerging Markets sections.
+- Yield Logic: Rental data is bifurcated; high-performing submarkets adapt through lean operations and rate recalibration.
+
+BALI KEY MARKETS:
+
+1. BERAWA
+Mature lifestyle investment corridor with high liquidity. Strong pricing trajectory.
+| Metric | Value | vs Market |
+| Supply | 940+ | 9% |
+| Median Price | $321k | +15% |
+| 2025 Sales Volume | 250+ | 6% |
+| Largest category | 3 bed | - |
+| Average size | 225 sqm | +2% |
+| Average price/sqm | $2,565 | +18% |
+| Average term | 26 yrs | -3% |
+
+2. BINGIN
+Boutique coastal enclave, tighter supply, lifestyle-driven. Smaller format villas.
+| Metric | Value | vs Market |
+| Supply | 200+ | 2% |
+| Median Price | $298k | +6% |
+| 2025 Sales Volume | 230+ | 5% |
+| Largest category | 2 bed | - |
+| Average size | 185 sqm | -16% |
+| Average price/sqm | $2,395 | +10% |
+| Average term | 28 yrs | +4% |
+
+3. CANGGU
+Structural centre of Bali's villa market. Largest by supply and sales volume. Liquidity engine of Bali's west coast.
+| Metric | Value | vs Market |
+| Supply | Largest | - |
+| 2025 Sales Volume | Largest | - |
+
+4. PERERENAN
+Transitioned from Canggu extension to premium submarket. Larger villa formats, upper-tier coastal bracket.
+| Metric | Value | vs Market |
+| Supply | 890+ | 9% |
+| Median Price | $328k | +17% |
+| 2025 Sales Volume | 370+ | 9% |
+| Largest category | 3 bed | - |
+| Average size | 245 sqm | +12% |
+| Average price/sqm | $2,355 | +8% |
+| Average term | 27 yrs | - |
+
+5. SANUR
+Traditional, family-oriented coastal market (east side). Larger residential-style villas.
+| Metric | Value | vs Market |
+| Supply | 360+ | 4% |
+| Median Price | $327k | +17% |
+| 2025 Sales Volume | 110+ | 3% |
+| Largest category | 3 bed | - |
+| Average size | 235 sqm | +8% |
+| Average price/sqm | $1,995 | -8% |
+| Average term | 27 yrs | - |
+
+6. SEMINYAK
+Original prime villa market. Mature cycle phase, established premium address.
+| Metric | Value | vs Market |
+| Supply | 690+ | 7% |
+| Median Price | $297k | +6% |
+| 2025 Sales Volume | 230+ | 5% |
+| Largest category | 3 bed | - |
+| Average size | 250 sqm | +14% |
+| Average price/sqm | $2,110 | -3% |
+| Average term | 23 yrs | -13% |
+
+7. UBUD
+Distinct inland niche: wellness, retreat, longer-stay residency. Stability over volatility.
+| Metric | Value | vs Market |
+| Supply | 760+ | 7% |
+| Median Price | $293k | +5% |
+| 2025 Sales Volume | 220+ | 5% |
+| Largest category | 3 bed | - |
+| Average size | 230 sqm | +6% |
+| Average price/sqm | $1,995 | -8% |
+| Average term | 26 yrs | -3% |
+
+8. ULUWATU
+Structural repositioning. Smaller villas, elevated per-sqm pricing. Compact, high-yield cliffside formats.
+| Metric | Value | vs Market |
+| Supply | 680+ | 7% |
+| Median Price | $238k | -15% |
+
+9. UMALAS
+Upper-tier residential positioning. Larger villas, strong median pricing growth. Private residential & long-stay investors.
+| Metric | Value | vs Market |
+| Supply | 860+ | 8% |
+| Median Price | $350k | +25% |
+| 2025 Sales Volume | 250+ | 6% |
+| Largest category | 3 bed | - |
+| Average size | 285 sqm | +29% |
+| Average price/sqm | $1,925 | -12% |
+| Average term | 26 yrs | -4% |
+
+10. UNGASAN
+Price-accessible southern market. Softer pricing, smaller formats, adjustment phase.
+| Metric | Value | vs Market |
+| Supply | 230+ | 2% |
+| Median Price | $237k | -15% |
+| 2025 Sales Volume | 180+ | 4% |
+| Largest category | 2 bed | - |
+| Average size | 175 sqm | -20% |
+| Average price/sqm | $1,870 | -14% |
+| Average term | 28 yrs | +4% |
+
+BALI EMERGING MARKETS:
+
+1. BALANGAN
+Secondary southern enclave. Limited supply, early-stage development. Lower Bukit Peninsula entry point.
+| Metric | Value | vs Market |
+| Supply | 120+ | 1% |
+| Median Price | $253k | -10% |
+| 2025 Sales Volume | 80+ | 2% |
+| Largest category | 2 bed | - |
+| Average size | 170 sqm | -21% |
+| Average price/sqm | $2,035 | -7% |
+| Average term | 29 yrs | +8% |
+
+2. KABA KABA
+Nascent inland market. Minimal supply, low transaction depth. Growth depends on infrastructure expansion.
+| Metric | Value | vs Market |
+| Supply | 80+ | 1% |
+| Median Price | $235k | -16% |
+| 2025 Sales Volume | 40+ | 1% |
+| Largest category | 3 bed | - |
+| Average size | 195 sqm | -10% |
+| Average price/sqm | $1,995 | -8% |
+| Average term | 28 yrs | +5% |
+
+3. NYANYI
+Premium aspirations despite limited transactions. Strategic position between Canggu expansion and lower-density coastal land.
+| Metric | Value | vs Market |
+| Supply | 125+ | 1% |
+| Median Price | $299k | +7% |
+| 2025 Sales Volume | 30+ | 1% |
+| Largest category | 2 bed | - |
+| Average size | 200 sqm | -9% |
+| Average price/sqm | $2,540 | +17% |
+| Average term | 28 yrs | +5% |
+
+4. PADONAN
+Affordability-driven extension of Canggu. Mid-sized villas, spillover activity.
+| Metric | Value | vs Market |
+| Supply | 160+ | 2% |
+| Median Price | $250k | -11% |
+| 2025 Sales Volume | 60+ | 2% |
+| Largest category | 3 bed | - |
+| Average size | 195 sqm | -11% |
+| Average price/sqm | $1,740 | -20% |
+| Average term | 26 yrs | -5% |
+
+5. SESEH
+Emerging coastal residential enclave. Larger villas, premium ambitions. Low-density beachfront.
+| Metric | Value | vs Market |
+| Supply | 190+ | 2% |
+| Median Price | $337k | -11% |
+| 2025 Sales Volume | 90+ | 2% |
+| Largest category | 3 bed | - |
+| Average size | 250 sqm | -11% |
+| Average price/sqm | $2,015 | -20% |
+| Average term | 25 yrs | -5% |
+`;
+
 const SCHEMA_DESCRIPTION = `
 Table: properties_2025
 Columns:
 - uqid (integer, PK)
 - id (text) — property listing ID
-- region (text) — e.g. North Badung, South Badung, Gianyar, Mengwi, Denpasar, Tabanan, Central Badung, Non Bali, Other
-- location (text) — e.g. Canggu, Ubud, Seminyak, Berawa, Pererenan, Sanur, Uluwatu, Kerobokan, Jimbaran, Ungasan, etc.
+- region (text) — e.g. North Badung, South Badung, Gianyar, Mengwi, Denpasar, Tabanan, Central Badung
+- location (text) — e.g. Canggu, Ubud, Seminyak, Berawa, Pererenan, Sanur, Uluwatu, etc.
 - contract_type (text) — Leasehold or Freehold
 - property_type (text) — Villa or Apartment
 - years (numeric) — lease duration in years (null for freehold)
@@ -37,18 +335,7 @@ Use AVG() for averages. Always ROUND() numeric results.
 Always filter out nulls for the columns being analyzed.
 `;
 
-const RAG_SYSTEM_PROMPT = `You are REID, an expert Bali real estate market analyst. You answer questions about the Bali property market using the provided data context.
-
-Guidelines:
-- Provide clear, concise, data-backed answers
-- When citing statistics, mention the sample size
-- Format numbers with commas for readability
-- Use bullet points and structured formatting for clarity
-- If the data doesn't fully answer the question, say so
-- Always mention the data source is the REID 2025 property database
-- For price ranges use USD unless user asks for IDR`;
-
-const ANALYTICAL_SYSTEM_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.
+const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.
 
 ${SCHEMA_DESCRIPTION}
 
@@ -63,20 +350,45 @@ Rules:
 - Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
 - Only SELECT queries are allowed`;
 
-const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results. 
+const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
+
+${GLOBAL_RULES}
 
 Present the findings in a clear, insightful way:
 - Lead with the key insight
 - Use formatted numbers (commas, rounding)
+- All prices in USD ($), all areas in SQM
 - Add brief market context when relevant
 - Use bullet points for multiple data points
 - Keep it concise but informative`;
+
+function buildRagSystemPrompt(tier: string, ragContent: string): string {
+  const tierLabel = tier === "member" || tier === "reid_base" ? "Member/Base" : tier === "reid_base_pro" ? "Pro" : "Enterprise";
+  return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
+
+${GLOBAL_RULES}
+
+Guidelines:
+- Provide clear, concise, data-backed answers using the provided intelligence report
+- When citing statistics, mention the data source (REID 2025 Report)
+- Format numbers with commas for readability
+- All prices in USD ($), all areas in SQM
+- Use bullet points and structured formatting for clarity
+- If the data doesn't fully answer the question, say so and explain what additional tier access would provide
+- For price ranges use USD unless user asks for IDR
+- Qualify all responses by mentioning the Leasehold focus where relevant
+${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
+${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
+
+REID 2025 Intelligence Report:
+${ragContent}`;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, mode } = await req.json();
+    const { messages, tier } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -85,10 +397,12 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const userMessage = messages[messages.length - 1]?.content || "";
+    const effectiveTier = tier || "member";
 
-    if (mode === "analytical") {
-      // Step 1: Generate SQL from user question
-      const sqlResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Enterprise tier: use Pro RAG + analytical (database queries)
+    if (effectiveTier === "enterprise") {
+      // First try to determine if the question needs a database query
+      const classifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -97,164 +411,152 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: ANALYTICAL_SYSTEM_PROMPT },
+            { role: "system", content: `You classify user questions about Bali real estate. 
+If the question requires specific data lookups, custom filtering, or calculations that need raw database access, respond with exactly "ANALYTICAL".
+If the question can be answered from general market knowledge, trends, or the intelligence report, respond with exactly "RAG".
+Respond with only one word: ANALYTICAL or RAG.` },
             { role: "user", content: userMessage },
           ],
         }),
       });
 
-      if (!sqlResponse.ok) {
-        const status = sqlResponse.status;
-        if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        throw new Error(`AI gateway error: ${status}`);
-      }
+      if (!classifyResponse.ok) throw new Error(`Classification error: ${classifyResponse.status}`);
+      const classifyData = await classifyResponse.json();
+      const classification = (classifyData.choices?.[0]?.message?.content?.trim() || "RAG").toUpperCase();
 
-      const sqlData = await sqlResponse.json();
-      let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
-      
-      // Clean up SQL - remove markdown fences if present
-      sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").replace(/;\s*$/, "").trim();
-
-      console.log("Generated SQL:", sql);
-
-      // Validate - only SELECT allowed
-      const upperSql = sql.toUpperCase().trim();
-      if (!upperSql.startsWith("SELECT")) {
-        return new Response(JSON.stringify({ error: "Invalid query generated. Only SELECT queries are allowed." }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (classification === "ANALYTICAL") {
+        // SQL generation path
+        const sqlResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              { role: "system", content: ANALYTICAL_SQL_PROMPT },
+              { role: "user", content: userMessage },
+            ],
+          }),
         });
-      }
 
-      // Reject dangerous keywords
-      const forbidden = ["DELETE", "DROP", "INSERT", "UPDATE", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"];
-      for (const kw of forbidden) {
-        if (upperSql.includes(kw)) {
-          return new Response(JSON.stringify({ error: `Forbidden SQL keyword detected: ${kw}` }), {
+        if (!sqlResponse.ok) {
+          const status = sqlResponse.status;
+          if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          throw new Error(`AI gateway error: ${status}`);
+        }
+
+        const sqlData = await sqlResponse.json();
+        let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
+        sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").replace(/;\s*$/, "").trim();
+
+        console.log("Generated SQL:", sql);
+
+        const upperSql = sql.toUpperCase().trim();
+        if (!upperSql.startsWith("SELECT")) {
+          return new Response(JSON.stringify({ error: "Invalid query generated." }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-      }
 
-      // Step 2: Execute the SQL
-      const { data: queryResult, error: queryError } = await supabase.rpc("execute_readonly_query", { query_text: sql });
+        const forbidden = ["DELETE", "DROP", "INSERT", "UPDATE", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"];
+        for (const kw of forbidden) {
+          if (upperSql.includes(kw)) {
+            return new Response(JSON.stringify({ error: `Forbidden SQL keyword: ${kw}` }), {
+              status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
 
-      if (queryError) {
-        console.error("Query execution error:", queryError);
-        // Fall back to explaining the error
-        return new Response(JSON.stringify({ 
-          error: `Query failed: ${queryError.message}`,
-          sql 
-        }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        const { data: queryResult, error: queryError } = await supabase.rpc("execute_readonly_query", { query_text: sql });
+
+        if (queryError) {
+          console.error("Query error:", queryError);
+          // Fall back to RAG with Pro content
+          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG);
+          const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...messages], stream: true }),
+          });
+          if (!response.ok) throw new Error(`AI error: ${response.status}`);
+          return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+        }
+
+        // Explain results
+        const explainResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT },
+              { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
+            ],
+            stream: true,
+          }),
         });
+
+        if (!explainResponse.ok) throw new Error(`AI explain error: ${explainResponse.status}`);
+        return new Response(explainResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
       }
 
-      // Step 3: Have AI explain the results (streaming)
-      const explainResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT },
-            { role: "user", content: `User question: ${userMessage}\n\nSQL query executed:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
-          ],
-          stream: true,
-        }),
-      });
-
-      if (!explainResponse.ok) throw new Error(`AI explain error: ${explainResponse.status}`);
-
-      return new Response(explainResponse.body, {
-        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-      });
-
-    } else {
-      // RAG mode: fetch relevant data as context
-      // Extract keywords for data retrieval
+      // Enterprise RAG fallback (uses Pro content + dynamic DB stats)
       const contextParts: string[] = [];
-
-      // Get summary stats
       const { data: stats } = await supabase.rpc("execute_readonly_query", {
-        query_text: `SELECT 
-          count(*) as total_properties,
-          count(*) FILTER (WHERE availability = 'Available') as available,
-          count(*) FILTER (WHERE availability = 'Sold') as sold,
-          ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd,
-          ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd,
-          count(DISTINCT region) as regions,
-          count(DISTINCT location) as locations
-        FROM properties_2025`
+        query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM properties_2025`
       });
-      if (stats) contextParts.push(`Market Overview: ${JSON.stringify(stats)}`);
+      if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      // Get region breakdown
-      const { data: regionStats } = await supabase.rpc("execute_readonly_query", {
-        query_text: `SELECT region, count(*) as listings, 
-          ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price,
-          ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price,
-          ROUND(AVG(price_per_sqm_usd) FILTER (WHERE price_per_sqm_usd IS NOT NULL)) as avg_price_sqm
-        FROM properties_2025 
-        WHERE availability = 'Available'
-        GROUP BY region ORDER BY listings DESC`
-      });
-      if (regionStats) contextParts.push(`Region Breakdown (Available): ${JSON.stringify(regionStats)}`);
-
-      // Get top locations by listing count
-      const { data: locationStats } = await supabase.rpc("execute_readonly_query", {
-        query_text: `SELECT location, region, count(*) as listings,
-          ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price,
-          ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price
-        FROM properties_2025
-        WHERE availability = 'Available'
-        GROUP BY location, region ORDER BY listings DESC LIMIT 20`
-      });
-      if (locationStats) contextParts.push(`Top 20 Locations (Available): ${JSON.stringify(locationStats)}`);
-
-      // Contract type breakdown
-      const { data: contractStats } = await supabase.rpc("execute_readonly_query", {
-        query_text: `SELECT contract_type, property_type, count(*) as listings,
-          ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price,
-          ROUND(AVG(price_per_year_usd) FILTER (WHERE price_per_year_usd IS NOT NULL)) as avg_annual_cost
-        FROM properties_2025
-        WHERE availability = 'Available'
-        GROUP BY contract_type, property_type ORDER BY listings DESC`
-      });
-      if (contractStats) contextParts.push(`Contract & Property Type Breakdown: ${JSON.stringify(contractStats)}`);
-
-      const dataContext = contextParts.join("\n\n");
-
+      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"));
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: `${RAG_SYSTEM_PROMPT}\n\nCurrent data context from REID 2025 Database:\n${dataContext}` },
-            ...messages,
-          ],
-          stream: true,
-        }),
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...messages], stream: true }),
       });
 
       if (!response.ok) {
         const status = response.status;
-        if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
         throw new Error(`AI gateway error: ${status}`);
       }
 
-      return new Response(response.body, {
-        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-      });
+      return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
+
+    // Member/Base and Pro tiers: pure RAG
+    const ragContent = (effectiveTier === "reid_base_pro") ? PRO_RAG : MEMBER_RAG;
+    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent);
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      const status = response.status;
+      if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      throw new Error(`AI gateway error: ${status}`);
+    }
+
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
   } catch (e) {
     console.error("chat error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {

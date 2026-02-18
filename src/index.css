@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,7 +18,7 @@
     --primary-foreground: 0 0% 0%;
 
     --secondary: 39 40% 90%;
-    --secondary-foreground: 0 0% 15%;
+    --secondary-foreground: 0 1% 20%;
 
     --muted: 39 30% 92%;
     --muted-foreground: 0 0% 40%;

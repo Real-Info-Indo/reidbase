@@ -4,21 +4,21 @@ import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Loader2, Chevron
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from
+"@/components/ui/dropdown-menu";
 import {
   type Msg, type Conversation,
   getConversation, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
-  getFolders, moveToFolder, type Folder,
-} from "@/lib/conversations";
+  getFolders, moveToFolder, type Folder } from
+"@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 
 const suggestions = [
-  { title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
-  { title: "Top markets", desc: "Discover the highest performing investment locations", icon: BarChart3 },
-  { title: "Emerging locations", desc: "Find up-and-coming areas with growth potential", icon: MapPin },
-  { title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator },
-];
+{ title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
+{ title: "Top markets", desc: "Discover the highest performing investment locations", icon: BarChart3 },
+{ title: "Emerging locations", desc: "Find up-and-coming areas with growth potential", icon: MapPin },
+{ title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator }];
+
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -26,28 +26,28 @@ async function streamChat({
   messages,
   tier,
   onDelta,
-  onDone,
-}: {
-  messages: Msg[];
-  tier: string;
-  onDelta: (text: string) => void;
-  onDone: () => void;
-}) {
+  onDone
+
+
+
+
+
+}: {messages: Msg[];tier: string;onDelta: (text: string) => void;onDone: () => void;}) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier }),
+    body: JSON.stringify({ messages, tier })
   });
 
   if (!resp.ok) {
     const errorData = await resp.json().catch(() => ({}));
     const errorMsg = errorData.error || `Request failed (${resp.status})`;
-    if (resp.status === 429) toast.error("Rate limit exceeded. Please wait a moment.");
-    else if (resp.status === 402) toast.error("AI credits exhausted. Please add funds.");
-    else toast.error(errorMsg);
+    if (resp.status === 429) toast.error("Rate limit exceeded. Please wait a moment.");else
+    if (resp.status === 402) toast.error("AI credits exhausted. Please add funds.");else
+    toast.error(errorMsg);
     throw new Error(errorMsg);
   }
 
@@ -71,7 +71,7 @@ async function streamChat({
       if (line.startsWith(":") || line.trim() === "") continue;
       if (!line.startsWith("data: ")) continue;
       const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") { streamDone = true; break; }
+      if (jsonStr === "[DONE]") {streamDone = true;break;}
       try {
         const parsed = JSON.parse(jsonStr);
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
@@ -217,7 +217,7 @@ export default function NewAnalysis() {
         messages: newMessages,
         tier,
         onDelta: (chunk) => upsertAssistant(chunk),
-        onDone: () => setIsLoading(false),
+        onDone: () => setIsLoading(false)
       });
     } catch (e) {
       console.error(e);
@@ -233,22 +233,22 @@ export default function NewAnalysis() {
 
   return (
     <div className="flex flex-col h-screen">
-      {hasConversation && (
-        <div className="border-b border-border px-8 py-3 flex items-center justify-between">
-          {isRenaming ? (
-            <div className="flex items-center gap-2">
+      {hasConversation &&
+      <div className="border-b border-border px-8 py-3 flex items-center justify-between">
+          {isRenaming ?
+        <div className="flex items-center gap-2">
               <input
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submitRename()}
-                className="text-sm font-medium border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
-                autoFocus
-              />
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submitRename()}
+            className="text-sm font-medium border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
+            autoFocus />
+
               <button onClick={submitRename} className="text-xs text-primary font-medium hover:underline">Save</button>
               <button onClick={() => setIsRenaming(false)} className="text-xs text-muted-foreground hover:underline">Cancel</button>
-            </div>
-          ) : (
-            <DropdownMenu>
+            </div> :
+
+        <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none">
                 {isPinned && <Pin className="h-3 w-3 text-primary" />}
                 {displayTitle}
@@ -264,66 +264,66 @@ export default function NewAnalysis() {
                   Rename
                 </DropdownMenuItem>
                 {(() => {
-                  const allFolders = getFolders();
-                  if (allFolders.length === 0) return null;
-                  return (
-                    <DropdownMenuSub>
+              const allFolders = getFolders();
+              if (allFolders.length === 0) return null;
+              return (
+                <DropdownMenuSub>
                       <DropdownMenuSubTrigger className="cursor-pointer">
                         <FolderInput className="h-4 w-4 mr-2" />
                         Move to folder
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-popover">
-                        {allFolders.map((f) => (
-                          <DropdownMenuItem key={f.id} onClick={() => { if (conversationId) { moveToFolder(conversationId, f.id); window.dispatchEvent(new Event("conversations-updated")); toast.success(`Moved to ${f.name}`); } }} className="cursor-pointer text-xs">
+                        {allFolders.map((f) =>
+                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
                             <FolderIcon className="h-3.5 w-3.5 mr-2" />
                             {f.name}
                           </DropdownMenuItem>
-                        ))}
+                    )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => { if (conversationId) { moveToFolder(conversationId, undefined); window.dispatchEvent(new Event("conversations-updated")); toast.success("Removed from folder"); } }} className="cursor-pointer text-xs">
+                        <DropdownMenuItem onClick={() => {if (conversationId) {moveToFolder(conversationId, undefined);window.dispatchEvent(new Event("conversations-updated"));toast.success("Removed from folder");}}} className="cursor-pointer text-xs">
                           Remove from folder
                         </DropdownMenuItem>
                       </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  );
-                })()}
+                    </DropdownMenuSub>);
+
+            })()}
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+        }
         </div>
-      )}
+      }
 
-      <div className="flex-1 overflow-y-auto px-8 py-12">
-        {!hasConversation ? (
-          <div className="max-w-3xl mx-auto">
+      <div className="flex-1 overflow-y-auto px-8 py-12 bg-destructive-foreground">
+        {!hasConversation ?
+        <div className="max-w-3xl mx-auto bg-destructive-foreground">
             <h1 className="text-4xl font-semibold mb-2">
               Welcome to <span className="text-primary">REID</span>,
             </h1>
             <p className="text-2xl text-muted-foreground mb-8">what would you like to discover?</p>
             <div className="relative mb-12">
               <textarea
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
-                placeholder="Enter a prompt..."
-                className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50"
-              />
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
+              placeholder="Enter a prompt..."
+              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50" />
+
               <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {suggestions.map((s) => (
-                <button
-                  key={s.title}
-                  onClick={() => send(s.desc)}
-                  className="items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              {suggestions.map((s) =>
+            <button
+              key={s.title}
+              onClick={() => send(s.desc)}
+              className="items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight">
+
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive-foreground">
                     <s.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -332,63 +332,63 @@ export default function NewAnalysis() {
                   </div>
                   <ArrowRight className="h-4 w-4 mt-1 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                 </button>
-              ))}
+            )}
             </div>
-          </div>
-        ) : (
-          <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          </div> :
+
+        <div className="max-w-3xl mx-auto space-y-6">
+            {messages.map((m, i) =>
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
-                    m.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-card border border-border rounded-bl-md"
-                  }`}
-                >
-                  {m.role === "assistant" ? (
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
+              className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
+              m.role === "user" ?
+              "bg-primary text-primary-foreground rounded-br-md" :
+              "bg-card border border-border rounded-bl-md"}`
+              }>
+
+                  {m.role === "assistant" ?
+              <div className="prose prose-sm max-w-none dark:prose-invert">
                       <ReactMarkdown>{m.content}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    m.content
-                  )}
+                    </div> :
+
+              m.content
+              }
                 </div>
               </div>
-            ))}
-            {isLoading && messages[messages.length - 1]?.role === "user" && (
-              <div className="flex justify-start">
+          )}
+            {isLoading && messages[messages.length - 1]?.role === "user" &&
+          <div className="flex justify-start">
                 <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-3">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
-            )}
+          }
             <div ref={messagesEndRef} />
           </div>
-        )}
+        }
       </div>
 
-      {hasConversation && (
-        <div className="border-t border-border px-8 py-4">
+      {hasConversation &&
+      <div className="border-t border-border px-8 py-4">
           <div className="max-w-3xl mx-auto relative">
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              placeholder="Enter a prompt..."
-              disabled={isLoading}
-              className="w-full rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
-            />
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            placeholder="Enter a prompt..."
+            disabled={isLoading}
+            className="w-full rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50" />
+
             <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
             </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

@@ -347,7 +347,7 @@ export default function NewAnalysis() {
               }>
 
                   {m.role === "assistant" ?
-              <div className="prose prose-sm max-w-none dark:prose-invert" style={{ lineHeight: 1.6 }}>
+              <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-ul:ml-6 prose-ol:ml-6 prose-li:mb-1.5" style={{ lineHeight: 1.6 }}>
                       <ReactMarkdown>{m.content}</ReactMarkdown>
                     </div> :
 

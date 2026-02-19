@@ -354,13 +354,12 @@ const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate anal
 
 ${GLOBAL_RULES}
 
-Formatting Rules:
-- Always insert a blank line between paragraphs for clear readability
-- Only use **bold** text for titles and subheadings, never for inline emphasis
-- Indent all bullet points and highlighted information with proper markdown list formatting
-- When listing data points, use nested indentation to group related items under a heading
-- Lead with the key insight
-- Use formatted numbers (commas, rounding)
+Formatting Rules (CRITICAL - you must follow these exactly):
+- ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
+- Use markdown headings (## or ###) for section titles and subheadings
+- Only use **bold** for headings/subheadings, never for inline emphasis within body text
+- Use markdown bullet lists (- item) for data points, and indent sub-points with two spaces (  - sub-point)
+- Never write wall-of-text responses; every distinct idea must be its own paragraph separated by a blank line
 - All prices in USD ($), all areas in SQM
 - Add brief market context when relevant
 - Keep it concise but informative`;
@@ -371,11 +370,13 @@ function buildRagSystemPrompt(tier: string, ragContent: string): string {
 
 ${GLOBAL_RULES}
 
-Formatting Rules:
-- Always insert a blank line between paragraphs for clear readability
-- Only use **bold** text for titles and subheadings, never for inline emphasis within paragraphs
-- Indent all bullet points and highlighted information with proper markdown list formatting for visual clarity
-- When listing data points, use nested indentation (e.g. "  - sub-point") to group related items under a heading
+Formatting Rules (CRITICAL - you must follow these exactly):
+- ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
+- Use markdown headings (## or ###) for section titles and subheadings
+- Only use **bold** for headings/subheadings, never for inline emphasis within body text
+- Use markdown bullet lists (- item) for data points, and indent sub-points with two spaces (  - sub-point)
+- Never write wall-of-text responses; every distinct idea must be its own paragraph separated by a blank line
+- Structure responses as: opening paragraph, then headed sections with bullet points underneath
 - Provide clear, concise, data-backed answers using the provided intelligence report
 - When citing statistics, mention the data source (REID 2025 Report)
 - Format numbers with commas for readability

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput } from "lucide-react";
+import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";
@@ -20,6 +20,12 @@ const suggestions = [
 { title: "Emerging locations", desc: "Find up-and-coming areas with growth potential", icon: MapPin },
 { title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator }];
 
+const searchModes = [
+  { id: "data-analyst", label: "Data analyst", icon: LineChart },
+  { id: "sales-assistant", label: "Sales assistant", icon: ShoppingCart },
+  { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
+  { id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart },
+];
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -112,6 +118,9 @@ export default function NewAnalysis() {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [isPinned, setIsPinned] = useState(false);
+  const [searchMode, setSearchMode] = useState<string>("data-analyst");
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
@@ -232,8 +241,57 @@ export default function NewAnalysis() {
   const handleSubmit = () => send(query);
   const hasConversation = messages.length > 0;
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setAttachedFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const activeMode = searchModes.find((m) => m.id === searchMode);
+
+  const PlusMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
+          <Plus className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="top" className="bg-popover w-52">
+        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
+          <Paperclip className="h-4 w-4 mr-2" />
+          Add files
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {searchModes.map((mode) => (
+          <DropdownMenuItem
+            key={mode.id}
+            onClick={() => setSearchMode(mode.id)}
+            className={`cursor-pointer ${searchMode === mode.id ? "bg-accent" : ""}`}
+          >
+            <mode.icon className="h-4 w-4 mr-2" />
+            {mode.label}
+            {searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div className="flex flex-col h-screen">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+        accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json"
+      />
       {hasConversation &&
       <div className="border-b border-border px-8 py-3 flex items-center justify-between">
           {isRenaming ?
@@ -302,13 +360,33 @@ export default function NewAnalysis() {
             </h1>
             <p className="text-2xl text-muted-foreground mb-8">what would you like to discover?</p>
             <div className="relative mb-12">
+              {attachedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {attachedFiles.map((f, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
+                      <Paperclip className="h-3 w-3" />
+                      {f.name}
+                      <button onClick={() => removeFile(i)} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
               <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
-              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50" />
+              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50" />
 
+              <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                <PlusMenu />
+                {activeMode && (
+                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <activeMode.icon className="h-3 w-3" />
+                    {activeMode.label}
+                  </span>
+                )}
+              </div>
               <button
               onClick={handleSubmit}
               disabled={isLoading}
@@ -385,22 +463,42 @@ export default function NewAnalysis() {
 
       {hasConversation &&
       <div className="border-t border-border px-8 py-4">
-          <div className="max-w-3xl mx-auto relative">
-            <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            placeholder="Enter a prompt..."
-            disabled={isLoading}
-            className="w-full rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50" />
+          <div className="max-w-3xl mx-auto">
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachedFiles.map((f, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
+                    <Paperclip className="h-3 w-3" />
+                    {f.name}
+                    <button onClick={() => removeFile(i)} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="relative flex items-center gap-2">
+              <PlusMenu />
+              {activeMode && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                  <activeMode.icon className="h-3 w-3" />
+                  {activeMode.label}
+                </span>
+              )}
+              <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              placeholder="Enter a prompt..."
+              disabled={isLoading}
+              className="flex-1 rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50" />
 
-            <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+              <button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
 
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-            </button>
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         </div>
       }

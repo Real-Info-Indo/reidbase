@@ -26,7 +26,7 @@ const navItems = [
 { title: "Appraisal Request", url: "/appraisal-request", icon: ClipboardEdit }];
 
 
-export function AppSidebar({ onNavigate }: {onNavigate?: () => void;}) {
+export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; isMobile?: boolean;}) {
   const [collapsed, setCollapsed] = useState(false);
   const { tier, userName } = useTier();
   const navigate = useNavigate();
@@ -159,7 +159,8 @@ export function AppSidebar({ onNavigate }: {onNavigate?: () => void;}) {
       collapsed ? "w-16" : "w-64"
       )}>
 
-      {/* Logo + collapse */}
+      {/* Logo + collapse (hidden on mobile) */}
+      {!isMobile && (
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-muted">
         {!collapsed &&
         <img src={reidLogo} alt="REID Base" className="h-6" />
@@ -171,6 +172,7 @@ export function AppSidebar({ onNavigate }: {onNavigate?: () => void;}) {
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
+      )}
 
       {/* Nav items */}
       <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto bg-transparent">

@@ -40,7 +40,7 @@ export function AppLayout() {
             : ""
         }
       >
-        <AppSidebar onNavigate={() => setMobileMenuOpen(false)} />
+        <AppSidebar onNavigate={() => setMobileMenuOpen(false)} isMobile={isMobile} />
       </div>
 
       {/* Main content */}

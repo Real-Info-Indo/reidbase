@@ -154,7 +154,7 @@ export function AppSidebar({ onNavigate }: {onNavigate?: () => void;}) {
 
   return (
     <aside
-      className={cn("flex flex-col h-screen sticky top-0 backdrop-blur-xl text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 shrink-0 bg-transparent",
+      className={cn("flex flex-col h-screen sticky top-0 backdrop-blur-xl text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 shrink-0 bg-sidebar",
 
       collapsed ? "w-16" : "w-64"
       )}>

@@ -26,7 +26,7 @@ const tierLabels: Record<UserTier, string> = {
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export function TierProvider({ children }: { children: React.ReactNode }) {
-  const [tier, setTier] = useState<UserTier>("reid_base_pro");
+  const [tier, setTier] = useState<UserTier>("enterprise");
 
   const canAccess = (page: string) => tierAccess[tier].includes(page);
 

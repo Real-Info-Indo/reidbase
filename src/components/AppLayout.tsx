@@ -44,7 +44,7 @@ export function AppLayout() {
       </div>
 
       {/* Main content */}
-      <main className={`flex-1 overflow-auto ${isMobile ? "pt-14" : ""}`}>
+      <main className={`flex-1 overflow-auto bg-background ${isMobile ? "pt-14" : ""}`}>
         <Outlet />
       </main>
     </div>

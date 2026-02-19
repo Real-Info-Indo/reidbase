@@ -342,12 +342,12 @@ export default function NewAnalysis() {
                 <div
               className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
               m.role === "user" ?
-              "bg-primary text-primary-foreground rounded-br-md" :
+              "bg-[#ffe3bb] text-foreground rounded-br-md" :
               "bg-card border border-border rounded-bl-md"}`
               }>
 
                   {m.role === "assistant" ?
-              <div className="prose prose-sm max-w-none dark:prose-invert">
+              <div className="prose prose-sm max-w-none dark:prose-invert" style={{ lineHeight: 1.6 }}>
                       <ReactMarkdown>{m.content}</ReactMarkdown>
                     </div> :
 

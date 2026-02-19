@@ -362,7 +362,16 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 - Never write wall-of-text responses; every distinct idea must be its own paragraph separated by a blank line
 - All prices in USD ($), all areas in SQM
 - Add brief market context when relevant
-- Keep it concise but informative`;
+- Keep it concise but informative
+
+Chart Generation Rules (IMPORTANT - include charts when presenting query results):
+- When the query results contain comparative data (multiple rows with numeric values), ALWAYS include a chart
+- Output charts as a fenced code block with language "chart" containing valid JSON
+- Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
+- Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions
+- Keep data arrays to 10 items max for readability
+- Place the chart AFTER the introductory paragraph, BEFORE detailed bullet points
+- The chart JSON must be valid and complete on a single line after the opening fence`;
 
 function buildRagSystemPrompt(tier: string, ragContent: string): string {
   const tierLabel = tier === "member" || tier === "reid_base" ? "Member/Base" : tier === "reid_base_pro" ? "Pro" : "Enterprise";
@@ -384,6 +393,16 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 - If the data doesn't fully answer the question, say so and explain what additional tier access would provide
 - For price ranges use USD unless user asks for IDR
 - Qualify all responses by mentioning the Leasehold focus where relevant
+
+Chart Generation Rules (IMPORTANT - include charts when presenting comparative data):
+- When presenting comparative data (prices by region, sales by location, bedroom breakdowns, etc.), ALWAYS include a chart
+- Output charts as a fenced code block with language "chart" containing valid JSON
+- Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
+- Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions
+- Keep data arrays to 10 items max for readability
+- Place the chart AFTER the introductory paragraph, BEFORE detailed bullet points
+- The chart JSON must be valid and complete on a single line after the opening fence
+
 ${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
 

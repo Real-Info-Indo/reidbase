@@ -355,6 +355,8 @@ const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate anal
 ${GLOBAL_RULES}
 
 Present the findings in a clear, insightful way:
+- Break the response into clear, well-separated paragraphs
+- Only use **bold** text for titles and subheadings, never for inline emphasis
 - Lead with the key insight
 - Use formatted numbers (commas, rounding)
 - All prices in USD ($), all areas in SQM
@@ -369,6 +371,8 @@ function buildRagSystemPrompt(tier: string, ragContent: string): string {
 ${GLOBAL_RULES}
 
 Guidelines:
+- Break responses into clear, well-separated paragraphs with blank lines between them
+- Only use **bold** text for titles and subheadings, never for inline emphasis within paragraphs
 - Provide clear, concise, data-backed answers using the provided intelligence report
 - When citing statistics, mention the data source (REID 2025 Report)
 - Format numbers with commas for readability

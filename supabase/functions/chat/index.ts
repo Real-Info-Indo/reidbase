@@ -414,7 +414,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, tier } = await req.json();
+    const { messages, tier, fileContents } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -422,7 +422,22 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const userMessage = messages[messages.length - 1]?.content || "";
+    // If files are attached, prepend their contents to the last user message
+    let enrichedMessages = [...messages];
+    if (fileContents && Array.isArray(fileContents) && fileContents.length > 0) {
+      const fileContext = fileContents
+        .map((f: { name: string; content: string }) => `--- Attached File: ${f.name} ---\n${f.content}\n--- End of ${f.name} ---`)
+        .join("\n\n");
+      const lastIdx = enrichedMessages.length - 1;
+      if (lastIdx >= 0 && enrichedMessages[lastIdx].role === "user") {
+        enrichedMessages[lastIdx] = {
+          ...enrichedMessages[lastIdx],
+          content: `${enrichedMessages[lastIdx].content}\n\n[USER ATTACHED FILES - Analyze these alongside the database]\n${fileContext}`,
+        };
+      }
+    }
+
+    const userMessage = enrichedMessages[enrichedMessages.length - 1]?.content || "";
     const effectiveTier = tier || "member";
 
     // Enterprise tier: use Pro RAG + analytical (database queries)
@@ -505,7 +520,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...messages], stream: true }),
+            body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
           });
           if (!response.ok) throw new Error(`AI error: ${response.status}`);
           return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
@@ -540,7 +555,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...messages], stream: true }),
+        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
       });
 
       if (!response.ok) {
@@ -567,7 +582,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...enrichedMessages,
         ],
         stream: true,
       }),

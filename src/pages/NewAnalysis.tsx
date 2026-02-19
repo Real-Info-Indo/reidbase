@@ -32,21 +32,17 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 async function streamChat({
   messages,
   tier,
+  fileContents,
   onDelta,
   onDone
-
-
-
-
-
-}: {messages: Msg[];tier: string;onDelta: (text: string) => void;onDone: () => void;}) {
+}: {messages: Msg[];tier: string;fileContents?: {name: string; content: string}[];onDelta: (text: string) => void;onDone: () => void;}) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier })
+    body: JSON.stringify({ messages, tier, fileContents })
   });
 
   if (!resp.ok) {
@@ -210,6 +206,19 @@ export default function NewAnalysis() {
     setQuery("");
     setIsLoading(true);
 
+    // Read attached files as text
+    let parsedFiles: {name: string; content: string}[] | undefined;
+    if (attachedFiles.length > 0) {
+      parsedFiles = await Promise.all(
+        attachedFiles.map(async (file) => {
+          const text = await file.text();
+          // Truncate very large files to ~50k chars to stay within token limits
+          return { name: file.name, content: text.slice(0, 50000) };
+        })
+      );
+      setAttachedFiles([]);
+    }
+
     let assistantSoFar = "";
     const upsertAssistant = (chunk: string) => {
       assistantSoFar += chunk;
@@ -226,6 +235,7 @@ export default function NewAnalysis() {
       await streamChat({
         messages: newMessages,
         tier,
+        fileContents: parsedFiles,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => setIsLoading(false)
       });

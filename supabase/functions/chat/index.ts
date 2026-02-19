@@ -354,14 +354,15 @@ const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate anal
 
 ${GLOBAL_RULES}
 
-Present the findings in a clear, insightful way:
-- Break the response into clear, well-separated paragraphs
+Formatting Rules:
+- Always insert a blank line between paragraphs for clear readability
 - Only use **bold** text for titles and subheadings, never for inline emphasis
+- Indent all bullet points and highlighted information with proper markdown list formatting
+- When listing data points, use nested indentation to group related items under a heading
 - Lead with the key insight
 - Use formatted numbers (commas, rounding)
 - All prices in USD ($), all areas in SQM
 - Add brief market context when relevant
-- Use bullet points for multiple data points
 - Keep it concise but informative`;
 
 function buildRagSystemPrompt(tier: string, ragContent: string): string {
@@ -370,14 +371,15 @@ function buildRagSystemPrompt(tier: string, ragContent: string): string {
 
 ${GLOBAL_RULES}
 
-Guidelines:
-- Break responses into clear, well-separated paragraphs with blank lines between them
+Formatting Rules:
+- Always insert a blank line between paragraphs for clear readability
 - Only use **bold** text for titles and subheadings, never for inline emphasis within paragraphs
+- Indent all bullet points and highlighted information with proper markdown list formatting for visual clarity
+- When listing data points, use nested indentation (e.g. "  - sub-point") to group related items under a heading
 - Provide clear, concise, data-backed answers using the provided intelligence report
 - When citing statistics, mention the data source (REID 2025 Report)
 - Format numbers with commas for readability
 - All prices in USD ($), all areas in SQM
-- Use bullet points and structured formatting for clarity
 - If the data doesn't fully answer the question, say so and explain what additional tier access would provide
 - For price ranges use USD unless user asks for IDR
 - Qualify all responses by mentioning the Leasehold focus where relevant

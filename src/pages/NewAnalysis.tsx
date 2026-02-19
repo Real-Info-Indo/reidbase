@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from
@@ -348,7 +349,21 @@ export default function NewAnalysis() {
 
                   {m.role === "assistant" ?
               <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-ul:ml-6 prose-ol:ml-6 prose-li:mb-1.5" style={{ lineHeight: 1.6 }}>
-                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                      <ReactMarkdown
+                        components={{
+                          code({ className, children, ...props }) {
+                            const match = /language-chart/.exec(className || "");
+                            if (match) {
+                              const chart = parseChartBlock(String(children).trim());
+                              if (chart) return <ChatChart chart={chart} />;
+                            }
+                            return <code className={className} {...props}>{children}</code>;
+                          },
+                          pre({ children }) {
+                            return <>{children}</>;
+                          },
+                        }}
+                      >{m.content}</ReactMarkdown>
                     </div> :
 
               m.content

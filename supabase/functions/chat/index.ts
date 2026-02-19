@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const AI_MODEL = "openai/gpt-5-mini";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -450,7 +452,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: AI_MODEL,
           messages: [
             { role: "system", content: `You classify user questions about Bali real estate. 
 If the question requires specific data lookups, custom filtering, or calculations that need raw database access, respond with exactly "ANALYTICAL".
@@ -461,9 +463,13 @@ Respond with only one word: ANALYTICAL or RAG.` },
         }),
       });
 
-      if (!classifyResponse.ok) throw new Error(`Classification error: ${classifyResponse.status}`);
-      const classifyData = await classifyResponse.json();
-      const classification = (classifyData.choices?.[0]?.message?.content?.trim() || "RAG").toUpperCase();
+      let classification = "RAG";
+      if (!classifyResponse.ok) {
+        console.error("Classification failed, falling back to RAG:", classifyResponse.status);
+      } else {
+        const classifyData = await classifyResponse.json();
+        classification = (classifyData.choices?.[0]?.message?.content?.trim() || "RAG").toUpperCase();
+      }
 
       if (classification === "ANALYTICAL") {
         // SQL generation path
@@ -474,7 +480,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: AI_MODEL,
             messages: [
               { role: "system", content: ANALYTICAL_SQL_PROMPT },
               { role: "user", content: userMessage },
@@ -520,7 +526,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+            body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
           });
           if (!response.ok) throw new Error(`AI error: ${response.status}`);
           return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
@@ -531,7 +537,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           method: "POST",
           headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: AI_MODEL,
             messages: [
               { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT },
               { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
@@ -555,7 +561,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+        body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
       });
 
       if (!response.ok) {
@@ -579,7 +585,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: AI_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           ...enrichedMessages,
@@ -590,6 +596,8 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     if (!response.ok) {
       const status = response.status;
+      const errorBody = await response.text().catch(() => "");
+      console.error("AI gateway error:", status, errorBody);
       if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (status === 402) return new Response(JSON.stringify({ error: "AI credits exhausted." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       throw new Error(`AI gateway error: ${status}`);

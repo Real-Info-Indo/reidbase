@@ -7,11 +7,11 @@ export function UpgradeOverlay() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/20">
           <Lock className="h-7 w-7 text-primary" />
         </div>
-        <h2 className="text-2xl font-semibold text-card mb-2">Upgrade to access insights</h2>
-        <p className="text-card/70 mb-6 text-sm">
+        <h2 className="text-2xl font-bold text-card mb-2">Upgrade to access insights</h2>
+        <p className="text-card/70 mb-6 text-sm font-extralight">
           Subscribers access location reports, interactive data, and full AI access.
         </p>
-        <button className="rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
+        <button className="rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity">
           SEE PLANS
         </button>
       </div>

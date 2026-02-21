@@ -19,15 +19,15 @@ export default function AppraisalRequest() {
 
   const selectClass = "w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
   const inputClass = selectClass;
-  const labelClass = "block text-sm font-medium mb-1.5";
+  const labelClass = "block text-sm font-extralight mb-1.5";
 
   return (
     <div className="relative p-8">
       {!hasAccess && <UpgradeOverlay />}
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-semibold mb-1">Appraisal Request</h1>
-          <p className="text-muted-foreground mb-8">Discover your property fair market value.</p>
+          <h1 className="text-2xl font-bold mb-1">Appraisal Request</h1>
+          <p className="text-muted-foreground font-extralight mb-8">Discover your property fair market value.</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Row 1 */}
@@ -156,7 +156,7 @@ export default function AppraisalRequest() {
             {/* Conditional: Under Construction budgets */}
             {isUnderConstruction && (
               <div className="border border-primary/30 rounded-xl p-6 bg-primary/5 space-y-6">
-                <h3 className="font-semibold text-sm uppercase tracking-wider text-primary">Construction Budget Details</h3>
+                <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Construction Budget Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={labelClass}>Construction Budget ($)</label>
@@ -195,7 +195,7 @@ export default function AppraisalRequest() {
             {/* Submit */}
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
             >
               SUBMIT <ArrowRight className="h-4 w-4" />
             </button>

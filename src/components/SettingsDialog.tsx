@@ -64,7 +64,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px] p-0 gap-0">
         <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="text-lg font-semibold">Settings</DialogTitle>
+          <DialogTitle className="text-lg font-bold">Settings</DialogTitle>
         </DialogHeader>
 
         {/* Tabs */}
@@ -73,7 +73,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              className={`flex items-center gap-2 px-3 py-2.5 text-sm font-extralight border-b-2 transition-colors -mb-px ${
                 activeTab === tab.id
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
@@ -102,7 +102,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="space-y-1.5">
                 <Label>Plan &amp; Details</Label>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
-                  <span className="inline-block text-xs font-semibold uppercase tracking-wider bg-primary/20 text-primary px-2.5 py-1 rounded-full">
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary px-2.5 py-1 rounded-full">
                     {tierLabels[tier]}
                   </span>
                   <span className="text-sm text-muted-foreground">Current plan</span>
@@ -113,7 +113,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
           {activeTab === "personalisation" && (
             <>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-extralight">
                 Help the AI search assistant get to know you better.
               </p>
               <div className="space-y-3">

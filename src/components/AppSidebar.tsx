@@ -198,7 +198,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
         {!collapsed && conversations.length > 0 &&
         <div className="mt-8 px-3">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sidebar-muted">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sidebar-muted">
                 <Search className="h-3.5 w-3.5" />
                 Recent Analysis
               </div>
@@ -220,7 +220,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
                   <div className="flex items-center gap-1 group">
                     <button
                     onClick={() => toggleFolder(folder.id)}
-                    className="flex items-center gap-1.5 flex-1 min-w-0 text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground py-1 px-1 rounded transition-colors">
+                    className="flex items-center gap-1.5 flex-1 min-w-0 text-xs font-extralight text-sidebar-foreground/70 hover:text-sidebar-foreground py-1 px-1 rounded transition-colors">
 
                       {isExpanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
                       <Folder className="h-3.5 w-3.5 shrink-0" />
@@ -290,8 +290,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{userName}</p>
-                  <span className="inline-block mt-0.5 text-[10px] font-semibold uppercase tracking-wider bg-sidebar-primary/20 text-sidebar-primary px-2 py-0.5 rounded-full">
+                  <p className="text-sm font-extralight truncate">{userName}</p>
+                  <span className="inline-block mt-0.5 text-[10px] font-bold uppercase tracking-wider bg-sidebar-primary/20 text-sidebar-primary px-2 py-0.5 rounded-full">
                     {tierLabels[tier]}
                   </span>
                 </div>

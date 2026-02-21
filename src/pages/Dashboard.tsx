@@ -17,15 +17,15 @@ export default function Dashboard() {
             <div className="w-full h-[calc(100vh-160px)] rounded-xl border border-border flex items-center justify-center bg-card">
               <div className="text-center text-muted-foreground px-6">
                 <Monitor className="h-12 w-12 mx-auto mb-4 text-primary/50" />
-                <p className="text-lg font-medium mb-2">Desktop Only</p>
-                <p className="text-sm">The dashboard is available on desktop. Please log in from a computer to access it.</p>
+                <p className="text-lg font-bold mb-2">Desktop Only</p>
+                <p className="text-sm font-extralight">The dashboard is available on desktop. Please log in from a computer to access it.</p>
               </div>
             </div>
           ) : (
             <div className="w-full h-[calc(100vh-160px)] rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-card">
               <div className="text-center text-muted-foreground">
-                <p className="text-lg font-medium mb-2">Looker Dashboard</p>
-                <p className="text-sm">iFrame will be embedded here in Phase 2</p>
+                <p className="text-lg font-bold mb-2">Looker Dashboard</p>
+                <p className="text-sm font-extralight">iFrame will be embedded here in Phase 2</p>
               </div>
             </div>
           )}

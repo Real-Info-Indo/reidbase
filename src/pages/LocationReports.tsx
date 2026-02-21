@@ -20,8 +20,8 @@ export default function LocationReports() {
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold">Location Reports</h1>
-            <p className="text-sm text-muted-foreground mt-1">Neighbourhood-level analysis</p>
+            <h1 className="text-2xl font-bold">Location Reports</h1>
+            <p className="text-sm text-muted-foreground font-extralight mt-1">Neighbourhood-level analysis</p>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -43,12 +43,12 @@ export default function LocationReports() {
               <div className="aspect-[3/4] bg-gradient-to-br from-primary/30 via-primary/15 to-secondary flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="h-12 w-12 text-primary/50 mx-auto mb-3" />
-                  <span className="text-lg font-semibold text-foreground/70">{location}</span>
+                  <span className="text-lg font-bold text-foreground/70">{location}</span>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-medium text-sm">{location}</h3>
-                <p className="text-xs text-muted-foreground">2024 Annual Report</p>
+                <h3 className="font-bold text-sm">{location}</h3>
+                <p className="text-xs text-muted-foreground font-extralight">2024 Annual Report</p>
               </div>
             </button>
           ))}

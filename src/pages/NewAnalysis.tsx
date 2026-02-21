@@ -326,7 +326,7 @@ export default function NewAnalysis() {
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submitRename()}
-            className="text-sm font-medium border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
+            className="text-sm font-extralight border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
             autoFocus />
 
               <button onClick={submitRename} className="text-xs text-primary font-medium hover:underline">Save</button>
@@ -334,7 +334,7 @@ export default function NewAnalysis() {
             </div> :
 
         <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none">
+              <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors focus:outline-none">
                 {isPinned && <Pin className="h-3 w-3 text-primary" />}
                 {displayTitle}
                 <ChevronDown className="h-3.5 w-3.5" />
@@ -381,10 +381,10 @@ export default function NewAnalysis() {
       <div className="flex-1 overflow-y-auto px-8 py-12 bg-destructive-foreground">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto bg-destructive-foreground">
-            <h1 className="text-4xl font-semibold mb-2">
+            <h1 className="text-4xl font-bold mb-2">
               Welcome to <span className="text-primary">REID</span>,
             </h1>
-            <p className="text-2xl text-muted-foreground mb-8">what would you like to discover?</p>
+            <p className="text-2xl text-muted-foreground font-extralight mb-8">what would you like to discover?</p>
             <div className="relative mb-12">
               {attachedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -432,8 +432,8 @@ export default function NewAnalysis() {
                     <s.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium mb-1">{s.title}</h3>
-                    <p className="text-sm text-muted-foreground">{s.desc}</p>
+                    <h3 className="font-bold mb-1">{s.title}</h3>
+                    <p className="text-sm text-muted-foreground font-extralight">{s.desc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 mt-1 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                 </button>

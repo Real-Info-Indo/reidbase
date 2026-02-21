@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
   Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2, Pin,
-  FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil } from
+  FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil,
+  Settings, LogOut, ExternalLink } from
 "lucide-react";
 import reidLogo from "@/assets/REID_Base_Black.svg";
 import { NavLink } from "@/components/NavLink";
@@ -17,6 +18,8 @@ import {
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from
 "@/components/ui/dropdown-menu";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { SettingsDialog } from "@/components/SettingsDialog";
 
 const navItems = [
 { title: "New Analysis", url: "/", icon: PlusCircle },
@@ -28,6 +31,7 @@ const navItems = [
 
 export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; isMobile?: boolean;}) {
   const [collapsed, setCollapsed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { tier, userName } = useTier();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -278,20 +282,52 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
       {/* User profile */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent">
-            <User className="h-4 w-4 text-sidebar-primary" />
-          </div>
-          {!collapsed &&
-          <div className="min-w-0">
-              <p className="text-sm font-medium truncate">{userName}</p>
-              <span className="inline-block mt-0.5 text-[10px] font-semibold uppercase tracking-wider bg-sidebar-primary/20 text-sidebar-primary px-2 py-0.5 rounded-full">
-                {tierLabels[tier]}
-              </span>
-            </div>
-          }
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-3 w-full rounded-lg p-1.5 hover:bg-sidebar-accent transition-colors text-left">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent">
+                <User className="h-4 w-4 text-sidebar-primary" />
+              </div>
+              {!collapsed && (
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{userName}</p>
+                  <span className="inline-block mt-0.5 text-[10px] font-semibold uppercase tracking-wider bg-sidebar-primary/20 text-sidebar-primary px-2 py-0.5 rounded-full">
+                    {tierLabels[tier]}
+                  </span>
+                </div>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align="start" className="w-48 p-1.5">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </button>
+            <a
+              href="https://rfreid.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Profile
+            </a>
+            <div className="my-1 h-px bg-border" />
+            <button
+              onClick={() => {/* log out logic */}}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent text-destructive transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Log out
+            </button>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </aside>);
 
 }

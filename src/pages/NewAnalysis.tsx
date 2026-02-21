@@ -33,16 +33,17 @@ async function streamChat({
   messages,
   tier,
   fileContents,
+  searchMode,
   onDelta,
   onDone
-}: {messages: Msg[];tier: string;fileContents?: {name: string; content: string}[];onDelta: (text: string) => void;onDone: () => void;}) {
+}: {messages: Msg[];tier: string;fileContents?: {name: string; content: string}[];searchMode?: string;onDelta: (text: string) => void;onDone: () => void;}) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier, fileContents })
+    body: JSON.stringify({ messages, tier, fileContents, searchMode })
   });
 
   if (!resp.ok) {
@@ -236,6 +237,7 @@ export default function NewAnalysis() {
         messages: newMessages,
         tier,
         fileContents: parsedFiles,
+        searchMode,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => setIsLoading(false)
       });

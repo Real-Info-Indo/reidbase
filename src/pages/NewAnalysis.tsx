@@ -378,9 +378,9 @@ export default function NewAnalysis() {
         </div>
       }
 
-      <div className="flex-1 overflow-y-auto px-8 py-12 bg-destructive-foreground">
+      <div className="flex-1 overflow-y-auto px-8 py-12 bg-background">
         {!hasConversation ?
-        <div className="max-w-3xl mx-auto bg-destructive-foreground">
+        <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold mb-2">
               Welcome to <span className="text-primary">REID</span>,
             </h1>
@@ -402,7 +402,7 @@ export default function NewAnalysis() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
-              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/50" />
+              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70" />
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <PlusMenu />
@@ -428,7 +428,7 @@ export default function NewAnalysis() {
               onClick={() => send(s.desc)}
               className="items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight">
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive-foreground">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
                     <s.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">

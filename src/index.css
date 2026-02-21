@@ -21,7 +21,7 @@
     --secondary-foreground: 0 1% 20%;
 
     --muted: 39 30% 92%;
-    --muted-foreground: 0 0% 40%;
+    --muted-foreground: 0 0% 32%;
 
     --accent: 36 97% 74%;
     --accent-foreground: 0 0% 0%;
@@ -43,7 +43,7 @@
     --sidebar-accent-foreground: 0 0% 15%;
     --sidebar-border: 0 0% 0% / 0.08;
     --sidebar-ring: 36 97% 50%;
-    --sidebar-muted: 0 0% 45%;
+    --sidebar-muted: 0 0% 35%;
   }
 
   * {

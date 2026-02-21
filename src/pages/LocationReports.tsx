@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Search, MapPin, Download } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 
 const reports = [
-  { location: "Berawa", file: "/reports/Berawa_2024.pdf" },
-  { location: "Bingin", file: "/reports/Bingin_2024.pdf" },
-  { location: "Canggu", file: "/reports/Canggu_2024.pdf" },
-  { location: "Kerobokan", file: "/reports/Kerobokan_2024.pdf" },
-  { location: "Pererenan", file: "/reports/Pererenan_2024.pdf" },
-  { location: "Sanur", file: "/reports/Sanur_2024.pdf" },
-  { location: "Seminyak", file: "/reports/Seminyak_2024.pdf" },
-  { location: "Ubud", file: "/reports/Ubud_2024.pdf" },
-  { location: "Uluwatu", file: "/reports/Uluwatu_2024.pdf" },
-  { location: "Umalas", file: "/reports/Umalas_2024.pdf" },
+  { location: "Berawa", file: "/reports/Berawa_2024.pdf", thumb: "/reports/thumbnails/Berawa.jpg" },
+  { location: "Bingin", file: "/reports/Bingin_2024.pdf", thumb: "/reports/thumbnails/Bingin.jpg" },
+  { location: "Canggu", file: "/reports/Canggu_2024.pdf", thumb: "/reports/thumbnails/Canggu.jpg" },
+  { location: "Kerobokan", file: "/reports/Kerobokan_2024.pdf", thumb: "/reports/thumbnails/Kerobokan.jpg" },
+  { location: "Pererenan", file: "/reports/Pererenan_2024.pdf", thumb: "/reports/thumbnails/Pererenan.jpg" },
+  { location: "Sanur", file: "/reports/Sanur_2024.pdf", thumb: "/reports/thumbnails/Sanur.jpg" },
+  { location: "Seminyak", file: "/reports/Seminyak_2024.pdf", thumb: "/reports/thumbnails/Seminyak.jpg" },
+  { location: "Ubud", file: "/reports/Ubud_2024.pdf", thumb: "/reports/thumbnails/Ubud.jpg" },
+  { location: "Uluwatu", file: "/reports/Uluwatu_2024.pdf", thumb: "/reports/thumbnails/Uluwatu.jpg" },
+  { location: "Umalas", file: "/reports/Umalas_2024.pdf", thumb: "/reports/thumbnails/Umalas.jpg" },
 ];
 
 export default function LocationReports() {
@@ -48,11 +48,13 @@ export default function LocationReports() {
               key={report.location}
               className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:border-primary/30 transition-all text-left"
             >
-              <div className="aspect-[3/4] bg-gradient-to-br from-primary/30 via-primary/15 to-secondary flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 text-primary/50 mx-auto mb-3" />
-                  <span className="text-lg font-bold text-foreground/70">{report.location}</span>
-                </div>
+              <div className="aspect-[3/4] overflow-hidden">
+                <img
+                  src={report.thumb}
+                  alt={`${report.location} report cover`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
               </div>
               <div className="p-4 flex items-center justify-between">
                 <div>

@@ -441,9 +441,21 @@ Chart Generation Rules (IMPORTANT - include charts when presenting query results
 - Place the chart AFTER the introductory paragraph, BEFORE detailed bullet points
 - The chart JSON must be valid and complete on a single line after the opening fence`;
 
-function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string): string {
+function buildPersonalisationBlock(personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
+  if (!personalisation) return "";
+  const parts: string[] = [];
+  if (personalisation.nickname) parts.push(`- Address the user as "${personalisation.nickname}".`);
+  if (personalisation.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
+  if (personalisation.business) parts.push(`- The user's business: ${personalisation.business}.`);
+  if (personalisation.about) parts.push(`- About the user: ${personalisation.about}.`);
+  if (parts.length === 0) return "";
+  return `\nUSER PERSONALISATION (use this to tailor your responses):\n${parts.join("\n")}\n`;
+}
+
+function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
   const tierLabel = tier === "member" || tier === "reid_base" ? "Member/Base" : tier === "reid_base_pro" ? "Pro" : "Enterprise";
   const modePrompt = MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"];
+  const personalisationBlock = buildPersonalisationBlock(personalisation);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
 ${MASTER_GOVERNANCE}
@@ -451,7 +463,7 @@ ${MASTER_GOVERNANCE}
 ${GLOBAL_RULES}
 
 ${modePrompt}
-
+${personalisationBlock}
 Formatting Rules (CRITICAL - you must follow these exactly):
 - ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
 - Use markdown headings (## or ###) for section titles and subheadings
@@ -487,7 +499,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, tier, fileContents, searchMode } = await req.json();
+    const { messages, tier, fileContents, searchMode, personalisation } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -593,7 +605,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG with Pro content
-          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, searchMode);
+          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, searchMode, personalisation);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -610,7 +622,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"]) + "\n\n" + MASTER_GOVERNANCE },
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"]) + "\n\n" + MASTER_GOVERNANCE + buildPersonalisationBlock(personalisation) },
               { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
             stream: true,
@@ -628,7 +640,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), searchMode);
+      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), searchMode, personalisation);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -647,7 +659,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     // Member/Base and Pro tiers: pure RAG
     const ragContent = (effectiveTier === "reid_base_pro") ? PRO_RAG : MEMBER_RAG;
-    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, searchMode);
+    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, searchMode, personalisation);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

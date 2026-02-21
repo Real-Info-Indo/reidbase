@@ -29,6 +29,8 @@ const searchModes = [
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
+const PERSONALISATION_KEY = "reid-personalisation";
+
 async function streamChat({
   messages,
   tier,
@@ -37,13 +39,25 @@ async function streamChat({
   onDelta,
   onDone
 }: {messages: Msg[];tier: string;fileContents?: {name: string; content: string}[];searchMode?: string;onDelta: (text: string) => void;onDone: () => void;}) {
+  // Load personalisation from localStorage
+  let personalisation: Record<string, string> | undefined;
+  try {
+    const raw = localStorage.getItem(PERSONALISATION_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.nickname || parsed.occupation || parsed.business || parsed.about) {
+        personalisation = parsed;
+      }
+    }
+  } catch {}
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode })
+    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation })
   });
 
   if (!resp.ok) {

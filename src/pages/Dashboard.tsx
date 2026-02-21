@@ -22,12 +22,14 @@ export default function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="w-full h-[calc(100vh-160px)] rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-card">
-              <div className="text-center text-muted-foreground">
-                <p className="text-lg font-bold mb-2">Looker Dashboard</p>
-                <p className="text-sm font-extralight">iFrame will be embedded here in Phase 2</p>
-              </div>
-            </div>
+            <iframe
+              src="https://lookerstudio.google.com/embed/reporting/582e2a97-85d3-4266-b0de-65029f7f0a94/page/PxYyD"
+              className="w-full h-[calc(100vh-80px)] rounded-xl border border-border"
+              style={{ border: 0 }}
+              allowFullScreen
+              sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+              title="REID Dashboard"
+            />
           )}
         </div>
       </div>

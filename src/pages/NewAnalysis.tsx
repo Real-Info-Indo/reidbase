@@ -271,7 +271,7 @@ export default function NewAnalysis() {
           <Plus className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side="top" className="bg-popover w-52">
+      <DropdownMenuContent align="start" side="bottom" className="bg-popover w-52">
         <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="cursor-pointer">
           <Paperclip className="h-4 w-4 mr-2" />
           Add files

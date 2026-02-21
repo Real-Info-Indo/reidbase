@@ -161,7 +161,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
       {/* Logo + collapse (hidden on mobile) */}
       {!isMobile && (
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border bg-muted">
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed &&
         <img src={reidLogo} alt="REID Base" className="h-6" />
         }

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useTier, tierLabels } from "@/contexts/TierContext";
+import { useWixAuth } from "@/contexts/WixAuthContext";
 import { User, Palette } from "lucide-react";
 
 interface PersonalisationData {
@@ -41,6 +42,7 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { tier, userName } = useTier();
+  const { member } = useWixAuth();
   const [activeTab, setActiveTab] = useState<"account" | "personalisation">("account");
   const [personalisation, setPersonalisation] = useState<PersonalisationData>(loadPersonalisation);
 
@@ -95,7 +97,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="settings-email">Email</Label>
-                  <Input id="settings-email" placeholder="your@email.com" disabled className="bg-muted" />
+                  <Input id="settings-email" value={member?.email ?? ""} placeholder="your@email.com" disabled className="bg-muted" />
                 </div>
               </div>
               <Separator />

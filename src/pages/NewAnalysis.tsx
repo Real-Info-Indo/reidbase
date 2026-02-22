@@ -547,29 +547,35 @@ export default function NewAnalysis() {
             )}
               </div>
           }
-            <div className="relative flex items-center gap-2">
-              <PlusMenu />
-              {activeMode &&
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                  <activeMode.icon className="h-3 w-3" />
-                  {activeMode.label}
-                </span>
-            }
-              <input
+            <div className="flex flex-col gap-2">
+              <textarea
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              onChange={(e) => { setQuery(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
               disabled={isLoading}
-              className="flex-1 rounded-xl border border-border bg-card px-5 py-3 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50" />
+              rows={1}
+              className="w-full rounded-xl border border-border bg-card px-5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
+              style={{ minHeight: "44px" }} />
 
-              <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <PlusMenu />
+                  {activeMode &&
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                      <activeMode.icon className="h-3 w-3" />
+                      {activeMode.label}
+                    </span>
+                }
+                </div>
+                <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
 
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              </button>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
         </div>

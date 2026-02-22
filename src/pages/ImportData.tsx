@@ -141,17 +141,25 @@ export default function ImportData() {
         });
       }
 
-      setRentalStatus(`Uploading ${rows.length} rows in batches...`);
+      // Deduplicate: keep last occurrence for each unique key
+      const deduped = new Map<string, typeof rows[0]>();
+      for (const row of rows) {
+        const key = `${row.date}|${row.region}|${row.location}|${row.type}|${row.mgmt}|${row.beds}`;
+        deduped.set(key, row);
+      }
+      const uniqueRows = Array.from(deduped.values());
+
+      setRentalStatus(`Uploading ${uniqueRows.length} unique rows (${rows.length - uniqueRows.length} duplicates removed)...`);
       const chunkSize = 2000;
       let totalInserted = 0;
-      for (let i = 0; i < rows.length; i += chunkSize) {
-        const chunk = rows.slice(i, i + chunkSize);
+      for (let i = 0; i < uniqueRows.length; i += chunkSize) {
+        const chunk = uniqueRows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-rentals", {
           body: { rows: chunk },
         });
         if (error) throw new Error(error.message);
         totalInserted += data.inserted;
-        setRentalStatus(`Uploaded ${totalInserted} / ${rows.length} rows...`);
+        setRentalStatus(`Uploaded ${totalInserted} / ${uniqueRows.length} rows...`);
       }
 
       setRentalStatus(`✅ Done! Imported ${totalInserted} rows.`);

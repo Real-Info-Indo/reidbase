@@ -398,9 +398,28 @@ Columns:
 - off_plan (text) — "Off Plan" or "Available"
 
 Total rows: ~26,951 properties in Bali real estate market.
+
+Table: rentals_2025
+Columns:
+- id (serial, PK)
+- date (text) — month/year e.g. "Oct/25", "Jan/22"
+- region (text) — e.g. Central Badung, Denpasar, North Badung, South Badung, Gianyar, Mengwi, Tabanan
+- location (text) — e.g. Seminyak, Canggu, Ubud, Berawa, Pererenan, Sanur, Uluwatu, etc.
+- type (text) — Villa or Apartment
+- mgmt (text) — Professional or Individual (management type)
+- beds (integer) — number of bedrooms
+- count (integer) — number of rental properties in this segment
+- occupancy (numeric) — occupancy rate as percentage (e.g. 42.7 means 42.7%)
+- rate_usd (numeric) — nightly rate in USD
+- monthly_usd (numeric) — monthly revenue in USD
+- total_usd (numeric) — total revenue in USD
+
+Total rows: ~15,245 monthly rental data records across Bali.
+
 Use PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for medians.
 Use AVG() for averages. Always ROUND() numeric results.
 Always filter out nulls for the columns being analyzed.
+When querying rentals, use the rentals_2025 table. When querying property sales/supply, use properties_2025.
 `;
 
 const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.

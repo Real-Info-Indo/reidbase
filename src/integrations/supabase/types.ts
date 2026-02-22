@@ -86,6 +86,51 @@ export type Database = {
         }
         Relationships: []
       }
+      rentals_2025: {
+        Row: {
+          beds: number | null
+          count: number | null
+          date: string | null
+          id: number
+          location: string | null
+          mgmt: string | null
+          monthly_usd: number | null
+          occupancy: number | null
+          rate_usd: number | null
+          region: string | null
+          total_usd: number | null
+          type: string | null
+        }
+        Insert: {
+          beds?: number | null
+          count?: number | null
+          date?: string | null
+          id?: number
+          location?: string | null
+          mgmt?: string | null
+          monthly_usd?: number | null
+          occupancy?: number | null
+          rate_usd?: number | null
+          region?: string | null
+          total_usd?: number | null
+          type?: string | null
+        }
+        Update: {
+          beds?: number | null
+          count?: number | null
+          date?: string | null
+          id?: number
+          location?: string | null
+          mgmt?: string | null
+          monthly_usd?: number | null
+          occupancy?: number | null
+          rate_usd?: number | null
+          region?: string | null
+          total_usd?: number | null
+          type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

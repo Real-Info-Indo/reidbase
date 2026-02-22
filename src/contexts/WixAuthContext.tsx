@@ -93,34 +93,12 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = authUrl;
   }, []);
 
-  const handleCallback = useCallback(async () => {
-    const oauthDataRaw = localStorage.getItem(OAUTH_DATA_KEY);
-    if (!oauthDataRaw) throw new Error("No OAuth data found");
-    
-    const oauthData = JSON.parse(oauthDataRaw);
-    const { code, state } = Object.fromEntries(
-      new URLSearchParams(window.location.search)
-    );
-
-    const tokenResponse = await wixClient.auth.getMemberTokens(code, state, oauthData);
-    wixClient.auth.setTokens(tokenResponse);
-    saveTokens(tokenResponse);
-    localStorage.removeItem(OAUTH_DATA_KEY);
-    await fetchMember();
-  }, [fetchMember]);
-
   const logout = useCallback(async () => {
     clearTokens();
     setMember(null);
     const { logoutUrl } = await wixClient.auth.logout(window.location.origin);
     window.location.href = logoutUrl;
   }, []);
-
-  // Expose handleCallback for the callback page
-  useEffect(() => {
-    (window as any).__wixHandleCallback = handleCallback;
-    return () => { delete (window as any).__wixHandleCallback; };
-  }, [handleCallback]);
 
   return (
     <WixAuthContext.Provider

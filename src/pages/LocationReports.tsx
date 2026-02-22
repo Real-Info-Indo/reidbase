@@ -26,7 +26,7 @@ export default function LocationReports() {
     <div className="relative p-8">
       {!hasAccess && <UpgradeOverlay />}
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Location Reports</h1>
             <p className="text-sm text-muted-foreground font-extralight mt-1">Neighbourhood-level analysis</p>
@@ -37,7 +37,7 @@ export default function LocationReports() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search locations..."
-              className="rounded-lg border border-border bg-card pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
+              className="rounded-lg border border-border bg-card pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64"
             />
           </div>
         </div>

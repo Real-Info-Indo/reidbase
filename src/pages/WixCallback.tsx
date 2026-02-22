@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { wixClient } from "@/lib/wixClient";
+
+const TOKEN_KEY = "wix-tokens";
+const OAUTH_DATA_KEY = "wix-oauth-data";
 
 export default function WixCallback() {
   const navigate = useNavigate();
@@ -9,10 +13,27 @@ export default function WixCallback() {
   useEffect(() => {
     const handle = async () => {
       try {
-        const handleCallback = (window as any).__wixHandleCallback;
-        if (!handleCallback) throw new Error("Auth handler not ready");
-        await handleCallback();
-        navigate("/", { replace: true });
+        const oauthDataRaw = localStorage.getItem(OAUTH_DATA_KEY);
+        if (!oauthDataRaw) throw new Error("No OAuth data found");
+
+        const oauthData = JSON.parse(oauthDataRaw);
+
+        // Wix uses responseMode=fragment, so params are in the hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const searchParams = new URLSearchParams(window.location.search);
+        
+        const code = hashParams.get("code") || searchParams.get("code");
+        const state = hashParams.get("state") || searchParams.get("state");
+
+        if (!code || !state) throw new Error("Missing code or state in callback URL");
+
+        const tokenResponse = await wixClient.auth.getMemberTokens(code, state, oauthData);
+        wixClient.auth.setTokens(tokenResponse);
+        localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenResponse));
+        localStorage.removeItem(OAUTH_DATA_KEY);
+
+        // Force reload so WixAuthContext picks up the new tokens
+        window.location.href = "/";
       } catch (err: any) {
         console.error("Callback error:", err);
         setError(err.message || "Authentication failed");
@@ -29,7 +50,7 @@ export default function WixCallback() {
           <p className="text-sm text-muted-foreground">{error}</p>
           <button
             onClick={() => navigate("/login", { replace: true })}
-            className="rounded-lg bg-primary px-6 py-2 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+            className="rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
           >
             Try Again
           </button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, FileText } from "lucide-react";
+import { Search, Download } from "lucide-react";
 
 interface Report {
   name: string;
@@ -37,21 +37,28 @@ export default function MarketReports() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filtered.map((report) =>
-        <a
+        <div
           key={report.file}
-          href={report.file}
-          target="_blank"
-          rel="noopener noreferrer"
           className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:border-primary/30 transition-all text-left">
 
             <div className="aspect-[4/3] overflow-hidden">
               <img src={report.thumbnail} alt={report.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             </div>
-            <div className="p-4">
-              <h3 className="font-bold text-sm">{report.name}</h3>
-              <p className="text-xs text-muted-foreground font-extralight">{report.subtitle}</p>
+            <div className="p-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-sm">{report.name}</h3>
+                <p className="text-xs text-muted-foreground font-extralight">{report.subtitle}</p>
+              </div>
+              <a
+                href={report.file}
+                download
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
+                title={`Download ${report.name}`}
+              >
+                <Download className="h-4 w-4" />
+              </a>
             </div>
-          </a>
+          </div>
         )}
       </div>
     </div>);

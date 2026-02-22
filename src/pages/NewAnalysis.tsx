@@ -135,7 +135,7 @@ export default function NewAnalysis() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const latestAiRef = useRef<HTMLDivElement>(null);
-  const [showScrollArrow, setShowScrollArrow] = useState(false);
+  const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
   const { tier } = useTier();
@@ -233,7 +233,9 @@ export default function NewAnalysis() {
     if (!container) return;
     const handleScroll = () => {
       const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-      setShowScrollArrow(distanceFromBottom > 100);
+      // Fade from 0 to 1 between 100px and 300px from bottom
+      const opacity = Math.min(1, Math.max(0, (distanceFromBottom - 100) / 200));
+      setScrollArrowOpacity(opacity);
     };
     container.addEventListener("scroll", handleScroll);
     handleScroll();
@@ -520,10 +522,11 @@ export default function NewAnalysis() {
             <div ref={messagesEndRef} />
           </div>
         }
-        {hasConversation && showScrollArrow && (
+        {hasConversation && scrollArrowOpacity > 0 && (
           <button
             onClick={scrollToBottom}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity animate-fade-in"
+            style={{ opacity: scrollArrowOpacity }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity"
           >
             <ArrowDown className="h-4 w-4" />
           </button>

@@ -28,7 +28,7 @@ serve(async (req) => {
 
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
-      const { error } = await supabase.from("rentals_2025").insert(batch);
+      const { error } = await supabase.from("rentals_2025").upsert(batch, { onConflict: "date,region,location,type,mgmt,beds" });
       if (error) {
         console.error(`Batch error at ${i}:`, error);
         return new Response(JSON.stringify({ error: error.message, inserted }), {

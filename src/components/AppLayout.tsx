@@ -20,7 +20,7 @@ export function AppLayout() {
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <img src={reidLogo} alt="REID Base" className="h-5" />
+          <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer"><img src={reidLogo} alt="REID Base" className="h-5" /></a>
         </header>
       )}
 

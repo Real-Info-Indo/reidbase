@@ -25,7 +25,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm text-center space-y-8">
-        <img src={reidLogo} alt="REID" className="h-8 mx-auto" />
+        <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer"><img src={reidLogo} alt="REID" className="h-8 mx-auto" /></a>
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Welcome to REID Base</h1>
           <p className="text-sm text-muted-foreground font-extralight">

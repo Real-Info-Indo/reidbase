@@ -1,0 +1,44 @@
+import { useWixAuth } from "@/contexts/WixAuthContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import reidLogo from "@/assets/REID_Black.svg";
+import { Loader2 } from "lucide-react";
+
+export default function Login() {
+  const { isLoggedIn, isLoading, login } = useWixAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && isLoggedIn) {
+      navigate("/", { replace: true });
+    }
+  }, [isLoading, isLoggedIn, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm text-center space-y-8">
+        <img src={reidLogo} alt="REID" className="h-8 mx-auto" />
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Welcome to REID Base</h1>
+          <p className="text-sm text-muted-foreground font-extralight">
+            Sign in to access Bali real estate intelligence.
+          </p>
+        </div>
+        <button
+          onClick={login}
+          className="w-full rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          Sign in with Wix
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useWixAuth } from "@/contexts/WixAuthContext";
 
 export type UserTier = "member" | "reid_base" | "reid_base_pro" | "enterprise";
 
@@ -26,12 +27,25 @@ const tierLabels: Record<UserTier, string> = {
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export function TierProvider({ children }: { children: React.ReactNode }) {
-  const [tier, setTier] = useState<UserTier>("enterprise");
+  const { member, isLoggedIn } = useWixAuth();
+  const [tier, setTier] = useState<UserTier>("member");
 
+  // Derive tier from Wix member roles/pricing plans
+  // TODO: Map Wix roles/plans to tiers once you configure them in Wix
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setTier("member");
+      return;
+    }
+    // Default to enterprise for now — replace with role-based mapping
+    setTier("enterprise");
+  }, [isLoggedIn, member]);
+
+  const userName = member?.name ?? "Guest";
   const canAccess = (page: string) => tierAccess[tier].includes(page);
 
   return (
-    <TierContext.Provider value={{ tier, setTier, userName: "Thomas Butler", canAccess }}>
+    <TierContext.Provider value={{ tier, setTier, userName, canAccess }}>
       {children}
     </TierContext.Provider>
   );

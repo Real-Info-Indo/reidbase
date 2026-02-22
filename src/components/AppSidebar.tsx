@@ -9,6 +9,7 @@ import {
 import reidLogo from "@/assets/REID_Black.svg";
 import { NavLink } from "@/components/NavLink";
 import { useTier, tierLabels } from "@/contexts/TierContext";
+import { useWixAuth } from "@/contexts/WixAuthContext";
 import { cn } from "@/lib/utils";
 import {
   getConversations, deleteConversation, getFolders, createFolder,
@@ -33,6 +34,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const [collapsed, setCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { tier, userName } = useTier();
+  const { logout } = useWixAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -317,7 +319,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             </a>
             <div className="my-1 h-px bg-border" />
             <button
-              onClick={() => {/* log out logic */}}
+              onClick={() => logout()}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent text-destructive transition-colors"
             >
               <LogOut className="h-4 w-4" />

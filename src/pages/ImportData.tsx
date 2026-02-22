@@ -29,9 +29,23 @@ function toNum(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
+function toCurrency(v: string): number | null {
+  if (!v || v.trim() === "" || v.trim() === "$0.00") return null;
+  const n = Number(v.replace(/[$,]/g, ""));
+  return isNaN(n) ? null : n;
+}
+
+function toPercent(v: string): number | null {
+  if (!v || v.trim() === "") return null;
+  const n = Number(v.replace(/%/g, ""));
+  return isNaN(n) ? null : n;
+}
+
 export default function ImportData() {
   const [status, setStatus] = useState("");
+  const [rentalStatus, setRentalStatus] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [isImportingRentals, setIsImportingRentals] = useState(false);
 
   const handleImport = async () => {
     setIsImporting(true);
@@ -41,7 +55,6 @@ export default function ImportData() {
       const resp = await fetch("/data/2025_REID_Database_CSV.csv");
       const text = await resp.text();
       const lines = text.split("\n").filter(l => l.trim());
-      const headers = lines[0];
       
       setStatus(`Parsing ${lines.length - 1} rows...`);
 
@@ -75,8 +88,6 @@ export default function ImportData() {
       }
 
       setStatus(`Uploading ${rows.length} rows in batches...`);
-
-      // Send in chunks of 2000 to the edge function
       const chunkSize = 2000;
       let totalInserted = 0;
       for (let i = 0; i < rows.length; i += chunkSize) {
@@ -100,6 +111,60 @@ export default function ImportData() {
     }
   };
 
+  const handleImportRentals = async () => {
+    setIsImportingRentals(true);
+    setRentalStatus("Loading rental CSV file...");
+
+    try {
+      const resp = await fetch("/data/2025_REID_Rental_Database_CSV-2.csv");
+      const text = await resp.text();
+      const lines = text.split("\n").filter(l => l.trim());
+
+      setRentalStatus(`Parsing ${lines.length - 1} rows...`);
+
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (cols.length < 11) continue;
+        rows.push({
+          date: cols[0]?.trim() || null,
+          region: cols[1]?.trim() || null,
+          location: cols[2]?.trim() || null,
+          type: cols[3]?.trim() || null,
+          mgmt: cols[4]?.trim() || null,
+          beds: toNum(cols[5]),
+          count: toNum(cols[6]),
+          occupancy: toPercent(cols[7]),
+          rate_usd: toCurrency(cols[8]),
+          monthly_usd: toCurrency(cols[9]),
+          total_usd: toCurrency(cols[10]),
+        });
+      }
+
+      setRentalStatus(`Uploading ${rows.length} rows in batches...`);
+      const chunkSize = 2000;
+      let totalInserted = 0;
+      for (let i = 0; i < rows.length; i += chunkSize) {
+        const chunk = rows.slice(i, i + chunkSize);
+        const { data, error } = await supabase.functions.invoke("import-rentals", {
+          body: { rows: chunk },
+        });
+        if (error) throw new Error(error.message);
+        totalInserted += data.inserted;
+        setRentalStatus(`Uploaded ${totalInserted} / ${rows.length} rows...`);
+      }
+
+      setRentalStatus(`✅ Done! Imported ${totalInserted} rows.`);
+      toast.success(`Successfully imported ${totalInserted} rental records`);
+    } catch (err: any) {
+      console.error(err);
+      setRentalStatus(`❌ Error: ${err.message}`);
+      toast.error("Rental import failed: " + err.message);
+    } finally {
+      setIsImportingRentals(false);
+    }
+  };
+
   return (
     <div className="p-8 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Import Property Data</h1>
@@ -110,6 +175,17 @@ export default function ImportData() {
         {isImporting ? "Importing..." : "Start Import"}
       </Button>
       {status && <p className="mt-4 text-sm font-mono">{status}</p>}
+
+      <hr className="my-8 border-border" />
+
+      <h1 className="text-2xl font-bold mb-4">Import Rental Data</h1>
+      <p className="text-muted-foreground font-extralight mb-6">
+        This will import the REID rental CSV data into the database.
+      </p>
+      <Button onClick={handleImportRentals} disabled={isImportingRentals} size="lg">
+        {isImportingRentals ? "Importing..." : "Start Rental Import"}
+      </Button>
+      {rentalStatus && <p className="mt-4 text-sm font-mono">{rentalStatus}</p>}
     </div>
   );
 }

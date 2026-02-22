@@ -21,11 +21,11 @@ const suggestions = [
 { title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator }];
 
 const searchModes = [
-  { id: "data-analyst", label: "Data analyst", icon: LineChart },
-  { id: "sales-assistant", label: "Sales assistant", icon: ShoppingCart },
-  { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
-  { id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart },
-];
+{ id: "data-analyst", label: "Data analyst", icon: LineChart },
+{ id: "sales-assistant", label: "Sales assistant", icon: ShoppingCart },
+{ id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
+{ id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
+
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -38,7 +38,7 @@ async function streamChat({
   searchMode,
   onDelta,
   onDone
-}: {messages: Msg[];tier: string;fileContents?: {name: string; content: string}[];searchMode?: string;onDelta: (text: string) => void;onDone: () => void;}) {
+}: {messages: Msg[];tier: string;fileContents?: {name: string;content: string;}[];searchMode?: string;onDelta: (text: string) => void;onDone: () => void;}) {
   // Load personalisation from localStorage
   let personalisation: Record<string, string> | undefined;
   try {
@@ -255,7 +255,7 @@ export default function NewAnalysis() {
     setIsLoading(true);
 
     // Read attached files as text
-    let parsedFiles: {name: string; content: string}[] | undefined;
+    let parsedFiles: {name: string;content: string;}[] | undefined;
     if (attachedFiles.length > 0) {
       parsedFiles = await Promise.all(
         attachedFiles.map(async (file) => {
@@ -313,8 +313,8 @@ export default function NewAnalysis() {
 
   const activeMode = searchModes.find((m) => m.id === searchMode);
 
-  const PlusMenu = () => (
-    <DropdownMenu>
+  const PlusMenu = () =>
+  <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
           <Plus className="h-4 w-4" />
@@ -326,20 +326,20 @@ export default function NewAnalysis() {
           Add files
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {searchModes.map((mode) => (
-          <DropdownMenuItem
-            key={mode.id}
-            onClick={() => setSearchMode(mode.id)}
-            className={`cursor-pointer ${searchMode === mode.id ? "bg-accent" : ""}`}
-          >
+        {searchModes.map((mode) =>
+      <DropdownMenuItem
+        key={mode.id}
+        onClick={() => setSearchMode(mode.id)}
+        className={`cursor-pointer ${searchMode === mode.id ? "bg-accent" : ""}`}>
+
             <mode.icon className="h-4 w-4 mr-2" />
             {mode.label}
             {searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>}
           </DropdownMenuItem>
-        ))}
+      )}
       </DropdownMenuContent>
-    </DropdownMenu>
-  );
+    </DropdownMenu>;
+
 
   return (
     <div className="flex flex-col h-screen">
@@ -349,8 +349,8 @@ export default function NewAnalysis() {
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json"
-      />
+        accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json" />
+
       {hasConversation &&
       <div className="border-b border-border px-8 py-3 flex items-center justify-between">
           {isRenaming ?
@@ -414,22 +414,22 @@ export default function NewAnalysis() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome to <span className="text-primary">REID</span>,
+            <h1 className="text-4xl font-bold mb-2">Welcome to REID Base,
+            <span className="font-sans text-4xl font-extrabold text-primary-foreground">REID Base</span>,
             </h1>
             <p className="text-2xl text-muted-foreground font-extralight mb-8">what would you like to discover?</p>
             <div className="relative mb-12">
-              {attachedFiles.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {attachedFiles.map((f, i) => (
-                    <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
+              {attachedFiles.length > 0 &&
+            <div className="flex flex-wrap gap-2 mb-2">
+                  {attachedFiles.map((f, i) =>
+              <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
                       <Paperclip className="h-3 w-3" />
                       {f.name}
                       <button onClick={() => removeFile(i)} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
                     </span>
-                  ))}
-                </div>
               )}
+                </div>
+            }
               <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -439,12 +439,12 @@ export default function NewAnalysis() {
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <PlusMenu />
-                {activeMode && (
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                {activeMode &&
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <activeMode.icon className="h-3 w-3" />
                     {activeMode.label}
                   </span>
-                )}
+              }
               </div>
               <button
               onClick={handleSubmit}
@@ -476,41 +476,41 @@ export default function NewAnalysis() {
 
         <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((m, i) => {
-              const isLastAi = m.role === "assistant" && (i === messages.length - 1 || (i === messages.length - 2 && messages[messages.length - 1]?.role !== "assistant"));
-              return (
-          <div key={i} ref={isLastAi ? latestAiRef : undefined} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            const isLastAi = m.role === "assistant" && (i === messages.length - 1 || i === messages.length - 2 && messages[messages.length - 1]?.role !== "assistant");
+            return (
+              <div key={i} ref={isLastAi ? latestAiRef : undefined} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-              className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
-              m.role === "user" ?
-              "bg-[#ffe3bb] text-foreground rounded-br-md" :
-              "bg-card border border-border rounded-bl-md"}`
-              }>
+                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
+                  m.role === "user" ?
+                  "bg-[#ffe3bb] text-foreground rounded-br-md" :
+                  "bg-card border border-border rounded-bl-md"}`
+                  }>
 
                   {m.role === "assistant" ?
-              <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-ul:ml-6 prose-ol:ml-6 prose-li:mb-1.5" style={{ lineHeight: 1.6 }}>
+                  <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-ul:ml-6 prose-ol:ml-6 prose-li:mb-1.5" style={{ lineHeight: 1.6 }}>
                       <ReactMarkdown
-                        components={{
-                          code({ className, children, ...props }) {
-                            const match = /language-chart/.exec(className || "");
-                            if (match) {
-                              const chart = parseChartBlock(String(children).trim());
-                              if (chart) return <ChatChart chart={chart} />;
-                            }
-                            return <code className={className} {...props}>{children}</code>;
-                          },
-                          pre({ children }) {
-                            return <>{children}</>;
-                          },
-                        }}
-                      >{m.content}</ReactMarkdown>
+                      components={{
+                        code({ className, children, ...props }) {
+                          const match = /language-chart/.exec(className || "");
+                          if (match) {
+                            const chart = parseChartBlock(String(children).trim());
+                            if (chart) return <ChatChart chart={chart} />;
+                          }
+                          return <code className={className} {...props}>{children}</code>;
+                        },
+                        pre({ children }) {
+                          return <>{children}</>;
+                        }
+                      }}>
+                      {m.content}</ReactMarkdown>
                     </div> :
 
-              m.content
-              }
+                  m.content
+                  }
                 </div>
-              </div>
-              );
-            })}
+              </div>);
+
+          })}
 
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">
@@ -522,39 +522,39 @@ export default function NewAnalysis() {
             <div ref={messagesEndRef} />
           </div>
         }
-        {hasConversation && scrollArrowOpacity > 0 && (
-          <button
-            onClick={scrollToBottom}
-            style={{ opacity: scrollArrowOpacity }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity"
-          >
+        {hasConversation && scrollArrowOpacity > 0 &&
+        <button
+          onClick={scrollToBottom}
+          style={{ opacity: scrollArrowOpacity }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity">
+
             <ArrowDown className="h-4 w-4" />
           </button>
-        )}
+        }
       </div>
 
       {hasConversation &&
       <div className="border-t border-border px-8 py-4">
           <div className="max-w-3xl mx-auto">
-            {attachedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {attachedFiles.map((f, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
+            {attachedFiles.length > 0 &&
+          <div className="flex flex-wrap gap-2 mb-2">
+                {attachedFiles.map((f, i) =>
+            <span key={i} className="inline-flex items-center gap-1 rounded-lg bg-accent px-2.5 py-1 text-xs text-accent-foreground">
                     <Paperclip className="h-3 w-3" />
                     {f.name}
                     <button onClick={() => removeFile(i)} className="ml-0.5 hover:text-destructive"><X className="h-3 w-3" /></button>
                   </span>
-                ))}
-              </div>
             )}
+              </div>
+          }
             <div className="relative flex items-center gap-2">
               <PlusMenu />
-              {activeMode && (
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+              {activeMode &&
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
                   <activeMode.icon className="h-3 w-3" />
                   {activeMode.label}
                 </span>
-              )}
+            }
               <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X } from "lucide-react";
+import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";
@@ -133,6 +133,9 @@ export default function NewAnalysis() {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const latestAiRef = useRef<HTMLDivElement>(null);
+  const [showScrollArrow, setShowScrollArrow] = useState(false);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
   const { tier } = useTier();
@@ -209,9 +212,37 @@ export default function NewAnalysis() {
     toast.success("Conversation renamed");
   };
 
+  // Scroll to top of latest AI response when it first appears (user just sent a message)
+  const prevMsgCountRef = useRef(messages.length);
   useEffect(() => {
+    const prev = prevMsgCountRef.current;
+    prevMsgCountRef.current = messages.length;
+    // When a new user message is added, scroll to bottom so they see their message
+    if (messages.length > prev && messages[messages.length - 1]?.role === "user") {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    // When the first AI chunk appears (assistant message added), scroll to top of that bubble
+    if (messages.length > prev && messages[messages.length - 1]?.role === "assistant" && latestAiRef.current) {
+      latestAiRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [messages.length]);
+
+  // Track scroll position to show/hide scroll arrow
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      setShowScrollArrow(distanceFromBottom > 100);
+    };
+    container.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => container.removeEventListener("scroll", handleScroll);
+  });
+
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  };
 
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
@@ -378,7 +409,7 @@ export default function NewAnalysis() {
         </div>
       }
 
-      <div className="flex-1 overflow-y-auto px-8 py-12 bg-background">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold mb-2">
@@ -442,8 +473,10 @@ export default function NewAnalysis() {
           </div> :
 
         <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((m, i) =>
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            {messages.map((m, i) => {
+              const isLastAi = m.role === "assistant" && (i === messages.length - 1 || (i === messages.length - 2 && messages[messages.length - 1]?.role !== "assistant"));
+              return (
+          <div key={i} ref={isLastAi ? latestAiRef : undefined} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
               className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
               m.role === "user" ?
@@ -474,7 +507,9 @@ export default function NewAnalysis() {
               }
                 </div>
               </div>
-          )}
+              );
+            })}
+
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">
                 <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-3">
@@ -485,6 +520,14 @@ export default function NewAnalysis() {
             <div ref={messagesEndRef} />
           </div>
         }
+        {hasConversation && showScrollArrow && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity animate-fade-in"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {hasConversation &&

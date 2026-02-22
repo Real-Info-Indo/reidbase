@@ -169,7 +169,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       {!isMobile && (
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!collapsed &&
-        <img src={reidLogo} alt="REID Base" className="h-6" />
+        <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer"><img src={reidLogo} alt="REID Base" className="h-6" /></a>
         }
         <button
           onClick={() => setCollapsed(!collapsed)}

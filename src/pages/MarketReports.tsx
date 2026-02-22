@@ -11,14 +11,6 @@ interface Report {
 const reports: Report[] = [
   { name: "Bali Annual Report", file: "/reports/Bali_Annual_2025.pdf", thumbnail: "/reports/thumbnails/Bali_Annual_2025.jpg", subtitle: "2025 Annual Report" },
   { name: "Bali Q3 Report", file: "/reports/Bali_Q3_2025.pdf", thumbnail: "/reports/thumbnails/Bali_Q3_2025.jpg", subtitle: "Q3 2025 Market Report" },
-  { name: "Berawa", file: "/reports/Berawa_2024.pdf", thumbnail: "/reports/thumbnails/Berawa.jpg", subtitle: "2024 Annual Report" },
-  { name: "Bingin", file: "/reports/Bingin_2024.pdf", thumbnail: "/reports/thumbnails/Bingin.jpg", subtitle: "2024 Annual Report" },
-  { name: "Canggu", file: "/reports/Canggu_2024.pdf", thumbnail: "/reports/thumbnails/Canggu.jpg", subtitle: "2024 Annual Report" },
-  { name: "Kerobokan", file: "/reports/Kerobokan_2024.pdf", thumbnail: "/reports/thumbnails/Kerobokan.jpg", subtitle: "2024 Annual Report" },
-  { name: "Pererenan", file: "/reports/Pererenan_2024.pdf", thumbnail: "/reports/thumbnails/Pererenan.jpg", subtitle: "2024 Annual Report" },
-  { name: "Sanur", file: "/reports/Sanur_2024.pdf", thumbnail: "/reports/thumbnails/Sanur.jpg", subtitle: "2024 Annual Report" },
-  { name: "Seminyak", file: "/reports/Seminyak_2024.pdf", thumbnail: "/reports/thumbnails/Seminyak.jpg", subtitle: "2024 Annual Report" },
-  { name: "Ubud", file: "/reports/Ubud_2024.pdf", thumbnail: "/reports/thumbnails/Ubud.jpg", subtitle: "2024 Annual Report" },
 ];
 
 

@@ -425,10 +425,10 @@ export default function NewAnalysis() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
-             <p className="text-lg md:text-2xl text-muted-foreground font-light mb-1">
+             <p className="text-base md:text-xl text-muted-foreground font-light mb-1">
                Hi {greetingName},
              </p>
-             <h1 className="text-2xl md:text-4xl font-bold mb-8">What would you like to discover?</h1>
+             <h1 className="text-2xl md:text-4xl font-extralight mb-8">What would you like to discover?</h1>
             <div className="relative mb-12">
               {attachedFiles.length > 0 &&
             <div className="flex flex-wrap gap-2 mb-2">
@@ -445,7 +445,7 @@ export default function NewAnalysis() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
-              placeholder="Enter a prompt..."
+              placeholder="Ask REID..."
               className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70" />
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">

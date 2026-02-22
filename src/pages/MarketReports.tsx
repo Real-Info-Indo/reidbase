@@ -1,14 +1,30 @@
 import { useState } from "react";
 import { Search, FileText } from "lucide-react";
 
-const reports = [
-"Berawa", "Bingin", "Canggu", "Kerobokan",
-"Pererenan", "Sanur", "Seminyak", "Ubud"];
+interface Report {
+  name: string;
+  file: string;
+  thumbnail: string;
+  subtitle: string;
+}
+
+const reports: Report[] = [
+  { name: "Bali Annual Report", file: "/reports/Bali_Annual_2025.pdf", thumbnail: "/reports/thumbnails/Bali_Annual_2025.jpg", subtitle: "2025 Annual Report" },
+  { name: "Bali Q3 Report", file: "/reports/Bali_Q3_2025.pdf", thumbnail: "/reports/thumbnails/Bali_Q3_2025.jpg", subtitle: "Q3 2025 Market Report" },
+  { name: "Berawa", file: "/reports/Berawa_2024.pdf", thumbnail: "/reports/thumbnails/Berawa.jpg", subtitle: "2024 Annual Report" },
+  { name: "Bingin", file: "/reports/Bingin_2024.pdf", thumbnail: "/reports/thumbnails/Bingin.jpg", subtitle: "2024 Annual Report" },
+  { name: "Canggu", file: "/reports/Canggu_2024.pdf", thumbnail: "/reports/thumbnails/Canggu.jpg", subtitle: "2024 Annual Report" },
+  { name: "Kerobokan", file: "/reports/Kerobokan_2024.pdf", thumbnail: "/reports/thumbnails/Kerobokan.jpg", subtitle: "2024 Annual Report" },
+  { name: "Pererenan", file: "/reports/Pererenan_2024.pdf", thumbnail: "/reports/thumbnails/Pererenan.jpg", subtitle: "2024 Annual Report" },
+  { name: "Sanur", file: "/reports/Sanur_2024.pdf", thumbnail: "/reports/thumbnails/Sanur.jpg", subtitle: "2024 Annual Report" },
+  { name: "Seminyak", file: "/reports/Seminyak_2024.pdf", thumbnail: "/reports/thumbnails/Seminyak.jpg", subtitle: "2024 Annual Report" },
+  { name: "Ubud", file: "/reports/Ubud_2024.pdf", thumbnail: "/reports/thumbnails/Ubud.jpg", subtitle: "2024 Annual Report" },
+];
 
 
 export default function MarketReports() {
   const [search, setSearch] = useState("");
-  const filtered = reports.filter((r) => r.toLowerCase().includes(search.toLowerCase()));
+  const filtered = reports.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="p-8">
@@ -28,22 +44,22 @@ export default function MarketReports() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filtered.map((location) =>
-        <button
-          key={location}
+        {filtered.map((report) =>
+        <a
+          key={report.file}
+          href={report.file}
+          target="_blank"
+          rel="noopener noreferrer"
           className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:border-primary/30 transition-all text-left">
 
-            <div className="aspect-[3/4] bg-gradient-to-br from-primary/20 via-primary/10 to-secondary flex items-center justify-center">
-              <div className="text-center">
-                <FileText className="h-12 w-12 text-primary/40 mx-auto mb-3" />
-                <span className="text-lg font-bold text-foreground/70">{location}</span>
-              </div>
+            <div className="aspect-[3/4] overflow-hidden">
+              <img src={report.thumbnail} alt={report.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             </div>
             <div className="p-4">
-              <h3 className="font-bold text-sm">{location}</h3>
-              <p className="text-xs text-muted-foreground font-extralight">2024 Annual Report</p>
+              <h3 className="font-bold text-sm">{report.name}</h3>
+              <p className="text-xs text-muted-foreground font-extralight">{report.subtitle}</p>
             </div>
-          </button>
+          </a>
         )}
       </div>
     </div>);

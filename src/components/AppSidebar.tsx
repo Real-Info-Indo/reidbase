@@ -6,7 +6,7 @@ import {
   FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil,
   Settings, LogOut, ExternalLink } from
 "lucide-react";
-import reidLogo from "@/assets/REID_Base_Black.svg";
+import reidLogo from "@/assets/REID_Black.svg";
 import { NavLink } from "@/components/NavLink";
 import { useTier, tierLabels } from "@/contexts/TierContext";
 import { cn } from "@/lib/utils";

@@ -465,21 +465,22 @@ export default function NewAnalysis() {
                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
               {suggestions.map((s) =>
             <button
               key={s.title}
               onClick={() => send(s.desc)}
-              className="items-start gap-4 rounded-xl border border-border bg-card p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight">
+              className="items-center md:items-start gap-3 md:gap-4 rounded-xl border border-border bg-card px-4 py-3 md:p-5 text-left hover:border-primary/40 hover:shadow-sm transition-all group flex flex-row text-xs font-extralight">
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
-                    <s.icon className="h-5 w-5 text-primary" />
+                  <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                    <s.icon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <h3 className="font-bold md:hidden">{s.title}</h3>
+                  <div className="flex-1 min-w-0 hidden md:block">
                     <h3 className="font-bold mb-1">{s.title}</h3>
                     <p className="text-sm text-muted-foreground font-extralight">{s.desc}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 mt-1 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-auto md:mt-1" />
                 </button>
             )}
             </div>

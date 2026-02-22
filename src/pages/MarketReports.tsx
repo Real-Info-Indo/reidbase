@@ -44,7 +44,7 @@ export default function MarketReports() {
           rel="noopener noreferrer"
           className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md hover:border-primary/30 transition-all text-left">
 
-            <div className="aspect-[3/4] overflow-hidden">
+            <div className="aspect-[4/3] overflow-hidden">
               <img src={report.thumbnail} alt={report.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             </div>
             <div className="p-4">

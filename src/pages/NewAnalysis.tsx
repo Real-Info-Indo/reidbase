@@ -138,7 +138,18 @@ export default function NewAnalysis() {
   const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
-  const { tier } = useTier();
+  const { tier, userName } = useTier();
+
+  const greetingName = (() => {
+    try {
+      const raw = localStorage.getItem(PERSONALISATION_KEY);
+      if (raw) {
+        const n = JSON.parse(raw).nickname;
+        if (n) return n;
+      }
+    } catch {}
+    return userName || "there";
+  })();
 
   const startNew = useCallback(() => {
     setMessages([]);
@@ -414,10 +425,10 @@ export default function NewAnalysis() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl mb-2 font-medium text-primary-foreground md:text-lg">Welcome to REID Base,
-            <span className="font-sans text-2xl md:text-4xl font-extrabold text-primary-foreground"></span>,
-            </h1>
-            <p className="text-muted-foreground font-extralight mb-8 text-4xl">what would you like to discover?</p>
+             <p className="text-lg md:text-2xl text-muted-foreground font-light mb-1">
+               Hi {greetingName},
+             </p>
+             <h1 className="text-2xl md:text-4xl font-bold mb-8">What would you like to discover?</h1>
             <div className="relative mb-12">
               {attachedFiles.length > 0 &&
             <div className="flex flex-wrap gap-2 mb-2">

@@ -17,9 +17,14 @@ export function UpgradeOverlay() {
             Subscribers access location reports, interactive data, and full AI access.
           </p>
         </div>
-        <button className="w-full rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity">
-          SEE PLANS
-        </button>
+        <a
+          href="https://www.realinfo.id/pricing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          Upgrade your plan
+        </a>
       </div>
     </div>
   );

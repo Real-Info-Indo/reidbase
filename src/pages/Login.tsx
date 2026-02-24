@@ -23,8 +23,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm text-center space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background/50 backdrop-blur-sm px-4">
+      <div className="w-full max-w-sm text-center space-y-8 bg-card/90 backdrop-blur-md border border-border rounded-2xl p-10 shadow-lg">
         <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer"><img src={reidLogo} alt="REID" className="h-8 mx-auto" /></a>
         <p className="text-sm text-muted-foreground font-extralight">
           Your home for Bali Real Estate Intelligence

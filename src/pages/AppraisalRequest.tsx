@@ -1,18 +1,65 @@
 import { useState } from "react";
-import { ArrowRight, Upload } from "lucide-react";
+import { ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function AppraisalRequest() {
   const { canAccess } = useTier();
   const hasAccess = canAccess("/appraisal-request");
-  const { toast } = useToast();
   const [propertyStatus, setPropertyStatus] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form state
+  const [form, setForm] = useState({
+    propertyType: "",
+    location: "",
+    description: "",
+    ownershipType: "",
+    landZone: "",
+    leaseTerm: "",
+    landSize: "",
+    internalSize: "",
+    bedrooms: "",
+    bathrooms: "",
+    yearBuilt: "",
+    currentlyOperational: "",
+    propertyWebsite: "",
+    averageDailyRate: "",
+    averageOccupancy: "",
+    yearsOperating: "",
+    constructionBudget: "",
+    consultantBudget: "",
+    ffeBudget: "",
+    landscapingBudget: "",
+    overheads: "",
+  });
+
+  const update = (field: string, value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Appraisal Request Submitted", description: "We'll get back to you within 48 hours." });
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-appraisal", {
+        body: { ...form, propertyStatus },
+      });
+      if (error) throw error;
+      setShowConfirmation(true);
+    } catch (err) {
+      console.error("Submission error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isUnderConstruction = propertyStatus === "under_construction";
@@ -34,7 +81,7 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Property Type</label>
-                <select className={selectClass}>
+                <select className={selectClass} value={form.propertyType} onChange={(e) => update("propertyType", e.target.value)}>
                   <option value="">Select type</option>
                   <option>Villa</option>
                   <option>Land</option>
@@ -44,21 +91,21 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Location</label>
-                <input className={inputClass} placeholder="Search location..." />
+                <input className={inputClass} placeholder="Search location..." value={form.location} onChange={(e) => update("location", e.target.value)} />
               </div>
             </div>
 
             {/* Description */}
             <div>
               <label className={labelClass}>Property Description</label>
-              <textarea className={`${inputClass} min-h-[100px] resize-none`} placeholder="Describe the property..." />
+              <textarea className={`${inputClass} min-h-[100px] resize-none`} placeholder="Describe the property..." value={form.description} onChange={(e) => update("description", e.target.value)} />
             </div>
 
             {/* Row 2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Ownership Type</label>
-                <select className={selectClass}>
+                <select className={selectClass} value={form.ownershipType} onChange={(e) => update("ownershipType", e.target.value)}>
                   <option value="">Select</option>
                   <option>Freehold</option>
                   <option>Leasehold</option>
@@ -66,7 +113,7 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Land Zone</label>
-                <select className={selectClass}>
+                <select className={selectClass} value={form.landZone} onChange={(e) => update("landZone", e.target.value)}>
                   <option value="">Select</option>
                   <option>Residential</option>
                   <option>Commercial</option>
@@ -80,11 +127,11 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Lease Term (years)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 25" />
+                <input type="number" className={inputClass} placeholder="e.g. 25" value={form.leaseTerm} onChange={(e) => update("leaseTerm", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Land Size (SQM)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 500" />
+                <input type="number" className={inputClass} placeholder="e.g. 500" value={form.landSize} onChange={(e) => update("landSize", e.target.value)} />
               </div>
             </div>
 
@@ -92,7 +139,7 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Internal Size (SQM)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 300" />
+                <input type="number" className={inputClass} placeholder="e.g. 300" value={form.internalSize} onChange={(e) => update("internalSize", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Property Status</label>
@@ -109,15 +156,15 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className={labelClass}>Bedrooms</label>
-                <input type="number" className={inputClass} placeholder="e.g. 3" />
+                <input type="number" className={inputClass} placeholder="e.g. 3" value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Bathrooms</label>
-                <input type="number" className={inputClass} placeholder="e.g. 2" />
+                <input type="number" className={inputClass} placeholder="e.g. 2" value={form.bathrooms} onChange={(e) => update("bathrooms", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Year Built</label>
-                <input type="number" className={inputClass} placeholder="e.g. 2022" />
+                <input type="number" className={inputClass} placeholder="e.g. 2022" value={form.yearBuilt} onChange={(e) => update("yearBuilt", e.target.value)} />
               </div>
             </div>
 
@@ -125,7 +172,7 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Currently Operational</label>
-                <select className={selectClass}>
+                <select className={selectClass} value={form.currentlyOperational} onChange={(e) => update("currentlyOperational", e.target.value)}>
                   <option value="">Select</option>
                   <option>Yes</option>
                   <option>No</option>
@@ -133,7 +180,7 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Property Website</label>
-                <input type="url" className={inputClass} placeholder="https://..." />
+                <input type="url" className={inputClass} placeholder="https://..." value={form.propertyWebsite} onChange={(e) => update("propertyWebsite", e.target.value)} />
               </div>
             </div>
 
@@ -141,15 +188,15 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className={labelClass}>Average Daily Rate ($)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 250" />
+                <input type="number" className={inputClass} placeholder="e.g. 250" value={form.averageDailyRate} onChange={(e) => update("averageDailyRate", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Average Occupancy (%)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 75" />
+                <input type="number" className={inputClass} placeholder="e.g. 75" value={form.averageOccupancy} onChange={(e) => update("averageOccupancy", e.target.value)} />
               </div>
               <div>
                 <label className={labelClass}>Years Operating</label>
-                <input type="number" className={inputClass} placeholder="e.g. 3" />
+                <input type="number" className={inputClass} placeholder="e.g. 3" value={form.yearsOperating} onChange={(e) => update("yearsOperating", e.target.value)} />
               </div>
             </div>
 
@@ -160,23 +207,23 @@ export default function AppraisalRequest() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={labelClass}>Construction Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Total construction cost" />
+                    <input type="number" className={inputClass} placeholder="Total construction cost" value={form.constructionBudget} onChange={(e) => update("constructionBudget", e.target.value)} />
                   </div>
                   <div>
                     <label className={labelClass}>Consultant Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Architect / Engineer" />
+                    <input type="number" className={inputClass} placeholder="Architect / Engineer" value={form.consultantBudget} onChange={(e) => update("consultantBudget", e.target.value)} />
                   </div>
                   <div>
                     <label className={labelClass}>FF&E Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Furniture, Fixtures & Equipment" />
+                    <input type="number" className={inputClass} placeholder="Furniture, Fixtures & Equipment" value={form.ffeBudget} onChange={(e) => update("ffeBudget", e.target.value)} />
                   </div>
                   <div>
                     <label className={labelClass}>Landscaping Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Landscaping costs" />
+                    <input type="number" className={inputClass} placeholder="Landscaping costs" value={form.landscapingBudget} onChange={(e) => update("landscapingBudget", e.target.value)} />
                   </div>
                   <div>
                     <label className={labelClass}>Overheads ($)</label>
-                    <input type="number" className={inputClass} placeholder="Overhead costs" />
+                    <input type="number" className={inputClass} placeholder="Overhead costs" value={form.overheads} onChange={(e) => update("overheads", e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -195,13 +242,33 @@ export default function AppraisalRequest() {
             {/* Submit */}
             <button
               type="submit"
-              className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+              disabled={submitting}
+              className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              SUBMIT <ArrowRight className="h-4 w-4" />
+              {submitting ? "SUBMITTING..." : "SUBMIT"} <ArrowRight className="h-4 w-4" />
             </button>
           </form>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center items-center">
+            <CheckCircle2 className="h-12 w-12 text-primary mb-2" />
+            <DialogTitle className="text-xl">Request Submitted</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-2">
+              Thank you for your appraisal request. A member of our appraisal team will get back to you within 24 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <button
+            onClick={() => setShowConfirmation(false)}
+            className="w-full mt-4 rounded-lg bg-primary px-6 py-2.5 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            OK
+          </button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

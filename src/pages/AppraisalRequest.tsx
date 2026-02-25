@@ -104,7 +104,7 @@ export default function AppraisalRequest() {
             {/* Row 2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>Ownership Type</label>
+                <label className={labelClass}>Ownership Type <span className="text-destructive">*</span></label>
                 <select className={selectClass} value={form.ownershipType} onChange={(e) => update("ownershipType", e.target.value)}>
                   <option value="">Select</option>
                   <option>Freehold</option>
@@ -112,7 +112,7 @@ export default function AppraisalRequest() {
                 </select>
               </div>
               <div>
-                <label className={labelClass}>Land Zone</label>
+                <label className={labelClass}>Land Zone <span className="text-destructive">*</span></label>
                 <select className={selectClass} value={form.landZone} onChange={(e) => update("landZone", e.target.value)}>
                   <option value="">Select</option>
                   <option value="Residential (Yellow)">Residential (Yellow)</option>
@@ -126,11 +126,11 @@ export default function AppraisalRequest() {
             {/* Row 3 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>Lease Term (years)</label>
+                <label className={labelClass}>Lease Term (years) <span className="text-destructive">*</span></label>
                 <input type="number" className={inputClass} placeholder="e.g. 25" value={form.leaseTerm} onChange={(e) => update("leaseTerm", e.target.value)} />
               </div>
               <div>
-                <label className={labelClass}>Land Size (SQM)</label>
+                <label className={labelClass}>Land Size (SQM) <span className="text-destructive">*</span></label>
                 <input type="number" className={inputClass} placeholder="e.g. 500" value={form.landSize} onChange={(e) => update("landSize", e.target.value)} />
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function AppraisalRequest() {
             {/* Row 4 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>Internal Size (SQM)</label>
+                <label className={labelClass}>Internal Size (SQM) <span className="text-destructive">*</span></label>
                 <input type="number" className={inputClass} placeholder="e.g. 300" value={form.internalSize} onChange={(e) => update("internalSize", e.target.value)} />
               </div>
               <div>
@@ -183,7 +183,7 @@ export default function AppraisalRequest() {
             {/* Row 5 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className={labelClass}>Bedrooms</label>
+                <label className={labelClass}>Bedrooms <span className="text-destructive">*</span></label>
                 <input type="number" className={inputClass} placeholder="e.g. 3" value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)} />
               </div>
               <div>

@@ -38,7 +38,7 @@ function buildEmailHtml(data: AppraisalData): string {
   const row = (label: string, value: string) =>
     value ? `<tr><td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb;width:40%">${label}</td><td style="padding:8px 12px;color:#1f2937;border-bottom:1px solid #e5e7eb">${value}</td></tr>` : "";
 
-  const constructionRows = data.propertyStatus === "under_construction" ? `
+  const constructionRows = data.propertyStatus === "off_plan" ? `
     ${row("Construction Budget ($)", data.constructionBudget || "")}
     ${row("Consultant Budget ($)", data.consultantBudget || "")}
     ${row("FF&E Budget ($)", data.ffeBudget || "")}

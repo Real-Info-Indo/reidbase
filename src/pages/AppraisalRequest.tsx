@@ -62,7 +62,7 @@ export default function AppraisalRequest() {
     }
   };
 
-  const isUnderConstruction = propertyStatus === "under_construction";
+  const isOffPlan = propertyStatus === "off_plan";
 
   const selectClass = "w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50";
   const inputClass = selectClass;
@@ -80,7 +80,7 @@ export default function AppraisalRequest() {
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>Property Type</label>
+                <label className={labelClass}>Property Type <span className="text-destructive">*</span></label>
                 <select className={selectClass} value={form.propertyType} onChange={(e) => update("propertyType", e.target.value)}>
                   <option value="">Select type</option>
                   <option>Villa</option>
@@ -90,7 +90,7 @@ export default function AppraisalRequest() {
                 </select>
               </div>
               <div>
-                <label className={labelClass}>Location</label>
+                <label className={labelClass}>Location <span className="text-destructive">*</span></label>
                 <input className={inputClass} placeholder="Search location..." value={form.location} onChange={(e) => update("location", e.target.value)} />
               </div>
             </div>
@@ -115,10 +115,10 @@ export default function AppraisalRequest() {
                 <label className={labelClass}>Land Zone</label>
                 <select className={selectClass} value={form.landZone} onChange={(e) => update("landZone", e.target.value)}>
                   <option value="">Select</option>
-                  <option>Residential</option>
-                  <option>Commercial</option>
-                  <option>Tourism</option>
-                  <option>Agricultural</option>
+                  <option value="Residential (Yellow)">Residential (Yellow)</option>
+                  <option value="Tourism (Pink)">Tourism (Pink)</option>
+                  <option value="Commercial (Red)">Commercial (Red)</option>
+                  <option value="Agriculture (Green)">Agriculture (Green)</option>
                 </select>
               </div>
             </div>
@@ -142,15 +142,43 @@ export default function AppraisalRequest() {
                 <input type="number" className={inputClass} placeholder="e.g. 300" value={form.internalSize} onChange={(e) => update("internalSize", e.target.value)} />
               </div>
               <div>
-                <label className={labelClass}>Property Status</label>
+                <label className={labelClass}>Property Status <span className="text-destructive">*</span></label>
                 <select className={selectClass} value={propertyStatus} onChange={(e) => setPropertyStatus(e.target.value)}>
                   <option value="">Select</option>
                   <option value="completed">Completed</option>
-                  <option value="under_construction">Under Construction</option>
                   <option value="off_plan">Off Plan</option>
                 </select>
               </div>
             </div>
+
+            {/* Conditional: Off Plan budgets */}
+            {isOffPlan && (
+              <div className="border border-primary/30 rounded-xl p-6 bg-primary/5 space-y-6">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Construction Budget Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className={labelClass}>Construction Budget ($)</label>
+                    <input type="number" className={inputClass} placeholder="Total construction cost" value={form.constructionBudget} onChange={(e) => update("constructionBudget", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Consultant Budget ($)</label>
+                    <input type="number" className={inputClass} placeholder="Architect / Engineer" value={form.consultantBudget} onChange={(e) => update("consultantBudget", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>FF&E Budget ($)</label>
+                    <input type="number" className={inputClass} placeholder="Furniture, Fixtures & Equipment" value={form.ffeBudget} onChange={(e) => update("ffeBudget", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Landscaping Budget ($)</label>
+                    <input type="number" className={inputClass} placeholder="Landscaping costs" value={form.landscapingBudget} onChange={(e) => update("landscapingBudget", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Overheads ($)</label>
+                    <input type="number" className={inputClass} placeholder="Overhead costs" value={form.overheads} onChange={(e) => update("overheads", e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Row 5 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -180,7 +208,7 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Property Website</label>
-                <input type="url" className={inputClass} placeholder="https://..." value={form.propertyWebsite} onChange={(e) => update("propertyWebsite", e.target.value)} />
+                <input type="text" className={inputClass} placeholder="www.example.com" value={form.propertyWebsite} onChange={(e) => update("propertyWebsite", e.target.value)} />
               </div>
             </div>
 
@@ -200,34 +228,6 @@ export default function AppraisalRequest() {
               </div>
             </div>
 
-            {/* Conditional: Under Construction budgets */}
-            {isUnderConstruction && (
-              <div className="border border-primary/30 rounded-xl p-6 bg-primary/5 space-y-6">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Construction Budget Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className={labelClass}>Construction Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Total construction cost" value={form.constructionBudget} onChange={(e) => update("constructionBudget", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Consultant Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Architect / Engineer" value={form.consultantBudget} onChange={(e) => update("consultantBudget", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>FF&E Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Furniture, Fixtures & Equipment" value={form.ffeBudget} onChange={(e) => update("ffeBudget", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Landscaping Budget ($)</label>
-                    <input type="number" className={inputClass} placeholder="Landscaping costs" value={form.landscapingBudget} onChange={(e) => update("landscapingBudget", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Overheads ($)</label>
-                    <input type="number" className={inputClass} placeholder="Overhead costs" value={form.overheads} onChange={(e) => update("overheads", e.target.value)} />
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* File upload */}
             <div>

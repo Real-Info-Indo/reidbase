@@ -76,3 +76,8 @@
 .ai-response li {
   margin-bottom: 0.375rem;
 }
+
+/* Subtle hand-drawn effect on Lucide icons */
+svg.lucide {
+  filter: url(#hand-drawn-filter);
+}

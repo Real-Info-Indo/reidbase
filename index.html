@@ -21,6 +21,15 @@
   <meta name="twitter:card" content="summary_large_image">
 </head>
   <body>
+    <!-- SVG filter for subtle hand-drawn icon effect -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+      <defs>
+        <filter id="hand-drawn-filter">
+          <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" seed="2" result="turbulence"/>
+          <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+      </defs>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

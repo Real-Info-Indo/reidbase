@@ -160,7 +160,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
   return (
     <aside
-      className={cn("flex flex-col sticky top-0 backdrop-blur-xl text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 shrink-0 bg-sidebar",
+      className={cn("flex flex-col sticky top-0 backdrop-blur-xl text-sidebar-foreground transition-all duration-300 shrink-0 bg-sidebar shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
       isMobile ? "h-full" : "h-screen",
       collapsed ? "w-16" : "w-64"
       )}>

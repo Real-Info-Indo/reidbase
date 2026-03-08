@@ -24,7 +24,7 @@ const searchModes = [
 { id: "data-analyst", label: "Data analyst", icon: LineChart },
 { id: "sales-assistant", label: "Sales assistant", icon: ShoppingCart },
 { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
-{ id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
+{ id: "portfolio-analyst", label: "Portfolio assistant", icon: PieChart }];
 
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;

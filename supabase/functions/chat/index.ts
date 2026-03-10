@@ -689,7 +689,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"]) + "\n\n" + MASTER_GOVERNANCE + buildPersonalisationBlock(personalisation) },
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) },
               { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
             stream: true,

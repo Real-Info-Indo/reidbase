@@ -526,9 +526,8 @@ function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: str
   const personalisationBlock = buildPersonalisationBlock(personalisation);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
-${MASTER_GOVERNANCE}
-
 ${GLOBAL_RULES}
+
 
 ${modePrompt}
 ${personalisationBlock}

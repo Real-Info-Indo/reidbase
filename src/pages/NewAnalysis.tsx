@@ -551,7 +551,7 @@ export default function NewAnalysis() {
             <div ref={messagesEndRef} />
           </div>
         }
-        {hasConversation && scrollArrowOpacity > 0 &&
+        {hasConversation && scrollArrowOpacity > 0 && !isLoading &&
         <button
           onClick={scrollToBottom}
           style={{ opacity: scrollArrowOpacity }}
@@ -563,11 +563,8 @@ export default function NewAnalysis() {
       </div>
 
       {hasConversation &&
-      <div className="px-8 py-4">
+      <div className="relative z-20 px-8 py-4 bg-background">
           <div className="max-w-3xl mx-auto">
-            {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
-              <p className="text-right text-[11px] text-muted-foreground/60 font-light mb-2">REID Base is AI and can make mistakes. Please double check responses.</p>
-            }
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">
                 {attachedFiles.map((f, i) =>
@@ -609,6 +606,9 @@ export default function NewAnalysis() {
                 </button>
               </div>
             </div>
+            {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
+              <p className="text-right text-[11px] text-muted-foreground/60 font-light mt-1.5">REID Base is AI and can make mistakes. Please double check responses.</p>
+            }
           </div>
         </div>
       }

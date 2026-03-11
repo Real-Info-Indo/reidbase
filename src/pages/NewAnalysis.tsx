@@ -24,7 +24,7 @@ const searchModes = [
 { id: "data-analyst", label: "Data analyst", icon: LineChart },
 { id: "sales-assistant", label: "Sales assistant", icon: ShoppingCart },
 { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
-{ id: "portfolio-analyst", label: "Portfolio assistant", icon: PieChart }];
+{ id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
 
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -51,13 +51,23 @@ async function streamChat({
     }
   } catch {}
 
+  // Load Wix access token for server-side tier verification
+  let wixAccessToken: string | undefined;
+  try {
+    const raw = localStorage.getItem("wix-tokens");
+    if (raw) {
+      const tokens = JSON.parse(raw);
+      wixAccessToken = tokens?.accessToken?.value;
+    }
+  } catch {}
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation })
+    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixAccessToken })
   });
 
   if (!resp.ok) {

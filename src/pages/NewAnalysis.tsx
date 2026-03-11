@@ -478,7 +478,7 @@ export default function NewAnalysis() {
                   <h3 className="font-bold md:hidden">{s.title}</h3>
                   <div className="flex-1 min-w-0 hidden md:block">
                     <h3 className="font-bold mb-1">{s.title}</h3>
-                    <p className="text-sm text-muted-foreground font-extralight">{s.desc}</p>
+                    <p className="text-sm text-muted-foreground font-extralight">{s.shortDesc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-auto md:mt-1" />
                 </button>

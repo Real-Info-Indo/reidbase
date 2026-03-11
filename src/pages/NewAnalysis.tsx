@@ -551,19 +551,10 @@ export default function NewAnalysis() {
             <div ref={messagesEndRef} />
           </div>
         }
-        {hasConversation && scrollArrowOpacity > 0 && !isLoading &&
-        <button
-          onClick={scrollToBottom}
-          style={{ opacity: scrollArrowOpacity }}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90 transition-opacity">
-
-            <ArrowDown className="h-4 w-4" />
-          </button>
-        }
       </div>
 
       {hasConversation &&
-      <div className="relative z-20 px-8 py-4 bg-background">
+      <div className="relative z-20 px-8 py-4">
           <div className="max-w-3xl mx-auto">
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">

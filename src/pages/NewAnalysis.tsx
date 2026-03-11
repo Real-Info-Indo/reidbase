@@ -337,17 +337,29 @@ export default function NewAnalysis() {
           Add files
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {searchModes.map((mode) =>
-      <DropdownMenuItem
-        key={mode.id}
-        onClick={() => setSearchMode(mode.id)}
-        className={`cursor-pointer ${searchMode === mode.id ? "bg-accent" : ""}`}>
-
-            <mode.icon className="h-4 w-4 mr-2" />
-            {mode.label}
-            {searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>}
-          </DropdownMenuItem>
-      )}
+        {searchModes.map((mode) => {
+          const isLocked = mode.id !== "data-analyst" && tier !== "enterprise";
+          return (
+            <DropdownMenuItem
+              key={mode.id}
+              onClick={() => {
+                if (isLocked) {
+                  window.open("https://www.realinfo.id/pricing", "_blank");
+                } else {
+                  setSearchMode(mode.id);
+                }
+              }}
+              className={`cursor-pointer relative ${searchMode === mode.id ? "bg-accent" : ""} ${isLocked ? "opacity-60" : ""}`}>
+              <mode.icon className="h-4 w-4 mr-2" />
+              {mode.label}
+              {isLocked ? (
+                <Lock className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
+              ) : (
+                searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>
+              )}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>;
 

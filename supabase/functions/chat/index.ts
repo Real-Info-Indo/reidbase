@@ -106,8 +106,7 @@ ${SELF_REVIEW_RULES}
 /* ── MEMBER RAG CONTENT ── */
 const MEMBER_RAG = `
 2025 REID Base RAG - Member Edition
-Source: REID 2025 Bali Real Estate Report (Macro-Market Summary)
-Scope: This document contains macro-market summaries. It does NOT contain granular neighborhood-level data or raw database entries.
+Scope: Macro-market summaries. Does NOT contain granular neighborhood-level data or raw database entries.
 
 KEY INSIGHTS:
 1. Total market median prices softened, falling -3%. Downward pressure from off-plan and apartment sales nudged prices slightly lower.

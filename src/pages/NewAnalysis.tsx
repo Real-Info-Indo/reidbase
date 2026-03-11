@@ -15,10 +15,10 @@ import {
 import { useTier } from "@/contexts/TierContext";
 
 const suggestions = [
-{ title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
-{ title: "Top markets", desc: "Discover the highest performing investment locations", icon: BarChart3 },
-{ title: "Emerging locations", desc: "Find up-and-coming areas with growth potential", icon: MapPin },
-{ title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator }];
+{ title: "Market trends", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
+{ title: "Top markets", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },
+{ title: "Emerging locations", desc: "What does the data show about Bali's emerging property markets \u2014 where are the early fundamentals worth watching?", icon: MapPin },
+{ title: "Yield estimator", desc: "I'd like to estimate the yield on a property I'm looking at \u2014 how does this work?", icon: Calculator }];
 
 const searchModes = [
 { id: "data-analyst", label: "Data analyst", icon: LineChart },

@@ -15,10 +15,10 @@ import {
 import { useTier } from "@/contexts/TierContext";
 
 const suggestions = [
-{ title: "Market trends", desc: "Explore current real estate market dynamics across Bali", icon: TrendingUp },
-{ title: "Top markets", desc: "Discover the highest performing investment locations", icon: BarChart3 },
-{ title: "Emerging locations", desc: "Find up-and-coming areas with growth potential", icon: MapPin },
-{ title: "Yield estimator", desc: "Calculate expected returns on property investments", icon: Calculator }];
+{ title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
+{ title: "Top markets", shortDesc: "Locations with the strongest sales and rental fundamentals", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },
+{ title: "Emerging locations", shortDesc: "Early-stage markets where fundamentals are forming", desc: "What does the data show about Bali's emerging property markets \u2014 where are the early fundamentals worth watching?", icon: MapPin },
+{ title: "Yield estimator", shortDesc: "Estimate gross and net yield on a specific property", desc: "I'd like to estimate the yield on a property I'm looking at \u2014 how does this work?", icon: Calculator }];
 
 const searchModes = [
 { id: "data-analyst", label: "Data analyst", icon: LineChart },
@@ -478,7 +478,7 @@ export default function NewAnalysis() {
                   <h3 className="font-bold md:hidden">{s.title}</h3>
                   <div className="flex-1 min-w-0 hidden md:block">
                     <h3 className="font-bold mb-1">{s.title}</h3>
-                    <p className="text-sm text-muted-foreground font-extralight">{s.desc}</p>
+                    <p className="text-sm text-muted-foreground font-extralight">{s.shortDesc}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-auto md:mt-1" />
                 </button>

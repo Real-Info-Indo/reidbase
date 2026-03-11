@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X } from "lucide-react";
+import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";
@@ -337,17 +337,29 @@ export default function NewAnalysis() {
           Add files
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {searchModes.map((mode) =>
-      <DropdownMenuItem
-        key={mode.id}
-        onClick={() => setSearchMode(mode.id)}
-        className={`cursor-pointer ${searchMode === mode.id ? "bg-accent" : ""}`}>
-
-            <mode.icon className="h-4 w-4 mr-2" />
-            {mode.label}
-            {searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>}
-          </DropdownMenuItem>
-      )}
+        {searchModes.map((mode) => {
+          const isLocked = mode.id !== "data-analyst" && tier !== "enterprise";
+          return (
+            <DropdownMenuItem
+              key={mode.id}
+              onClick={() => {
+                if (isLocked) {
+                  window.open("https://www.realinfo.id/pricing", "_blank");
+                } else {
+                  setSearchMode(mode.id);
+                }
+              }}
+              className={`cursor-pointer relative ${searchMode === mode.id ? "bg-accent" : ""} ${isLocked ? "opacity-60" : ""}`}>
+              <mode.icon className="h-4 w-4 mr-2" />
+              {mode.label}
+              {isLocked ? (
+                <Lock className="h-3.5 w-3.5 ml-auto text-muted-foreground" />
+              ) : (
+                searchMode === mode.id && <span className="ml-auto text-primary text-xs">●</span>
+              )}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>;
 
@@ -526,8 +538,13 @@ export default function NewAnalysis() {
 
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">
-                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-3 flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "200ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: "400ms" }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground font-light">REID is collecting the latest insights</span>
                 </div>
               </div>
           }
@@ -547,6 +564,9 @@ export default function NewAnalysis() {
 
       {hasConversation &&
       <div className="border-t border-border px-8 py-4">
+          {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
+            <p className="text-center text-[11px] text-muted-foreground/60 font-light mb-2">REID Base is AI and can make mistakes. Please double check responses.</p>
+          }
           <div className="max-w-3xl mx-auto">
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">

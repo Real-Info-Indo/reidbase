@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X } from "lucide-react";
+import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";

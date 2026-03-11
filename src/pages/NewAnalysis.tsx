@@ -563,11 +563,11 @@ export default function NewAnalysis() {
       </div>
 
       {hasConversation &&
-      <div className="border-t border-border px-8 py-4">
-          {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
-            <p className="text-center text-[11px] text-muted-foreground/60 font-light mb-2">REID Base is AI and can make mistakes. Please double check responses.</p>
-          }
+      <div className="px-8 py-4">
           <div className="max-w-3xl mx-auto">
+            {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
+              <p className="text-right text-[11px] text-muted-foreground/60 font-light mb-2">REID Base is AI and can make mistakes. Please double check responses.</p>
+            }
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">
                 {attachedFiles.map((f, i) =>
@@ -579,7 +579,7 @@ export default function NewAnalysis() {
             )}
               </div>
           }
-            <div className="flex flex-col gap-2">
+            <div className="relative">
               <textarea
               value={query}
               onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";e.target.style.height = e.target.scrollHeight + "px";}}
@@ -587,10 +587,10 @@ export default function NewAnalysis() {
               placeholder="Enter a prompt..."
               disabled={isLoading}
               rows={1}
-              className="w-full rounded-xl border border-border bg-card px-5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
-              style={{ minHeight: "44px" }} />
+              className="w-full rounded-xl border border-border px-5 py-3 pb-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
+              style={{ minHeight: "56px" }} />
 
-              <div className="flex items-center justify-between">
+              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <PlusMenu />
                   {activeMode &&

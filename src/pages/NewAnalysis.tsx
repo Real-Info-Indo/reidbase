@@ -15,10 +15,10 @@ import {
 import { useTier } from "@/contexts/TierContext";
 
 const suggestions = [
-{ title: "Market trends", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
-{ title: "Top markets", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },
-{ title: "Emerging locations", desc: "What does the data show about Bali's emerging property markets \u2014 where are the early fundamentals worth watching?", icon: MapPin },
-{ title: "Yield estimator", desc: "I'd like to estimate the yield on a property I'm looking at \u2014 how does this work?", icon: Calculator }];
+{ title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
+{ title: "Top markets", shortDesc: "Locations with the strongest sales and rental fundamentals", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },
+{ title: "Emerging locations", shortDesc: "Early-stage markets where fundamentals are forming", desc: "What does the data show about Bali's emerging property markets \u2014 where are the early fundamentals worth watching?", icon: MapPin },
+{ title: "Yield estimator", shortDesc: "Estimate gross and net yield on a specific property", desc: "I'd like to estimate the yield on a property I'm looking at \u2014 how does this work?", icon: Calculator }];
 
 const searchModes = [
 { id: "data-analyst", label: "Data analyst", icon: LineChart },

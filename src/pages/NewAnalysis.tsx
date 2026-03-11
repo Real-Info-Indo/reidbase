@@ -564,6 +564,9 @@ export default function NewAnalysis() {
 
       {hasConversation &&
       <div className="border-t border-border px-8 py-4">
+          {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
+            <p className="text-center text-[11px] text-muted-foreground/60 font-light mb-2">REID Base is AI and can make mistakes. Please double check responses.</p>
+          }
           <div className="max-w-3xl mx-auto">
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">

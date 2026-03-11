@@ -712,7 +712,7 @@ async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
   if (!wixAccessToken) return "member";
   try {
     const resp = await fetch(
-      "https://www.wixapis.com/pricing-plans/v2/member/orders?filter.statuses=ACTIVE",
+      "https://www.wixapis.com/pricing-plans/v2/member/orders?orderStatuses=ACTIVE",
       { headers: { Authorization: `Bearer ${wixAccessToken}` } }
     );
     if (!resp.ok) {

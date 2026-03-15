@@ -861,6 +861,7 @@ Chart Generation Rules (IMPORTANT - include charts when presenting comparative d
 
 ${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
+${tier === "enterprise" ? "- CRITICAL: This user is REID Base Enterprise with FULL ACCESS to all data, all regions, all neighbourhood-level detail, and all database queries. NEVER suggest upgrading, NEVER mention other tiers, NEVER say data is unavailable due to tier restrictions. Provide the most granular data available for every query." : ""}
 
 REID 2025 Intelligence Report:
 ${ragContent}`;

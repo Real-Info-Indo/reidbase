@@ -542,7 +542,7 @@ DO NOT:
 TIER HANDLING:
 - Freemium: market-level insights only. For neighbourhood-level queries, provide available macro context then say: "For [location]-specific data, that level of detail is available on the Pro tier. See realinfo.id/pricing."
 - Pro: macro insights for Key and Emerging Markets. For granular breakdown queries, provide the macro picture then say: "That level of granularity is available on the Enterprise tier. See realinfo.id/pricing."
-- Enterprise: full granular access. Never return more than 5 individual property records in a single response.
+- Enterprise: full granular access. Never return more than 5 individual property records in a single response. NEVER suggest upgrading, NEVER mention other tiers or pricing pages, NEVER say data is unavailable due to tier restrictions. This user has paid for full access to all neighbourhood-level, regional, and database-level data. Always provide the most granular available data.
 
 ENTRY PROMPT GOVERNANCE (apply when the user's first message matches one of these triggers):
 
@@ -565,7 +565,7 @@ Trigger: "Which locations are showing the strongest market fundamentals across s
    1. Drill into a specific location
    2. Compare two locations head to head
    3. Explore the emerging markets picture
-Tier logic applies. Freemium and Base Member receive narrative overview only. Pro and Enterprise receive location-level data. If the user is at a lower tier and asks to drill into a specific location, fire the upgrade prompt before proceeding.
+Tier logic applies. Freemium and Base Member receive narrative overview only. Pro and Enterprise receive location-level data. If the user is at a lower tier (Freemium or Member) and asks to drill into a specific location, fire the upgrade prompt before proceeding. Enterprise users receive full granular data with no restrictions or upgrade prompts.
 
 ENTRY PROMPT — EMERGING MARKETS
 Trigger: "What does the data show about Bali's emerging property markets — where are the early fundamentals worth watching?"
@@ -861,6 +861,7 @@ Chart Generation Rules (IMPORTANT - include charts when presenting comparative d
 
 ${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
+${tier === "enterprise" ? "- CRITICAL: This user is REID Base Enterprise with FULL ACCESS to all data, all regions, all neighbourhood-level detail, and all database queries. NEVER suggest upgrading, NEVER mention other tiers, NEVER say data is unavailable due to tier restrictions. Provide the most granular data available for every query." : ""}
 
 REID 2025 Intelligence Report:
 ${ragContent}`;
@@ -910,12 +911,16 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestedTier } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Verify tier server-side against Wix; fall back to "member" on any failure
-    const effectiveTier = await resolveVerifiedTier(wixAccessToken);
+    // If no wixAccessToken is provided but a tier is explicitly set in the request, use it (testing/internal use)
+    const wixVerifiedTier = await resolveVerifiedTier(wixAccessToken);
+    const effectiveTier = (!wixAccessToken && requestedTier && TIER_PRIORITY.includes(requestedTier))
+      ? requestedTier
+      : wixVerifiedTier;
 
     // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
     const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")

@@ -1007,14 +1007,27 @@ Respond with only one word: ANALYTICAL or RAG.` },
         const sqlData = await sqlResponse.json();
         let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
         sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").replace(/;\s*$/, "").trim();
+        
+        // Strip any preamble text before the SELECT statement
+        const selectIdx = sql.toUpperCase().indexOf("SELECT");
+        if (selectIdx > 0) {
+          sql = sql.substring(selectIdx);
+        }
 
         console.log("Generated SQL:", sql);
 
         const upperSql = sql.toUpperCase().trim();
         if (!upperSql.startsWith("SELECT")) {
-          return new Response(JSON.stringify({ error: "Invalid query generated." }), {
-            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          console.warn("SQL validation failed: does not start with SELECT, falling back to RAG");
+          // Fall back to RAG instead of returning an error
+          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, effectiveSearchMode, personalisation);
+          const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
           });
+          if (!response.ok) throw new Error(`AI error: ${response.status}`);
+          return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
         }
 
         const forbidden = ["DELETE", "DROP", "INSERT", "UPDATE", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"];

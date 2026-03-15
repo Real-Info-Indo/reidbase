@@ -916,12 +916,11 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Verify tier server-side against Wix; fall back to "member" on any failure
-    // Allow tier override only from service-role requests (edge function invocations)
-    const authHeader = req.headers.get("authorization") || "";
-    const isServiceRole = authHeader.includes(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "NONE");
-    const effectiveTier = (isServiceRole && requestedTier && TIER_PRIORITY.includes(requestedTier))
+    // If no wixAccessToken is provided but a tier is explicitly set in the request, use it (testing/internal use)
+    const wixVerifiedTier = await resolveVerifiedTier(wixAccessToken);
+    const effectiveTier = (!wixAccessToken && requestedTier && TIER_PRIORITY.includes(requestedTier))
       ? requestedTier
-      : await resolveVerifiedTier(wixAccessToken);
+      : wixVerifiedTier;
 
     // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
     const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")

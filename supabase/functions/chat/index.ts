@@ -518,7 +518,7 @@ Seseh reflects an emerging coastal residential enclave with relatively larger vi
 | Average size | 250 sqm | -11% |
 | Average price/sqm | $2,015 | -20% |
 | Average term | 25 yrs | -5% |
-\`;
+`;
 /* ── Mode-Specific Persona Modules (from REID Master Operating Manual) ── */
 const MODE_PROMPTS: Record<string, string> = {
   "data-analyst": `MODE: Data Analyst (Default)

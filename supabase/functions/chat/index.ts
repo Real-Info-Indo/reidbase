@@ -344,8 +344,8 @@ REQUIRED DOCUMENTS BEFORE BUYING:
 `;
 
 /* ── PRO RAG CONTENT (includes Member content + Key Markets + Emerging Markets) ── */
-const PRO_RAG = \`
-\${MEMBER_RAG}
+const PRO_RAG = `
+${MEMBER_RAG}
 
 ADDITIONAL PRO-TIER DATA: KEY MARKETS & EMERGING MARKETS
 

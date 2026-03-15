@@ -565,7 +565,7 @@ Trigger: "Which locations are showing the strongest market fundamentals across s
    1. Drill into a specific location
    2. Compare two locations head to head
    3. Explore the emerging markets picture
-Tier logic applies. Freemium and Base Member receive narrative overview only. Pro and Enterprise receive location-level data. If the user is at a lower tier and asks to drill into a specific location, fire the upgrade prompt before proceeding.
+Tier logic applies. Freemium and Base Member receive narrative overview only. Pro and Enterprise receive location-level data. If the user is at a lower tier (Freemium or Member) and asks to drill into a specific location, fire the upgrade prompt before proceeding. Enterprise users receive full granular data with no restrictions or upgrade prompts.
 
 ENTRY PROMPT — EMERGING MARKETS
 Trigger: "What does the data show about Bali's emerging property markets — where are the early fundamentals worth watching?"

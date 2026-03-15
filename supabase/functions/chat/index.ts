@@ -775,20 +775,23 @@ Always filter out nulls for the columns being analyzed.
 When querying rentals, use the rentals_2025 table. When querying property sales/supply, use properties_2025.
 `;
 
-const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.
+const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the appropriate table(s).
 
 ${SCHEMA_DESCRIPTION}
 
 Rules:
 - Return ONLY a valid SQL SELECT query, nothing else
-- No markdown, no explanation, just the raw SQL
+- No markdown, no explanation, no preamble, just the raw SQL starting with SELECT
 - Always use proper aggregation functions
 - Limit results to 50 rows max for non-aggregate queries
 - Use ILIKE for text matching
 - Handle nulls properly with WHERE col IS NOT NULL
 - For median calculations use: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)
 - Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
-- Only SELECT queries are allowed`;
+- Only SELECT queries are allowed
+- Use properties_2025 for sales, supply, pricing, and days_listed queries
+- Use rentals_2025 for occupancy, ADR, rental revenue queries
+- The first character of your response must be 'S' (from SELECT)`;
 
 const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
 

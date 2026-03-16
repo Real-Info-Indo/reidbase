@@ -27,20 +27,6 @@ const searchModes = [
 { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
 { id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
 
-  // Auto-send prompt from URL parameter (e.g. from embedded widget)
-  const promptHandledRef = useRef(false);
-  useEffect(() => {
-    if (paramPrompt && !promptHandledRef.current && messages.length === 0) {
-      promptHandledRef.current = true;
-      // Clear the prompt param from the URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete("prompt");
-      window.history.replaceState({}, "", url.toString());
-      // Auto-send after a short delay to ensure component is ready
-      setTimeout(() => send(decodeURIComponent(paramPrompt)), 300);
-    }
-  }, [paramPrompt]);
-
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 

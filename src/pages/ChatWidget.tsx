@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import reidLogo from "@/assets/REID_Base_Black.svg";
+
 
 const FULL_APP_URL = "https://reidbase.lovable.app";
 

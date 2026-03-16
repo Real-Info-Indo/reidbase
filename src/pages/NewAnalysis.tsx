@@ -321,6 +321,18 @@ export default function NewAnalysis() {
     }
   };
 
+  // Auto-send prompt from URL parameter (e.g. from embedded widget)
+  const promptHandledRef = useRef(false);
+  useEffect(() => {
+    if (paramPrompt && !promptHandledRef.current && messages.length === 0) {
+      promptHandledRef.current = true;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("prompt");
+      window.history.replaceState({}, "", url.toString());
+      send(paramPrompt);
+    }
+  }, [paramPrompt]);
+
   const handleSubmit = () => send(query);
   const hasConversation = messages.length > 0;
 

@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import WixCallback from "./pages/WixCallback";
 import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
+import ChatWidget from "./pages/ChatWidget";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<WixCallback />} />
+              <Route path="/widget" element={<ChatWidget />} />
               <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
                 <Route path="/" element={<NewAnalysis />} />
                 <Route path="/dashboard" element={<Dashboard />} />

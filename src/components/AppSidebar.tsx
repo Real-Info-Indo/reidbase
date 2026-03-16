@@ -4,7 +4,7 @@ import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
   Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2, Pin,
   FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil,
-  Settings, LogOut, ExternalLink } from
+  Settings, LogOut, ExternalLink, HelpCircle } from
 "lucide-react";
 import reidLogo from "@/assets/REID_Black.svg";
 import { NavLink } from "@/components/NavLink";

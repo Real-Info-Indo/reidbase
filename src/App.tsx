@@ -17,6 +17,7 @@ import WixCallback from "./pages/WixCallback";
 import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
 import ChatWidget from "./pages/ChatWidget";
+import AdminChatLogs from "./pages/AdminChatLogs";
 
 const queryClient = new QueryClient();
 

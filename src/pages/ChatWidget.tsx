@@ -67,7 +67,7 @@ export default function ChatWidget() {
             width: "36px",
             height: "36px",
             borderRadius: "50%",
-            background: prompt.trim() ? "#e8a838" : "#e0d5c0",
+            background: prompt.trim() ? "hsl(36, 97%, 74%)" : "#e0d5c0",
             border: "none",
             display: "flex",
             alignItems: "center",

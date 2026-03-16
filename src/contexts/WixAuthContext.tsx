@@ -84,6 +84,8 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchMember]);
 
   const login = useCallback(async () => {
+    // Preserve the current URL so we can restore it after OAuth callback
+    localStorage.setItem("wix-post-login-redirect", window.location.href);
     const oauthData = wixClient.auth.generateOAuthData(
       `${window.location.origin}/callback`,
       window.location.href

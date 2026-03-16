@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Send } from "lucide-react";
-
+import { ArrowRight } from "lucide-react";
 
 const FULL_APP_URL = "https://reidbase.lovable.app";
 
@@ -22,28 +21,62 @@ export default function ChatWidget() {
   };
 
   return (
-    <div className="bg-transparent p-2">
-      <div className="relative flex items-end rounded-xl border border-border bg-card shadow-lg p-2">
-        <textarea
+    <div
+      style={{
+        width: "500px",
+        height: "50px",
+        display: "flex",
+        alignItems: "center",
+        background: "transparent",
+        padding: 0,
+        margin: 0,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          height: "100%",
+          background: "#ffffff",
+          borderRadius: "9999px",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+          padding: "0 6px 0 20px",
+        }}
+      >
+        <input
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="e.g. Canggu, 2-bed villa, $350k"
-          rows={1}
-          className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-          style={{ minHeight: "40px", maxHeight: "120px" }}
-          onInput={(e) => {
-            const target = e.target as HTMLTextAreaElement;
-            target.style.height = "auto";
-            target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
+          style={{
+            flex: 1,
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            fontSize: "14px",
+            color: "#1a1a1a",
+            height: "100%",
           }}
         />
         <button
           onClick={handleSubmit}
           disabled={!prompt.trim()}
-          className="flex-shrink-0 rounded-lg bg-primary p-2 text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+          style={{
+            flexShrink: 0,
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            background: prompt.trim() ? "#e8a838" : "#e0d5c0",
+            border: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: prompt.trim() ? "pointer" : "default",
+            transition: "background 0.2s",
+          }}
         >
-          <Send className="h-4 w-4" />
+          <ArrowRight style={{ width: "18px", height: "18px", color: "#1a1a1a" }} />
         </button>
       </div>
     </div>

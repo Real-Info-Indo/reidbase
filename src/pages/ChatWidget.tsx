@@ -48,7 +48,7 @@ export default function ChatWidget() {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="e.g. Canggu, 2-bed villa, $350k"
+          placeholder="Ask REID . . ."
           style={{
             flex: 1,
             border: "none",

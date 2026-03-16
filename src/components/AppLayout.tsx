@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
+import { WhatsAppBubble } from "./WhatsAppBubble";
 import { useIsMobile } from "@/hooks/use-mobile";
 import reidLogo from "@/assets/REID_Black.svg";
 

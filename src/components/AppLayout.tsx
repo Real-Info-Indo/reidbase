@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
+import { WhatsAppBubble } from "./WhatsAppBubble";
 import { useIsMobile } from "@/hooks/use-mobile";
 import reidLogo from "@/assets/REID_Black.svg";
 
@@ -48,6 +49,8 @@ export function AppLayout() {
       <main className={`flex-1 overflow-auto bg-background ${isMobile ? "pt-14" : ""}`}>
         <Outlet />
       </main>
+
+      <WhatsAppBubble />
     </div>
   );
 }

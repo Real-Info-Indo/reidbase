@@ -4,7 +4,7 @@ import {
   PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit,
   Search, ChevronLeft, ChevronRight, MessageSquare, User, Trash2, Pin,
   FolderPlus, Folder, ChevronDown, ChevronUp, MoreHorizontal, Pencil,
-  Settings, LogOut, ExternalLink, HelpCircle } from
+  Settings, LogOut, ExternalLink } from
 "lucide-react";
 import reidLogo from "@/assets/REID_Black.svg";
 import { NavLink } from "@/components/NavLink";
@@ -316,15 +316,6 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             >
               <ExternalLink className="h-4 w-4" />
               Profile
-            </a>
-            <a
-              href="https://wa.me/6282340658006"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
-            >
-              <HelpCircle className="h-4 w-4" />
-              Get help
             </a>
             <div className="my-1 h-px bg-border" />
             <button

@@ -14,6 +14,7 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
+import { logConversation } from "@/lib/chatLogger";
 
 const suggestions = [
 { title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
@@ -208,7 +209,9 @@ export default function NewAnalysis() {
       window.history.replaceState({}, "", url.toString());
     }
     persistRef.current = id;
-    saveConversation({ id, title: customTitle || deriveTitle(messages), messages, updatedAt: Date.now(), pinned: isPinned });
+    const title = customTitle || deriveTitle(messages);
+    saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned });
+    logConversation({ conversationId: id, title, messages, searchMode });
     window.dispatchEvent(new Event("conversations-updated"));
   }, [messages, conversationId]);
 

@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_logs: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          message_count: number
+          messages: Json
+          search_mode: string | null
+          title: string
+          updated_at: string
+          wix_user_email: string | null
+          wix_user_id: string | null
+          wix_user_name: string | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_count?: number
+          messages?: Json
+          search_mode?: string | null
+          title?: string
+          updated_at?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_count?: number
+          messages?: Json
+          search_mode?: string | null
+          title?: string
+          updated_at?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
+        }
+        Relationships: []
+      }
       properties_2025: {
         Row: {
           availability: string | null

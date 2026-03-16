@@ -17,6 +17,7 @@ import WixCallback from "./pages/WixCallback";
 import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
 import ChatWidget from "./pages/ChatWidget";
+import AdminChatLogs from "./pages/AdminChatLogs";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="/appraisal-request" element={<AppraisalRequest />} />
               </Route>
               <Route path="/import-data" element={<ImportData />} />
+              <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

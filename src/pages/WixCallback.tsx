@@ -32,8 +32,10 @@ export default function WixCallback() {
         localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenResponse));
         localStorage.removeItem(OAUTH_DATA_KEY);
 
-        // Force reload so WixAuthContext picks up the new tokens
-        window.location.href = "/";
+        // Restore the pre-login URL (preserves ?prompt= from widget) or default to /
+        const redirect = localStorage.getItem("wix-post-login-redirect") || "/";
+        localStorage.removeItem("wix-post-login-redirect");
+        window.location.href = redirect;
       } catch (err: any) {
         console.error("Callback error:", err);
         setError(err.message || "Authentication failed");

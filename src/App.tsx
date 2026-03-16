@@ -41,6 +41,7 @@ const App = () => (
                 <Route path="/appraisal-request" element={<AppraisalRequest />} />
               </Route>
               <Route path="/import-data" element={<ImportData />} />
+              <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

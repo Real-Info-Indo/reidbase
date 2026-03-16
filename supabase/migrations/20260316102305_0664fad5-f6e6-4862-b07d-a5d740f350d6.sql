@@ -1,0 +1,1 @@
+ALTER TABLE public.chat_logs ADD CONSTRAINT chat_logs_conversation_id_key UNIQUE (conversation_id);

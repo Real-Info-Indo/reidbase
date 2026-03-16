@@ -1,0 +1,199 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import type { Msg } from "@/lib/conversations";
+
+const ADMIN_PASSWORD = "reid-admin-2025";
+
+interface ChatLog {
+  id: string;
+  conversation_id: string;
+  wix_user_id: string | null;
+  wix_user_name: string | null;
+  wix_user_email: string | null;
+  title: string;
+  messages: Msg[];
+  search_mode: string | null;
+  message_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export default function AdminChatLogs() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [logs, setLogs] = useState<ChatLog[]>([]);
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = () => {
+    if (password === ADMIN_PASSWORD) {
+      setAuthenticated(true);
+      fetchLogs();
+    }
+  };
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("chat_logs" as any)
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(500) as any;
+
+    if (!error && data) setLogs(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (authenticated) fetchLogs();
+  }, [authenticated]);
+
+  const filtered = logs.filter((log) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      log.title?.toLowerCase().includes(q) ||
+      log.wix_user_name?.toLowerCase().includes(q) ||
+      log.wix_user_email?.toLowerCase().includes(q) ||
+      log.messages?.some((m) => m.content.toLowerCase().includes(q))
+    );
+  });
+
+  if (!authenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="w-full max-w-sm space-y-4 p-8 border border-border rounded-xl bg-card">
+          <div className="flex items-center gap-2 text-foreground">
+            <Lock className="h-5 w-5" />
+            <h1 className="text-lg font-medium">Admin access</h1>
+          </div>
+          <Input
+            type="password"
+            placeholder="Enter admin password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+          />
+          <Button onClick={handleLogin} className="w-full">Sign in</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-6 md:p-10">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MessageSquare className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold text-foreground">Chat logs</h1>
+            <span className="text-sm text-muted-foreground">({filtered.length} conversations)</span>
+          </div>
+          <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
+            {loading ? "Loading..." : "Refresh"}
+          </Button>
+        </div>
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by user, title, or message content..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <div className="border border-border rounded-xl overflow-hidden bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">User</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead className="w-[100px]">Mode</TableHead>
+                <TableHead className="w-[80px]">Messages</TableHead>
+                <TableHead className="w-[160px]">Last active</TableHead>
+                <TableHead className="w-[40px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((log) => (
+                <>
+                  <TableRow
+                    key={log.id}
+                    className="cursor-pointer hover:bg-accent/50"
+                    onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
+                  >
+                    <TableCell>
+                      <div className="text-sm font-medium">{log.wix_user_name || "Anonymous"}</div>
+                      <div className="text-xs text-muted-foreground">{log.wix_user_email || "No email"}</div>
+                    </TableCell>
+                    <TableCell className="text-sm">{log.title}</TableCell>
+                    <TableCell>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {log.search_mode || "data-analyst"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm text-center">{log.message_count}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(log.updated_at).toLocaleDateString("en-GB", {
+                        day: "numeric", month: "short", year: "numeric",
+                        hour: "2-digit", minute: "2-digit"
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {expandedId === log.id ? (
+                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  {expandedId === log.id && (
+                    <TableRow key={`${log.id}-expanded`}>
+                      <TableCell colSpan={6} className="p-0">
+                        <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
+                          {log.messages?.map((msg, i) => (
+                            <div
+                              key={i}
+                              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-[80%] rounded-lg px-4 py-2 text-sm whitespace-pre-wrap ${
+                                  msg.role === "user"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-card border border-border text-foreground"
+                                }`}
+                              >
+                                <div className="text-[10px] font-medium opacity-60 mb-1">
+                                  {msg.role === "user" ? "User" : "REID"}
+                                </div>
+                                {msg.content}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              ))}
+              {filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                    {loading ? "Loading chat logs..." : "No conversations found"}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  );
+}

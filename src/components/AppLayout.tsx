@@ -49,6 +49,8 @@ export function AppLayout() {
       <main className={`flex-1 overflow-auto bg-background ${isMobile ? "pt-14" : ""}`}>
         <Outlet />
       </main>
+
+      <WhatsAppBubble />
     </div>
   );
 }

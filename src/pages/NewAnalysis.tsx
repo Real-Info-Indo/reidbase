@@ -150,6 +150,7 @@ export default function NewAnalysis() {
   const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
+  const paramPrompt = searchParams.get("prompt");
   const { tier, userName } = useTier();
 
   const greetingName = (() => {

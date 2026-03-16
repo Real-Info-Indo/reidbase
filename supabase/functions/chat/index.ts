@@ -807,8 +807,8 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 - Add brief market context when relevant
 - Keep it concise but informative
 
-Chart Generation Rules (IMPORTANT - include charts when presenting query results):
-- When the query results contain comparative data (multiple rows with numeric values), ALWAYS include a chart
+Chart Generation Rules (IMPORTANT - charts are ONLY generated when the user explicitly requests one):
+- Do NOT automatically include charts. Only generate a chart when the user explicitly asks for one (e.g. "show me a chart", "can you graph this", "visualise this data")
 - Output charts as a fenced code block with language "chart" containing valid JSON
 - Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
 - Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions
@@ -853,8 +853,8 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 - For price ranges use USD unless user asks for IDR
 - Qualify all responses by mentioning the Leasehold focus where relevant
 
-Chart Generation Rules (IMPORTANT - include charts when presenting comparative data):
-- When presenting comparative data (prices by region, sales by location, bedroom breakdowns, etc.), ALWAYS include a chart
+Chart Generation Rules (IMPORTANT - charts are ONLY generated when the user explicitly requests one):
+- Do NOT automatically include charts. Only generate a chart when the user explicitly asks for one (e.g. "show me a chart", "can you graph this", "visualise this data")
 - Output charts as a fenced code block with language "chart" containing valid JSON
 - Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
 - Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions

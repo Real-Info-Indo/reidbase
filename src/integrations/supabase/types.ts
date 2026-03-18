@@ -49,6 +49,7 @@ export type Database = {
       }
       appraisal_requests: {
         Row: {
+          admin_notes: string | null
           average_daily_rate: string | null
           average_occupancy: string | null
           bathrooms: string | null
@@ -77,6 +78,7 @@ export type Database = {
           years_operating: string | null
         }
         Insert: {
+          admin_notes?: string | null
           average_daily_rate?: string | null
           average_occupancy?: string | null
           bathrooms?: string | null
@@ -105,6 +107,7 @@ export type Database = {
           years_operating?: string | null
         }
         Update: {
+          admin_notes?: string | null
           average_daily_rate?: string | null
           average_occupancy?: string | null
           bathrooms?: string | null

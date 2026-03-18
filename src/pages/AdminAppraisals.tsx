@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Lock, ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
-  ArrowLeft, ChevronDown, ChevronUp,
+  ArrowLeft, ChevronDown, ChevronUp, Save,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ interface AppraisalRequest {
   ffe_budget: string | null;
   landscaping_budget: string | null;
   overheads: string | null;
+  admin_notes: string | null;
   status: string;
   reviewed_at: string | null;
   created_at: string;
@@ -96,6 +97,28 @@ export default function AdminAppraisals() {
         r.id === id ? { ...r, status: "reviewed", reviewed_at: new Date().toISOString() } : r
       )
     );
+  };
+
+  const [notesValue, setNotesValue] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  useEffect(() => {
+    if (expandedId) {
+      const r = requests.find((req) => req.id === expandedId);
+      setNotesValue(r?.admin_notes || "");
+    }
+  }, [expandedId]);
+
+  const saveNotes = async (id: string) => {
+    setSavingNotes(true);
+    await supabase
+      .from("appraisal_requests" as any)
+      .update({ admin_notes: notesValue } as any)
+      .eq("id", id) as any;
+    setRequests((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, admin_notes: notesValue } : r))
+    );
+    setSavingNotes(false);
   };
 
   const filtered = useMemo(() => {
@@ -306,6 +329,29 @@ export default function AdminAppraisals() {
                           {req.reviewed_at && detailRow("Reviewed at", new Date(req.reviewed_at).toLocaleDateString("en-GB", {
                             day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
                           }))}
+
+                          {/* Admin notes */}
+                          <div className="mt-4 pt-4 border-t border-border">
+                            <label className="block text-sm font-medium text-muted-foreground mb-2">Admin notes</label>
+                            <textarea
+                              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm resize-none min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary/50"
+                              placeholder="Add notes about this request..."
+                              value={notesValue}
+                              onChange={(e) => setNotesValue(e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="flex justify-end mt-2">
+                              <Button
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); saveNotes(req.id); }}
+                                disabled={savingNotes}
+                                className="h-7 text-xs"
+                              >
+                                <Save className="h-3 w-3 mr-1" />
+                                {savingNotes ? "Saving..." : "Save notes"}
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

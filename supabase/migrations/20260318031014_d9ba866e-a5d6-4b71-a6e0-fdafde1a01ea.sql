@@ -1,0 +1,1 @@
+ALTER TABLE public.appraisal_requests ADD COLUMN admin_notes text;

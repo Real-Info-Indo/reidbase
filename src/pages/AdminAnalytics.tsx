@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Lock, BarChart3, Users, FileText, MessageSquare, MousePointerClick,
-  RefreshCw, ArrowLeft,
+  RefreshCw, ClipboardList,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

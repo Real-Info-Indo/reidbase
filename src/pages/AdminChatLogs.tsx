@@ -159,9 +159,17 @@ export default function AdminChatLogs() {
             <h1 className="text-xl font-semibold text-foreground">Chat logs</h1>
             <span className="text-sm text-muted-foreground">({filtered.length} conversations)</span>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
-            {loading ? "Loading..." : "Refresh"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {selectedIds.size > 0 && (
+              <Button variant="outline" size="sm" onClick={handleDownloadSelected}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download ({selectedIds.size})
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
+              {loading ? "Loading..." : "Refresh"}
+            </Button>
+          </div>
         </div>
 
         <div className="relative">

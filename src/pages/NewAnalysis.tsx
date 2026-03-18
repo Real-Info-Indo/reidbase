@@ -15,6 +15,7 @@ import {
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
 import { logConversation } from "@/lib/chatLogger";
+import { trackFeature } from "@/lib/analytics";
 
 const suggestions = [
 { title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },

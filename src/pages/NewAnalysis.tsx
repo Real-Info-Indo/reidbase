@@ -17,6 +17,43 @@ import { WhatsAppPopup } from "@/components/WhatsAppPopup";
 import { logConversation, logFeedback } from "@/lib/chatLogger";
 import { trackFeature } from "@/lib/analytics";
 
+/* ── Freemium daily prompt limit ── */
+const DAILY_LIMIT = 10;
+const PROMPT_COUNTER_KEY = "reid-daily-prompts";
+
+function getDailyPromptData(): { count: number; resetAt: number } {
+  try {
+    const raw = localStorage.getItem(PROMPT_COUNTER_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.resetAt && Date.now() < parsed.resetAt) {
+        return { count: parsed.count ?? 0, resetAt: parsed.resetAt };
+      }
+    }
+  } catch {}
+  // Expired or missing: start fresh
+  const resetAt = Date.now() + 24 * 60 * 60 * 1000;
+  const data = { count: 0, resetAt };
+  localStorage.setItem(PROMPT_COUNTER_KEY, JSON.stringify(data));
+  return data;
+}
+
+function incrementDailyPromptCount(): number {
+  const data = getDailyPromptData();
+  data.count += 1;
+  localStorage.setItem(PROMPT_COUNTER_KEY, JSON.stringify(data));
+  return data.count;
+}
+
+function getTimeUntilReset(): string {
+  const data = getDailyPromptData();
+  const diff = Math.max(0, data.resetAt - Date.now());
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
 const suggestions = [
 { title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
 { title: "Top markets", shortDesc: "Locations with the strongest sales and rental fundamentals", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },

@@ -50,14 +50,21 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
       });
       const m = response.member;
       if (m) {
-        setMember({
+        const memberData = {
           id: m._id ?? "",
           name: m.contact?.firstName
             ? `${m.contact.firstName} ${m.contact.lastName ?? ""}`.trim()
             : m.loginEmail ?? "Member",
           email: m.loginEmail ?? "",
-          roles: [], // Will be populated if needed
-        });
+          roles: [],
+        };
+        setMember(memberData);
+        // Persist for chat logger and analytics
+        localStorage.setItem("wix-member", JSON.stringify({
+          id: memberData.id,
+          name: { first: m.contact?.firstName, last: m.contact?.lastName },
+          email: memberData.email,
+        }));
       }
     } catch (err) {
       console.error("Failed to fetch Wix member:", err);

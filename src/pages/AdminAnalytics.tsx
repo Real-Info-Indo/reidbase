@@ -68,6 +68,7 @@ export default function AdminAnalytics() {
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [chatLogs, setChatLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(false);
+  const [newAppraisalCount, setNewAppraisalCount] = useState(0);
   const navigate = useNavigate();
 
   const handleLogin = () => {

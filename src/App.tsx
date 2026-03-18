@@ -45,6 +45,7 @@ const App = () => (
               </Route>
               <Route path="/import-data" element={<ImportData />} />
               <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -30,8 +30,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <PageViewTracker />
             <Routes>
-              <PageViewTracker />
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<WixCallback />} />
               <Route path="/widget" element={<ChatWidget />} />

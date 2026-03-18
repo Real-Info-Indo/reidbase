@@ -862,6 +862,20 @@ export default function NewAnalysis() {
             )}
               </div>
           }
+            {limitReached ? (
+              <div className="rounded-xl border border-border bg-card p-5 text-center">
+                <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
+                <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
+                <a
+                  href="https://www.realinfo.id/pricing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  Explore plans <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            ) : (
             <div className="relative">
               <textarea
               value={query}
@@ -883,15 +897,20 @@ export default function NewAnalysis() {
                     </span>
                 }
                 </div>
-                <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
-
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                </button>
+                <div className="flex items-center gap-2">
+                  {isFreemium && (
+                    <span className="text-xs text-muted-foreground/60 font-light">{dailyPromptCount}/{DAILY_LIMIT}</span>
+                  )}
+                  <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
             </div>
+            )}
             {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
               <p className="text-right text-[11px] md:text-[11px] text-[9px] text-muted-foreground/60 font-light mt-1.5">REID Base is AI and can make mistakes. Please double check responses.</p>
             }

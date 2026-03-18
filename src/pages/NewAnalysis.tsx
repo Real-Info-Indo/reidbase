@@ -182,6 +182,7 @@ export default function NewAnalysis() {
   const [showWaPopup, setShowWaPopup] = useState(false);
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
+  const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);

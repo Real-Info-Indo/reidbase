@@ -621,13 +621,31 @@ export default function NewAnalysis() {
                   </span>
               }
               </div>
-              <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
-
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
-              </button>
+              <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                {isFreemium && (
+                  <span className="text-xs text-muted-foreground/60 font-light">{dailyPromptCount}/{DAILY_LIMIT}</span>
+                )}
+                <button
+                onClick={handleSubmit}
+                disabled={isLoading || limitReached}
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50">
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="h-5 w-5" />}
+                </button>
+              </div>
+              {limitReached && (
+                <div className="absolute inset-0 rounded-xl bg-card/95 flex flex-col items-center justify-center p-6 text-center">
+                  <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
+                  <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
+                  <a
+                    href="https://www.realinfo.id/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    Explore plans <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
               {suggestions.map((s) =>

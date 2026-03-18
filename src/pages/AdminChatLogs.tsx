@@ -280,7 +280,7 @@ export default function AdminChatLogs() {
                   </TableRow>
                   {expandedId === log.id && (
                     <TableRow key={`${log.id}-expanded`}>
-                      <TableCell colSpan={7} className="p-0">
+                      <TableCell colSpan={8} className="p-0">
                         <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
                           {log.messages?.map((msg, i) => (
                             <div

@@ -93,6 +93,42 @@ export default function AdminChatLogs() {
     );
   });
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((l) => l.id)));
+    }
+  };
+
+  const handleDownloadSelected = () => {
+    const selected = filtered.filter((l) => selectedIds.has(l.id));
+    if (selected.length === 0) { toast.error("No conversations selected"); return; }
+
+    const output = selected.map((log) => {
+      const header = `Title: ${log.title}\nUser: ${log.wix_user_name || "Anonymous"} (${log.wix_user_email || "No email"})\nMode: ${log.search_mode || "data-analyst"}\nDate: ${new Date(log.updated_at).toLocaleString("en-GB")}\nLikes: ${log.likes} | Dislikes: ${log.dislikes} | Copies: ${log.copy_count}\n`;
+      const msgs = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}:\n${m.content}`).join("\n\n");
+      return `${header}\n${msgs}`;
+    }).join("\n\n" + "=".repeat(80) + "\n\n");
+
+    const blob = new Blob([output], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reid-chat-logs-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded ${selected.length} conversation${selected.length > 1 ? "s" : ""}`);
+  };
+
   if (!authenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">

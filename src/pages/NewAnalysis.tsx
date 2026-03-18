@@ -391,6 +391,13 @@ export default function NewAnalysis() {
   const handleTenureSelect = (tenure: string) => {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
+    // Record the locations from this query as clarified
+    const locs = extractLocations(q);
+    setClarifiedLocations(prev => {
+      const next = new Set(prev);
+      locs.forEach(loc => next.add(loc));
+      return next;
+    });
     setPendingTenureQuery(null);
     setSelectedTenure(null);
     // Remove the user message we already added, sendWithTenure will re-add it

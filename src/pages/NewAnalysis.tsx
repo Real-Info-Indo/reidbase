@@ -151,14 +151,21 @@ const SECTOR_KEYWORDS = [
 
 const TENURE_ALREADY_SPECIFIED = ["leasehold", "freehold", "both tenure"];
 
-function needsTenureClarification(text: string): boolean {
+function extractLocations(text: string): string[] {
+  const lower = text.toLowerCase();
+  return LOCATION_KEYWORDS.filter(k => lower.includes(k));
+}
+
+function needsTenureClarification(text: string, clarifiedLocations: Set<string>): boolean {
   const lower = text.toLowerCase();
   // Skip if tenure is already specified
   if (TENURE_ALREADY_SPECIFIED.some(t => lower.includes(t))) return false;
-  // Trigger if location or sector keyword is present
-  const hasLocation = LOCATION_KEYWORDS.some(k => lower.includes(k));
-  const hasSector = SECTOR_KEYWORDS.some(k => lower.includes(k));
-  return hasLocation || hasSector;
+  // Only trigger for location-specific queries
+  const locations = extractLocations(text);
+  if (locations.length === 0) return false;
+  // Skip if all mentioned locations have already been clarified
+  const hasNewLocation = locations.some(loc => !clarifiedLocations.has(loc));
+  return hasNewLocation;
 }
 
 export default function NewAnalysis() {
@@ -175,6 +182,7 @@ export default function NewAnalysis() {
   const [showWaPopup, setShowWaPopup] = useState(false);
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
+  const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -369,7 +377,7 @@ export default function NewAnalysis() {
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
     // Check if we need tenure clarification
-    if (needsTenureClarification(input)) {
+    if (needsTenureClarification(input, clarifiedLocations)) {
       // Show user message immediately, then show chips
       const userMsg: Msg = { role: "user", content: input };
       setMessages((prev) => [...prev, userMsg]);
@@ -383,6 +391,13 @@ export default function NewAnalysis() {
   const handleTenureSelect = (tenure: string) => {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
+    // Record the locations from this query as clarified
+    const locs = extractLocations(q);
+    setClarifiedLocations(prev => {
+      const next = new Set(prev);
+      locs.forEach(loc => next.add(loc));
+      return next;
+    });
     setPendingTenureQuery(null);
     setSelectedTenure(null);
     // Remove the user message we already added, sendWithTenure will re-add it

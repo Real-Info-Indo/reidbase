@@ -151,14 +151,21 @@ const SECTOR_KEYWORDS = [
 
 const TENURE_ALREADY_SPECIFIED = ["leasehold", "freehold", "both tenure"];
 
-function needsTenureClarification(text: string): boolean {
+function extractLocations(text: string): string[] {
+  const lower = text.toLowerCase();
+  return LOCATION_KEYWORDS.filter(k => lower.includes(k));
+}
+
+function needsTenureClarification(text: string, clarifiedLocations: Set<string>): boolean {
   const lower = text.toLowerCase();
   // Skip if tenure is already specified
   if (TENURE_ALREADY_SPECIFIED.some(t => lower.includes(t))) return false;
-  // Trigger if location or sector keyword is present
-  const hasLocation = LOCATION_KEYWORDS.some(k => lower.includes(k));
-  const hasSector = SECTOR_KEYWORDS.some(k => lower.includes(k));
-  return hasLocation || hasSector;
+  // Only trigger for location-specific queries
+  const locations = extractLocations(text);
+  if (locations.length === 0) return false;
+  // Skip if all mentioned locations have already been clarified
+  const hasNewLocation = locations.some(loc => !clarifiedLocations.has(loc));
+  return hasNewLocation;
 }
 
 export default function NewAnalysis() {

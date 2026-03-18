@@ -1,4 +1,6 @@
+import { useRef, useCallback } from "react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { Download } from "lucide-react";
 
 const COLORS = [
   "hsl(var(--primary))",

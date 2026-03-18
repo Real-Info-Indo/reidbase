@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Msg } from "@/lib/conversations";
 
 const ADMIN_PASSWORD = "reid-admin-2025";

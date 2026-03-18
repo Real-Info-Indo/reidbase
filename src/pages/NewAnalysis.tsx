@@ -662,7 +662,7 @@ export default function NewAnalysis() {
                       <ThumbsUp className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => toast.success("Thanks for the feedback")}
+                      onClick={() => { toast.success("Thanks for the feedback"); if (conversationId) logFeedback(conversationId, "dislike"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Poor response"
                     >

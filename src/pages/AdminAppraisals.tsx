@@ -39,6 +39,7 @@ interface AppraisalRequest {
   ffe_budget: string | null;
   landscaping_budget: string | null;
   overheads: string | null;
+  admin_notes: string | null;
   status: string;
   reviewed_at: string | null;
   created_at: string;

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { toast } from "sonner";
 import type { Msg } from "@/lib/conversations";
 
 const ADMIN_PASSWORD = "reid-admin-2025";
@@ -18,6 +19,9 @@ interface ChatLog {
   messages: Msg[];
   search_mode: string | null;
   message_count: number;
+  copy_count: number;
+  likes: number;
+  dislikes: number;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +56,29 @@ export default function AdminChatLogs() {
   useEffect(() => {
     if (authenticated) fetchLogs();
   }, [authenticated]);
+
+  const handleCopyChat = (log: ChatLog) => {
+    const text = log.messages
+      .map((m) => `${m.role === "user" ? "User" : "REID"}:\n${m.content}`)
+      .join("\n\n---\n\n");
+    navigator.clipboard.writeText(text);
+    toast.success("Full conversation copied");
+  };
+
+  const handleDelete = async (log: ChatLog) => {
+    const { error } = await supabase
+      .from("chat_logs" as any)
+      .delete()
+      .eq("id", log.id) as any;
+
+    if (error) {
+      toast.error("Failed to delete");
+    } else {
+      setLogs((prev) => prev.filter((l) => l.id !== log.id));
+      if (expandedId === log.id) setExpandedId(null);
+      toast.success("Conversation deleted");
+    }
+  };
 
   const filtered = logs.filter((log) => {
     const q = search.toLowerCase();
@@ -117,8 +144,9 @@ export default function AdminChatLogs() {
                 <TableHead>Title</TableHead>
                 <TableHead className="w-[100px]">Mode</TableHead>
                 <TableHead className="w-[80px]">Messages</TableHead>
+                <TableHead className="w-[100px]">Feedback</TableHead>
                 <TableHead className="w-[160px]">Last active</TableHead>
-                <TableHead className="w-[40px]"></TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,6 +168,28 @@ export default function AdminChatLogs() {
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-center">{log.message_count}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {log.likes > 0 && (
+                          <span className="inline-flex items-center gap-0.5 text-green-600">
+                            <ThumbsUp className="h-3 w-3" /> {log.likes}
+                          </span>
+                        )}
+                        {log.dislikes > 0 && (
+                          <span className="inline-flex items-center gap-0.5 text-red-500">
+                            <ThumbsDown className="h-3 w-3" /> {log.dislikes}
+                          </span>
+                        )}
+                        {log.copy_count > 0 && (
+                          <span className="inline-flex items-center gap-0.5">
+                            <Copy className="h-3 w-3" /> {log.copy_count}
+                          </span>
+                        )}
+                        {log.likes === 0 && log.dislikes === 0 && log.copy_count === 0 && (
+                          <span className="text-muted-foreground/40">None</span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(log.updated_at).toLocaleDateString("en-GB", {
                         day: "numeric", month: "short", year: "numeric",
@@ -147,16 +197,32 @@ export default function AdminChatLogs() {
                       })}
                     </TableCell>
                     <TableCell>
-                      {expandedId === log.id ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      )}
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleCopyChat(log)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                          title="Copy full conversation"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(log)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Delete conversation"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                        {expandedId === log.id ? (
+                          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                   {expandedId === log.id && (
                     <TableRow key={`${log.id}-expanded`}>
-                      <TableCell colSpan={6} className="p-0">
+                      <TableCell colSpan={7} className="p-0">
                         <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
                           {log.messages?.map((msg, i) => (
                             <div
@@ -185,7 +251,7 @@ export default function AdminChatLogs() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     {loading ? "Loading chat logs..." : "No conversations found"}
                   </TableCell>
                 </TableRow>

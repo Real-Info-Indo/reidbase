@@ -1,4 +1,6 @@
+import { useRef, useCallback } from "react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { Download } from "lucide-react";
 
 const COLORS = [
   "hsl(var(--primary))",
@@ -43,9 +45,41 @@ export function parseChartBlock(json: string): ChartData | null {
 
 export default function ChatChart({ chart }: { chart: ChartData }) {
   const { type, title, data, xKey = "name", dataKeys = [] } = chart;
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = useCallback(() => {
+    if (!chartRef.current) return;
+    const svg = chartRef.current.querySelector("svg");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width * 2;
+      canvas.height = img.height * 2;
+      ctx.scale(2, 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, img.width, img.height);
+      ctx.drawImage(img, 0, 0);
+      const a = document.createElement("a");
+      a.download = `${title || "chart"}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  }, [title]);
 
   return (
-    <div className="my-4 rounded-xl border border-border bg-card p-4">
+    <div ref={chartRef} className="my-4 rounded-xl border border-border bg-card p-4 relative">
+      <button
+        onClick={handleDownload}
+        className="absolute top-3 right-3 p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors z-10"
+        title="Download chart"
+      >
+        <Download className="h-4 w-4" />
+      </button>
       {title && <p className="text-sm font-medium mb-3 text-foreground">{title}</p>}
       <ResponsiveContainer width="100%" height={280}>
         {type === "pie" ? (

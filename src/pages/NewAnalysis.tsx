@@ -384,6 +384,7 @@ export default function NewAnalysis() {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
     setPendingTenureQuery(null);
+    setSelectedTenure(null);
     // Remove the user message we already added, sendWithTenure will re-add it
     setMessages((prev) => prev.slice(0, -1));
     sendWithTenure(q, tenure);

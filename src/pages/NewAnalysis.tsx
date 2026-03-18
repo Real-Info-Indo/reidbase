@@ -221,8 +221,6 @@ export default function NewAnalysis() {
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
   const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
   const [dailyPromptCount, setDailyPromptCount] = useState(() => getDailyPromptData().count);
-  const isFreemium = tier === "member";
-  const limitReached = isFreemium && dailyPromptCount >= DAILY_LIMIT;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -232,6 +230,8 @@ export default function NewAnalysis() {
   const paramConvoId = searchParams.get("c");
   const paramPrompt = searchParams.get("prompt");
   const { tier, userName } = useTier();
+  const isFreemium = tier === "member";
+  const limitReached = isFreemium && dailyPromptCount >= DAILY_LIMIT;
 
   const greetingName = (() => {
     try {

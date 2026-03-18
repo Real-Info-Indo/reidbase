@@ -79,7 +79,7 @@ export default function AdminAnalytics() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [eventsRes, logsRes] = await Promise.all([
+    const [eventsRes, logsRes, appraisalRes] = await Promise.all([
       supabase
         .from("analytics_events" as any)
         .select("*")
@@ -90,9 +90,14 @@ export default function AdminAnalytics() {
         .select("id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at")
         .order("updated_at", { ascending: false })
         .limit(1000) as any,
+      supabase
+        .from("appraisal_requests" as any)
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new") as any,
     ]);
     if (eventsRes.data) setEvents(eventsRes.data);
     if (logsRes.data) setChatLogs(logsRes.data);
+    setNewAppraisalCount(appraisalRes.count ?? 0);
     setLoading(false);
   };
 

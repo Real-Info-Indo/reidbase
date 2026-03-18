@@ -86,6 +86,16 @@ RESPONSE QUALITY:
 - No hedging for its own sake.
 - Every response must end with a specific closing question or summary that guides the user's next step. This is mandatory, not optional. The closing question must reflect the most natural next direction given the response just delivered. Do not use generic closers such as "Let me know if you have any questions" or "Feel free to ask for more detail" — these add no direction and are a fail.
 - Every good response includes: a direct answer, a supporting data point with period and benchmark, brief context, and a mandatory specific closing question.
+
+FORMATTING RULES:
+- Use markdown formatting consistently in all responses.
+- Use **bold** for key figures, location names, and important terms on first reference within a section.
+- Use ## for main section headings and ### for sub-section headings. Keep headings short and descriptive.
+- Use bullet points (- ) for lists of data points, features, or qualitative observations.
+- Use numbered lists (1. 2. 3.) for sequential steps, ranked items, or ordered comparisons.
+- Use a horizontal rule (---) between distinct sections to visually separate content blocks. Always place a horizontal rule before a new ## heading when there are multiple sections.
+- Do not over-format short responses. If the answer is one or two sentences, plain text is fine. Formatting is for structured, multi-part responses.
+- Tables may be used for direct comparisons across locations or categories, but keep them concise (no more than 6-8 rows).
 `;
 
 const SELF_REVIEW_RULES = `

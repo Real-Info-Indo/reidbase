@@ -542,23 +542,41 @@ export default function NewAnalysis() {
                   }>
 
                   {m.role === "assistant" ?
-                  <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-ul:ml-6 prose-ol:ml-6 prose-li:mb-1.5" style={{ lineHeight: 1.6 }}>
-                      <ReactMarkdown
-                      components={{
-                        code({ className, children, ...props }) {
-                          const match = /language-chart/.exec(className || "");
-                          if (match) {
-                            const chart = parseChartBlock(String(children).trim());
-                            if (chart) return <ChatChart chart={chart} />;
-                          }
-                          return <code className={className} {...props}>{children}</code>;
-                        },
-                        pre({ children }) {
-                          return <>{children}</>;
-                        }
-                      }}>
-                      {m.content}</ReactMarkdown>
-                    </div> :
+                   <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-5 prose-headings:mb-2 prose-ul:ml-5 prose-ol:ml-5 prose-li:mb-1 prose-hr:my-4" style={{ lineHeight: 1.6 }}>
+                       <ReactMarkdown
+                       components={{
+                         code({ className, children, ...props }) {
+                           const match = /language-chart/.exec(className || "");
+                           if (match) {
+                             const chart = parseChartBlock(String(children).trim());
+                             if (chart) return <ChatChart chart={chart} />;
+                           }
+                           return <code className={className} {...props}>{children}</code>;
+                         },
+                         pre({ children }) {
+                           return <>{children}</>;
+                         },
+                         h2({ children }) {
+                           return <h2 className="text-base font-bold text-foreground mt-5 mb-2">{children}</h2>;
+                         },
+                         h3({ children }) {
+                           return <h3 className="text-sm font-semibold text-foreground mt-4 mb-1.5">{children}</h3>;
+                         },
+                         hr() {
+                           return <hr className="border-t border-border/60 my-4" />;
+                         },
+                         ul({ children }) {
+                           return <ul className="list-disc ml-5 space-y-1">{children}</ul>;
+                         },
+                         ol({ children }) {
+                           return <ol className="list-decimal ml-5 space-y-1">{children}</ol>;
+                         },
+                         strong({ children }) {
+                           return <strong className="font-semibold text-foreground">{children}</strong>;
+                         },
+                       }}>
+                       {m.content}</ReactMarkdown>
+                     </div> :
 
                   m.content
                   }

@@ -3,6 +3,7 @@ import { ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFeature } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,

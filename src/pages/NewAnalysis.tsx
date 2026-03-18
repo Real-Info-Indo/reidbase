@@ -179,10 +179,6 @@ export default function NewAnalysis() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const latestAiRef = useRef<HTMLDivElement>(null);
   const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const latestAiRef = useRef<HTMLDivElement>(null);
-  const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
   const paramPrompt = searchParams.get("prompt");

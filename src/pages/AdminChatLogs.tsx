@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Msg } from "@/lib/conversations";
 
 const ADMIN_PASSWORD = "reid-admin-2025";
@@ -33,6 +34,7 @@ export default function AdminChatLogs() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
@@ -91,6 +93,42 @@ export default function AdminChatLogs() {
     );
   });
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((l) => l.id)));
+    }
+  };
+
+  const handleDownloadSelected = () => {
+    const selected = filtered.filter((l) => selectedIds.has(l.id));
+    if (selected.length === 0) { toast.error("No conversations selected"); return; }
+
+    const output = selected.map((log) => {
+      const header = `Title: ${log.title}\nUser: ${log.wix_user_name || "Anonymous"} (${log.wix_user_email || "No email"})\nMode: ${log.search_mode || "data-analyst"}\nDate: ${new Date(log.updated_at).toLocaleString("en-GB")}\nLikes: ${log.likes} | Dislikes: ${log.dislikes} | Copies: ${log.copy_count}\n`;
+      const msgs = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}:\n${m.content}`).join("\n\n");
+      return `${header}\n${msgs}`;
+    }).join("\n\n" + "=".repeat(80) + "\n\n");
+
+    const blob = new Blob([output], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reid-chat-logs-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded ${selected.length} conversation${selected.length > 1 ? "s" : ""}`);
+  };
+
   if (!authenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -121,9 +159,17 @@ export default function AdminChatLogs() {
             <h1 className="text-xl font-semibold text-foreground">Chat logs</h1>
             <span className="text-sm text-muted-foreground">({filtered.length} conversations)</span>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
-            {loading ? "Loading..." : "Refresh"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {selectedIds.size > 0 && (
+              <Button variant="outline" size="sm" onClick={handleDownloadSelected}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download ({selectedIds.size})
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={fetchLogs} disabled={loading}>
+              {loading ? "Loading..." : "Refresh"}
+            </Button>
+          </div>
         </div>
 
         <div className="relative">
@@ -140,6 +186,12 @@ export default function AdminChatLogs() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead className="w-[200px]">User</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead className="w-[100px]">Mode</TableHead>
@@ -157,6 +209,12 @@ export default function AdminChatLogs() {
                     className="cursor-pointer hover:bg-accent/50"
                     onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
                   >
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selectedIds.has(log.id)}
+                        onCheckedChange={() => toggleSelect(log.id)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="text-sm font-medium">{log.wix_user_name || "Anonymous"}</div>
                       <div className="text-xs text-muted-foreground">{log.wix_user_email || "No email"}</div>
@@ -222,7 +280,7 @@ export default function AdminChatLogs() {
                   </TableRow>
                   {expandedId === log.id && (
                     <TableRow key={`${log.id}-expanded`}>
-                      <TableCell colSpan={7} className="p-0">
+                      <TableCell colSpan={8} className="p-0">
                         <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
                           {log.messages?.map((msg, i) => (
                             <div
@@ -251,7 +309,7 @@ export default function AdminChatLogs() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                     {loading ? "Loading chat logs..." : "No conversations found"}
                   </TableCell>
                 </TableRow>

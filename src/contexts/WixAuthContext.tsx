@@ -6,6 +6,7 @@ interface WixMember {
   name: string;
   email: string;
   roles: string[];
+  profilePhoto?: string;
 }
 
 interface WixAuthContextType {

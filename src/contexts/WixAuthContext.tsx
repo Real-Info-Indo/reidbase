@@ -65,7 +65,9 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           id: memberData.id,
           name: { first: m.contact?.firstName, last: m.contact?.lastName },
           email: memberData.email,
+          displayName: memberData.name,
         }));
+        console.log("Wix member persisted:", memberData.id, memberData.name, memberData.email);
       }
     } catch (err) {
       console.error("Failed to fetch Wix member:", err);

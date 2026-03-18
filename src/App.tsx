@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
 import ChatWidget from "./pages/ChatWidget";
 import AdminChatLogs from "./pages/AdminChatLogs";
+import AdminAnalytics from "./pages/AdminAnalytics";
 import { PageViewTracker } from "@/components/PageViewTracker";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
               </Route>
               <Route path="/import-data" element={<ImportData />} />
               <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

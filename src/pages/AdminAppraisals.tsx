@@ -99,6 +99,28 @@ export default function AdminAppraisals() {
     );
   };
 
+  const [notesValue, setNotesValue] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  useEffect(() => {
+    if (expandedId) {
+      const r = requests.find((req) => req.id === expandedId);
+      setNotesValue(r?.admin_notes || "");
+    }
+  }, [expandedId]);
+
+  const saveNotes = async (id: string) => {
+    setSavingNotes(true);
+    await supabase
+      .from("appraisal_requests" as any)
+      .update({ admin_notes: notesValue } as any)
+      .eq("id", id) as any;
+    setRequests((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, admin_notes: notesValue } : r))
+    );
+    setSavingNotes(false);
+  };
+
   const filtered = useMemo(() => {
     return requests.filter((r) => {
       if (statusFilter !== "all" && r.status !== statusFilter) return false;

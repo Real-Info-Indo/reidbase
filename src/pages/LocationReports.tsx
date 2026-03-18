@@ -65,6 +65,7 @@ export default function LocationReports() {
                 <a
                   href={report.file}
                   download
+                  onClick={() => trackFeature("report_download", { report: report.location, type: "location" })}
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
                   title={`Download ${report.location} report`}
                 >

@@ -56,6 +56,7 @@ export default function AppraisalRequest() {
       });
       if (error) throw error;
       setShowConfirmation(true);
+      trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
     } catch (err) {
       console.error("Submission error:", err);
     } finally {

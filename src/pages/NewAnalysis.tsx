@@ -635,10 +635,28 @@ export default function NewAnalysis() {
                          ol({ children }) {
                            return <ol className="list-decimal ml-5 space-y-1">{children}</ol>;
                          },
-                         strong({ children }) {
-                           return <strong className="font-semibold text-foreground">{children}</strong>;
-                         },
-                       }}>
+                          strong({ children }) {
+                            return <strong className="font-semibold text-foreground">{children}</strong>;
+                          },
+                          table({ children }) {
+                            return <div className="my-4 overflow-x-auto"><table className="w-full text-sm border-collapse">{children}</table></div>;
+                          },
+                          thead({ children }) {
+                            return <thead className="border-b border-border">{children}</thead>;
+                          },
+                          tbody({ children }) {
+                            return <tbody>{children}</tbody>;
+                          },
+                          tr({ children }) {
+                            return <tr className="border-b border-border/40">{children}</tr>;
+                          },
+                          th({ children }) {
+                            return <th className="text-left py-2 pr-4 font-semibold text-foreground whitespace-nowrap">{children}</th>;
+                          },
+                          td({ children }) {
+                            return <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">{children}</td>;
+                          },
+                        }}>
                        {m.content}</ReactMarkdown>
                      </div> :
 

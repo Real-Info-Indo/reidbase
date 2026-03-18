@@ -34,6 +34,7 @@ export default function AdminChatLogs() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {

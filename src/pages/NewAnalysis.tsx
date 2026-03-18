@@ -133,6 +133,34 @@ async function streamChat({
   onDone();
 }
 
+/* ── Tenure clarification detection ── */
+const LOCATION_KEYWORDS = [
+  "canggu", "seminyak", "ubud", "uluwatu", "sanur", "berawa", "pererenan",
+  "kerobokan", "umalas", "bingin", "balangan", "nyanyi", "seseh", "padonan",
+  "kaba kaba", "tabanan", "gianyar", "denpasar", "mengwi", "jimbaran",
+  "nusa dua", "pecatu", "ungasan", "kedungu", "tanah lot", "north badung",
+  "south badung", "central badung",
+];
+
+const SECTOR_KEYWORDS = [
+  "villa", "villas", "land", "apartment", "apartments", "commercial",
+  "hotel", "hotels", "townhouse", "townhouses",
+  "1-bed", "2-bed", "3-bed", "4-bed", "5-bed", "1 bed", "2 bed", "3 bed",
+  "4 bed", "5 bed", "studio",
+];
+
+const TENURE_ALREADY_SPECIFIED = ["leasehold", "freehold", "both tenure"];
+
+function needsTenureClarification(text: string): boolean {
+  const lower = text.toLowerCase();
+  // Skip if tenure is already specified
+  if (TENURE_ALREADY_SPECIFIED.some(t => lower.includes(t))) return false;
+  // Trigger if location or sector keyword is present
+  const hasLocation = LOCATION_KEYWORDS.some(k => lower.includes(k));
+  const hasSector = SECTOR_KEYWORDS.some(k => lower.includes(k));
+  return hasLocation || hasSector;
+}
+
 export default function NewAnalysis() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -145,6 +173,7 @@ export default function NewAnalysis() {
   const [searchMode, setSearchMode] = useState<string>("data-analyst");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [showWaPopup, setShowWaPopup] = useState(false);
+  const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -274,11 +303,22 @@ export default function NewAnalysis() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const send = async (input: string) => {
+  const sendWithTenure = async (input: string, tenure?: string) => {
     if (!input.trim() || isLoading) return;
     trackFeature("chat_message_sent", { search_mode: searchMode });
+
+    // Append tenure context if provided
+    const enrichedInput = tenure && tenure !== "both"
+      ? `${input}\n\n[Tenure filter: ${tenure} only]`
+      : tenure === "both"
+        ? `${input}\n\n[Tenure filter: both leasehold and freehold]`
+        : input;
+
     const userMsg: Msg = { role: "user", content: input };
+    const msgForAI: Msg = { role: "user", content: enrichedInput };
+
     const newMessages = [...messages, userMsg];
+    const aiMessages = [...messages, msgForAI];
     setMessages(newMessages);
     setQuery("");
     setIsLoading(true);
@@ -289,7 +329,6 @@ export default function NewAnalysis() {
       parsedFiles = await Promise.all(
         attachedFiles.map(async (file) => {
           const text = await file.text();
-          // Truncate very large files to ~50k chars to stay within token limits
           return { name: file.name, content: text.slice(0, 50000) };
         })
       );
@@ -310,7 +349,7 @@ export default function NewAnalysis() {
 
     try {
       await streamChat({
-        messages: newMessages,
+        messages: aiMessages,
         tier,
         fileContents: parsedFiles,
         searchMode,
@@ -324,6 +363,29 @@ export default function NewAnalysis() {
         setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again." }]);
       }
     }
+  };
+
+  const send = async (input: string) => {
+    if (!input.trim() || isLoading) return;
+    // Check if we need tenure clarification
+    if (needsTenureClarification(input)) {
+      // Show user message immediately, then show chips
+      const userMsg: Msg = { role: "user", content: input };
+      setMessages((prev) => [...prev, userMsg]);
+      setQuery("");
+      setPendingTenureQuery(input);
+      return;
+    }
+    sendWithTenure(input);
+  };
+
+  const handleTenureSelect = (tenure: string) => {
+    if (!pendingTenureQuery) return;
+    const q = pendingTenureQuery;
+    setPendingTenureQuery(null);
+    // Remove the user message we already added, sendWithTenure will re-add it
+    setMessages((prev) => prev.slice(0, -1));
+    sendWithTenure(q, tenure);
   };
 
   // Auto-send prompt from URL parameter (e.g. from embedded widget)
@@ -595,6 +657,30 @@ export default function NewAnalysis() {
               </div>);
 
           })}
+
+            {/* Tenure clarification chips */}
+            {pendingTenureQuery && !isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-md">
+                  <p className="text-sm text-foreground mb-3">Which tenure type are you interested in?</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                      { label: "Leasehold", value: "leasehold" },
+                      { label: "Freehold", value: "freehold" },
+                      { label: "Both", value: "both" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => handleTenureSelect(opt.value)}
+                        className="px-4 py-1.5 rounded-full text-sm font-medium border border-primary/40 bg-primary/10 text-foreground hover:bg-primary/25 transition-colors"
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">

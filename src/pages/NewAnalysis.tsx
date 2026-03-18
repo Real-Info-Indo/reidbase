@@ -14,7 +14,7 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation } from "@/lib/chatLogger";
+import { logConversation, logFeedback } from "@/lib/chatLogger";
 import { trackFeature } from "@/lib/analytics";
 
 const suggestions = [

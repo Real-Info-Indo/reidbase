@@ -140,8 +140,11 @@ export type Database = {
       chat_logs: {
         Row: {
           conversation_id: string
+          copy_count: number
           created_at: string
+          dislikes: number
           id: string
+          likes: number
           message_count: number
           messages: Json
           search_mode: string | null
@@ -153,8 +156,11 @@ export type Database = {
         }
         Insert: {
           conversation_id: string
+          copy_count?: number
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
           message_count?: number
           messages?: Json
           search_mode?: string | null
@@ -166,8 +172,11 @@ export type Database = {
         }
         Update: {
           conversation_id?: string
+          copy_count?: number
           created_at?: string
+          dislikes?: number
           id?: string
+          likes?: number
           message_count?: number
           messages?: Json
           search_mode?: string | null

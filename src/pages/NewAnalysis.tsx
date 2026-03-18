@@ -14,7 +14,7 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation } from "@/lib/chatLogger";
+import { logConversation, logFeedback } from "@/lib/chatLogger";
 import { trackFeature } from "@/lib/analytics";
 
 const suggestions = [
@@ -648,21 +648,21 @@ export default function NewAnalysis() {
                 {m.role === "assistant" && !isLoading && (
                   <div className="flex items-center gap-1 mt-1.5">
                     <button
-                      onClick={() => { navigator.clipboard.writeText(m.content); toast.success("Copied to clipboard"); }}
+                      onClick={() => { navigator.clipboard.writeText(m.content); toast.success("Copied to clipboard"); if (conversationId) logFeedback(conversationId, "copy"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Copy response"
                     >
                       <Copy className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => toast.success("Thanks for the feedback")}
+                      onClick={() => { toast.success("Thanks for the feedback"); if (conversationId) logFeedback(conversationId, "like"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Good response"
                     >
                       <ThumbsUp className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => toast.success("Thanks for the feedback")}
+                      onClick={() => { toast.success("Thanks for the feedback"); if (conversationId) logFeedback(conversationId, "dislike"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Poor response"
                     >

@@ -46,3 +46,23 @@ export async function logConversation(payload: LogPayload) {
 
   if (error) console.warn("Chat log upsert failed:", error.message);
 }
+
+export async function logFeedback(conversationId: string, action: "copy" | "like" | "dislike") {
+  const col = action === "copy" ? "copy_count" : action === "like" ? "likes" : "dislikes";
+
+  // Fetch current value then increment
+  const { data } = await supabase
+    .from("chat_logs" as any)
+    .select(col)
+    .eq("conversation_id", conversationId)
+    .single() as any;
+
+  const current = data?.[col] ?? 0;
+
+  const { error } = await supabase
+    .from("chat_logs" as any)
+    .update({ [col]: current + 1 } as any)
+    .eq("conversation_id", conversationId) as any;
+
+  if (error) console.warn(`Feedback log (${action}) failed:`, error.message);
+}

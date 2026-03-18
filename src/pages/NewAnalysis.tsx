@@ -174,6 +174,7 @@ export default function NewAnalysis() {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [showWaPopup, setShowWaPopup] = useState(false);
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
+  const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -383,6 +384,7 @@ export default function NewAnalysis() {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
     setPendingTenureQuery(null);
+    setSelectedTenure(null);
     // Remove the user message we already added, sendWithTenure will re-add it
     setMessages((prev) => prev.slice(0, -1));
     sendWithTenure(q, tenure);
@@ -658,29 +660,8 @@ export default function NewAnalysis() {
 
           })}
 
-            {/* Tenure clarification chips */}
-            {pendingTenureQuery && !isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-md">
-                  <p className="text-sm text-foreground mb-3">Which tenure type are you interested in?</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {[
-                      { label: "Leasehold", value: "leasehold" },
-                      { label: "Freehold", value: "freehold" },
-                      { label: "Both", value: "both" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => handleTenureSelect(opt.value)}
-                        className="px-4 py-1.5 rounded-full text-sm font-medium border border-primary/40 bg-primary/10 text-foreground hover:bg-primary/25 transition-colors"
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+
+
 
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">
@@ -702,6 +683,58 @@ export default function NewAnalysis() {
       {hasConversation &&
       <div className="relative z-20 px-8 py-4">
           <div className="max-w-3xl mx-auto">
+            {/* Tenure clarification popup */}
+            {pendingTenureQuery && !isLoading && (
+              <div className="mb-3 rounded-xl border border-border bg-card shadow-lg overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+                <div className="px-5 pt-4 pb-2">
+                  <p className="text-sm font-medium text-foreground mb-3">Which tenure type are you interested in?</p>
+                  <div className="space-y-2">
+                    {[
+                      { label: "Leasehold", value: "leasehold", desc: "Time-limited ownership, typically 25 to 30 years with extension options" },
+                      { label: "Freehold", value: "freehold", desc: "Full ownership rights, available through specific legal structures" },
+                      { label: "Both", value: "both", desc: "Compare leasehold and freehold data side by side" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setSelectedTenure(opt.value)}
+                        className={`w-full flex items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors border ${
+                          selectedTenure === opt.value
+                            ? "border-primary bg-primary/10"
+                            : "border-transparent hover:bg-accent"
+                        }`}
+                      >
+                        <div className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                          selectedTenure === opt.value ? "border-primary bg-primary" : "border-muted-foreground/40"
+                        }`}>
+                          {selectedTenure === opt.value && (
+                            <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground">{opt.label}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border">
+                  <button
+                    onClick={() => { setPendingTenureQuery(null); setSelectedTenure(null); setMessages((prev) => prev.slice(0, -1)); }}
+                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => selectedTenure && handleTenureSelect(selectedTenure)}
+                    disabled={!selectedTenure}
+                    className="px-4 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-40"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            )}
             {attachedFiles.length > 0 &&
           <div className="flex flex-wrap gap-2 mb-2">
                 {attachedFiles.map((f, i) =>

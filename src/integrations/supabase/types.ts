@@ -47,6 +47,93 @@ export type Database = {
         }
         Relationships: []
       }
+      appraisal_requests: {
+        Row: {
+          average_daily_rate: string | null
+          average_occupancy: string | null
+          bathrooms: string | null
+          bedrooms: string | null
+          construction_budget: string | null
+          consultant_budget: string | null
+          created_at: string
+          currently_operational: string | null
+          description: string | null
+          ffe_budget: string | null
+          id: string
+          internal_size: string | null
+          land_size: string | null
+          land_zone: string | null
+          landscaping_budget: string | null
+          lease_term: string | null
+          location: string | null
+          overheads: string | null
+          ownership_type: string | null
+          property_status: string | null
+          property_type: string | null
+          property_website: string | null
+          reviewed_at: string | null
+          status: string
+          year_built: string | null
+          years_operating: string | null
+        }
+        Insert: {
+          average_daily_rate?: string | null
+          average_occupancy?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          construction_budget?: string | null
+          consultant_budget?: string | null
+          created_at?: string
+          currently_operational?: string | null
+          description?: string | null
+          ffe_budget?: string | null
+          id?: string
+          internal_size?: string | null
+          land_size?: string | null
+          land_zone?: string | null
+          landscaping_budget?: string | null
+          lease_term?: string | null
+          location?: string | null
+          overheads?: string | null
+          ownership_type?: string | null
+          property_status?: string | null
+          property_type?: string | null
+          property_website?: string | null
+          reviewed_at?: string | null
+          status?: string
+          year_built?: string | null
+          years_operating?: string | null
+        }
+        Update: {
+          average_daily_rate?: string | null
+          average_occupancy?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          construction_budget?: string | null
+          consultant_budget?: string | null
+          created_at?: string
+          currently_operational?: string | null
+          description?: string | null
+          ffe_budget?: string | null
+          id?: string
+          internal_size?: string | null
+          land_size?: string | null
+          land_zone?: string | null
+          landscaping_budget?: string | null
+          lease_term?: string | null
+          location?: string | null
+          overheads?: string | null
+          ownership_type?: string | null
+          property_status?: string | null
+          property_type?: string | null
+          property_website?: string | null
+          reviewed_at?: string | null
+          status?: string
+          year_built?: string | null
+          years_operating?: string | null
+        }
+        Relationships: []
+      }
       chat_logs: {
         Row: {
           conversation_id: string

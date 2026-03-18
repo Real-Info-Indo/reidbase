@@ -276,6 +276,7 @@ export default function NewAnalysis() {
 
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
+    trackFeature("chat_message_sent", { search_mode: searchMode });
     const userMsg: Msg = { role: "user", content: input };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);

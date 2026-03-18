@@ -303,11 +303,22 @@ export default function NewAnalysis() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const send = async (input: string) => {
+  const sendWithTenure = async (input: string, tenure?: string) => {
     if (!input.trim() || isLoading) return;
     trackFeature("chat_message_sent", { search_mode: searchMode });
+
+    // Append tenure context if provided
+    const enrichedInput = tenure && tenure !== "both"
+      ? `${input}\n\n[Tenure filter: ${tenure} only]`
+      : tenure === "both"
+        ? `${input}\n\n[Tenure filter: both leasehold and freehold]`
+        : input;
+
     const userMsg: Msg = { role: "user", content: input };
+    const msgForAI: Msg = { role: "user", content: enrichedInput };
+
     const newMessages = [...messages, userMsg];
+    const aiMessages = [...messages, msgForAI];
     setMessages(newMessages);
     setQuery("");
     setIsLoading(true);
@@ -318,7 +329,6 @@ export default function NewAnalysis() {
       parsedFiles = await Promise.all(
         attachedFiles.map(async (file) => {
           const text = await file.text();
-          // Truncate very large files to ~50k chars to stay within token limits
           return { name: file.name, content: text.slice(0, 50000) };
         })
       );
@@ -339,7 +349,7 @@ export default function NewAnalysis() {
 
     try {
       await streamChat({
-        messages: newMessages,
+        messages: aiMessages,
         tier,
         fileContents: parsedFiles,
         searchMode,
@@ -353,6 +363,29 @@ export default function NewAnalysis() {
         setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again." }]);
       }
     }
+  };
+
+  const send = async (input: string) => {
+    if (!input.trim() || isLoading) return;
+    // Check if we need tenure clarification
+    if (needsTenureClarification(input)) {
+      // Show user message immediately, then show chips
+      const userMsg: Msg = { role: "user", content: input };
+      setMessages((prev) => [...prev, userMsg]);
+      setQuery("");
+      setPendingTenureQuery(input);
+      return;
+    }
+    sendWithTenure(input);
+  };
+
+  const handleTenureSelect = (tenure: string) => {
+    if (!pendingTenureQuery) return;
+    const q = pendingTenureQuery;
+    setPendingTenureQuery(null);
+    // Remove the user message we already added, sendWithTenure will re-add it
+    setMessages((prev) => prev.slice(0, -1));
+    sendWithTenure(q, tenure);
   };
 
   // Auto-send prompt from URL parameter (e.g. from embedded widget)

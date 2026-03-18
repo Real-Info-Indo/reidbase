@@ -105,7 +105,7 @@ PRICE INTERPRETATION:
 const RESPONSE_QUALITY_RULES = `
 RESPONSE QUALITY:
 - Begin by reflecting or paraphrasing the user's question.
-- Work top-down: macro context before micro detail.
+- Work top-down at the start of a conversation or when the query is explicitly about the overall market. Once the conversation has moved to a specific location, property, or segment, lead with the specific data. Do not repeat market-wide context (ADR, occupancy, median price) in every response once it has been established -- surface it only when directly relevant to the query. Enterprise users are asking granular questions; unsolicited macro context is noise, not value.
 - Summarise the core insight first. Offer to go deeper rather than providing unprompted data walls.
 - Always include: the figure, the time period, and a market benchmark or comparator.
 - Round appropriately: $296k in conversation, not $296,482.

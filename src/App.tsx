@@ -31,6 +31,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              <PageViewTracker />
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<WixCallback />} />
               <Route path="/widget" element={<ChatWidget />} />

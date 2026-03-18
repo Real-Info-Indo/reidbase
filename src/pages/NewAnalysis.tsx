@@ -354,6 +354,9 @@ export default function NewAnalysis() {
 
   const sendWithTenure = async (input: string, tenure?: string) => {
     if (!input.trim() || isLoading) return;
+    if (limitReached) return;
+    const newCount = isFreemium ? incrementDailyPromptCount() : dailyPromptCount;
+    if (isFreemium) setDailyPromptCount(newCount);
     trackFeature("chat_message_sent", { search_mode: searchMode });
 
     // Append tenure context if provided

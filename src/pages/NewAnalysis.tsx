@@ -660,29 +660,8 @@ export default function NewAnalysis() {
 
           })}
 
-            {/* Tenure clarification chips */}
-            {pendingTenureQuery && !isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4 max-w-md">
-                  <p className="text-sm text-foreground mb-3">Which tenure type are you interested in?</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {[
-                      { label: "Leasehold", value: "leasehold" },
-                      { label: "Freehold", value: "freehold" },
-                      { label: "Both", value: "both" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => handleTenureSelect(opt.value)}
-                        className="px-4 py-1.5 rounded-full text-sm font-medium border border-primary/40 bg-primary/10 text-foreground hover:bg-primary/25 transition-colors"
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+
+
 
             {isLoading && messages[messages.length - 1]?.role === "user" &&
           <div className="flex justify-start">

@@ -229,19 +229,29 @@ export default function AdminAnalytics() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
+        {/* Admin nav */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/admin/chat-logs")} className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-5 w-5" />
-            </button>
             <BarChart3 className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            {loading ? "Loading" : "Refresh"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat-logs")}>
+              <MessageSquare className="h-4 w-4 mr-1.5" /> Chat logs
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/appraisals")} className="relative">
+              <ClipboardList className="h-4 w-4 mr-1.5" /> Appraisals
+              {newAppraisalCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                  {newAppraisalCount}
+                </span>
+              )}
+            </Button>
+            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              {loading ? "Loading" : "Refresh"}
+            </Button>
+          </div>
         </div>
 
         {/* KPI cards */}

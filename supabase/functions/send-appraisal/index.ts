@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -70,7 +71,8 @@ function buildEmailHtml(data: AppraisalData): string {
         ${row("Years Operating", data.yearsOperating)}
         ${constructionRows}
       </table>
-      <p style="color:#9ca3af;font-size:12px;margin-top:24px">This email was sent automatically from the REID platform.</p>
+      <p style="color:#6b7280;font-size:13px;margin-top:20px">View all requests at <a href="https://reidbase.lovable.app/admin/appraisals" style="color:#2563eb">reidbase.lovable.app/admin/appraisals</a></p>
+      <p style="color:#9ca3af;font-size:12px;margin-top:16px">This email was sent automatically from the REID platform.</p>
     </div>
   `;
 }
@@ -87,6 +89,42 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing required fields");
     }
 
+    // Save to database
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { error: dbError } = await supabase.from("appraisal_requests").insert({
+      property_type: data.propertyType || null,
+      location: data.location || null,
+      description: data.description || null,
+      ownership_type: data.ownershipType || null,
+      land_zone: data.landZone || null,
+      lease_term: data.leaseTerm || null,
+      land_size: data.landSize || null,
+      internal_size: data.internalSize || null,
+      property_status: data.propertyStatus || null,
+      bedrooms: data.bedrooms || null,
+      bathrooms: data.bathrooms || null,
+      year_built: data.yearBuilt || null,
+      currently_operational: data.currentlyOperational || null,
+      property_website: data.propertyWebsite || null,
+      average_daily_rate: data.averageDailyRate || null,
+      average_occupancy: data.averageOccupancy || null,
+      years_operating: data.yearsOperating || null,
+      construction_budget: data.constructionBudget || null,
+      consultant_budget: data.consultantBudget || null,
+      ffe_budget: data.ffeBudget || null,
+      landscaping_budget: data.landscapingBudget || null,
+      overheads: data.overheads || null,
+      status: "new",
+    });
+
+    if (dbError) {
+      console.error("DB insert error:", dbError);
+    }
+
+    // Send email notification
     const emailResponse = await resend.emails.send({
       from: "REID Appraisals <appraisals@realinfo.id>",
       to: ["admin@realinfo.id"],
@@ -101,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
-    console.error("Error sending appraisal email:", error);
+    console.error("Error processing appraisal:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }

@@ -220,6 +220,9 @@ export default function NewAnalysis() {
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
   const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
+  const [dailyPromptCount, setDailyPromptCount] = useState(() => getDailyPromptData().count);
+  const isFreemium = tier === "member";
+  const limitReached = isFreemium && dailyPromptCount >= DAILY_LIMIT;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);

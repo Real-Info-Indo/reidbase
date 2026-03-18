@@ -850,7 +850,7 @@ export default function NewAnalysis() {
               </div>
             </div>
             {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
-              <p className="text-right text-[11px] text-muted-foreground/60 font-light mt-1.5">REID Base is AI and can make mistakes. Please double check responses.</p>
+              <p className="text-right text-[11px] md:text-[11px] text-[9px] text-muted-foreground/60 font-light mt-1.5">REID Base is AI and can make mistakes. Please double check responses.</p>
             }
           </div>
         </div>

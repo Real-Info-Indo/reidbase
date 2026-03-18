@@ -12,9 +12,9 @@ interface TierContextType {
 }
 
 const tierAccess: Record<UserTier, string[]> = {
-  member: ["/"],
-  reid_base: ["/", "/dashboard"],
-  reid_base_pro: ["/", "/dashboard", "/market-reports", "/location-reports"],
+  member: ["/", "/appraisal-request"],
+  reid_base: ["/", "/dashboard", "/appraisal-request"],
+  reid_base_pro: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
   enterprise: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
 };
 

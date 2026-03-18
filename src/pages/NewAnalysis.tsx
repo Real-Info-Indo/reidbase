@@ -133,6 +133,34 @@ async function streamChat({
   onDone();
 }
 
+/* ── Tenure clarification detection ── */
+const LOCATION_KEYWORDS = [
+  "canggu", "seminyak", "ubud", "uluwatu", "sanur", "berawa", "pererenan",
+  "kerobokan", "umalas", "bingin", "balangan", "nyanyi", "seseh", "padonan",
+  "kaba kaba", "tabanan", "gianyar", "denpasar", "mengwi", "jimbaran",
+  "nusa dua", "pecatu", "ungasan", "kedungu", "tanah lot", "north badung",
+  "south badung", "central badung",
+];
+
+const SECTOR_KEYWORDS = [
+  "villa", "villas", "land", "apartment", "apartments", "commercial",
+  "hotel", "hotels", "townhouse", "townhouses",
+  "1-bed", "2-bed", "3-bed", "4-bed", "5-bed", "1 bed", "2 bed", "3 bed",
+  "4 bed", "5 bed", "studio",
+];
+
+const TENURE_ALREADY_SPECIFIED = ["leasehold", "freehold", "both tenure"];
+
+function needsTenureClarification(text: string): boolean {
+  const lower = text.toLowerCase();
+  // Skip if tenure is already specified
+  if (TENURE_ALREADY_SPECIFIED.some(t => lower.includes(t))) return false;
+  // Trigger if location or sector keyword is present
+  const hasLocation = LOCATION_KEYWORDS.some(k => lower.includes(k));
+  const hasSector = SECTOR_KEYWORDS.some(k => lower.includes(k));
+  return hasLocation || hasSector;
+}
+
 export default function NewAnalysis() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -145,7 +173,12 @@ export default function NewAnalysis() {
   const [searchMode, setSearchMode] = useState<string>("data-analyst");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [showWaPopup, setShowWaPopup] = useState(false);
+  const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const latestAiRef = useRef<HTMLDivElement>(null);
+  const [scrollArrowOpacity, setScrollArrowOpacity] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const latestAiRef = useRef<HTMLDivElement>(null);

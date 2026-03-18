@@ -13,9 +13,12 @@ function getWixUserInfo(): { id?: string; name?: string; email?: string } {
     const raw = localStorage.getItem("wix-member");
     if (raw) {
       const member = JSON.parse(raw);
+      const name = member?.displayName
+        || [member?.name?.first, member?.name?.last].filter(Boolean).join(" ")
+        || undefined;
       return {
         id: member?.id,
-        name: [member?.name?.first, member?.name?.last].filter(Boolean).join(" ") || undefined,
+        name,
         email: member?.email,
       };
     }

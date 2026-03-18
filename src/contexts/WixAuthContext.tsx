@@ -37,6 +37,7 @@ function loadTokens(): any | null {
 function clearTokens() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(OAUTH_DATA_KEY);
+  localStorage.removeItem("wix-member");
 }
 
 export function WixAuthProvider({ children }: { children: React.ReactNode }) {

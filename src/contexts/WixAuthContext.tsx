@@ -6,6 +6,7 @@ interface WixMember {
   name: string;
   email: string;
   roles: string[];
+  profilePhoto?: string;
 }
 
 interface WixAuthContextType {
@@ -51,6 +52,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
       });
       const m = response.member;
       if (m) {
+        const photoUrl = (m as any).profile?.photo?.url || undefined;
         const memberData = {
           id: m._id ?? "",
           name: m.contact?.firstName
@@ -58,6 +60,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
             : m.loginEmail ?? "Member",
           email: m.loginEmail ?? "",
           roles: [],
+          profilePhoto: photoUrl,
         };
         setMember(memberData);
         // Persist for chat logger and analytics

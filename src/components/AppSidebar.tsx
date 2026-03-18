@@ -34,7 +34,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const [collapsed, setCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { tier, userName } = useTier();
-  const { logout } = useWixAuth();
+  const { logout, member } = useWixAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -287,9 +287,13 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-3 w-full rounded-lg p-1.5 hover:bg-sidebar-accent transition-colors text-left">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent">
-                <User className="h-4 w-4 text-sidebar-primary" />
-              </div>
+              {member?.profilePhoto ? (
+                <img src={member.profilePhoto} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+              ) : (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent">
+                  <User className="h-4 w-4 text-sidebar-primary" />
+                </div>
+              )}
               {!collapsed && (
                 <div className="min-w-0">
                   <p className="text-sm font-extralight truncate">{userName}</p>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Download } from "lucide-react";
+import { trackFeature } from "@/lib/analytics";
 
 interface Report {
   name: string;

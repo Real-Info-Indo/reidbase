@@ -209,6 +209,12 @@ export default function AdminChatLogs() {
                     className="cursor-pointer hover:bg-accent/50"
                     onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
                   >
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selectedIds.has(log.id)}
+                        onCheckedChange={() => toggleSelect(log.id)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="text-sm font-medium">{log.wix_user_name || "Anonymous"}</div>
                       <div className="text-xs text-muted-foreground">{log.wix_user_email || "No email"}</div>

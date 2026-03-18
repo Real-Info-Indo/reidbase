@@ -645,6 +645,46 @@ export default function NewAnalysis() {
                   m.content
                   }
                 </div>
+                {m.role === "assistant" && !isLoading && (
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(m.content); toast.success("Copied to clipboard"); }}
+                      className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+                      title="Copy response"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toast.success("Thanks for the feedback")}
+                      className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+                      title="Good response"
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => toast.success("Thanks for the feedback")}
+                      className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+                      title="Poor response"
+                    >
+                      <ThumbsDown className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Find the user message that preceded this assistant message
+                        const userMsg = messages.slice(0, i).reverse().find(msg => msg.role === "user");
+                        if (userMsg) {
+                          // Remove this assistant message and re-send
+                          setMessages((prev) => prev.filter((_, idx) => idx !== i));
+                          sendWithTenure(userMsg.content);
+                        }
+                      }}
+                      className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+                      title="Regenerate response"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
                 {hasDataTeamCTA && !isLoading && (
                   <button
                     onClick={() => setShowWaPopup(true)}

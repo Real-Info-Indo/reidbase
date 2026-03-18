@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Download } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
+import { trackFeature } from "@/lib/analytics";
 
 const reports = [
   { location: "Berawa", file: "/reports/Berawa_2024.pdf", thumb: "/reports/thumbnails/Berawa.jpg" },
@@ -64,6 +65,7 @@ export default function LocationReports() {
                 <a
                   href={report.file}
                   download
+                  onClick={() => trackFeature("report_download", { report: report.location, type: "location" })}
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
                   title={`Download ${report.location} report`}
                 >

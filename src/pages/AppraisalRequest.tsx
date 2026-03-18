@@ -3,6 +3,7 @@ import { ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFeature } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +56,7 @@ export default function AppraisalRequest() {
       });
       if (error) throw error;
       setShowConfirmation(true);
+      trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
     } catch (err) {
       console.error("Submission error:", err);
     } finally {

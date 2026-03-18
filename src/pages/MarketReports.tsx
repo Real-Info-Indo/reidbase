@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Download } from "lucide-react";
+import { trackFeature } from "@/lib/analytics";
 
 interface Report {
   name: string;
@@ -52,6 +53,7 @@ export default function MarketReports() {
               <a
                 href={report.file}
                 download
+                onClick={() => trackFeature("report_download", { report: report.name, type: "market" })}
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
                 title={`Download ${report.name}`}
               >

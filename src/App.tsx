@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
 import ChatWidget from "./pages/ChatWidget";
 import AdminChatLogs from "./pages/AdminChatLogs";
+import { PageViewTracker } from "@/components/PageViewTracker";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <PageViewTracker />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<WixCallback />} />

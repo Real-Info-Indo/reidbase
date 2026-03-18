@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Download } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
+import { trackFeature } from "@/lib/analytics";
 
 const reports = [
   { location: "Berawa", file: "/reports/Berawa_2024.pdf", thumb: "/reports/thumbnails/Berawa.jpg" },

@@ -377,7 +377,7 @@ export default function NewAnalysis() {
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
     // Check if we need tenure clarification
-    if (needsTenureClarification(input)) {
+    if (needsTenureClarification(input, clarifiedLocations)) {
       // Show user message immediately, then show chips
       const userMsg: Msg = { role: "user", content: input };
       setMessages((prev) => [...prev, userMsg]);

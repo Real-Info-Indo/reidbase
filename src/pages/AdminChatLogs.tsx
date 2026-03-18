@@ -186,6 +186,12 @@ export default function AdminChatLogs() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead className="w-[200px]">User</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead className="w-[100px]">Mode</TableHead>

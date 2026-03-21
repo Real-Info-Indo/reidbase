@@ -863,7 +863,7 @@ export default function NewAnalysis() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <button
-                      onClick={() => { downloadResponseAsPdf(m.content); toast.success("PDF downloaded"); }}
+                      onClick={() => { downloadResponseAsPdf(m.content, displayTitle); toast.success("PDF downloaded"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Download as PDF"
                     >

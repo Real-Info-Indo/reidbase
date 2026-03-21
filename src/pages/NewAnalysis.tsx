@@ -67,6 +67,60 @@ const searchModes = [
 { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
 { id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
 
+/** Strip markdown formatting characters for plain text output */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")       // headings
+    .replace(/\*\*(.+?)\*\*/g, "$1")    // bold
+    .replace(/\*(.+?)\*/g, "$1")        // italic
+    .replace(/__(.+?)__/g, "$1")        // bold alt
+    .replace(/_(.+?)_/g, "$1")          // italic alt
+    .replace(/~~(.+?)~~/g, "$1")        // strikethrough
+    .replace(/`{1,3}[^`]*`{1,3}/g, (m) => m.replace(/`/g, "")) // code
+    .replace(/^\s*[-*+]\s+/gm, "- ")    // list markers normalise
+    .replace(/^\s*\d+\.\s+/gm, (m) => m) // keep numbered lists
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links
+    .replace(/^---+$/gm, "")            // horizontal rules
+    .trim();
+}
+
+function downloadResponseAsPdf(content: string) {
+  const clean = stripMarkdown(content);
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const margin = 15;
+  const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
+  const lineHeight = 6;
+  let y = margin + 5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  // Add REID header
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("REID Base", margin, y);
+  y += 8;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(120, 120, 120);
+  doc.text(new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), margin, y);
+  doc.setTextColor(0, 0, 0);
+  y += 10;
+
+  doc.setFontSize(10);
+  const lines = doc.splitTextToSize(clean, pageWidth);
+  for (const line of lines) {
+    if (y > doc.internal.pageSize.getHeight() - margin) {
+      doc.addPage();
+      y = margin;
+    }
+    doc.text(line, margin, y);
+    y += lineHeight;
+  }
+
+  doc.save("REID_Response.pdf");
+}
+
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 

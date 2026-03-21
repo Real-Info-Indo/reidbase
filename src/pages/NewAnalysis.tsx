@@ -118,7 +118,8 @@ function downloadResponseAsPdf(content: string, chatTitle?: string) {
     y += lineHeight;
   }
 
-  doc.save("REID_Response.pdf");
+  const safeName = (chatTitle || "REID_Response").replace(/[^a-zA-Z0-9 _-]/g, "").trim().replace(/\s+/g, "_");
+  doc.save(`${safeName}.pdf`);
 }
 
 

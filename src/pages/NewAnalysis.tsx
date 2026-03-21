@@ -84,7 +84,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-function downloadResponseAsPdf(content: string) {
+function downloadResponseAsPdf(content: string, chatTitle?: string) {
   const clean = stripMarkdown(content);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const margin = 15;
@@ -118,7 +118,8 @@ function downloadResponseAsPdf(content: string) {
     y += lineHeight;
   }
 
-  doc.save("REID_Response.pdf");
+  const safeName = (chatTitle || "REID_Response").replace(/[^a-zA-Z0-9 _-]/g, "").trim().replace(/\s+/g, "_");
+  doc.save(`${safeName}.pdf`);
 }
 
 
@@ -862,7 +863,7 @@ export default function NewAnalysis() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <button
-                      onClick={() => { downloadResponseAsPdf(m.content); toast.success("PDF downloaded"); }}
+                      onClick={() => { downloadResponseAsPdf(m.content, displayTitle); toast.success("PDF downloaded"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Download as PDF"
                     >

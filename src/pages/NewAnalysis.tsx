@@ -84,7 +84,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-function downloadResponseAsPdf(content: string) {
+function downloadResponseAsPdf(content: string, chatTitle?: string) {
   const clean = stripMarkdown(content);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const margin = 15;

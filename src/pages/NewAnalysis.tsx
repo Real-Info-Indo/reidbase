@@ -477,9 +477,6 @@ export default function NewAnalysis() {
     if (!input.trim() || isLoading) return;
     // Check if we need tenure clarification
     if (needsTenureClarification(input, clarifiedLocations)) {
-      // Show user message immediately, then show chips
-      const userMsg: Msg = { role: "user", content: input };
-      setMessages((prev) => [...prev, userMsg]);
       setQuery("");
       setPendingTenureQuery(input);
       return;
@@ -492,15 +489,13 @@ export default function NewAnalysis() {
     const q = pendingTenureQuery;
     // Record the locations from this query as clarified
     const locs = extractLocations(q);
-    setClarifiedLocations(prev => {
+    setClarifiedLocations((prev) => {
       const next = new Set(prev);
-      locs.forEach(loc => next.add(loc));
+      locs.forEach((l) => next.add(l));
       return next;
     });
     setPendingTenureQuery(null);
     setSelectedTenure(null);
-    // Remove the user message we already added, sendWithTenure will re-add it
-    setMessages((prev) => prev.slice(0, -1));
     sendWithTenure(q, tenure);
   };
 

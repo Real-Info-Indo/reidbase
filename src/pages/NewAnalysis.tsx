@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock, Copy, ThumbsUp, ThumbsDown, RefreshCw, Share2, Download, Mail } from "lucide-react";
+import { ArrowRight, ArrowDown, TrendingUp, MapPin, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock, Copy, ThumbsUp, ThumbsDown, RefreshCw, Share2, Download, Mail, ExternalLink } from "lucide-react";
 import jsPDF from "jspdf";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
@@ -744,6 +744,13 @@ export default function NewAnalysis() {
             {messages.map((m, i) => {
             const isLastAi = m.role === "assistant" && (i === messages.length - 1 || i === messages.length - 2 && messages[messages.length - 1]?.role !== "assistant");
             const hasDataTeamCTA = m.role === "assistant" && m.content.toLowerCase().includes("reid data team");
+            const hasUpgradeCTA = m.role === "assistant" && (
+              m.content.toLowerCase().includes("available on reid base") ||
+              m.content.toLowerCase().includes("available on the pro tier") ||
+              m.content.toLowerCase().includes("available on the enterprise tier") ||
+              m.content.toLowerCase().includes("explore our pricing plans") ||
+              m.content.toLowerCase().includes("requires a pro or enterprise")
+            );
             return (
               <div key={i} ref={isLastAi ? latestAiRef : undefined} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div
@@ -897,6 +904,17 @@ export default function NewAnalysis() {
                     </svg>
                     Contact the REID data team
                   </button>
+                )}
+                {hasUpgradeCTA && !isLoading && (
+                  <a
+                    href="https://www.realinfo.id/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Pricing plans
+                  </a>
                 )}
               </div>);
 

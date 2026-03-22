@@ -905,6 +905,17 @@ export default function NewAnalysis() {
                     Contact the REID data team
                   </button>
                 )}
+                {hasUpgradeCTA && !isLoading && (
+                  <a
+                    href="https://www.realinfo.id/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Pricing plans
+                  </a>
+                )}
               </div>);
 
           })}

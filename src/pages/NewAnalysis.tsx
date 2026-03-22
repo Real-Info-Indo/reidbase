@@ -244,6 +244,21 @@ const SECTOR_KEYWORDS = [
 
 const TENURE_ALREADY_SPECIFIED = ["leasehold", "freehold", "both tenure"];
 
+const RENTAL_KEYWORDS = [
+  "occupancy", "adr", "average daily rate", "daily rate", "nightly rate",
+  "rental performance", "rental data", "rental income", "rental yield",
+  "management", "property manager", "managed", "airbnb", "booking",
+  "guest", "guests", "night", "nights", "monthly rate", "revenue per",
+];
+
+const TRANSACTION_KEYWORDS = [
+  "price", "pricing", "sale", "sales", "sold", "buy", "buying", "purchase",
+  "supply", "median", "average price", "cost", "asking price", "listed",
+  "listing", "listings", "transaction", "transactions", "market value",
+  "price per sqm", "clearance", "days on market", "days listed",
+  "fsr", "off-plan", "off plan", "land price",
+];
+
 function extractLocations(text: string): string[] {
   const lower = text.toLowerCase();
   return LOCATION_KEYWORDS.filter(k => lower.includes(k));
@@ -253,9 +268,15 @@ function needsTenureClarification(text: string, clarifiedLocations: Set<string>)
   const lower = text.toLowerCase();
   // Skip if tenure is already specified
   if (TENURE_ALREADY_SPECIFIED.some(t => lower.includes(t))) return false;
-  // Only trigger for location-specific queries
+  // Skip for rental-related queries
+  const isRentalQuery = RENTAL_KEYWORDS.some(k => lower.includes(k));
+  const isTransactionQuery = TRANSACTION_KEYWORDS.some(k => lower.includes(k));
+  // If purely rental with no transaction keywords, skip
+  if (isRentalQuery && !isTransactionQuery) return false;
+  // Only trigger for location-specific queries with transaction context
   const locations = extractLocations(text);
   if (locations.length === 0) return false;
+  // If no transaction keywords detected, still show for general location queries
   // Skip if all mentioned locations have already been clarified
   const hasNewLocation = locations.some(loc => !clarifiedLocations.has(loc));
   return hasNewLocation;

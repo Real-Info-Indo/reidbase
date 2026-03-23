@@ -830,12 +830,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Verify tier server-side against Wix; fall back to "member" on any failure
-    const effectiveTier = await resolveVerifiedTier(wixAccessToken);
+    // Verify tier server-side against Wix; fall back to request body tier (for testing) or "member"
+    const effectiveTier = await resolveVerifiedTier(wixAccessToken) !== "member"
+      ? await resolveVerifiedTier(wixAccessToken)
+      : (wixAccessToken ? "member" : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member"));
 
     // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
     const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")

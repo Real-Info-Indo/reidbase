@@ -746,7 +746,7 @@ function buildPersonalisationBlock(personalisation?: { nickname?: string; occupa
 }
 
 function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
-  const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : "Freemium";
+  const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
   const modePrompt = MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"];
   const personalisationBlock = buildPersonalisationBlock(personalisation);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.

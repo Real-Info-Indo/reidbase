@@ -839,6 +839,7 @@ serve(async (req) => {
     const effectiveTier = wixAccessToken
       ? wixTier
       : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member");
+    console.log("Tier resolution:", { wixAccessToken: !!wixAccessToken, wixTier, requestTier, effectiveTier });
 
     // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
     const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")

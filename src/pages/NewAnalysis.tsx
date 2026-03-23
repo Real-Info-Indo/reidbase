@@ -431,9 +431,14 @@ export default function NewAnalysis() {
 
   const sendWithTenure = async (input: string, tenure?: string) => {
     if (!input.trim() || isLoading) return;
-    if (limitReached) return;
-    const newCount = isFreemium ? incrementDailyPromptCount() : dailyPromptCount;
-    if (isFreemium) setDailyPromptCount(newCount);
+    // Check limit using fresh localStorage data to avoid stale closure issues
+    if (isFreemium) {
+      const currentData = getDailyPromptData();
+      if (currentData.count >= DAILY_LIMIT) {
+        setDailyPromptCount(currentData.count);
+        return;
+      }
+    }
     trackFeature("chat_message_sent", { search_mode: searchMode });
 
     // Append tenure context if provided

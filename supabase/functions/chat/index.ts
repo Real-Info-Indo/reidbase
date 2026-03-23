@@ -751,6 +751,8 @@ function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: str
   const personalisationBlock = buildPersonalisationBlock(personalisation);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
+CRITICAL — CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
+
 ${GLOBAL_RULES}
 
 

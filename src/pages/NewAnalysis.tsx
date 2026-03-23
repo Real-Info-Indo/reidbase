@@ -456,6 +456,11 @@ export default function NewAnalysis() {
     setMessages(newMessages);
     setQuery("");
     setIsLoading(true);
+    // Increment prompt count AFTER the message is committed
+    if (isFreemium) {
+      const newCount = incrementDailyPromptCount();
+      setDailyPromptCount(newCount);
+    }
 
     // Read attached files as text
     let parsedFiles: {name: string;content: string;}[] | undefined;

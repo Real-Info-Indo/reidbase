@@ -834,10 +834,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Verify tier server-side against Wix; fall back to request body tier (for testing) or "member"
-    const effectiveTier = await resolveVerifiedTier(wixAccessToken) !== "member"
-      ? await resolveVerifiedTier(wixAccessToken)
-      : (wixAccessToken ? "member" : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member"));
+    // Verify tier server-side against Wix; if no token, fall back to request body tier (for testing/dev)
+    const wixTier = await resolveVerifiedTier(wixAccessToken);
+    const effectiveTier = wixAccessToken
+      ? wixTier
+      : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member");
 
     // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
     const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")

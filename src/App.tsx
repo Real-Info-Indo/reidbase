@@ -17,6 +17,7 @@ import WixCallback from "./pages/WixCallback";
 import NotFound from "./pages/NotFound";
 import ImportData from "./pages/ImportData";
 import ChatWidget from "./pages/ChatWidget";
+import ChatWidgetMinimal from "./pages/ChatWidgetMinimal";
 import AdminChatLogs from "./pages/AdminChatLogs";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminAppraisals from "./pages/AdminAppraisals";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/callback" element={<WixCallback />} />
               <Route path="/widget" element={<ChatWidget />} />
+              <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
               <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
                 <Route path="/" element={<NewAnalysis />} />
                 <Route path="/dashboard" element={<Dashboard />} />

@@ -47,7 +47,7 @@ export default function ChatWidget() {
           width: "100%",
           height: "50px",
           background: "#ffffff",
-          borderRadius: "9999px",
+          borderRadius: "5px",
           boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
           padding: "0 6px 0 20px",
         }}
@@ -75,7 +75,7 @@ export default function ChatWidget() {
           style={{
             flexShrink: 0,
             height: "36px",
-            borderRadius: "9999px",
+            borderRadius: "5px",
             background: prompt.trim() ? "hsl(36, 97%, 74%)" : "#e0d5c0",
             border: "none",
             display: "flex",
@@ -86,7 +86,7 @@ export default function ChatWidget() {
             padding: "0 16px",
             gap: "6px",
             fontFamily: "Poppins, sans-serif",
-            fontWeight: 700,
+            fontWeight: 400,
             fontSize: "13px",
             color: "#1a1a1a",
           }}
@@ -96,7 +96,7 @@ export default function ChatWidget() {
       </div>
 
       {/* Quick buttons */}
-      <div style={{ display: "flex", gap: "8px" }}>
+      <div style={{ display: "flex", gap: "8px", alignSelf: "flex-start" }}>
         {quickButtons.map((btn) => (
           <button
             key={btn.label}
@@ -106,9 +106,9 @@ export default function ChatWidget() {
               alignItems: "center",
               gap: "6px",
               padding: "6px 14px",
-              borderRadius: "9999px",
+              borderRadius: "3px",
               border: "none",
-              background: "rgba(232, 168, 56, 0.15)",
+              background: "#FFE3BB",
               color: "hsl(36, 97%, 44%)",
               fontSize: "12px",
               fontFamily: "Poppins, sans-serif",
@@ -116,8 +116,8 @@ export default function ChatWidget() {
               cursor: "pointer",
               transition: "background 0.2s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(232, 168, 56, 0.25)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(232, 168, 56, 0.15)")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5d49a")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#FFE3BB")}
           >
             <btn.icon style={{ width: "14px", height: "14px" }} />
             {btn.label}

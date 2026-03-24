@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { TrendingUp, Globe, PieChart } from "lucide-react";
+import { TrendingUp, BarChart3, Calculator } from "lucide-react";
 
 const FULL_APP_URL = "https://reidbase.lovable.app";
 
 const quickButtons = [
   { label: "Trends", icon: TrendingUp, prompt: "What are the latest property market trends in Bali?" },
-  { label: "Markets", icon: Globe, prompt: "Give me an overview of the current Bali property market" },
-  { label: "Yield", icon: PieChart, prompt: "What are the current yield figures across Bali locations?" },
+  { label: "Markets", icon: BarChart3, prompt: "Give me an overview of the current Bali property market" },
+  { label: "Yield", icon: Calculator, prompt: "What are the current yield figures across Bali locations?" },
 ];
 
 export default function ChatWidget() {
@@ -48,7 +48,7 @@ export default function ChatWidget() {
           height: "50px",
           background: "#ffffff",
           borderRadius: "5px",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
           padding: "0 6px 0 20px",
         }}
       >
@@ -76,7 +76,7 @@ export default function ChatWidget() {
             flexShrink: 0,
             height: "36px",
             borderRadius: "5px",
-            background: prompt.trim() ? "hsl(36, 97%, 74%)" : "#e0d5c0",
+            background: "hsl(36, 97%, 74%)",
             border: "none",
             display: "flex",
             alignItems: "center",
@@ -86,7 +86,7 @@ export default function ChatWidget() {
             padding: "0 16px",
             gap: "6px",
             fontFamily: "Poppins, sans-serif",
-            fontWeight: 400,
+            fontWeight: 500,
             fontSize: "13px",
             color: "#1a1a1a",
           }}
@@ -108,16 +108,16 @@ export default function ChatWidget() {
               padding: "6px 14px",
               borderRadius: "3px",
               border: "none",
-              background: "#FFE3BB",
-              color: "hsl(36, 97%, 44%)",
+              background: "#e8e8e8",
+              color: "#555",
               fontSize: "12px",
               fontFamily: "Poppins, sans-serif",
-              fontWeight: 700,
+              fontWeight: 300,
               cursor: "pointer",
               transition: "background 0.2s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f5d49a")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#FFE3BB")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#d9d9d9")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#e8e8e8")}
           >
             <btn.icon style={{ width: "14px", height: "14px" }} />
             {btn.label}

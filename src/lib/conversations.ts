@@ -1,4 +1,4 @@
-export type Msg = { role: "user" | "assistant"; content: string };
+export type Msg = { role: "user" | "assistant"; content: string; mode?: string };
 
 export interface Folder {
   id: string;

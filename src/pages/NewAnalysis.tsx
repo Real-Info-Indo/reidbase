@@ -482,7 +482,7 @@ export default function NewAnalysis() {
         if (last?.role === "assistant") {
           return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
         }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
+        return [...prev, { role: "assistant", content: assistantSoFar, mode: searchMode }];
       });
     };
 
@@ -499,7 +499,7 @@ export default function NewAnalysis() {
       console.error(e);
       setIsLoading(false);
       if (!assistantSoFar) {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again." }]);
+        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again.", mode: searchMode }]);
       }
     }
   };

@@ -204,13 +204,14 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
                 <Search className="h-3.5 w-3.5" />
                 Recent Analysis
               </div>
+              {(tier === "reid_base_pro" || tier === "enterprise") && (
               <button
               onClick={handleCreateFolder}
               className="p-1 rounded hover:bg-sidebar-accent transition-colors text-sidebar-muted hover:text-sidebar-foreground"
               title="New folder">
-
                 <FolderPlus className="h-3.5 w-3.5" />
               </button>
+              )}
             </div>
 
             {/* Folders */}

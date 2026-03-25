@@ -763,6 +763,11 @@ export default function NewAnalysis() {
             );
             return (
               <div key={i} ref={isLastAi ? latestAiRef : undefined} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
+                {m.role === "assistant" && (
+                  <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "8px", letterSpacing: "0.05em" }} className="text-muted-foreground mb-1 ml-1 uppercase">
+                    REID {searchModes.find(sm => sm.id === m.mode)?.label || "Data analyst"}
+                  </span>
+                )}
                 <div
                   className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
                   m.role === "user" ?

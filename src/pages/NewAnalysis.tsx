@@ -772,7 +772,7 @@ export default function NewAnalysis() {
                   className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
                   m.role === "user" ?
                   "bg-[#ffe3bb] text-foreground rounded-br-md" :
-                  "bg-card border border-border rounded-bl-md"}`
+                  "bg-transparent rounded-bl-md"}`
                   }>
 
                   {m.role === "assistant" ?

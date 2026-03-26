@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { useTier } from "@/contexts/TierContext";
 import { toast } from "@/hooks/use-toast";
+import { trackFeature } from "@/lib/analytics";
 
 const SESSION_KEY = "reid-session-id";
 const POLL_INTERVAL = 15_000; // 15 seconds
@@ -56,6 +57,10 @@ export function useSessionEnforcement() {
 
       if (data && data.session_id !== sessionId.current) {
         // Another device has taken over
+        trackFeature("session_kicked", {
+          kicked_session_id: sessionId.current,
+          new_session_id: data.session_id,
+        });
         toast({
           title: "Session ended",
           description:

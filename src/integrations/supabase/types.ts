@@ -305,6 +305,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen: string
+          session_id: string
+          wix_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          session_id: string
+          wix_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          session_id?: string
+          wix_user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

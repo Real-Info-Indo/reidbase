@@ -3,11 +3,15 @@ import { Outlet } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSessionEnforcement } from "@/hooks/useSessionEnforcement";
 import reidLogo from "@/assets/REID_Black.svg";
 
 export function AppLayout() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Enforce single-device sessions for paid tiers
+  useSessionEnforcement();
 
   return (
     <div className="flex min-h-screen w-full relative">

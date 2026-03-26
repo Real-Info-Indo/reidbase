@@ -57,6 +57,10 @@ export function useSessionEnforcement() {
 
       if (data && data.session_id !== sessionId.current) {
         // Another device has taken over
+        trackFeature("session_kicked", {
+          kicked_session_id: sessionId.current,
+          new_session_id: data.session_id,
+        });
         toast({
           title: "Session ended",
           description:

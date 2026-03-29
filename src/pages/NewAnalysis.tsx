@@ -572,7 +572,10 @@ export default function NewAnalysis() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {searchModes.map((mode) => {
-          const isLocked = mode.id !== "data-analyst" && tier !== "enterprise";
+          const isLocked = mode.id !== "data-analyst"
+            && mode.id !== "sales-assistant"
+              ? tier !== "enterprise"
+              : (mode.id === "sales-assistant" && tier !== "enterprise" && tier !== "reid_base_pro");
           return (
             <DropdownMenuItem
               key={mode.id}

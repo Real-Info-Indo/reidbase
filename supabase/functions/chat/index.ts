@@ -850,7 +850,8 @@ async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
   }
 }
 
-const ENTERPRISE_ONLY_MODES = ["sales-assistant", "marketing-assistant", "portfolio-analyst"];
+const ENTERPRISE_ONLY_MODES = ["marketing-assistant", "portfolio-analyst"];
+const PRO_AND_ENTERPRISE_MODES = ["sales-assistant"];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -867,10 +868,13 @@ serve(async (req) => {
       : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member");
     console.log("Tier resolution:", { wixAccessToken: !!wixAccessToken, wixTier, requestTier, effectiveTier });
 
-    // Enforce Enterprise-only modes — downgrade to data-analyst if tier doesn't qualify
-    const effectiveSearchMode = (ENTERPRISE_ONLY_MODES.includes(searchMode) && effectiveTier !== "enterprise")
-      ? "data-analyst"
-      : (searchMode || "data-analyst");
+    // Enforce mode access by tier
+    let effectiveSearchMode = searchMode || "data-analyst";
+    if (ENTERPRISE_ONLY_MODES.includes(effectiveSearchMode) && effectiveTier !== "enterprise") {
+      effectiveSearchMode = "data-analyst";
+    } else if (PRO_AND_ENTERPRISE_MODES.includes(effectiveSearchMode) && effectiveTier !== "enterprise" && effectiveTier !== "reid_base_pro") {
+      effectiveSearchMode = "data-analyst";
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

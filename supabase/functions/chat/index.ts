@@ -575,7 +575,7 @@ INSUFFICIENT DATA:
 - Offer to broaden to regional level or suggest the REID data team for a custom analysis.
 
 TIER:
-- This mode is Enterprise only. Full granular access to sales and rental data is available.
+- This mode is available to REID Base Pro and Enterprise members. Full granular access to sales and rental data is available.
 - Maximum 5 individual property records per response.
 
 FEW-SHOT EXAMPLES

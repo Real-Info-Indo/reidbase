@@ -3,6 +3,74 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
+/* ── URL scraping utilities ── */
+const URL_REGEX = /https?:\/\/[^\s<>"')\]]+/gi;
+
+function extractUrls(text: string): string[] {
+  const matches = text.match(URL_REGEX) || [];
+  return [...new Set(matches)].slice(0, 3);
+}
+
+function extractTextFromHtml(html: string): string {
+  // Remove script, style, and other non-content tags
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<svg[\s\S]*?<\/svg>/gi, "")
+    .replace(/<header[\s\S]*?<\/header>/gi, "");
+  // Strip remaining HTML tags
+  cleaned = cleaned.replace(/<[^>]+>/g, " ");
+  // Decode common HTML entities
+  cleaned = cleaned
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'");
+  // Collapse whitespace
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  return cleaned.slice(0, 4000);
+}
+
+async function scrapeUrl(url: string): Promise<{ url: string; content: string } | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, {
+      headers: { "User-Agent": "REID-Bot/1.0 (property market intelligence)" },
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) return null;
+    const contentType = resp.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+    const html = await resp.text();
+    const text = extractTextFromHtml(html);
+    if (text.length < 50) return null;
+    return { url, content: text };
+  } catch (e) {
+    console.warn("URL scrape failed:", url, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+async function scrapeUrlsFromMessage(text: string): Promise<string> {
+  const urls = extractUrls(text);
+  if (urls.length === 0) return "";
+  const results = await Promise.all(urls.map(scrapeUrl));
+  const successful = results.filter(Boolean) as { url: string; content: string }[];
+  if (successful.length === 0) return "";
+  return successful
+    .map(r => `--- Website Content: ${r.url} ---\n${r.content}\n--- End of ${r.url} ---`)
+    .join("\n\n");
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -13,7 +81,9 @@ const MASTER_GOVERNANCE_IDENTITY = `
 IDENTITY:
 You are REID. You are not an AI assistant, a chatbot, or an agent. You do not use a personal name or adopt a persona. If asked what you are, respond: "REID is your home for Bali property market intelligence — data-driven insights across sales, rental performance, pricing, and market trends across the island."
 
-You are not a property registry, a listing service, or a transaction record. Only use the following response when a user asks about a specific named property, specific address, or individual sale record: "REID provides market-level intelligence rather than individual property records. For specific property information, speak directly with a local agent or developer." Do not use this response as a default opener for market data queries, location queries, or any question about pricing, occupancy, ADR, supply, or yield.
+You are not a property registry, a listing service, or a transaction record. Only use the following response when a user asks about a specific named property, specific address, or individual sale record AND no website content has been provided: "REID provides market-level intelligence rather than individual property records. For specific property information, speak directly with a local agent or developer." Do not use this response as a default opener for market data queries, location queries, or any question about pricing, occupancy, ADR, supply, or yield.
+
+EXCEPTION — WEBSITE CONTENT: When the user's message includes "[WEBSITE CONTENT FROM LINKS]", they have shared a property listing URL. In this case, extract the relevant details (location, bedrooms, price, land size, build size, lease term, property type) from the scraped website content and compare those details against REID market data for that location and typology. Provide a data-driven comparison covering price benchmarks, price per SQM, rental yield potential, and how the property sits relative to market medians. Do not refuse these requests.
 
 All insights are presented as REID's native market knowledge. Never cite internal source files, RAG documents, or CSV sources. External third-party sources may be cited where directly relevant.
 `;
@@ -892,6 +962,20 @@ serve(async (req) => {
           ...enrichedMessages[lastIdx],
           content: `${enrichedMessages[lastIdx].content}\n\n[USER ATTACHED FILES - Analyze these alongside the database]\n${fileContext}`,
         };
+      }
+    }
+
+    // Scrape any URLs found in the latest user message
+    const lastUserMsg = enrichedMessages[enrichedMessages.length - 1];
+    if (lastUserMsg?.role === "user") {
+      const scrapedContent = await scrapeUrlsFromMessage(lastUserMsg.content);
+      if (scrapedContent) {
+        const lastIdx = enrichedMessages.length - 1;
+        enrichedMessages[lastIdx] = {
+          ...enrichedMessages[lastIdx],
+          content: `${enrichedMessages[lastIdx].content}\n\n[WEBSITE CONTENT FROM LINKS - Use this information to compare against REID market data]\n${scrapedContent}`,
+        };
+        console.log("Scraped URL content injected into context");
       }
     }
 

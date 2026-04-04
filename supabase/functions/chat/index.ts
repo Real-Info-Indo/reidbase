@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { DOMParser } from "https://esm.sh/linkedom@0.16.11";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -9,21 +8,33 @@ const URL_REGEX = /https?:\/\/[^\s<>"')\]]+/gi;
 
 function extractUrls(text: string): string[] {
   const matches = text.match(URL_REGEX) || [];
-  // Deduplicate and limit to 3 URLs max
   return [...new Set(matches)].slice(0, 3);
 }
 
 function extractTextFromHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  // Remove script, style, nav, footer, header elements
-  for (const tag of ["script", "style", "nav", "footer", "header", "noscript", "svg"]) {
-    for (const el of doc.querySelectorAll(tag)) el.remove();
-  }
-  const text = (doc.body?.textContent || doc.documentElement?.textContent || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  // Cap at ~4000 chars to avoid context bloat
-  return text.slice(0, 4000);
+  // Remove script, style, and other non-content tags
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<svg[\s\S]*?<\/svg>/gi, "")
+    .replace(/<header[\s\S]*?<\/header>/gi, "");
+  // Strip remaining HTML tags
+  cleaned = cleaned.replace(/<[^>]+>/g, " ");
+  // Decode common HTML entities
+  cleaned = cleaned
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'");
+  // Collapse whitespace
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  return cleaned.slice(0, 4000);
 }
 
 async function scrapeUrl(url: string): Promise<{ url: string; content: string } | null> {

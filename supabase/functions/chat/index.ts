@@ -1,7 +1,64 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { DOMParser } from "https://esm.sh/linkedom@0.16.11";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
+
+/* ── URL scraping utilities ── */
+const URL_REGEX = /https?:\/\/[^\s<>"')\]]+/gi;
+
+function extractUrls(text: string): string[] {
+  const matches = text.match(URL_REGEX) || [];
+  // Deduplicate and limit to 3 URLs max
+  return [...new Set(matches)].slice(0, 3);
+}
+
+function extractTextFromHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  // Remove script, style, nav, footer, header elements
+  for (const tag of ["script", "style", "nav", "footer", "header", "noscript", "svg"]) {
+    for (const el of doc.querySelectorAll(tag)) el.remove();
+  }
+  const text = (doc.body?.textContent || doc.documentElement?.textContent || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  // Cap at ~4000 chars to avoid context bloat
+  return text.slice(0, 4000);
+}
+
+async function scrapeUrl(url: string): Promise<{ url: string; content: string } | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, {
+      headers: { "User-Agent": "REID-Bot/1.0 (property market intelligence)" },
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) return null;
+    const contentType = resp.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+    const html = await resp.text();
+    const text = extractTextFromHtml(html);
+    if (text.length < 50) return null;
+    return { url, content: text };
+  } catch (e) {
+    console.warn("URL scrape failed:", url, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+async function scrapeUrlsFromMessage(text: string): Promise<string> {
+  const urls = extractUrls(text);
+  if (urls.length === 0) return "";
+  const results = await Promise.all(urls.map(scrapeUrl));
+  const successful = results.filter(Boolean) as { url: string; content: string }[];
+  if (successful.length === 0) return "";
+  return successful
+    .map(r => `--- Website Content: ${r.url} ---\n${r.content}\n--- End of ${r.url} ---`)
+    .join("\n\n");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

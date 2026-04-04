@@ -952,6 +952,20 @@ serve(async (req) => {
       }
     }
 
+    // Scrape any URLs found in the latest user message
+    const lastUserMsg = enrichedMessages[enrichedMessages.length - 1];
+    if (lastUserMsg?.role === "user") {
+      const scrapedContent = await scrapeUrlsFromMessage(lastUserMsg.content);
+      if (scrapedContent) {
+        const lastIdx = enrichedMessages.length - 1;
+        enrichedMessages[lastIdx] = {
+          ...enrichedMessages[lastIdx],
+          content: `${enrichedMessages[lastIdx].content}\n\n[WEBSITE CONTENT FROM LINKS - Use this information to compare against REID market data]\n${scrapedContent}`,
+        };
+        console.log("Scraped URL content injected into context");
+      }
+    }
+
     const userMessage = enrichedMessages[enrichedMessages.length - 1]?.content || "";
 
     // Enterprise tier: use Pro RAG + analytical (database queries)

@@ -671,7 +671,7 @@ export default function NewAnalysis() {
         </div>
       }
 
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-8 py-12 bg-background relative">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-3 md:px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
              <p className="text-base md:text-xl text-muted-foreground font-light mb-1">
@@ -772,10 +772,10 @@ export default function NewAnalysis() {
                   </span>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm ${
+                  className={`rounded-2xl px-5 py-3 text-sm ${
                   m.role === "user" ?
-                  "bg-[#ffe3bb] text-foreground rounded-br-md" :
-                  "bg-transparent rounded-bl-md"}`
+                  "max-w-[80%] bg-[#ffe3bb] text-foreground rounded-br-md" :
+                  "w-full bg-transparent rounded-bl-md"}`
                   }>
 
                   {m.role === "assistant" ?

@@ -508,6 +508,9 @@ export default function NewAnalysis() {
     if (!input.trim() || isLoading) return;
     // Check if we need tenure clarification
     if (needsTenureClarification(input, clarifiedLocations)) {
+      // Add user message so the conversation view activates and the tenure popup is visible
+      const userMsg: Msg = { role: "user", content: input };
+      setMessages((prev) => [...prev, userMsg]);
       setQuery("");
       setPendingTenureQuery(input);
       return;

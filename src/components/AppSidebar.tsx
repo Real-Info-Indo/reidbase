@@ -13,7 +13,7 @@ import { useWixAuth } from "@/contexts/WixAuthContext";
 import { cn } from "@/lib/utils";
 import {
   getConversations, deleteConversation, getFolders, createFolder,
-  renameFolder, deleteFolder, moveToFolder,
+  renameFolder, deleteFolder, moveToFolder, renameConversation,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
 import {
@@ -42,6 +42,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
   const [folderRenameValue, setFolderRenameValue] = useState("");
+  const [renamingConvoId, setRenamingConvoId] = useState<string | null>(null);
+  const [convoRenameValue, setConvoRenameValue] = useState("");
   const activeConvoId = searchParams.get("c");
 
   const refresh = () => {
@@ -112,6 +114,15 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const unfolderedConvos = conversations.filter((c) => !c.folderId);
   const convosInFolder = (folderId: string) => conversations.filter((c) => c.folderId === folderId);
 
+  const submitConvoRename = (id: string) => {
+    if (convoRenameValue.trim()) {
+      renameConversation(id, convoRenameValue.trim());
+      refresh();
+      window.dispatchEvent(new Event("conversations-updated"));
+    }
+    setRenamingConvoId(null);
+  };
+
   const ConvoItem = ({ convo }: {convo: Conversation;}) =>
   <div
     className={cn(
@@ -121,9 +132,21 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
     )}>
 
-      <button onClick={() => openConvo(convo.id)} className="flex items-center gap-2 flex-1 min-w-0">
+      <button onClick={() => openConvo(convo.id)} className="flex items-center gap-2 flex-1 min-w-0 text-left">
         {convo.pinned ? <Pin className="h-3.5 w-3.5 shrink-0 text-primary" /> : <MessageSquare className="h-3.5 w-3.5 shrink-0" />}
-        <span className="truncate flex-1">{convo.title}</span>
+        {renamingConvoId === convo.id ? (
+          <input
+            value={convoRenameValue}
+            onChange={(e) => setConvoRenameValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") submitConvoRename(convo.id); if (e.key === "Escape") setRenamingConvoId(null); }}
+            onBlur={() => submitConvoRename(convo.id)}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-transparent border-b border-primary/50 focus:outline-none text-xs w-full text-left"
+            autoFocus
+          />
+        ) : (
+          <span className="truncate flex-1 text-left">{convo.title}</span>
+        )}
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -132,8 +155,13 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-popover min-w-[140px]">
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setRenamingConvoId(convo.id); setConvoRenameValue(convo.title); }} className="cursor-pointer text-xs">
+            <Pencil className="h-3.5 w-3.5 mr-2" />
+            Rename
+          </DropdownMenuItem>
           {folders.length > 0 &&
         <>
+              <DropdownMenuSeparator />
               {folders.map((f) =>
           <DropdownMenuItem key={f.id} onClick={() => handleMoveToFolder(convo.id, f.id)} className="cursor-pointer text-xs">
                   <Folder className="h-3.5 w-3.5 mr-2" />
@@ -146,9 +174,9 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
                   Remove from folder
                 </DropdownMenuItem>
           }
-              <DropdownMenuSeparator />
             </>
         }
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={(e) => {e.stopPropagation();handleDelete(e as unknown as React.MouseEvent, convo.id);}} className="cursor-pointer text-xs text-destructive">
             <Trash2 className="h-3.5 w-3.5 mr-2" />
             Delete

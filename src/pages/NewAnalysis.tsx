@@ -429,7 +429,7 @@ export default function NewAnalysis() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendWithTenure = async (input: string, tenure?: string) => {
+  const sendWithTenure = async (input: string, tenure?: string, skipAddUserMsg = false) => {
     if (!input.trim() || isLoading) return;
     // Check limit using fresh localStorage data to avoid stale closure issues
     if (isFreemium) {
@@ -451,9 +451,9 @@ export default function NewAnalysis() {
     const userMsg: Msg = { role: "user", content: input };
     const msgForAI: Msg = { role: "user", content: enrichedInput };
 
-    const newMessages = [...messages, userMsg];
-    const aiMessages = [...messages, msgForAI];
-    setMessages(newMessages);
+    const newMessages = skipAddUserMsg ? [...messages] : [...messages, userMsg];
+    const aiMessages = skipAddUserMsg ? [...messages.slice(0, -1), msgForAI] : [...messages, msgForAI];
+    if (!skipAddUserMsg) setMessages(newMessages);
     setQuery("");
     setIsLoading(true);
     // Increment prompt count AFTER the message is committed

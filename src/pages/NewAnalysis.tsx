@@ -530,6 +530,12 @@ export default function NewAnalysis() {
     });
     setPendingTenureQuery(null);
     setSelectedTenure(null);
+    // Remove the placeholder user message before sendWithTenure adds its own
+    setMessages((prev) => {
+      const last = prev[prev.length - 1];
+      if (last?.role === "user" && last.content === q) return prev.slice(0, -1);
+      return prev;
+    });
     sendWithTenure(q, tenure);
   };
 

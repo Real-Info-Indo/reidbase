@@ -817,6 +817,7 @@ export default function NewAnalysis() {
                       })()}
                     </div>
                   ) : null}
+                  {m.role === "assistant" ? (
                    <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-5 prose-headings:mb-2 prose-ul:ml-5 prose-ol:ml-5 prose-li:mb-1 prose-hr:my-4" style={{ lineHeight: 1.6 }}>
                        <ReactMarkdown
                        components={{
@@ -869,10 +870,8 @@ export default function NewAnalysis() {
                           },
                         }}>
                        {m.content}</ReactMarkdown>
-                     </div> :
-
-                  m.content
-                  }
+                     </div>
+                  ) : null}
                 </div>
                 {m.role === "assistant" && !isLoading && (
                   <div className="flex items-center gap-1 mt-1.5">

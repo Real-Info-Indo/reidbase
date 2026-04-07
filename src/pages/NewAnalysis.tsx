@@ -704,7 +704,7 @@ export default function NewAnalysis() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Ask REID..."
-              className="w-full min-h-[120px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70" />
+              className="w-full min-h-[120px] max-h-[300px] rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70 overflow-y-auto" />
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <PlusMenu />
@@ -787,7 +787,37 @@ export default function NewAnalysis() {
                   "w-full bg-transparent rounded-bl-md"}`
                   }>
 
-                  {m.role === "assistant" ?
+                  {m.role === "user" ? (
+                    <div className="whitespace-pre-wrap">
+                      {(() => {
+                        const lines = m.content.split("\n");
+                        const result: React.ReactNode[] = [];
+                        let bulletBuffer: string[] = [];
+                        const flushBullets = () => {
+                          if (bulletBuffer.length > 0) {
+                            result.push(
+                              <ul key={`ul-${result.length}`} className="list-disc pl-5 my-1 space-y-0.5">
+                                {bulletBuffer.map((b, bi) => <li key={bi}>{b}</li>)}
+                              </ul>
+                            );
+                            bulletBuffer = [];
+                          }
+                        };
+                        lines.forEach((line, li) => {
+                          const bulletMatch = line.match(/^\s*[-–—•]\s+(.*)$/);
+                          if (bulletMatch) {
+                            bulletBuffer.push(bulletMatch[1]);
+                          } else {
+                            flushBullets();
+                            result.push(<span key={li}>{line}{li < lines.length - 1 ? "\n" : ""}</span>);
+                          }
+                        });
+                        flushBullets();
+                        return result;
+                      })()}
+                    </div>
+                  ) : null}
+                  {m.role === "assistant" ? (
                    <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-5 prose-headings:mb-2 prose-ul:ml-5 prose-ol:ml-5 prose-li:mb-1 prose-hr:my-4" style={{ lineHeight: 1.6 }}>
                        <ReactMarkdown
                        components={{
@@ -840,10 +870,8 @@ export default function NewAnalysis() {
                           },
                         }}>
                        {m.content}</ReactMarkdown>
-                     </div> :
-
-                  m.content
-                  }
+                     </div>
+                  ) : null}
                 </div>
                 {m.role === "assistant" && !isLoading && (
                   <div className="flex items-center gap-1 mt-1.5">
@@ -1050,13 +1078,13 @@ export default function NewAnalysis() {
             <div className="relative">
               <textarea
               value={query}
-              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";e.target.style.height = e.target.scrollHeight + "px";}}
+              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";}}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
               disabled={isLoading}
               rows={1}
-              className="w-full rounded-xl border border-border px-5 py-3 pb-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
-              style={{ minHeight: "56px" }} />
+              className="w-full rounded-xl border border-border px-5 py-3 pb-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
+              style={{ minHeight: "56px", maxHeight: "200px" }} />
 
               <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">

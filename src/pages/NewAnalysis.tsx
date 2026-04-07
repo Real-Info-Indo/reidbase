@@ -787,7 +787,36 @@ export default function NewAnalysis() {
                   "w-full bg-transparent rounded-bl-md"}`
                   }>
 
-                  {m.role === "assistant" ?
+                  {m.role === "user" ? (
+                    <div className="whitespace-pre-wrap">
+                      {(() => {
+                        const lines = m.content.split("\n");
+                        const result: React.ReactNode[] = [];
+                        let bulletBuffer: string[] = [];
+                        const flushBullets = () => {
+                          if (bulletBuffer.length > 0) {
+                            result.push(
+                              <ul key={`ul-${result.length}`} className="list-disc pl-5 my-1 space-y-0.5">
+                                {bulletBuffer.map((b, bi) => <li key={bi}>{b}</li>)}
+                              </ul>
+                            );
+                            bulletBuffer = [];
+                          }
+                        };
+                        lines.forEach((line, li) => {
+                          const bulletMatch = line.match(/^\s*[-–—•]\s+(.*)$/);
+                          if (bulletMatch) {
+                            bulletBuffer.push(bulletMatch[1]);
+                          } else {
+                            flushBullets();
+                            result.push(<span key={li}>{line}{li < lines.length - 1 ? "\n" : ""}</span>);
+                          }
+                        });
+                        flushBullets();
+                        return result;
+                      })()}
+                    </div>
+                  ) : null}
                    <div className="ai-response prose prose-sm max-w-none dark:prose-invert prose-p:mb-4 prose-headings:mt-5 prose-headings:mb-2 prose-ul:ml-5 prose-ol:ml-5 prose-li:mb-1 prose-hr:my-4" style={{ lineHeight: 1.6 }}>
                        <ReactMarkdown
                        components={{

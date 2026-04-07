@@ -704,12 +704,14 @@ export default function NewAnalysis() {
               onChange={(e) => {
                 setQuery(e.target.value);
                 e.target.style.height = "auto";
-                e.target.style.height = Math.min(e.target.scrollHeight, 300) + "px";
+                const maxH = 300;
+                e.target.style.height = Math.min(e.target.scrollHeight, maxH) + "px";
+                e.target.style.overflowY = e.target.scrollHeight > maxH ? "auto" : "hidden";
               }}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Ask REID..."
               className="w-full rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70 overflow-y-auto"
-              style={{ minHeight: "120px", maxHeight: "300px" }} />
+              style={{ minHeight: "120px", maxHeight: "300px", paddingBottom: "56px" }} />
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <PlusMenu />
@@ -1083,13 +1085,13 @@ export default function NewAnalysis() {
             <div className="relative">
               <textarea
               value={query}
-              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";}}
+              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";const maxH = 200;e.target.style.height = Math.min(e.target.scrollHeight, maxH) + "px";e.target.style.overflowY = e.target.scrollHeight > maxH ? "auto" : "hidden";}}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
               disabled={isLoading}
               rows={1}
-              className="w-full rounded-xl border border-border px-5 py-3 pb-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
-              style={{ minHeight: "56px", maxHeight: "200px" }} />
+              className="w-full rounded-xl border border-border px-5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
+              style={{ minHeight: "56px", maxHeight: "200px", paddingBottom: "48px" }} />
 
               <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">

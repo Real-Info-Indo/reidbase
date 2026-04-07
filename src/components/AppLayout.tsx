@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
-import { PersistentDashboard } from "./PersistentDashboard";
+import { PersistentDashboard, type PersistentDashboardHandle } from "./PersistentDashboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSessionEnforcement } from "@/hooks/useSessionEnforcement";
 import reidLogo from "@/assets/REID_Black.svg";
@@ -12,6 +12,7 @@ export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isDashboard = location.pathname === "/dashboard";
+  const dashboardRef = useRef<PersistentDashboardHandle>(null);
 
   // Enforce single-device sessions for paid tiers
   useSessionEnforcement();
@@ -54,11 +55,11 @@ export function AppLayout() {
       {/* Main content */}
       <main className={`flex-1 overflow-auto bg-background relative ${isMobile ? "pt-14" : ""}`}>
         {/* Persistent dashboard iframe (hidden when not on /dashboard) */}
-        {!isMobile && <PersistentDashboard visible={isDashboard} />}
+        {!isMobile && <PersistentDashboard ref={dashboardRef} visible={isDashboard} />}
 
         {/* Normal routed content - hide when dashboard is active on desktop */}
         <div style={isDashboard && !isMobile ? { visibility: "hidden" } : undefined}>
-          <Outlet />
+          <Outlet context={{ dashboardRef }} />
         </div>
       </main>
     </div>

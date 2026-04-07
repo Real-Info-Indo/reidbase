@@ -709,7 +709,7 @@ export default function NewAnalysis() {
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Ask REID..."
               className="w-full rounded-xl border border-border bg-card p-5 pb-14 pr-14 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70 overflow-y-auto"
-              style={{ minHeight: "120px", maxHeight: "300px" }} />
+              style={{ minHeight: "120px", maxHeight: "300px", paddingBottom: "56px" }} />
 
               <div className="absolute bottom-4 left-4 flex items-center gap-2">
                 <PlusMenu />
@@ -1088,8 +1088,8 @@ export default function NewAnalysis() {
               placeholder="Enter a prompt..."
               disabled={isLoading}
               rows={1}
-              className="w-full rounded-xl border border-border px-5 py-3 pb-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
-              style={{ minHeight: "56px", maxHeight: "200px" }} />
+              className="w-full rounded-xl border border-border px-5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
+              style={{ minHeight: "56px", maxHeight: "200px", paddingBottom: "48px" }} />
 
               <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">

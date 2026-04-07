@@ -704,7 +704,9 @@ export default function NewAnalysis() {
               onChange={(e) => {
                 setQuery(e.target.value);
                 e.target.style.height = "auto";
-                e.target.style.height = Math.min(e.target.scrollHeight, 300) + "px";
+                const maxH = 300;
+                e.target.style.height = Math.min(e.target.scrollHeight, maxH) + "px";
+                e.target.style.overflowY = e.target.scrollHeight > maxH ? "auto" : "hidden";
               }}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Ask REID..."
@@ -1083,7 +1085,7 @@ export default function NewAnalysis() {
             <div className="relative">
               <textarea
               value={query}
-              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";}}
+              onChange={(e) => {setQuery(e.target.value);e.target.style.height = "auto";const maxH = 200;e.target.style.height = Math.min(e.target.scrollHeight, maxH) + "px";e.target.style.overflowY = e.target.scrollHeight > maxH ? "auto" : "hidden";}}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSubmit())}
               placeholder="Enter a prompt..."
               disabled={isLoading}

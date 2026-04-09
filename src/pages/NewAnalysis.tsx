@@ -147,13 +147,21 @@ async function streamChat({
     }
   } catch {}
 
-  // Load Wix access token for server-side tier verification
+  // Load Wix access token and user ID for server-side tier verification and memory
   let wixAccessToken: string | undefined;
+  let wixUserId: string | undefined;
   try {
     const raw = localStorage.getItem("wix-tokens");
     if (raw) {
       const tokens = JSON.parse(raw);
       wixAccessToken = tokens?.accessToken?.value;
+    }
+  } catch {}
+  try {
+    const raw = localStorage.getItem("wix-member");
+    if (raw) {
+      const member = JSON.parse(raw);
+      wixUserId = member?.id;
     }
   } catch {}
 
@@ -163,7 +171,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixAccessToken })
+    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixAccessToken, wixUserId })
   });
 
   if (!resp.ok) {

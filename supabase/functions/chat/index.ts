@@ -1104,7 +1104,8 @@ const PRO_AND_ENTERPRISE_MODES = ["sales-assistant"];
 
 /* ── Cross-conversation memory: fetch past chat summaries for higher tiers ── */
 async function buildUserMemory(supabase: any, wixUserId: string, tier: string, currentConversationId?: string): Promise<string> {
-  const limit = tier === "enterprise" ? 10 : tier === "reid_base_pro" ? 5 : 0;
+  const isEnterprise = tier === "enterprise";
+  const limit = isEnterprise ? 1000 : tier === "reid_base_pro" ? 5 : 0;
   if (limit === 0 || !wixUserId) return "";
 
   try {
@@ -1113,7 +1114,7 @@ async function buildUserMemory(supabase: any, wixUserId: string, tier: string, c
       .select("title, search_mode, messages, updated_at")
       .eq("wix_user_id", wixUserId)
       .order("updated_at", { ascending: false })
-      .limit(limit + 1); // fetch one extra in case we filter out current
+      .limit(limit + 1); // fetch extra in case we filter out current
 
     const { data, error } = await query;
     if (error || !data || data.length === 0) return "";

@@ -325,6 +325,7 @@ export default function NewAnalysis() {
     setMessages([]);
     setConversationId(null);
     setQuery("");
+    setCustomTitle(null);
     const url = new URL(window.location.href);
     url.searchParams.delete("c");
     window.history.replaceState({}, "", url.toString());
@@ -345,6 +346,7 @@ export default function NewAnalysis() {
       setMessages([]);
       setConversationId(null);
       setQuery("");
+      setCustomTitle(null);
     }
   }, [paramConvoId]);
 

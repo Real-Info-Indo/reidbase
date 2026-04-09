@@ -209,7 +209,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       )}
 
       {/* Nav items */}
-      <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto bg-transparent">
+      <nav className="py-4 space-y-1 px-2 bg-transparent shrink-0">
         {navItems.map((item) =>
         <NavLink
           key={item.url}
@@ -223,10 +223,12 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             {!collapsed && <span>{item.title}</span>}
           </NavLink>
         )}
+      </nav>
 
-        {/* Recent conversations */}
-        {!collapsed && conversations.length > 0 &&
-        <div className="mt-8 px-3">
+      {/* Scrollable recent conversations */}
+      {!collapsed && conversations.length > 0 &&
+        <div className="flex-1 min-h-0 overflow-y-auto px-2">
+          <div className="px-3">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sidebar-muted">
                 <Search className="h-3.5 w-3.5" />
@@ -301,15 +303,15 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
           })}
 
-            {/* Unfoldered conversations */}
-            <div className="space-y-0.5">
-              {unfolderedConvos.slice(0, 10).map((convo) =>
+            {/* Unfoldered conversations - no limit */}
+            <div className="space-y-0.5 pb-2">
+              {unfolderedConvos.map((convo) =>
             <ConvoItem key={convo.id} convo={convo} />
             )}
             </div>
           </div>
-        }
-      </nav>
+        </div>
+      }
 
       {/* User profile */}
       <div className="border-t border-sidebar-border p-3">

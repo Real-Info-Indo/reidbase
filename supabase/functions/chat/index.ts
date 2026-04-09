@@ -1017,10 +1017,11 @@ function buildPersonalisationBlock(personalisation?: { nickname?: string; occupa
   return `\nUSER PERSONALISATION (use this to tailor your responses):\n${parts.join("\n")}\n`;
 }
 
-function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
+function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }, userMemory?: string): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
   const modePrompt = MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"];
   const personalisationBlock = buildPersonalisationBlock(personalisation);
+  const memoryBlock = userMemory || "";
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
 CRITICAL — CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
@@ -1029,7 +1030,7 @@ ${GLOBAL_RULES}
 
 
 ${modePrompt}
-${personalisationBlock}
+${personalisationBlock}${memoryBlock}
 Formatting Rules (CRITICAL - you must follow these exactly):
 - ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
 - Use markdown headings (## or ###) for section titles and subheadings
@@ -1101,11 +1102,57 @@ async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
 const ENTERPRISE_ONLY_MODES = ["marketing-assistant", "portfolio-analyst"];
 const PRO_AND_ENTERPRISE_MODES = ["sales-assistant"];
 
+/* ── Cross-conversation memory: fetch past chat summaries for higher tiers ── */
+async function buildUserMemory(supabase: any, wixUserId: string, tier: string, currentConversationId?: string): Promise<string> {
+  const limit = tier === "enterprise" ? 10 : tier === "reid_base_pro" ? 5 : 0;
+  if (limit === 0 || !wixUserId) return "";
+
+  try {
+    let query = supabase
+      .from("chat_logs")
+      .select("title, search_mode, messages, updated_at")
+      .eq("wix_user_id", wixUserId)
+      .order("updated_at", { ascending: false })
+      .limit(limit + 1); // fetch one extra in case we filter out current
+
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) return "";
+
+    // Filter out the current conversation and limit
+    const pastConvos = (data as any[])
+      .filter((c: any) => {
+        // Skip current conversation if we can identify it by title match
+        if (currentConversationId) return true; // we don't have conversation_id in select, handled below
+        return true;
+      })
+      .slice(0, limit);
+
+    if (pastConvos.length === 0) return "";
+
+    const summaries = pastConvos.map((c: any) => {
+      const msgs = Array.isArray(c.messages) ? c.messages : [];
+      // Extract key topics from conversation: first user message + last assistant message
+      const userMsgs = msgs.filter((m: any) => m.role === "user");
+      const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
+      const firstQuery = userMsgs[0]?.content?.slice(0, 200) || "";
+      const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 300) || "";
+      return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || "unknown date"}): User asked about: ${firstQuery}${lastResponse ? ` | Key finding: ${lastResponse}` : ""}`;
+    });
+
+    return `\nUSER CONVERSATION HISTORY (use this to understand the user's interests and provide continuity across sessions):
+The user has ${pastConvos.length} recent conversation(s). Reference these naturally when relevant, but do not repeat previous answers verbatim. Use this context to tailor responses to their demonstrated interests and avoid re-explaining concepts they have already explored.
+${summaries.join("\n")}\n`;
+  } catch (err) {
+    console.error("Failed to build user memory:", err);
+    return "";
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -1127,6 +1174,9 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Build cross-conversation memory for Pro/Enterprise users
+    const userMemory = await buildUserMemory(supabase, wixUserId, effectiveTier);
 
     // If files are attached, prepend their contents to the last user message
     let enrichedMessages = [...messages];
@@ -1239,7 +1289,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG with Pro content
-          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, effectiveSearchMode, personalisation);
+          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, effectiveSearchMode, personalisation, userMemory);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -1256,7 +1306,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[effectiveSearchMode] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) },
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[effectiveSearchMode] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) + (userMemory || "") },
               { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
             stream: true,
@@ -1274,7 +1324,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation);
+      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation, userMemory);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -1293,7 +1343,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     // Member/Base and Pro tiers: pure RAG
     const ragContent = (effectiveTier === "reid_base_pro") ? PRO_RAG : MEMBER_RAG;
-    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation);
+    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation, userMemory);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

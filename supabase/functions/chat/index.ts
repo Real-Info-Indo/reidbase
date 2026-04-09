@@ -1017,10 +1017,11 @@ function buildPersonalisationBlock(personalisation?: { nickname?: string; occupa
   return `\nUSER PERSONALISATION (use this to tailor your responses):\n${parts.join("\n")}\n`;
 }
 
-function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
+function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }, userMemory?: string): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
   const modePrompt = MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"];
   const personalisationBlock = buildPersonalisationBlock(personalisation);
+  const memoryBlock = userMemory || "";
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
 CRITICAL — CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
@@ -1029,7 +1030,7 @@ ${GLOBAL_RULES}
 
 
 ${modePrompt}
-${personalisationBlock}
+${personalisationBlock}${memoryBlock}
 Formatting Rules (CRITICAL - you must follow these exactly):
 - ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
 - Use markdown headings (## or ###) for section titles and subheadings

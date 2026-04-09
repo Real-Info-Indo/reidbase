@@ -215,10 +215,11 @@ Respond with only one word: ANALYTICAL or RAG.` },
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model: AI_MODEL,
-          messages: [
-            { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) },
-            { role: "user", content: `User question: ${userMessage}\n\nSQL query:\n${sql}\n\nResults:\n${JSON.stringify(queryResult, null, 2)}` },
-          ],
+            messages: [
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) },
+              ...enrichedMessages.slice(0, -1),
+              { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}` },
+            ],
           stream: true,
         }),
       });

@@ -1095,7 +1095,7 @@ export default function NewAnalysis() {
               placeholder="Enter a prompt..."
               disabled={isLoading}
               rows={1}
-              className="w-full rounded-xl border border-border px-5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
+              className="w-full rounded-xl border border-border px-5 py-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-y-auto"
               style={{ minHeight: "56px", maxHeight: "200px", paddingBottom: "48px" }} />
 
               <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">

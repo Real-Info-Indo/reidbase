@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download } from "lucide-react";
+import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";

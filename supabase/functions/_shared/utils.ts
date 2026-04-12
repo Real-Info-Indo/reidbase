@@ -88,7 +88,8 @@ export function buildRagSystemPrompt(
   tier: string,
   ragContent: string,
   modePrompt: string,
-  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }
+  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string },
+  userMemory?: string
 ): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
   const personalisationBlock = buildPersonalisationBlock(personalisation);
@@ -100,7 +101,7 @@ ${GLOBAL_RULES}
 
 
 ${modePrompt}
-${personalisationBlock}
+${personalisationBlock}${userMemory || ""}
 Formatting Rules (CRITICAL - you must follow these exactly):
 - ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
 - Use markdown headings (## or ###) for section titles and subheadings
@@ -166,5 +167,42 @@ export async function resolveVerifiedTier(wixAccessToken?: string): Promise<stri
   } catch (err) {
     console.error("Wix tier resolution error:", err);
     return "member";
+  }
+}
+
+/* ── Cross-conversation memory: fetch past chat summaries for higher tiers ── */
+export async function buildUserMemory(supabase: any, wixUserId: string, tier: string): Promise<string> {
+  const isEnterprise = tier === "enterprise";
+  const limit = isEnterprise ? 1000 : tier === "reid_base_pro" ? 5 : 0;
+  if (limit === 0 || !wixUserId) return "";
+
+  try {
+    const { data, error } = await supabase
+      .from("chat_logs")
+      .select("title, search_mode, messages, updated_at")
+      .eq("wix_user_id", wixUserId)
+      .order("updated_at", { ascending: false })
+      .limit(limit + 1);
+
+    if (error || !data || data.length === 0) return "";
+
+    const pastConvos = (data as any[]).slice(0, limit);
+    if (pastConvos.length === 0) return "";
+
+    const summaries = pastConvos.map((c: any) => {
+      const msgs = Array.isArray(c.messages) ? c.messages : [];
+      const userMsgs = msgs.filter((m: any) => m.role === "user");
+      const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
+      const firstQuery = userMsgs[0]?.content?.slice(0, 200) || "";
+      const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 300) || "";
+      return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || "unknown date"}): User asked about: ${firstQuery}${lastResponse ? ` | Key finding: ${lastResponse}` : ""}`;
+    });
+
+    return `\nUSER CONVERSATION HISTORY (use this to understand the user's interests and provide continuity across sessions):
+The user has ${pastConvos.length} recent conversation(s). Reference these naturally when relevant, but do not repeat previous answers verbatim. Use this context to tailor responses to their demonstrated interests and avoid re-explaining concepts they have already explored.
+${summaries.join("\n")}\n`;
+  } catch (err) {
+    console.error("Failed to build user memory:", err);
+    return "";
   }
 }

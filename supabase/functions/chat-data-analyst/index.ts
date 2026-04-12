@@ -8,6 +8,7 @@ import {
   scrapeUrlsFromMessage,
   buildPersonalisationBlock,
   buildRagSystemPrompt,
+  buildUserMemory,
   resolveVerifiedTier,
   TIER_PRIORITY,
 } from "../_shared/utils.ts";
@@ -156,7 +157,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -172,6 +173,8 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const userMemory = await buildUserMemory(supabase, wixUserId, effectiveTier);
 
     const modePrompt = MODE_PROMPTS["data-analyst"];
 
@@ -286,7 +289,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG with Pro content
-          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, modePrompt, personalisation);
+          const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, modePrompt, personalisation, userMemory);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -303,7 +306,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) },
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) + (userMemory || "") },
               ...enrichedMessages.slice(0, -1),
               { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
@@ -322,7 +325,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation);
+      const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -341,7 +344,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     // Member/Base and Pro tiers: pure RAG
     const ragContent = (effectiveTier === "reid_base_pro") ? PRO_RAG : MEMBER_RAG;
-    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, modePrompt, personalisation);
+    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, modePrompt, personalisation, userMemory);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

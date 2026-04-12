@@ -503,6 +503,7 @@ export default function NewAnalysis() {
         tier,
         fileContents: parsedFiles,
         searchMode,
+        conversationId: conversationId ?? undefined,
         onDelta: (chunk) => upsertAssistant(chunk),
         onDone: () => setIsLoading(false)
       });

@@ -1,7 +1,8 @@
 import { useRef, useCallback, useMemo, memo } from "react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Download, Share2 } from "lucide-react";
+import { Download, Share2, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const COLORS = [
   "hsl(var(--primary))",

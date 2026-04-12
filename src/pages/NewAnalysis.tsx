@@ -132,9 +132,10 @@ async function streamChat({
   tier,
   fileContents,
   searchMode,
+  conversationId,
   onDelta,
   onDone
-}: {messages: Msg[];tier: string;fileContents?: {name: string;content: string;}[];searchMode?: string;onDelta: (text: string) => void;onDone: () => void;}) {
+}: {messages: Msg[];tier: string;fileContents?: {name: string;content: string;}[];searchMode?: string;conversationId?: string;onDelta: (text: string) => void;onDone: () => void;}) {
   // Load personalisation from localStorage
   let personalisation: Record<string, string> | undefined;
   try {
@@ -171,7 +172,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixAccessToken, wixUserId })
+    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixAccessToken, wixUserId, conversationId })
   });
 
   if (!resp.ok) {

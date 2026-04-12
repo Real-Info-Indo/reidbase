@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Lock, BarChart3, Users, FileText, MessageSquare, MousePointerClick,
-  RefreshCw, ClipboardList,
+  RefreshCw, ClipboardList, Shield,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -236,6 +236,9 @@ export default function AdminAnalytics() {
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/alerts")}>
+              <Shield className="h-4 w-4 mr-1.5" /> Alerts
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
               <Users className="h-4 w-4 mr-1.5" /> Users
             </Button>

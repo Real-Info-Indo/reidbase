@@ -137,6 +137,51 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_flags: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          conversation_id: string
+          created_at: string
+          details: string | null
+          flagged_message: string
+          id: string
+          reviewed: boolean
+          severity: string
+          wix_user_email: string | null
+          wix_user_id: string | null
+          wix_user_name: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string
+          conversation_id: string
+          created_at?: string
+          details?: string | null
+          flagged_message: string
+          id?: string
+          reviewed?: boolean
+          severity?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          conversation_id?: string
+          created_at?: string
+          details?: string | null
+          flagged_message?: string
+          id?: string
+          reviewed?: boolean
+          severity?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
+        }
+        Relationships: []
+      }
       chat_logs: {
         Row: {
           conversation_id: string

@@ -209,6 +209,7 @@ export default function AdminChatLogs() {
                 <TableHead className="w-[200px]">User</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead className="w-[100px]">Mode</TableHead>
+                <TableHead className="w-[80px]">Tier</TableHead>
                 <TableHead className="w-[80px]">Messages</TableHead>
                 <TableHead className="w-[100px]">Feedback</TableHead>
                 <TableHead className="w-[160px]">Last active</TableHead>
@@ -237,6 +238,11 @@ export default function AdminChatLogs() {
                     <TableCell>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {log.search_mode || "data-analyst"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {log.user_tier || "unknown"}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-center">{log.message_count}</TableCell>

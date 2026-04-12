@@ -113,17 +113,30 @@ export default function AdminChatLogs() {
     const selected = filtered.filter((l) => selectedIds.has(l.id));
     if (selected.length === 0) { toast.error("No conversations selected"); return; }
 
-    const output = selected.map((log) => {
-      const header = `Title: ${log.title}\nUser: ${log.wix_user_name || "Anonymous"} (${log.wix_user_email || "No email"})\nMode: ${log.search_mode || "data-analyst"}\nDate: ${new Date(log.updated_at).toLocaleString("en-GB")}\nLikes: ${log.likes} | Dislikes: ${log.dislikes} | Copies: ${log.copy_count}\n`;
-      const msgs = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}:\n${m.content}`).join("\n\n");
-      return `${header}\n${msgs}`;
-    }).join("\n\n" + "=".repeat(80) + "\n\n");
+    const escCsv = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const headers = ["Title", "User Name", "User Email", "Mode", "Date", "Messages", "Likes", "Dislikes", "Copies", "Conversation"];
+    const rows = selected.map((log) => {
+      const conversation = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}: ${m.content}`).join("\n\n");
+      return [
+        escCsv(log.title),
+        escCsv(log.wix_user_name || "Anonymous"),
+        escCsv(log.wix_user_email || ""),
+        escCsv(log.search_mode || "data-analyst"),
+        escCsv(new Date(log.updated_at).toLocaleString("en-GB")),
+        String(log.message_count),
+        String(log.likes),
+        String(log.dislikes),
+        String(log.copy_count),
+        escCsv(conversation),
+      ].join(",");
+    });
 
-    const blob = new Blob([output], { type: "text/plain" });
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `reid-chat-logs-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `reid-chat-logs-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(`Downloaded ${selected.length} conversation${selected.length > 1 ? "s" : ""}`);

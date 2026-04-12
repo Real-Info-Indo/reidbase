@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download } from "lucide-react";
+import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -29,6 +30,7 @@ interface ChatLog {
 }
 
 export default function AdminChatLogs() {
+  const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [logs, setLogs] = useState<ChatLog[]>([]);
@@ -170,6 +172,9 @@ export default function AdminChatLogs() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin/analytics")} title="Back to analytics">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <MessageSquare className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Chat logs</h1>
             <span className="text-sm text-muted-foreground">({filtered.length} conversations)</span>

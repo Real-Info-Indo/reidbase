@@ -171,6 +171,9 @@ export default function AdminChatLogs() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin/analytics")} title="Back to analytics">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <MessageSquare className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Chat logs</h1>
             <span className="text-sm text-muted-foreground">({filtered.length} conversations)</span>

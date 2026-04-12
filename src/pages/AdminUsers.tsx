@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Lock, Users, ArrowLeft, RefreshCw, Download, Search, ExternalLink,
-  MessageSquare,
+  ChevronDown, ChevronRight, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,9 @@ interface UserStats {
   pageViews: number;
   downloads: number;
   chatCount: number;
+  appraisalCount: number;
+  pages: Record<string, number>;
+  downloadItems: string[];
 }
 
 export default function AdminUsers() {
@@ -40,6 +43,16 @@ export default function AdminUsers() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [statsMap, setStatsMap] = useState<Record<string, UserStats>>({});
   const [search, setSearch] = useState("");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
@@ -52,7 +65,6 @@ export default function AdminUsers() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch user profiles
       const { data: profileData } = await supabase
         .from("user_profiles" as any)
         .select("*")
@@ -61,27 +73,51 @@ export default function AdminUsers() {
       const users = (profileData as unknown as UserProfile[]) || [];
       setProfiles(users);
 
-      // Fetch analytics events for page views and downloads
+      // Fetch analytics events with page_path for detail
       const { data: events } = await supabase
         .from("analytics_events")
-        .select("wix_user_id, event_type, event_name");
+        .select("wix_user_id, event_type, event_name, page_path, metadata");
 
       // Fetch chat log counts
       const { data: chatLogs } = await supabase
         .from("chat_logs")
         .select("wix_user_id");
 
+      // Fetch appraisal counts per user from analytics feature events
+      // (appraisal_submitted events are tracked in analytics_events)
+
       const stats: Record<string, UserStats> = {};
 
       const ensureStats = (uid: string) => {
-        if (!stats[uid]) stats[uid] = { pageViews: 0, downloads: 0, chatCount: 0 };
+        if (!stats[uid])
+          stats[uid] = {
+            pageViews: 0,
+            downloads: 0,
+            chatCount: 0,
+            appraisalCount: 0,
+            pages: {},
+            downloadItems: [],
+          };
       };
 
       (events || []).forEach((e: any) => {
         if (!e.wix_user_id) return;
         ensureStats(e.wix_user_id);
-        if (e.event_type === "page_view") stats[e.wix_user_id].pageViews++;
-        if (e.event_name === "report_download") stats[e.wix_user_id].downloads++;
+        const s = stats[e.wix_user_id];
+        if (e.event_type === "page_view") {
+          s.pageViews++;
+          const path = e.page_path || "unknown";
+          s.pages[path] = (s.pages[path] || 0) + 1;
+        }
+        if (e.event_name === "report_download") {
+          s.downloads++;
+          const meta = e.metadata as any;
+          const label = meta?.report || meta?.name || e.page_path || "Report";
+          s.downloadItems.push(String(label));
+        }
+        if (e.event_name === "appraisal_submitted") {
+          s.appraisalCount++;
+        }
       });
 
       (chatLogs || []).forEach((c: any) => {
@@ -117,11 +153,11 @@ export default function AdminUsers() {
   const handleDownloadCSV = () => {
     const headers = [
       "Name", "Email", "Business", "Tier", "Last Login",
-      "Page Views", "Downloads", "Chats",
+      "Page Views", "Downloads", "Chats", "Appraisals",
       "Nickname", "Occupation", "About",
     ];
     const rows = filtered.map((p) => {
-      const s = statsMap[p.wix_user_id] || { pageViews: 0, downloads: 0, chatCount: 0 };
+      const s = statsMap[p.wix_user_id] || { pageViews: 0, downloads: 0, chatCount: 0, appraisalCount: 0, pages: {}, downloadItems: [] };
       return [
         p.display_name || "",
         p.email || "",
@@ -131,6 +167,7 @@ export default function AdminUsers() {
         s.pageViews,
         s.downloads,
         s.chatCount,
+        s.appraisalCount,
         p.nickname || "",
         p.occupation || "",
         p.about || "",
@@ -149,7 +186,6 @@ export default function AdminUsers() {
     toast.success("CSV downloaded");
   };
 
-  // ── Auth gate ──
   if (!authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -170,6 +206,8 @@ export default function AdminUsers() {
       </div>
     );
   }
+
+  const colCount = 10;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -205,7 +243,6 @@ export default function AdminUsers() {
           />
         </div>
 
-        {/* Summary */}
         <p className="text-sm text-muted-foreground">
           {filtered.length} user{filtered.length !== 1 ? "s" : ""}
         </p>
@@ -215,6 +252,7 @@ export default function AdminUsers() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8" />
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Business</TableHead>
@@ -222,72 +260,160 @@ export default function AdminUsers() {
                 <TableHead>Last Login</TableHead>
                 <TableHead className="text-center">Pages</TableHead>
                 <TableHead className="text-center">Downloads</TableHead>
+                <TableHead className="text-center">Appraisals</TableHead>
                 <TableHead className="text-center">Chats</TableHead>
-                <TableHead>Personalisation</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={colCount} className="text-center py-12 text-muted-foreground">
                     {loading ? "Loading..." : "No users found"}
                   </TableCell>
                 </TableRow>
               )}
               {filtered.map((p) => {
-                const s = statsMap[p.wix_user_id] || { pageViews: 0, downloads: 0, chatCount: 0 };
-                const personalisation = [
-                  p.nickname && `Nickname: ${p.nickname}`,
-                  p.occupation && `Occupation: ${p.occupation}`,
-                  p.about && `About: ${p.about}`,
-                ].filter(Boolean).join("; ");
+                const s = statsMap[p.wix_user_id] || {
+                  pageViews: 0, downloads: 0, chatCount: 0, appraisalCount: 0, pages: {}, downloadItems: [],
+                };
+                const isExpanded = expandedIds.has(p.wix_user_id);
 
                 return (
-                  <TableRow key={p.wix_user_id}>
-                    <TableCell className="font-medium whitespace-nowrap">
-                      {p.display_name || "—"}
-                    </TableCell>
-                    <TableCell className="text-sm">{p.email || "—"}</TableCell>
-                    <TableCell className="text-sm">{p.business || "—"}</TableCell>
-                    <TableCell>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                        {p.tier || "freemium"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
-                      {p.last_login
-                        ? new Date(p.last_login).toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "—"}
-                    </TableCell>
-                    <TableCell className="text-center">{s.pageViews}</TableCell>
-                    <TableCell className="text-center">{s.downloads}</TableCell>
-                    <TableCell className="text-center">
-                      {s.chatCount > 0 ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() =>
-                            navigate(`/admin/chat-logs?user=${encodeURIComponent(p.wix_user_id)}`)
-                          }
-                        >
-                          {s.chatCount}
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      ) : (
-                        "0"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate" title={personalisation}>
-                      {personalisation || "—"}
-                    </TableCell>
-                  </TableRow>
+                  <>
+                    <TableRow
+                      key={p.wix_user_id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => toggleExpand(p.wix_user_id)}
+                    >
+                      <TableCell className="w-8 px-2">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium whitespace-nowrap">
+                        {p.display_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">{p.email || "—"}</TableCell>
+                      <TableCell className="text-sm">{p.business || "—"}</TableCell>
+                      <TableCell>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {p.tier || "freemium"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {p.last_login
+                          ? new Date(p.last_login).toLocaleDateString("en-GB", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="text-center">{s.pageViews}</TableCell>
+                      <TableCell className="text-center">{s.downloads}</TableCell>
+                      <TableCell className="text-center">{s.appraisalCount}</TableCell>
+                      <TableCell className="text-center">
+                        {s.chatCount > 0 ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/chat-logs?user=${encodeURIComponent(p.wix_user_id)}`);
+                            }}
+                          >
+                            {s.chatCount}
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        ) : (
+                          "0"
+                        )}
+                      </TableCell>
+                    </TableRow>
+
+                    {isExpanded && (
+                      <TableRow key={`${p.wix_user_id}-detail`}>
+                        <TableCell colSpan={colCount} className="bg-muted/30 p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                            {/* Personalisation */}
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-foreground">Personalisation</h4>
+                              <div className="space-y-1 text-muted-foreground">
+                                <p><span className="font-medium text-foreground">Nickname:</span> {p.nickname || "—"}</p>
+                                <p><span className="font-medium text-foreground">Occupation:</span> {p.occupation || "—"}</p>
+                                <p><span className="font-medium text-foreground">Business:</span> {p.business || "—"}</p>
+                                <p><span className="font-medium text-foreground">About:</span> {p.about || "—"}</p>
+                              </div>
+                            </div>
+
+                            {/* Pages visited */}
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-foreground">Pages visited ({s.pageViews})</h4>
+                              {Object.keys(s.pages).length > 0 ? (
+                                <ul className="space-y-0.5 text-muted-foreground max-h-48 overflow-y-auto">
+                                  {Object.entries(s.pages)
+                                    .sort((a, b) => b[1] - a[1])
+                                    .map(([path, count]) => (
+                                      <li key={path} className="flex justify-between gap-2">
+                                        <span className="truncate">{path}</span>
+                                        <span className="text-foreground font-medium shrink-0">{count}</span>
+                                      </li>
+                                    ))}
+                                </ul>
+                              ) : (
+                                <p className="text-muted-foreground">No page visits recorded</p>
+                              )}
+                            </div>
+
+                            {/* Downloads & Appraisals */}
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground">Downloads ({s.downloads})</h4>
+                                {s.downloadItems.length > 0 ? (
+                                  <ul className="space-y-0.5 text-muted-foreground max-h-24 overflow-y-auto">
+                                    {s.downloadItems.map((item, i) => (
+                                      <li key={i} className="flex items-center gap-1.5">
+                                        <Download className="h-3 w-3 shrink-0" />
+                                        <span className="truncate">{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-muted-foreground">No downloads recorded</p>
+                                )}
+                              </div>
+
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-foreground">Appraisal requests ({s.appraisalCount})</h4>
+                                {s.appraisalCount > 0 ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate("/admin/appraisals");
+                                    }}
+                                  >
+                                    <FileText className="h-3.5 w-3.5" />
+                                    View appraisals
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                ) : (
+                                  <p className="text-muted-foreground">No appraisal requests</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 );
               })}
             </TableBody>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;font-family:'Poppins',sans-serif}
+.bar{display:flex;align-items:center;width:500px;height:50px;background:#fff;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:0 6px 0 20px}
+.bar input{flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#1a1a1a;font-family:'Poppins',sans-serif;font-weight:200;height:100%}
+.bar button{flex-shrink:0;height:36px;border-radius:5px;background:hsl(36,97%,74%);border:none;display:flex;align-items:center;justify-content:center;padding:0 16px;gap:6px;font-family:'Poppins',sans-serif;font-weight:500;font-size:13px;color:#1a1a1a;cursor:pointer;transition:background .2s}
+.bar button:disabled{cursor:default}
+</style>
+</head>
+<body>
+<div class="bar">
+  <input id="p" placeholder="Real data. Real answers">
+  <button id="go" disabled>Ask REID</button>
+</div>
+<script>
+var APP='https://reidbase.lovable.app';
+var p=document.getElementById('p'),go=document.getElementById('go');
+function send(t){t=t.trim();if(!t)return;window.open(APP+'/?prompt='+encodeURIComponent(t),'_blank')}
+p.addEventListener('input',function(){go.disabled=!p.value.trim()});
+p.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(p.value)}});
+go.addEventListener('click',function(){send(p.value)});
+</script>
+</body>
+</html>

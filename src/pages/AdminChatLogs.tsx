@@ -30,6 +30,7 @@ interface ChatLog {
 }
 
 export default function AdminChatLogs() {
+  const navigate = useNavigate();
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [logs, setLogs] = useState<ChatLog[]>([]);

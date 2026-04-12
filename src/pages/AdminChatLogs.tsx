@@ -301,7 +301,7 @@ export default function AdminChatLogs() {
                   </TableRow>
                   {expandedId === log.id && (
                     <TableRow key={`${log.id}-expanded`}>
-                      <TableCell colSpan={8} className="p-0">
+                      <TableCell colSpan={9} className="p-0">
                         <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
                           {log.messages?.map((msg, i) => (
                             <div
@@ -330,7 +330,7 @@ export default function AdminChatLogs() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                     {loading ? "Loading chat logs..." : "No conversations found"}
                   </TableCell>
                 </TableRow>

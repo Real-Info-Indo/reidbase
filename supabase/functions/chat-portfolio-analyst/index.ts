@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { GLOBAL_RULES } from "../_shared/global-rules.ts";
-import { PRO_RAG } from "../_shared/rag-content.ts";
+import { RAG_CONTENT } from "../_shared/rag-content.ts";
 import { ANALYTICAL_SQL_PROMPT, ANALYTICAL_EXPLAIN_PROMPT } from "../_shared/schema.ts";
 import {
   corsHeaders,
@@ -202,7 +202,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       if (queryError) {
         console.error("Query error:", queryError);
         // Fall back to RAG with Pro content
-        const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG, modePrompt, personalisation, userMemory);
+        const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory);
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -238,7 +238,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
     });
     if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-    const ragPrompt = buildRagSystemPrompt("enterprise", PRO_RAG + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory);
+    const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory);
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },

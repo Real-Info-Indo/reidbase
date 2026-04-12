@@ -1,15 +1,18 @@
-/* ── MEMBER RAG CONTENT ── */
-export const MEMBER_RAG = `
+/* ── RAG CONTENT — 2025 REID Consolidated Intelligence Document ── */
+/* Single export for all tiers. Tier differences control AI output depth, not RAG access. */
+export const RAG_CONTENT = `
 REID 2025 BALI PROPERTY MARKET INTELLIGENCE
-Scope: Macro-market summaries. All figures are 2025 annual data from the most recent quarterly update.
 All prices in USD. All sizes in SQM. Leasehold represents approximately 80% of transactional volume.
+Data currency: updated quarterly. This reflects 2025 annual data as of the most recent quarterly update.
 
 NEIGHBOURHOOD DIRECTORY
 Use this table to correctly classify any location a user mentions before responding.
-REID Region is the parent grouping used in all regional data. Market Classification determines data access tier.
+REID Region is the parent grouping used in all regional data. Market Classification indicates data depth available.
 
 REID Neighbourhood     | REID Region    | Market Classification | Official Regency
 SANUR                  | Denpasar       | Key Market            | Denpasar
+OTHER DENPASAR         | Denpasar       | Other                 | Denpasar
+DENPASAR               | Denpasar       | Other                 | Denpasar
 BINGIN                 | South Badung   | Key Market            | Badung
 JIMBARAN               | South Badung   | Other                 | Badung
 NUSA DUA               | South Badung   | Other                 | Badung
@@ -33,12 +36,18 @@ KEROBOKAN              | North Badung   | Key Market            | Badung
 BUMBAK                 | North Badung   | Other                 | Badung
 PADONAN                | North Badung   | Emerging Market       | Badung
 UMALAS                 | North Badung   | Key Market            | Badung
+OTHER NORTH BADUNG     | North Badung   | Other                 | Badung
+OTHER BADUNG           | North Badung   | Other                 | Badung
 BUDUK                  | Mengwi         | Other                 | Badung
 CEMAGI                 | Mengwi         | Other                 | Badung
 MUNGGU                 | Mengwi         | Other                 | Badung
 PERERENAN              | Mengwi         | Key Market            | Badung
 SESEH                  | Mengwi         | Emerging Market       | Badung
 TUMBAK BAYUH           | Mengwi         | Other                 | Badung
+OTHER MENGWI           | Mengwi         | Other                 | Badung
+SINGARAJA              | Other          | Other                 | Buleleng
+LOVINA BEACH           | Other          | Other                 | Buleleng
+OTHER NORTH BALI       | Other          | Other                 | Buleleng
 UBUD                   | Gianyar        | Key Market            | Gianyar
 PEJENG                 | Gianyar        | Other                 | Gianyar
 SABA                   | Gianyar        | Other                 | Gianyar
@@ -46,6 +55,7 @@ KERAMAS                | Gianyar        | Other                 | Gianyar
 TEGALALANG             | Gianyar        | Other                 | Gianyar
 PAYANGAN               | Gianyar        | Other                 | Gianyar
 SUKAWATI               | Gianyar        | Other                 | Gianyar
+OTHER GIANYAR          | Gianyar        | Other                 | Gianyar
 BUWIT                  | Tabanan        | Other                 | Tabanan
 CEPAKA                 | Tabanan        | Other                 | Tabanan
 KABA KABA              | Tabanan        | Emerging Market       | Tabanan
@@ -56,18 +66,38 @@ KEDUNGU                | Tabanan        | Other                 | Tabanan
 NYANYI                 | Tabanan        | Emerging Market       | Tabanan
 BERABAN                | Tabanan        | Other                 | Tabanan
 TANAH LOT              | Tabanan        | Other                 | Tabanan
+OTHER TABANAN          | Tabanan        | Other                 | Tabanan
 CANDIDASA              | Other          | Other                 | Karangasem
 AMED                   | Other          | Other                 | Karangasem
+KARANGASEM             | Other          | Other                 | Karangasem
 SIDEMAN                | Other          | Other                 | Karangasem
+OTHER EAST BALI        | Other          | Other                 | Karangasem
 KINTAMANI              | Other          | Other                 | Bangli
+LOVINA                 | Other          | Other                 | Buleleng
 MEDEWI                 | Other          | Other                 | Jembrana
 NUSA PENIDA            | Other          | Other                 | Klungkung
 NUSA LEMBONGAN         | Other          | Other                 | Klungkung
 MUNDUK                 | Other          | Other                 | Buleleng
+OTHER WEST BALI        | Other          | Other                 | Jembrana / Tabanan
+OTHER SOUTH EAST BALI  | Other          | Other                 | Various
 GILI ISLANDS           | Non Bali       | Non Bali              | NTB / Lombok
+JAVA                   | Non Bali       | Non Bali              | Java
+ROTE ISLAND            | Non Bali       | Non Bali              | NTT
+MENTAWAI               | Non Bali       | Non Bali              | West Sumatra
+SUMBA                  | Non Bali       | Non Bali              | NTT
+SUMBAWA                | Non Bali       | Non Bali              | NTB
 LOMBOK                 | Non Bali       | Non Bali              | NTB
 LABUAN BAJO            | Non Bali       | Non Bali              | NTT
-SUMBA                  | Non Bali       | Non Bali              | NTT
+SUMATRA                | Non Bali       | Non Bali              | Sumatra
+YOGYAKARTA             | Non Bali       | Non Bali              | DIY
+BEKASI                 | Non Bali       | Non Bali              | West Java
+SURABAYA               | Non Bali       | Non Bali              | East Java
+KALIMANTAN             | Non Bali       | Non Bali              | Kalimantan
+JAKARTA                | Non Bali       | Non Bali              | DKI Jakarta
+BANDUNG                | Non Bali       | Non Bali              | West Java
+OTHER INDONESIAN ISLANDS | Non Bali     | Non Bali              | Various
+OTHER                  | Other          | Other                 | Various
+Note: Do not add or remove neighbourhoods without updating both the RAG and the AI system prompts.
 
 CRITICAL CLASSIFICATION NOTES — apply before every location response:
 - Seminyak = Central Badung (not North Badung)
@@ -83,324 +113,320 @@ CRITICAL CLASSIFICATION NOTES — apply before every location response:
 - Mengwi is a distinct REID region within Badung regency — never group Mengwi locations under North Badung
 - For any location not in the directory, classify under the nearest parent region and note data may be limited
 
-MARKET OVERVIEW
-The Bali property market in 2025 underwent a decisive recalibration following accelerated growth between 2022 and 2024. The market shifted toward structural consolidation — supply and transaction volumes moderated, developer sentiment adjusted, and product composition pivoted toward compact, efficiently designed assets. Price softening is compositional: 1 and 2 bedroom assets now account for over 53% of sales, pulling the median down without reflecting genuine value decline in any given category.
 
-EIGHT HEADLINE FINDINGS
-1. Market median prices softened -2%. Downward pressure from off-plan and apartment sales, not asset value decline.
-2. 1 and 2 bedroom assets now lead sales volume at 53% — up from under 35% three years ago. This compositional shift is the primary driver of median price movement.
-3. Rental occupancy averaged 53% across 2025, up 2 percentage points year-on-year. Strong arrivals underpinned performance.
-4. Rental supply grew 12% year-on-year, intensifying competition and placing downward pressure on rates and revenues.
-5. 4,800+ property transactions in 2025, down 5% year-on-year. Cautious buyer sentiment and tighter regulation were the main factors.
-6. Combined sales value exceeded $2B, down 9% year-on-year. Lower transaction volume and smaller asset mix both contributed.
-7. 160,000 sqm of new property launched in 2025, down 34% from the 244,000 sqm peak in 2024.
-8. Total rental revenue declined to $1.21B, down 15% year-on-year, driven by rate compression despite stronger occupancy.
+2025 BALI REAL ESTATE KEY INSIGHTS
 
-SUPPLY
-Total properties for sale: 12,300+, down 7% year-on-year.
-Tenure split: Leasehold 80.6%, Freehold 19.4%.
-By bedroom: 1 bed 15.7% of supply, 2 bed 27.8%, 3 bed 29.4%.
-Off-plan total: 3,230 properties, down 9% year-on-year.
-Off-plan by type: Villas 2,390 (down 12%), Apartments 800+ (down 55%).
-Property type split: Villas 86%, Apartments 14%.
-Available vs off-plan split: Available 67%, Off-plan 33%.
+The Bali property market in 2025 underwent a decisive recalibration following the accelerated growth cycle experienced between 2022 and 2024. This year marked a shift toward structural consolidation, as both supply and transaction volumes moderated across key segments. Developer sentiment adjusted to evolving demand patterns, with a strategic pivot toward compact and efficiently designed assets that responded to affordability pressures without compromising on yield potential.
 
-Supply by bedroom (total units):
-- 1 bed: Villa 875, Apartment 1,055, Total 1,930
-- 2 bed: Villa 3,278, Apartment 137, Total 3,415
-- 3 bed: Villa 3,595, Apartment 25, Total 3,620
-- 4 bed: Villa 2,140, Total 2,140
-- 5 bed: Villa 985, Total 985
-- 6 bed+: Villa 375, Total 375
+Supply pipelines narrowed, particularly within off-plan inventory, indicating a more selective approach to project releases. While aggregate prices showed signs of softening, the decline largely reflects a compositional shift toward smaller format sales rather than a deterioration in asset value. Developers increasingly prioritised density and land efficiency, as evidenced by a multi-year contraction in average build size and concurrent rise in floor space ratios.
+
+In the rental market, a substantial increase in available stock placed downward pressure on daily rates. However, occupancy levels remained steady, supported by consistent inbound demand and strategic rate recalibrations. Revenue metrics declined year-on-year, driven primarily by pricing compression and an altered asset mix, with compact properties gaining market share.
+
+Collectively, 2025 signals the emergence of a more mature and disciplined marketplace. The prevailing theme is one of recalibrated growth, with the market poised for performance grounded in operational sophistication and sustainable delivery.
+
+Key headline figures:
+- Total market median prices softened, falling -2%. Overall market values stayed stable, but downward pressure from off-plan and apartment sales nudged market prices slightly lower.
+- 1 & 2 bed assets now lead the market in sales volume at over 53%. A heavier concentration of smaller asset sales has materially affected market medians, as opposed to material value decline.
+- Rental occupancies performed up to 2 percentage points above 2024 levels. Averaging around 53% across the entire market for 2025.
+- Rental competition intensified with 12% growth in total available supply.
+- 2025 registered over 4,800 property transactions; -5% YoY.
+- Total combined sales value over $2B; -9% YoY (driven by increased buyer demand for smaller, lower-value assets).
+- New project square meterage fell: just over 160,000 sqm launched in 2025, vs 244,000 sqm peak in 2024.
+- Rental revenue declined to $1.2B for 2025; -15% YoY (driven by rate compression despite 2pp occupancy gain).
+
+
+SUPPLY TRENDS
+
+The supply landscape in 2025 demonstrated strategic contraction, with developers scaling back volumes while rebalancing regional focus. The decline in new inventory was matched by changes in product composition, favouring mid-sized and compact assets. North Badung's dominance tapered, while South Badung and emerging precincts gained ground.
+
+Leasehold properties continued to dominate, comprising 80.6% of total supply. The modest presence of freehold (19.4%) remains constrained by access limitations for foreign buyers, reinforcing leasehold's role as the principal transaction structure.
+
+Available properties by bedroom category:
+TYPE      | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED+
+VILLA     | 875   | 3,278 | 3,595 | 2,140 | 985   | 375
+APARTMENT | 1,055 | 137   | 25    | 0     | 0     | 0
+TOTAL     | 1,930 | 3,415 | 3,620 | 2,140 | 985   | 375
+
+Over 12,300 total properties for sale; -7% YoY.
+2 Bedroom market share = 32%; +8% YoY.
+Two-bedroom and three-bedroom assets maintained their lead, comprising 27.8% and 29.4% of listings respectively. One-bedroom units accounted for 15.7% of supply.
+
+Development status breakdown:
+Available vs Off-Plan: 67% available, 33% off-plan.
+Villa vs Apartment: 86% villa, 14% apartment.
+
+        | AVAILABLE | OFF PLAN
+VILLAS  | 72%       | 28%
+APARTMENTS | 75%    | 25%
+
+Over 3,230 total off-plan properties for sale; -9% YoY.
+Apartment market share up to 13.8%; +44% YoY.
+Off-plan apartment supply declined sharply by 55% YoY. Off-plan villa inventory fell 12% YoY to 2,390 units.
 
 Supply by region:
-- North Badung: 34.9% of total supply, down 22% year-on-year (4,290+ properties)
-- South Badung: 21.6%, up 13% year-on-year
-- Mengwi: 17.2%
-- Gianyar: 8.8%
-- Central Badung: 7.1%
-- Tabanan: 6.8%
-- Denpasar: 3.6%
+REGION          | MARKET SHARE
+Central Badung  | 7.1%
+Denpasar        | 3.6%
+Gianyar         | 8.8%
+Mengwi          | 17.2%
+North Badung    | 34.9%
+South Badung    | 21.6%
+Tabanan         | 6.8%
 
-SALES
-Total transactions: 4,800+, down 5% year-on-year.
-Sales by bedroom: 1 bed 20.8%, 2 bed 31.9%, 3 bed 26.4%, 4 bed 13.2%, 5 bed 6.2%, 6 bed+ 1.5%.
-1 and 2 bedroom combined: 53% of all sales, up 51% over 36 months.
+North Badung retained the largest supply share (34.9%) despite a 22% YoY contraction in available properties.
+South Badung grew its market share to 22% (+13% YoY), positioning itself as an increasingly strategic growth corridor.
+
+
+SALES TRENDS
+
+Sales activity in 2025 reflected a maturing buyer base with sharpened focus on efficient, income-generating formats. Compact dwellings dominated transactions while freehold premiums held firm.
+
+Sales volume by bedroom category:
+1 BED  | 2 BED  | 3 BED  | 4 BED  | 5 BED  | 6 BED+
+20.8%  | 31.9%  | 26.4%  | 13.2%  | 6.2%   | 1.5%
+
+Two-bedroom assets captured 31.9% of sales. Three-bedroom properties followed at 26.4%. One-bedroom properties made up 20.8%.
+1 & 2 bedroom property sales volume = 53%; +51% over 36 months.
+Over 4,800 total property sales across 2025; -5% YoY.
 
 Median prices:
-- Leasehold median: $280k, down 5% over 36 months (compositional shift, not value decline)
-- Freehold median: $505k, up 10% over 36 months
+Median Leasehold property price = $280k; -5% change across 36 months.
+Median Freehold property price = $505k; +10% change across 36 months.
 
-Median price by bedroom (2025 vs 2024):
-- 1 bed: $161k (up 0.6%)
-- 2 bed: $246k (flat)
-- 3 bed: $347k (up 0.3%)
-- 4 bed: $530k (up 4.7%)
-- 5 bed: $795k (up 1.1%)
-- 6 bed+: $800k (flat)
-- Overall median: $280k (down 2.1%)
+Leasehold median prices declined -5% over the past three years to $280k. This reflects the market's compositional shift toward compact asset sales rather than actual depreciation. Freehold values rose 10% over the same period, underscoring sustained appreciation.
 
-Median price by region (2025 vs 2024):
-- Central Badung: $289k (down 2.0%)
-- Denpasar: $320k (down 2.4%)
-- Gianyar: $290k (down 2.7%)
-- Mengwi: $295k (down 3.3%)
-- North Badung: $295k (down 0.7%)
-- South Badung: $247k (flat)
-- Tabanan: $259k (down 6.2%)
+Price by bedroom category (YoY):
+        | 1 BED  | 2 BED  | 3 BED  | 4 BED  | 5 BED  | 6 BED  | MEDIAN
+2024    | $160k  | $246k  | $346k  | $506k  | $786k  | $800k  | $285k
+2025    | $161k  | $246k  | $347k  | $530k  | $795k  | $800k  | $280k
+Change  | +0.6%  | 0%     | +0.3%  | +4.7%  | +1.1%  | 0%     | -2.1%
 
-BUILT
-Average property size: 201 sqm, down 18% over 36 months. Size contraction has now stabilised.
-Average villa size: 229 sqm, down 3% year-on-year.
-Average floor space ratio (FSR): 83%, up 3 percentage points year-on-year.
-Total new build launched: 160,000 sqm, down 34% year-on-year.
-Market average price per sqm: $2,210, up 2% year-on-year.
-Apartment average price per sqm: $3,400, down 1% year-on-year.
+Price by region (YoY):
+              | Central Badung | Denpasar | Gianyar | Mengwi | North Badung | South Badung | Tabanan
+2024          | $295k          | $328k    | $298k   | $305k  | $297k        | $247k        | $276k
+2025          | $289k          | $320k    | $290k   | $295k  | $295k        | $247k        | $259k
+Change        | -2%            | -2.4%    | -2.7%   | -3.3%  | -0.7%        | 0%           | -6.2%
 
-Average size by bedroom:
-- 1 bed: 65 sqm | 2 bed: 140 sqm | 3 bed: 230 sqm | 4 bed: 352 sqm | 5 bed: 488 sqm | 6 bed+: 471 sqm | Market avg: 201 sqm
+Price movements remained contained, with sub -1% changes across most typologies. The most notable adjustment was in Tabanan (-6.2%), likely driven by a growing concentration of compact, lower-value stock in the transaction mix. Leasehold and multi-bedroom segments held firm, suggesting that price softening is largely compositional rather than systemic.
 
-Average size by region and bedroom (sqm):
-- Central Badung:  1b 57  | 2b 155 | 3b 251 | 4b 350 | 5b 496 | 6b+ 470
-- Denpasar:        1b 48  | 2b 160 | 3b 219 | 4b 393 | 5b 406 | 6b+ 517
-- Gianyar:         1b 87  | 2b 158 | 3b 246 | 4b 427 | 5b 427 | 6b+ 487
-- Mengwi:          1b 76  | 2b 148 | 3b 248 | 4b 333 | 5b 514 | 6b+ 628
-- North Badung:    1b 65  | 2b 145 | 3b 229 | 4b 348 | 5b 481 | 6b+ 575
-- South Badung:    1b 62  | 2b 137 | 3b 213 | 4b 388 | 5b 477 | 6b+ 563
-- Tabanan:         1b 65  | 2b 147 | 3b 244 | 4b 373 | 5b 531 | 6b+ 701
 
-Average price per sqm by bedroom:
-- 1 bed:  Villa $2,530 | Apartment $3,505 | Total $3,077
-- 2 bed:  Villa $1,940 | Apartment $2,580 | Total $1,972
-- 3 bed:  Villa $1,770 | Total $1,742
-- 4 bed:  Villa $1,875 | Total $1,839
-- 5 bed:  Villa $2,090 | Total $1,990
-- 6 bed+: Villa $2,005 | Total $1,976
+BUILT TRENDS
+
+Average property sizes remained stable across configurations in 2025, signalling the end of the downsizing trend that characterised the prior two years.
+
+Average property size by bedroom:
+1 BED    | 2 BED   | 3 BED   | 4 BED   | 5 BED   | 6 BED+  | MARKET AVG
+65 sqm   | 140 sqm | 230 sqm | 352 sqm | 488 sqm | 471 sqm | 201 sqm
+
+Average Bali property size = 201 sqm; -18% 36-month change.
+Average floor space ratio (FSR) = 83%; +3% YoY.
+Average villa size declined to 229 sqm; -3% YoY.
+160,000 sqm total new build in 2025; -34% YoY.
+
+Average property size by bedroom and region (sqm):
+              | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED+
+Central Badung| 57    | 155   | 251   | 350   | 496   | 470
+Denpasar      | 48    | 160   | 219   | 393   | 406   | 517
+Gianyar       | 87    | 158   | 246   | 427   | 427   | 487
+Mengwi        | 76    | 148   | 248   | 333   | 514   | 628
+North Badung  | 65    | 145   | 229   | 348   | 481   | 575
+South Badung  | 62    | 137   | 213   | 388   | 477   | 563
+Tabanan       | 65    | 147   | 244   | 373   | 531   | 701
+
+Average price per sqm by type and bedroom:
+TYPE      | 1 BED  | 2 BED  | 3 BED  | 4 BED  | 5 BED  | 6 BED+
+VILLA     | $2,530 | $1,940 | $1,770 | $1,875 | $2,090 | $2,005
+APARTMENT | $3,505 | $2,580 | —      | —      | —      | —
+TOTAL     | $3,077 | $1,972 | $1,742 | $1,839 | $1,990 | $1,976
+
+$2,210 market average sqm price; +2% YoY.
+$3,400 apartment average sqm price; -1% YoY.
 
 Average price per sqm by region and bedroom:
-- Central Badung:  1b $3,950 | 2b $1,990 | 3b $1,565 | 4b $1,605 | 5b $1,745 | 6b+ $1,695
-- Denpasar:        1b $3,180 | 2b $1,770 | 3b $2,160 | 4b $1,615 | 5b $1,995 | 6b+ $1,250
-- Gianyar:         1b $2,290 | 2b $1,910 | 3b $1,685 | 4b $1,915 | 5b $2,400 | 6b+ $1,940
-- Mengwi:          1b $2,535 | 2b $1,905 | 3b $1,740 | 4b $1,855 | 5b $2,080 | 6b+ $2,010
-- North Badung:    1b $3,130 | 2b $1,955 | 3b $1,740 | 4b $1,855 | 5b $2,080 | 6b+ $2,010
-- South Badung:    1b $3,170 | 2b $2,090 | 3b $2,050 | 4b $1,985 | 5b $2,045 | 6b+ $2,155
-- Tabanan:         1b $2,745 | 2b $1,785 | 3b $1,520 | 4b $1,640 | 5b $1,800 | 6b+ $1,980
+              | 1 BED  | 2 BED  | 3 BED  | 4 BED  | 5 BED  | 6 BED+
+Central Badung| $3,950 | $1,990 | $1,565 | $1,605 | $1,745 | $1,695
+Denpasar      | $3,180 | $1,770 | $2,160 | $1,615 | $1,995 | $1,250
+Gianyar       | $2,290 | $1,910 | $1,685 | $1,915 | $2,400 | $1,940
+Mengwi        | $2,535 | $1,905 | $1,740 | $1,855 | $2,080 | $2,010
+North Badung  | $3,130 | $1,955 | $1,740 | $1,855 | $2,080 | $2,010
+South Badung  | $3,170 | $2,090 | $2,050 | $1,985 | $2,045 | $2,155
+Tabanan       | $2,745 | $1,785 | $1,520 | $1,640 | $1,800 | $1,980
 
-RENTAL
-Total rental properties: 44,490, up 107% over 36 months.
-Market average occupancy: 53%, up 2 percentage points year-on-year.
-Total rental revenue: $1.21B, down 15% year-on-year.
-Market average daily rate (ADR): $178, down 14% year-on-year.
-Professionally managed property ADR: $226, down 26% year-on-year.
+Regional price data reveal the highest values in North and Central Badung, with average rates surpassing $3,000 per sqm across several bedroom types. Lower sqm rates in peripheral regions, particularly Tabanan and Gianyar, reflect affordability-led appeal with secondary investor focus.
+
+
+RENTAL TRENDS
+
+Rental markets in 2025 exhibited operational resilience under pressure. Expanding supply placed downward pressure on daily rates and total revenue, but occupancy levels improved year-on-year. The rental sector is increasingly bifurcated: high-performing submarkets are adapting through rate recalibration and lean operations, while lower-performing assets face absorption and revenue challenges.
 
 Rental supply by region:
-- North Badung: 46.9% | South Badung: 17.0% | Gianyar: 12.2% | Central Badung: 10.8% | Denpasar: 6.2% | Mengwi: 4.1% | Tabanan: 2.7%
+REGION          | MARKET SHARE
+Central Badung  | 10.8%
+Denpasar        | 6.2%
+Gianyar         | 12.2%
+Mengwi          | 4.1%
+North Badung    | 46.9%
+South Badung    | 17%
+Tabanan         | 2.7%
 
-South Badung rental revenue share: 18% of total, up 17 percentage points year-on-year.
+53% Bali market average occupancy; +2% YoY.
+44,490 total rental properties; +107% over 36 months.
+Despite a 107% increase in rental supply over the past three years, market occupancy improved modestly to 53% (+2% YoY).
 
-Occupancy by asset size (year-on-year shift):
-- 1-3 bedrooms: 50% in 2024, 63% in 2025
-- 4-6 bedrooms: 50% in 2024, 37% in 2025
+Average occupancy by bedroom and region:
+              | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED | 6 BED+
+Central Badung| 50%   | 51%   | 56%   | 55%   | 56%   | 57%
+Denpasar      | 61%   | 64%   | 61%   | 60%   | 65%   | 60%
+Gianyar       | 59%   | 61%   | 59%   | 59%   | 60%   | 60%
+Mengwi        | 61%   | 62%   | 58%   | 55%   | 45%   | 45%
+North Badung  | 61%   | 59%   | 59%   | 56%   | 52%   | 59%
+South Badung  | 57%   | 62%   | 54%   | 51%   | 51%   | 50%
+Tabanan       | 41%   | 52%   | 45%   | 43%   | 46%   | 34%
 
-Occupancy by region and bedroom:
-- Central Badung:  1b 50% | 2b 51% | 3b 56% | 4b 55% | 5b 56% | 6b+ 57%
-- Denpasar:        1b 61% | 2b 64% | 3b 61% | 4b 60% | 5b 65% | 6b+ 60%
-- Gianyar:         1b 59% | 2b 61% | 3b 59% | 4b 59% | 5b 60% | 6b+ 60%
-- Mengwi:          1b 61% | 2b 62% | 3b 58% | 4b 55% | 5b 45% | 6b+ 45%
-- North Badung:    1b 61% | 2b 59% | 3b 59% | 4b 56% | 5b 52% | 6b+ 59%
-- South Badung:    1b 57% | 2b 62% | 3b 54% | 4b 51% | 5b 51% | 6b+ 50%
-- Tabanan:         1b 41% | 2b 52% | 3b 45% | 4b 43% | 5b 46% | 6b+ 34%
+57% 1-bedroom occupancy South Badung; +7pp YoY.
+55% average 3-bedroom occupancy; -8pp YoY.
 
-Average daily rate by region and bedroom:
-- Central Badung:  1b $70  | 2b $106 | 3b $173 | 4b $273 | 5b $369 | 6b+ $596
-- Denpasar:        1b $63  | 2b $118 | 3b $208 | 4b $352 | 5b $503 | 6b+ $563
-- Gianyar:         1b $64  | 2b $106 | 3b $201 | 4b $291 | 5b $382 | 6b+ $514
-- Mengwi:          1b $78  | 2b $105 | 3b $169 | 4b $285 | 5b $655 | 6b+ $944
-- North Badung:    1b $87  | 2b $117 | 3b $195 | 4b $329 | 5b $485 | 6b+ $752
-- South Badung:    1b $103 | 2b $154 | 3b $254 | 4b $411 | 5b $619 | 6b+ $779
-- Tabanan:         1b $74  | 2b $129 | 3b $186 | 4b $292 | 5b $569 | 6b+ $938
+Occupancy by asset size (YoY):
+              | 1-3 BED | 4-6 BED
+2024          | 50%     | 50%
+2025          | 63%     | 37%
 
-REGULATORY SUMMARY
-Bali is now a formally regulated market. Foreign freehold ownership is not available to individuals. Three structures apply:
-- Hak Pakai: state-recognised right of use for foreign individuals holding a KITAS or KITAP. Time-bound, extendable.
-- HGB via PT PMA: right to build and operate commercially. 30 years, extendable to approximately 80 years. Requires a foreign investment company.
-- Leasehold: private contractual arrangement. Not a state-recognised land title. Protection depends entirely on contract quality.
+$1.21B 2025 total rental revenue; -15% YoY.
+South Badung share of total revenue 18%; +17% YoY.
+Total rental revenue declined 15% YoY to $1.21B, driven by declining daily rates and a shifting composition toward compact assets.
 
-Key compliance requirements: zoning alignment (RDTR), building approval (PBG), certificate of proper function (SLF), business identification number (NIB), tourism operational licence, OSS registration for all business licensing.
+Average daily rate by bedroom and region:
+              | 1 BED | 2 BED | 3 BED | 4 BED | 5 BED  | 6 BED+
+Central Badung| $70   | $106  | $173  | $273  | $369   | $596
+Denpasar      | $63   | $118  | $208  | $352  | $503   | $563
+Gianyar       | $64   | $106  | $201  | $291  | $382   | $514
+Mengwi        | $78   | $105  | $169  | $285  | $655   | $944
+North Badung  | $87   | $117  | $195  | $329  | $485   | $752
+South Badung  | $103  | $154  | $254  | $411  | $619   | $779
+Tabanan       | $74   | $129  | $186  | $292  | $569   | $938
 
-Authorities are actively enforcing compliance. Properties without correct approvals face restrictions on use. Short-term rental operations without a NIB and tourism licence face administrative sanctions.
-`;
+$178 2025 market average daily rate (ADR); -14% YoY.
+$226 2025 professionally managed property average ADR; -26% YoY.
+Despite the broad reduction, premium configurations particularly in North and South Badung retained pricing power. Operators are increasingly focusing on volume stability rather than price expansion.
 
-/* ── PRO RAG CONTENT (includes Member content + Key Markets + Emerging Markets) ── */
-export const PRO_RAG = `
-${MEMBER_RAG}
 
-PRO TIER ADDITIONAL DATA: KEY MARKETS AND EMERGING MARKETS
-All figures are 2025 annual data. All prices in USD. All sizes in SQM.
-When a query names a specific location, use the location data below in preference to regional or island-wide figures.
-Always check the Neighbourhood Directory above to confirm the correct REID Region before responding.
+BALI KEY MARKETS
 
-STRATEGIC CONTEXT
-- Market engine: Canggu (North Badung) anchors liquidity and sets pricing benchmarks for surrounding areas.
-- Upper-tier residential: Umalas (North Badung) and Pererenan (Mengwi) have consolidated into premium brackets with larger villa formats.
-- High-value coastal niches: Seseh (Mengwi) and Nyanyi (Tabanan) are premium-aspiring markets undergoing recalibration.
-- Compact densification: Uluwatu (South Badung) is shifting toward smaller, higher-value-per-sqm cliffside product.
-- Stable inland: Ubud (Gianyar) reflects steady wellness and retreat demand, not rapid growth.
+BERAWA
+Berawa continues to function as one of Bali's core lifestyle investment corridors. Its relatively large supply base and strong pricing trajectory indicate a mature yet resilient market. The area attracts investors seeking established infrastructure, walkability, and consistent rental performance. Mid-to-upper pricing tiers and steady transaction activity position Berawa as a balanced, high-liquidity coastal market rather than a speculative growth play.
+Supply: 940+ (9% of market) | Median Price: $321k (+15%) | 2025 Sales: 250+ (6% of market)
+Largest category: 3 bed | Avg size: 225 sqm (+2%) | Avg $/sqm: $2,565 (+18%) | Avg lease term: 26 yrs (-3%)
 
-KEY MARKETS
+BINGIN
+Bingin represents a boutique coastal enclave characterised by tighter supply and focused product composition. The prevalence of smaller format villas aligns with its positioning as a lifestyle-driven market appealing to shorter-stay rental demand and individual investors. Price appreciation without excessive supply expansion reinforces its reputation as a niche but desirable southern peninsula location.
+Supply: 200+ (2% of market) | Median Price: $298k (+6%) | 2025 Sales: 230+ (5% of market)
+Largest category: 2 bed | Avg size: 185 sqm (-16%) | Avg $/sqm: $2,395 (+10%) | Avg lease term: 28 yrs (+4%)
 
-BERAWA (North Badung, Badung)
-Mature lifestyle investment corridor. High liquidity. Strong pricing trajectory. Attracts investors seeking established infrastructure, walkability, and consistent rental performance.
-- Supply: 940+, 9% of Bali market
-- Median price: $321k, up 15% vs market
-- 2025 sales volume: 250+, 6% of market
-- Largest category: 3 bedroom
-- Average size: 225 sqm, up 2% vs market
-- Average price per sqm: $2,565, up 18% vs market
-- Average lease term: 26 years, down 3% vs market
+CANGGU
+Canggu remains the structural centre of Bali's villa market. As the island's largest market by supply and sales volume, it anchors investor activity and sets pricing benchmarks for surrounding areas. Its broad stock profile and sustained absorption reflect both end-user demand and rental-led acquisition. Canggu operates as the liquidity engine of Bali's west coast, with scale supporting pricing stability.
+Supply: 1,240+ (12% of market) | Median Price: $296k (+6%) | 2025 Sales: 480+ (12% of market)
+Largest category: 3 bed | Avg size: 230 sqm (+6%) | Avg $/sqm: $2,170 (0%) | Avg lease term: 26 yrs (-4%)
 
-BINGIN (South Badung, Badung)
-Boutique coastal enclave. Tight supply, lifestyle-driven. Smaller format villas dominate. Controlled growth with price appreciation.
-- Supply: 200+, 2% of Bali market
-- Median price: $298k, up 6% vs market
-- 2025 sales volume: 230+, 5% of market
-- Largest category: 2 bedroom
-- Average size: 185 sqm, down 16% vs market
-- Average price per sqm: $2,395, up 10% vs market
-- Average lease term: 28 years, up 4% vs market
+PERERENAN
+Pererenan has transitioned from an extension of Canggu into a premium submarket in its own right. Larger villa formats and stronger median pricing growth indicate movement toward higher-end residential positioning. The area attracts buyers seeking proximity to Canggu's amenities while favouring lower density and more residential character. Its performance profile suggests consolidation into Bali's upper-tier coastal bracket.
+Supply: 890+ (9% of market) | Median Price: $328k (+17%) | 2025 Sales: 370+ (9% of market)
+Largest category: 3 bed | Avg size: 245 sqm (+12%) | Avg $/sqm: $2,355 (+8%) | Avg lease term: 27 yrs (0%)
 
-CANGGU (North Badung, Badung)
-Structural centre of Bali's villa market. Largest by supply and sales volume. Sets pricing benchmarks for surrounding areas. Liquidity engine of Bali's west coast.
-- Supply: 1,240+, 12% of Bali market
-- Median price: $296k, up 6% vs market
-- 2025 sales volume: 480+, 12% of market
-- Largest category: 3 bedroom
-- Average size: 230 sqm, up 6% vs market
-- Average price per sqm: $2,170, flat vs market
-- Average lease term: 26 years, down 4% vs market
+SANUR
+Sanur operates as a more traditional, family-oriented coastal market on the island's east side. Pricing growth alongside softer per-square-metre movement suggests larger residential-style villas rather than compact rental stock. Compared to west coast hubs, Sanur reflects a steadier, end-user driven environment with moderate turnover and less speculative supply expansion.
+Supply: 360+ (4% of market) | Median Price: $327k (+17%) | 2025 Sales: 110+ (3% of market)
+Largest category: 3 bed | Avg size: 235 sqm (+8%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 27 yrs (0%)
 
-KEROBOKAN (North Badung, Badung)
-Established residential corridor between Seminyak and Canggu. Mature market with sustained demand from both end-users and investors. Data follows North Badung regional benchmarks where location-specific figures are not available.
+SEMINYAK
+Seminyak represents one of Bali's original prime villa markets. While pricing remains elevated, relative moderation in per-square-metre growth and shorter lease terms suggest a mature cycle phase. The area continues to command recognition and infrastructure advantage, but its profile reflects consolidation rather than acceleration. It functions as an established premium address with stable but measured activity.
+Supply: 690+ (7% of market) | Median Price: $297k (+6%) | 2025 Sales: 230+ (5% of market)
+Largest category: 3 bed | Avg size: 250 sqm (+14%) | Avg $/sqm: $2,110 (-3%) | Avg lease term: 23 yrs (-13%)
 
-PERERENAN (Mengwi, Badung)
-Transitioned from Canggu extension to premium submarket. Larger villas, upper-tier coastal positioning. Attracts buyers seeking Canggu proximity with lower density.
-- Supply: 890+, 9% of Bali market
-- Median price: $328k, up 17% vs market
-- 2025 sales volume: 370+, 9% of market
-- Largest category: 3 bedroom
-- Average size: 245 sqm, up 12% vs market
-- Average price per sqm: $2,355, up 8% vs market
-- Average lease term: 27 years, flat vs market
+UBUD
+Ubud occupies a distinct inland niche centred on wellness, retreat, and longer-stay residency. Market behaviour reflects steady demand rather than rapid growth, with larger villas and moderate pricing positioning. Unlike coastal tourism hubs, Ubud's appeal lies in lifestyle differentiation, drawing buyers seeking tranquillity and natural surroundings. Its performance profile suggests stability over volatility.
+Supply: 760+ (7% of market) | Median Price: $293k (+5%) | 2025 Sales: 220+ (5% of market)
+Largest category: 3 bed | Avg size: 230 sqm (+6%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 26 yrs (-3%)
 
-SANUR (Denpasar)
-Traditional family-oriented coastal market. Larger residential-style villas. Steady end-user driven environment, moderate turnover, less speculative supply.
-- Supply: 360+, 4% of Bali market
-- Median price: $327k, up 17% vs market
-- 2025 sales volume: 110+, 3% of market
-- Largest category: 3 bedroom
-- Average size: 235 sqm, up 8% vs market
-- Average price per sqm: $1,995, down 8% vs market
-- Average lease term: 27 years, flat vs market
+ULUWATU
+Uluwatu stands out for structural repositioning. The shift toward smaller villas combined with elevated per-square-metre pricing indicates densification of premium cliffside and ocean-view product. Despite softer median values, the area demonstrates strong absorption, reflecting continued demand for compact, high-yield formats. Uluwatu increasingly caters to design-led, view-oriented developments rather than expansive residential compounds.
+Supply: 680+ (7% of market) | Median Price: $238k (-15%) | 2025 Sales: 430+ (10% of market)
+Largest category: 2 bed | Avg size: 145 sqm (-33%) | Avg $/sqm: $2,725 (+25%) | Avg lease term: 32 yrs (+18%)
 
-SEMINYAK (Central Badung, Badung)
-One of Bali's original prime villa markets. Mature cycle phase. Established premium address with stable but measured activity. Shorter lease terms signal consolidation.
-- Supply: 690+, 7% of Bali market
-- Median price: $297k, up 6% vs market
-- 2025 sales volume: 230+, 5% of market
-- Largest category: 3 bedroom
-- Average size: 250 sqm, up 14% vs market
-- Average price per sqm: $2,110, down 3% vs market
-- Average lease term: 23 years, down 13% vs market
+UMALAS
+Umalas reflects one of the clearest moves toward upper-tier residential positioning. Larger average villa sizes and strong median pricing growth signal buyer appetite for expansive properties within proximity to Canggu and Seminyak. Rather than functioning as a short-term rental hotspot, Umalas aligns more closely with private residential and long-stay investors, supporting its premium orientation.
+Supply: 860+ (8% of market) | Median Price: $350k (+25%) | 2025 Sales: 250+ (6% of market)
+Largest category: 3 bed | Avg size: 285 sqm (+29%) | Avg $/sqm: $1,925 (-12%) | Avg lease term: 26 yrs (-4%)
 
-UBUD (Gianyar)
-Distinct inland niche. Wellness, retreat, longer-stay residency. Steady demand, not rapid growth. Stability over volatility profile.
-- Supply: 760+, 7% of Bali market
-- Median price: $293k, up 5% vs market
-- 2025 sales volume: 220+, 5% of market
-- Largest category: 3 bedroom
-- Average size: 230 sqm, up 6% vs market
-- Average price per sqm: $1,995, down 8% vs market
-- Average lease term: 26 years, down 3% vs market
+UNGASAN
+Ungasan represents a more price-accessible southern market relative to Uluwatu. Softer pricing metrics and smaller average formats indicate repositioning toward entry-level and mid-market buyers. While sales activity remains active, its overall scale and price correction suggest an adjustment phase rather than premium consolidation.
+Supply: 230+ (2% of market) | Median Price: $237k (-15%) | 2025 Sales: 180+ (4% of market)
+Largest category: 2 bed | Avg size: 175 sqm (-20%) | Avg $/sqm: $1,870 (-14%) | Avg lease term: 28 yrs (+4%)
 
-ULUWATU (South Badung, Badung)
-Structural repositioning underway. Shift toward smaller villas with elevated per-sqm pricing. Compact, high-yield cliffside and ocean-view product. Strong absorption despite softer median values.
-- Supply: 680+, 7% of Bali market
-- Median price: $238k, down 15% vs market
-- 2025 sales volume: 430+, 10% of market
-- Largest category: 2 bedroom
-- Average size: 145 sqm, down 33% vs market
-- Average price per sqm: $2,725, up 25% vs market
-- Average lease term: 32 years, up 18% vs market
 
-UMALAS (North Badung, Badung)
-Upper-tier residential positioning. Larger villas, strong median price growth. Primarily private residential and long-stay investors rather than short-term rental operators.
-- Supply: 860+, 8% of Bali market
-- Median price: $350k, up 25% vs market
-- 2025 sales volume: 250+, 6% of market
-- Largest category: 3 bedroom
-- Average size: 285 sqm, up 29% vs market
-- Average price per sqm: $1,925, down 12% vs market
-- Average lease term: 26 years, down 4% vs market
+BALI EMERGING MARKETS
 
-UNGASAN (South Badung, Badung)
-Price-accessible southern market relative to Uluwatu. Softer pricing, smaller formats. Adjustment phase rather than premium consolidation.
-- Supply: 230+, 2% of Bali market
-- Median price: $237k, down 15% vs market
-- 2025 sales volume: 180+, 4% of market
-- Largest category: 2 bedroom
-- Average size: 175 sqm, down 20% vs market
-- Average price per sqm: $1,870, down 14% vs market
-- Average lease term: 28 years, up 4% vs market
+BALANGAN
+Balangan operates as a secondary southern enclave with limited supply and measured demand. Pricing moderation and compact villa formats suggest early-stage development activity. The area appeals to buyers seeking exposure to the Bukit Peninsula at lower entry points compared to Uluwatu, though liquidity remains comparatively modest.
+Supply: 120+ (1% of market) | Median Price: $253k (-10%) | 2025 Sales: 80+ (2% of market)
+Largest category: 2 bed | Avg size: 170 sqm (-21%) | Avg $/sqm: $2,035 (-7%) | Avg lease term: 29 yrs (+8%)
 
-EMERGING MARKETS
+KABA KABA
+Kaba Kaba reflects a nascent inland market with minimal supply and low transaction depth. Its pricing recalibration and moderate villa sizing indicate a developmental phase rather than established demand concentration. The area's growth trajectory will likely depend on infrastructure expansion and spillover from western coastal hubs.
+Supply: 80+ (1% of market) | Median Price: $235k (-16%) | 2025 Sales: 40+ (1% of market)
+Largest category: 3 bed | Avg size: 195 sqm (-10%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 28 yrs (+5%)
 
-BALANGAN (South Badung, Badung)
-Secondary southern enclave. Limited supply, early-stage development. Lower Bukit Peninsula entry point relative to Uluwatu. Liquidity remains modest.
-- Supply: 120+, 1% of Bali market
-- Median price: $253k, down 10% vs market
-- 2025 sales volume: 80+, 2% of market
-- Largest category: 2 bedroom
-- Average size: 170 sqm, down 21% vs market
-- Average price per sqm: $2,035, down 7% vs market
-- Average lease term: 29 years, up 8% vs market
+NYANYI
+Nyanyi presents a contrasting profile among emerging areas. Despite limited transaction volume, pricing indicators suggest premium aspirations, supported by proximity to high-end resort and master-planned developments. It occupies a strategic position between Canggu expansion zones and lower-density coastal land, positioning it as a potential high-value niche rather than a mass-market location.
+Supply: 125+ (1% of market) | Median Price: $299k (+7%) | 2025 Sales: 30+ (1% of market)
+Largest category: 2 bed | Avg size: 200 sqm (-9%) | Avg $/sqm: $2,540 (+17%) | Avg lease term: 28 yrs (+5%)
 
-KABA KABA (Tabanan)
-Nascent inland market. Minimal supply, low transaction depth. Growth trajectory depends on infrastructure expansion and spillover from western coastal hubs.
-- Supply: 80+, 1% of Bali market
-- Median price: $235k, down 16% vs market
-- 2025 sales volume: 40+, 1% of market
-- Largest category: 3 bedroom
-- Average size: 195 sqm, down 10% vs market
-- Average price per sqm: $1,995, down 8% vs market
-- Average lease term: 28 years, up 5% vs market
+PADONAN
+Padonan functions as an affordability-driven extension of Canggu. Price compression and mid-sized villas suggest repositioning toward accessible entry points for investors priced out of core areas. While demand remains moderate, its identity is closely tied to spillover activity rather than independent destination appeal.
+Supply: 160+ (2% of market) | Median Price: $250k (-11%) | 2025 Sales: 60+ (2% of market)
+Largest category: 3 bed | Avg size: 195 sqm (-11%) | Avg $/sqm: $1,740 (-20%) | Avg lease term: 26 yrs (-5%)
 
-NYANYI (Tabanan)
-Premium aspirations despite limited transaction volume. Strategic position between Canggu expansion zones and lower-density coastal land. Potential high-value niche rather than mass-market location.
-- Supply: 125+, 1% of Bali market
-- Median price: $299k, up 7% vs market
-- 2025 sales volume: 30+, 1% of market
-- Largest category: 2 bedroom
-- Average size: 200 sqm, down 9% vs market
-- Average price per sqm: $2,540, up 17% vs market
-- Average lease term: 28 years, up 5% vs market
+SESEH
+Seseh reflects an emerging coastal residential enclave with relatively larger villas and premium ambitions. However, recent pricing adjustments suggest recalibration following earlier growth phases. Its appeal lies in low-density beachfront positioning, though absorption remains measured relative to more central west coast locations.
+Supply: 190+ (2% of market) | Median Price: $337k (-11%) | 2025 Sales: 90+ (2% of market)
+Largest category: 3 bed | Avg size: 250 sqm (-11%) | Avg $/sqm: $2,015 (-20%) | Avg lease term: 25 yrs (-5%)
 
-PADONAN (North Badung, Badung)
-Affordability-driven extension of Canggu. Mid-sized villas, price compression. Identity tied to spillover activity rather than independent destination appeal.
-- Supply: 160+, 2% of Bali market
-- Median price: $250k, down 11% vs market
-- 2025 sales volume: 60+, 2% of market
-- Largest category: 3 bedroom
-- Average size: 195 sqm, down 11% vs market
-- Average price per sqm: $1,740, down 20% vs market
-- Average lease term: 26 years, down 5% vs market
 
-SESEH (Mengwi, Badung)
-Emerging coastal residential enclave. Larger villas, premium ambitions. Low-density beachfront positioning. Pricing has recalibrated following earlier growth. Absorption remains measured.
-- Supply: 190+, 2% of Bali market
-- Median price: $337k, down 11% vs market
-- 2025 sales volume: 90+, 2% of market
-- Largest category: 3 bedroom
-- Average size: 250 sqm, down 11% vs market
-- Average price per sqm: $2,015, down 20% vs market
-- Average lease term: 25 years, down 5% vs market
+BALI REGULATORY LANDSCAPE
+
+Overview
+Property acquisition and development in Bali remains viable for foreign investors, but it is no longer a lightly regulated environment. Over the past two years, both the Provincial Government of Bali and central authorities have materially increased enforcement around zoning compliance, building approvals, and tourism licensing. The focus has shifted from structural permissibility to operational compliance.
+
+At a structural level, foreign participation must sit within Indonesia's recognised land rights framework. Direct individual freehold ownership is not available to foreign individuals. Investment therefore requires a properly structured approach: either through an individual right of use (Hak Pakai) for residential occupation, a foreign investment company (PT PMA) for commercial development, or a private lease arrangement supported by robust documentation.
+
+The more significant compliance risk today sits in land use alignment and licensing. Authorities are actively reviewing villas and small-scale hospitality assets operating without correct zoning, building approvals, or tourism licences. Properties constructed without the appropriate building approval (PBG) or lacking a certificate confirming lawful function (SLF) may face restrictions on use.
+
+For developers, feasibility must now incorporate spatial planning (RDTR) verification at the outset. For investors purchasing existing assets, due diligence must extend beyond title validity to include zoning designation, construction approvals, operational permits, and corporate compliance where applicable.
+
+Bali has moved from a relationship-based, documentation-light market to one that demands formal registration, licensing alignment, and transparent business structuring. Well-structured projects with correct approvals continue to operate without issue. Informal or partially compliant arrangements carry growing risk.
+
+Ownership Structures
+1. Right of Use (Hak Pakai)
+Hak Pakai is the primary title available to foreign individuals holding a valid Indonesian residence permit (KITAS or KITAP). It grants a state-recognised, time-bound right to use and occupy residential property. It does not provide full ownership but offers a legally recognised tenure that may be extended under prevailing regulations.
+
+2. Right to Build (Hak Guna Bangunan / HGB) via PT PMA
+HGB allows the holder to construct and commercially utilise buildings on land not held under freehold. Foreign individuals cannot hold HGB directly and must establish a PT PMA. HGB is typically granted for 30 years and may be extended in stages up to approximately 80 years, subject to regulation.
+
+3. Leasehold
+Leasehold is a private contractual arrangement between landowner and tenant. It is not a state-recognised land title under Indonesian agrarian law. The lease is granted for a fixed term agreed between the parties. Because protections depend on contract structure rather than statutory land rights, risk and enforceability are determined by due diligence and documentation.
+
+Required Documents Before Buying
+1. Land Certificate — Hak Pakai or HGB
+The land certificate must clearly reflect the correct title and be formally registered with the Badan Pertanahan Nasional (BPN). This is the primary proof of legal tenure and confirms the validity, duration, and classification of the land right.
+
+2. PBG and SLF — Building Approval and Certificate of Proper Function
+The PBG (Persetujuan Bangunan Gedung) confirms that the building has received formal construction approval under current regulations, replacing the former IMB system. The SLF (Sertifikat Laik Fungsi) certifies that the completed building is fit for use and compliant with safety and zoning requirements.
+
+3. Lease Agreement (Leasehold)
+For long-term leasehold acquisitions, a formal Lease Agreement must be executed, typically before a Notary or Land Deed Official (PPAT). The agreement should clearly define: lease duration, extension rights, transfer provisions, and renovation and structural permissions.
+
+4. NIB and Tourism Business Licence
+If the villa is to be operated as short-term or long-term rental accommodation, a Business Identification Number (Nomor Induk Berusaha / NIB) and the relevant tourism operational licence are required.
+
+5. OSS Registration — Online Single Submission
+All business licensing, including NIB issuance and sector approvals, is processed through Indonesia's Online Single Submission (OSS) system. OSS registration applies to both individuals and PT PMA entities engaging in rental activity.
 `;

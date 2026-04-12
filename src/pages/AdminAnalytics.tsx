@@ -236,6 +236,9 @@ export default function AdminAnalytics() {
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
+              <Users className="h-4 w-4 mr-1.5" /> Users
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/chat-logs")}>
               <MessageSquare className="h-4 w-4 mr-1.5" /> Chat logs
             </Button>

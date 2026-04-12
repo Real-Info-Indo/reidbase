@@ -1,6 +1,7 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useMemo, memo } from "react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Download } from "lucide-react";
+import { Download, Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 const COLORS = [
   "hsl(var(--primary))",
@@ -28,7 +29,11 @@ function formatValue(val: unknown): string {
   return val.toLocaleString();
 }
 
+const chartCache = new Map<string, ChartData>();
+
 export function parseChartBlock(json: string): ChartData | null {
+  const cached = chartCache.get(json);
+  if (cached) return cached;
   try {
     const parsed = JSON.parse(json);
     if (!parsed.data || !Array.isArray(parsed.data) || parsed.data.length === 0) return null;
@@ -37,24 +42,23 @@ export function parseChartBlock(json: string): ChartData | null {
     const xKey = parsed.xKey || allKeys[0];
     const dataKeys = parsed.dataKeys || allKeys.filter((k) => k !== xKey && typeof parsed.data[0][k] === "number");
     if (dataKeys.length === 0) return null;
-    return { type, title: parsed.title, data: parsed.data, xKey, dataKeys };
+    const result: ChartData = { type, title: parsed.title, data: parsed.data, xKey, dataKeys };
+    chartCache.set(json, result);
+    return result;
   } catch {
     return null;
   }
 }
 
-export default function ChatChart({ chart }: { chart: ChartData }) {
-  const { type, title, data, xKey = "name", dataKeys = [] } = chart;
-  const chartRef = useRef<HTMLDivElement>(null);
-
-  const handleDownload = useCallback(() => {
-    if (!chartRef.current) return;
+function getChartCanvas(chartRef: React.RefObject<HTMLDivElement>): Promise<HTMLCanvasElement | null> {
+  return new Promise((resolve) => {
+    if (!chartRef.current) return resolve(null);
     const svg = chartRef.current.querySelector("svg");
-    if (!svg) return;
+    if (!svg) return resolve(null);
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return resolve(null);
     const img = new Image();
     img.onload = () => {
       canvas.width = img.width * 2;
@@ -63,29 +67,75 @@ export default function ChatChart({ chart }: { chart: ChartData }) {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, img.width, img.height);
       ctx.drawImage(img, 0, 0);
-      const a = document.createElement("a");
-      a.download = `${title || "chart"}.png`;
-      a.href = canvas.toDataURL("image/png");
-      a.click();
+      resolve(canvas);
     };
+    img.onerror = () => resolve(null);
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  });
+}
+
+const ChatChart = memo(function ChatChart({ chart }: { chart: ChartData }) {
+  const { type, title, data, xKey = "name", dataKeys = [] } = chart;
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = useCallback(async () => {
+    const canvas = await getChartCanvas(chartRef);
+    if (!canvas) return;
+    const a = document.createElement("a");
+    a.download = `${title || "chart"}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
   }, [title]);
+
+  const handleShare = useCallback(async () => {
+    const canvas = await getChartCanvas(chartRef);
+    if (!canvas) return;
+    try {
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
+      if (!blob) throw new Error("Failed to create image");
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], `${title || "chart"}.png`, { type: "image/png" });
+        const shareData = { files: [file], title: title || "Chart" };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          return;
+        }
+      }
+      // Fallback: copy image to clipboard
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      toast.success("Chart copied to clipboard");
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name === "AbortError") return;
+      toast.error("Sharing not supported. Try downloading instead.");
+    }
+  }, [title]);
+
+  const stableData = useMemo(() => data, [JSON.stringify(data)]);
 
   return (
     <div ref={chartRef} className="my-4 rounded-xl border border-border bg-card p-4 relative">
-      <button
-        onClick={handleDownload}
-        className="absolute top-3 right-3 p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors z-10"
-        title="Download chart"
-      >
-        <Download className="h-4 w-4" />
-      </button>
+      <div className="absolute top-3 right-3 flex gap-1 z-10">
+        <button
+          onClick={handleShare}
+          className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+          title="Share chart"
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleDownload}
+          className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
+          title="Download chart"
+        >
+          <Download className="h-4 w-4" />
+        </button>
+      </div>
       {title && <p className="text-sm font-medium mb-3 text-foreground">{title}</p>}
       <ResponsiveContainer width="100%" height={280}>
         {type === "pie" ? (
           <PieChart>
             <Pie
-              data={data}
+              data={stableData}
               dataKey={dataKeys[0]}
               nameKey={xKey}
               cx="50%"
@@ -93,7 +143,7 @@ export default function ChatChart({ chart }: { chart: ChartData }) {
               outerRadius={100}
               label={({ name, value }) => `${name}: ${formatValue(value)}`}
             >
-              {data.map((_, i) => (
+              {stableData.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
@@ -101,7 +151,7 @@ export default function ChatChart({ chart }: { chart: ChartData }) {
             <Legend />
           </PieChart>
         ) : type === "line" ? (
-          <LineChart data={data}>
+          <LineChart data={stableData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v)} />
@@ -112,7 +162,7 @@ export default function ChatChart({ chart }: { chart: ChartData }) {
             ))}
           </LineChart>
         ) : (
-          <BarChart data={data}>
+          <BarChart data={stableData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey={xKey} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v)} />
@@ -126,4 +176,6 @@ export default function ChatChart({ chart }: { chart: ChartData }) {
       </ResponsiveContainer>
     </div>
   );
-}
+});
+
+export default ChatChart;

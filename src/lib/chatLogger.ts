@@ -39,6 +39,7 @@ export async function logConversation(payload: LogPayload) {
       title: payload.title,
       messages: payload.messages,
       search_mode: payload.searchMode || "data-analyst",
+      user_tier: payload.userTier || null,
       message_count: payload.messages.length,
       updated_at: new Date().toISOString(),
     } as any,

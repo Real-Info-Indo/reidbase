@@ -115,7 +115,7 @@ export default function AdminChatLogs() {
     if (selected.length === 0) { toast.error("No conversations selected"); return; }
 
     const escCsv = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const headers = ["Title", "User Name", "User Email", "Mode", "Date", "Messages", "Likes", "Dislikes", "Copies", "Conversation"];
+    const headers = ["Title", "User Name", "User Email", "Mode", "Tier", "Date", "Messages", "Likes", "Dislikes", "Copies", "Conversation"];
     const rows = selected.map((log) => {
       const conversation = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}: ${m.content}`).join("\n\n");
       return [
@@ -123,6 +123,7 @@ export default function AdminChatLogs() {
         escCsv(log.wix_user_name || "Anonymous"),
         escCsv(log.wix_user_email || ""),
         escCsv(log.search_mode || "data-analyst"),
+        escCsv(log.user_tier || "unknown"),
         escCsv(new Date(log.updated_at).toLocaleString("en-GB")),
         String(log.message_count),
         String(log.likes),

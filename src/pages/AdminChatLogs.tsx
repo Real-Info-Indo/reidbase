@@ -19,6 +19,7 @@ interface ChatLog {
   title: string;
   messages: Msg[];
   search_mode: string | null;
+  user_tier: string | null;
   message_count: number;
   copy_count: number;
   likes: number;
@@ -114,7 +115,7 @@ export default function AdminChatLogs() {
     if (selected.length === 0) { toast.error("No conversations selected"); return; }
 
     const escCsv = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const headers = ["Title", "User Name", "User Email", "Mode", "Date", "Messages", "Likes", "Dislikes", "Copies", "Conversation"];
+    const headers = ["Title", "User Name", "User Email", "Mode", "Tier", "Date", "Messages", "Likes", "Dislikes", "Copies", "Conversation"];
     const rows = selected.map((log) => {
       const conversation = log.messages.map((m) => `${m.role === "user" ? "User" : "REID"}: ${m.content}`).join("\n\n");
       return [
@@ -122,6 +123,7 @@ export default function AdminChatLogs() {
         escCsv(log.wix_user_name || "Anonymous"),
         escCsv(log.wix_user_email || ""),
         escCsv(log.search_mode || "data-analyst"),
+        escCsv(log.user_tier || "unknown"),
         escCsv(new Date(log.updated_at).toLocaleString("en-GB")),
         String(log.message_count),
         String(log.likes),
@@ -208,6 +210,7 @@ export default function AdminChatLogs() {
                 <TableHead className="w-[200px]">User</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead className="w-[100px]">Mode</TableHead>
+                <TableHead className="w-[80px]">Tier</TableHead>
                 <TableHead className="w-[80px]">Messages</TableHead>
                 <TableHead className="w-[100px]">Feedback</TableHead>
                 <TableHead className="w-[160px]">Last active</TableHead>
@@ -236,6 +239,11 @@ export default function AdminChatLogs() {
                     <TableCell>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {log.search_mode || "data-analyst"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {log.user_tier || "unknown"}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm text-center">{log.message_count}</TableCell>
@@ -293,7 +301,7 @@ export default function AdminChatLogs() {
                   </TableRow>
                   {expandedId === log.id && (
                     <TableRow key={`${log.id}-expanded`}>
-                      <TableCell colSpan={8} className="p-0">
+                      <TableCell colSpan={9} className="p-0">
                         <div className="max-h-96 overflow-y-auto p-4 space-y-3 bg-muted/30">
                           {log.messages?.map((msg, i) => (
                             <div
@@ -322,7 +330,7 @@ export default function AdminChatLogs() {
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                     {loading ? "Loading chat logs..." : "No conversations found"}
                   </TableCell>
                 </TableRow>

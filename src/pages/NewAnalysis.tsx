@@ -377,7 +377,7 @@ export default function NewAnalysis() {
     persistRef.current = id;
     const title = customTitle || deriveTitle(messages);
     saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned });
-    logConversation({ conversationId: id, title, messages, searchMode });
+    logConversation({ conversationId: id, title, messages, searchMode, userTier: tier });
     window.dispatchEvent(new Event("conversations-updated"));
   }, [messages, conversationId]);
 

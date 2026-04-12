@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import ReactMarkdown from "react-markdown";
+import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import type { Msg } from "@/lib/conversations";
 
 const ADMIN_PASSWORD = "reid-admin-2025";

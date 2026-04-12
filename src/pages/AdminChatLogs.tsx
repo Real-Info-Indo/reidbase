@@ -19,6 +19,7 @@ interface ChatLog {
   title: string;
   messages: Msg[];
   search_mode: string | null;
+  user_tier: string | null;
   message_count: number;
   copy_count: number;
   likes: number;

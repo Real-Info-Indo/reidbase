@@ -150,6 +150,7 @@ export type Database = {
           search_mode: string | null
           title: string
           updated_at: string
+          user_tier: string | null
           wix_user_email: string | null
           wix_user_id: string | null
           wix_user_name: string | null
@@ -166,6 +167,7 @@ export type Database = {
           search_mode?: string | null
           title?: string
           updated_at?: string
+          user_tier?: string | null
           wix_user_email?: string | null
           wix_user_id?: string | null
           wix_user_name?: string | null
@@ -182,6 +184,7 @@ export type Database = {
           search_mode?: string | null
           title?: string
           updated_at?: string
+          user_tier?: string | null
           wix_user_email?: string | null
           wix_user_id?: string | null
           wix_user_name?: string | null

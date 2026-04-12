@@ -6,6 +6,7 @@ interface LogPayload {
   title: string;
   messages: Msg[];
   searchMode?: string;
+  userTier?: string;
 }
 
 function getWixUserInfo(): { id?: string; name?: string; email?: string } {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { wixClient } from "@/lib/wixClient";
+import { syncUserProfile } from "@/lib/syncUserProfile";
 
 interface WixMember {
   id: string;
@@ -71,6 +72,8 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           displayName: memberData.name,
         }));
         console.log("Wix member persisted:", memberData.id, memberData.name, memberData.email);
+        // Sync profile to database (fire-and-forget)
+        setTimeout(() => syncUserProfile(), 500);
       }
     } catch (err) {
       console.error("Failed to fetch Wix member:", err);

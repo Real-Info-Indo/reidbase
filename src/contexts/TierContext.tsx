@@ -84,6 +84,7 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
         console.log("Wix active orders:", activeOrders.map(o => o.planName));
         console.log("Resolved tier:", highestTier);
         setTier(highestTier);
+        localStorage.setItem("reid-user-tier", highestTier);
       } catch (err) {
         console.error("Failed to fetch Wix pricing plan orders:", err);
         setTier("member");

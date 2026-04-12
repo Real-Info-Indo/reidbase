@@ -55,6 +55,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const handleSave = () => {
     savePersonalisation(personalisation);
     onOpenChange(false);
+    // Sync personalisation to backend profile
+    import("@/lib/syncUserProfile").then(({ syncUserProfile }) => syncUserProfile());
   };
 
   const tabs = [

@@ -308,6 +308,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          about: string | null
+          business: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          last_login: string | null
+          nickname: string | null
+          occupation: string | null
+          tier: string | null
+          updated_at: string
+          wix_user_id: string
+        }
+        Insert: {
+          about?: string | null
+          business?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          last_login?: string | null
+          nickname?: string | null
+          occupation?: string | null
+          tier?: string | null
+          updated_at?: string
+          wix_user_id: string
+        }
+        Update: {
+          about?: string | null
+          business?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          last_login?: string | null
+          nickname?: string | null
+          occupation?: string | null
+          tier?: string | null
+          updated_at?: string
+          wix_user_id?: string
+        }
+        Relationships: []
+      }
       user_sessions: {
         Row: {
           created_at: string

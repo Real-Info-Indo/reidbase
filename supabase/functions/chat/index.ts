@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { moderateMessage } from "../_shared/moderation.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -757,7 +758,13 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId, conversationId } = await req.json();
+
+    // Moderate the latest user message (silent, non-blocking)
+    const lastMsg = messages?.[messages.length - 1];
+    if (lastMsg?.role === "user" && lastMsg.content) {
+      moderateMessage(lastMsg.content, { conversationId: conversationId || "unknown", wixUserId });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 

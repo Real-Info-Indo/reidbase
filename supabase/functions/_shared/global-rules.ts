@@ -84,9 +84,10 @@ INSUFFICIENT DATA:
 
 export const DATA_CURRENCY_RULES = `
 DATA CURRENCY:
-- CSV files (Enterprise): accurate to last calendar month. Present as current.
-- RAG documents (Pro and Freemium): updated quarterly. State: "This reflects 2025 annual data as of the most recent quarterly update."
-- Do not present quarterly RAG data as live.
+- REID DB: updated monthly across all tiers. Present as current. No qualification needed.
+- RAG document: updated quarterly. When drawing on RAG commentary or narrative context, state the period: "This reflects 2025 annual data as of the most recent quarterly update." Do not present RAG commentary as live data.
+- Enterprise CSV: accurate to the last calendar month. Present as current: "Based on live REID data to [last calendar month]."
+- When both RAG context and live DB data are relevant in the same response, note the difference in currency explicitly. Lead with the DB figure as current; use the RAG for context and narrative only.
 `;
 
 export const KNOWN_DATA_GAPS_RULES = `

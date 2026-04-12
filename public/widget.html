@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;font-family:'Poppins',sans-serif}
+.w{width:500px;display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;align-items:center;width:100%;height:50px;background:#fff;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:0 6px 0 20px}
+.bar input{flex:1;border:none;outline:none;background:transparent;font-size:14px;color:#1a1a1a;font-family:'Poppins',sans-serif;font-weight:200;height:100%}
+.bar button{flex-shrink:0;height:36px;border-radius:5px;background:hsl(36,97%,74%);border:none;display:flex;align-items:center;justify-content:center;padding:0 16px;gap:6px;font-family:'Poppins',sans-serif;font-weight:500;font-size:13px;color:#1a1a1a;cursor:pointer;transition:background .2s}
+.bar button:disabled{cursor:default}
+.qb{display:flex;gap:8px}
+.qb button{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:3px;border:none;background:#e8e8e8;color:#555;font-size:12px;font-family:'Poppins',sans-serif;font-weight:300;cursor:pointer;transition:background .2s}
+.qb button:hover{background:#d9d9d9}
+.qb svg{width:14px;height:14px}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="bar">
+    <input id="p" placeholder="Real data. Real answers">
+    <button id="go" disabled>Ask REID</button>
+  </div>
+  <div class="qb">
+    <button data-q="What are the latest property market trends in Bali?">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      Trends
+    </button>
+    <button data-q="Give me an overview of the current Bali property market">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Markets
+    </button>
+    <button data-q="What are the current yield figures across Bali locations?">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+      Yield
+    </button>
+  </div>
+</div>
+<script>
+var APP='https://reidbase.lovable.app';
+var p=document.getElementById('p'),go=document.getElementById('go');
+function send(t){t=t.trim();if(!t)return;window.open(APP+'/?prompt='+encodeURIComponent(t),'_blank')}
+p.addEventListener('input',function(){go.disabled=!p.value.trim()});
+p.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(p.value)}});
+go.addEventListener('click',function(){send(p.value)});
+document.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){send(b.dataset.q)})});
+</script>
+</body>
+</html>

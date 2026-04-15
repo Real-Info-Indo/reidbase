@@ -611,21 +611,37 @@ Chart Generation Rules:
 - Keep data arrays to 10 items max for readability.
 - The chart JSON must be valid and complete on a single line after the opening fence.`;
 
-function buildPersonalisationBlock(personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
-  if (!personalisation) return "";
+function buildPersonalisationBlock(
+  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string; display_name?: string },
+  aiSummary?: string,
+  tier?: string
+): string {
   const parts: string[] = [];
-  if (personalisation.nickname) parts.push(`- Address the user as "${personalisation.nickname}".`);
-  if (personalisation.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
-  if (personalisation.business) parts.push(`- The user's business: ${personalisation.business}.`);
-  if (personalisation.about) parts.push(`- About the user: ${personalisation.about}.`);
+
+  // All tiers: use nickname if set, fall back to display_name
+  const name = personalisation?.nickname || personalisation?.display_name;
+  if (name) parts.push(`- Address the user as "${name}".`);
+
+  // Member and above: include occupation, business, about
+  if (tier && tier !== "freemium") {
+    if (personalisation?.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
+    if (personalisation?.business) parts.push(`- The user's business: ${personalisation.business}.`);
+    if (personalisation?.about) parts.push(`- About the user: ${personalisation.about}.`);
+  }
+
+  // Pro and Enterprise: include AI-generated summary
+  if (aiSummary && tier && (tier === "reid_base_pro" || tier === "enterprise")) {
+    parts.push(`- User profile summary: ${aiSummary}`);
+  }
+
   if (parts.length === 0) return "";
-  return `\nUSER PERSONALISATION (use this to tailor your responses):\n${parts.join("\n")}\n`;
+  return `\nUSER PROFILE (use this to personalise your responses and build on prior context):\n${parts.join("\n")}\n`;
 }
 
-function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }, userMemory?: string): string {
+function buildRagSystemPrompt(tier: string, ragContent: string, searchMode?: string, personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string; display_name?: string }, userMemory?: string, aiSummary?: string): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
   const modePrompt = MODE_PROMPTS[searchMode || "data-analyst"] || MODE_PROMPTS["data-analyst"];
-  const personalisationBlock = buildPersonalisationBlock(personalisation);
+  const personalisationBlock = buildPersonalisationBlock(personalisation, aiSummary, tier);
   const memoryBlock = userMemory || "";
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
@@ -707,51 +723,58 @@ async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
 const ENTERPRISE_ONLY_MODES = ["marketing-assistant", "portfolio-analyst"];
 const PRO_AND_ENTERPRISE_MODES = ["sales-assistant"];
 
-/* ── Cross-conversation memory: fetch past chat summaries for higher tiers ── */
-async function buildUserMemory(supabase: any, wixUserId: string, tier: string, currentConversationId?: string): Promise<string> {
-  const isEnterprise = tier === "enterprise";
-  const limit = isEnterprise ? 1000 : tier === "reid_base_pro" ? 5 : 0;
-  if (limit === 0 || !wixUserId) return "";
+/* ── Cross-conversation memory: fetch past chat summaries and ai_summary for higher tiers ── */
+async function buildUserMemory(supabase: any, wixUserId: string, tier: string, currentConversationId?: string): Promise<{ memory: string; aiSummary: string }> {
+  if (!wixUserId) return { memory: "", aiSummary: "" };
 
+  // Fetch ai_summary from user_profiles
+  let aiSummary = "";
   try {
-    let query = supabase
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("ai_summary")
+      .eq("wix_user_id", wixUserId)
+      .single();
+    if (profile?.ai_summary) aiSummary = profile.ai_summary;
+  } catch (err) {
+    console.error("Failed to fetch user profile:", err);
+  }
+
+  // Determine conversation limit by tier
+  const limit = tier === "enterprise" ? 30
+    : tier === "reid_base_pro" ? 15
+    : tier === "reid_base" ? 5
+    : 0;
+
+  if (limit === 0) return { memory: "", aiSummary };
+
+  // Fetch recent conversations from chat_logs
+  let memory = "";
+  try {
+    const { data, error } = await supabase
       .from("chat_logs")
       .select("title, search_mode, messages, updated_at")
       .eq("wix_user_id", wixUserId)
       .order("updated_at", { ascending: false })
-      .limit(limit + 1); // fetch extra in case we filter out current
+      .limit(limit);
 
-    const { data, error } = await query;
-    if (error || !data || data.length === 0) return "";
+    if (!error && data && data.length > 0) {
+      const summaries = (data as any[]).map((c: any) => {
+        const msgs = Array.isArray(c.messages) ? c.messages : [];
+        const userMsgs = msgs.filter((m: any) => m.role === "user");
+        const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
+        const firstQuery = userMsgs[0]?.content?.slice(0, 150) || "";
+        const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 200) || "";
+        return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || ""}): ${firstQuery}${lastResponse ? ` | ${lastResponse}` : ""}`;
+      });
 
-    // Filter out the current conversation and limit
-    const pastConvos = (data as any[])
-      .filter((c: any) => {
-        // Skip current conversation if we can identify it by title match
-        if (currentConversationId) return true; // we don't have conversation_id in select, handled below
-        return true;
-      })
-      .slice(0, limit);
-
-    if (pastConvos.length === 0) return "";
-
-    const summaries = pastConvos.map((c: any) => {
-      const msgs = Array.isArray(c.messages) ? c.messages : [];
-      // Extract key topics from conversation: first user message + last assistant message
-      const userMsgs = msgs.filter((m: any) => m.role === "user");
-      const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
-      const firstQuery = userMsgs[0]?.content?.slice(0, 200) || "";
-      const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 300) || "";
-      return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || "unknown date"}): User asked about: ${firstQuery}${lastResponse ? ` | Key finding: ${lastResponse}` : ""}`;
-    });
-
-    return `\nUSER CONVERSATION HISTORY (use this to understand the user's interests and provide continuity across sessions):
-The user has ${pastConvos.length} recent conversation(s). Reference these naturally when relevant, but do not repeat previous answers verbatim. Use this context to tailor responses to their demonstrated interests and avoid re-explaining concepts they have already explored.
-${summaries.join("\n")}\n`;
+      memory = `\nRECENT CONVERSATION HISTORY (use for continuity, do not repeat verbatim):\n${summaries.join("\n")}\n`;
+    }
   } catch (err) {
-    console.error("Failed to build user memory:", err);
-    return "";
+    console.error("Failed to fetch conversation history:", err);
   }
+
+  return { memory, aiSummary };
 }
 
 serve(async (req) => {
@@ -788,7 +811,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Build cross-conversation memory for Pro/Enterprise users
-    const userMemory = await buildUserMemory(supabase, wixUserId, effectiveTier);
+    const { memory: userMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
 
     // If files are attached, prepend their contents to the last user message
     let enrichedMessages = [...messages];
@@ -901,7 +924,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG with Pro content
-          const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, effectiveSearchMode, personalisation, userMemory);
+          const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -918,7 +941,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[effectiveSearchMode] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation) + (userMemory || "") },
+              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[effectiveSearchMode] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation, aiSummary, effectiveTier) + (userMemory || "") },
               ...enrichedMessages.slice(0, -1),
               { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
@@ -937,7 +960,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation, userMemory);
+      const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation, userMemory, aiSummary);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -956,7 +979,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     // Member/Base and Pro tiers: pure RAG
     const ragContent = RAG_CONTENT;
-    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation, userMemory);
+    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation, userMemory, aiSummary);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

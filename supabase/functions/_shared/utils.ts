@@ -73,26 +73,43 @@ export const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-export function buildPersonalisationBlock(personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string }): string {
-  if (!personalisation) return "";
+export function buildPersonalisationBlock(
+  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string; display_name?: string },
+  aiSummary?: string,
+  tier?: string
+): string {
   const parts: string[] = [];
-  if (personalisation.nickname) parts.push(`- Address the user as "${personalisation.nickname}".`);
-  if (personalisation.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
-  if (personalisation.business) parts.push(`- The user's business: ${personalisation.business}.`);
-  if (personalisation.about) parts.push(`- About the user: ${personalisation.about}.`);
+
+  // All tiers: use nickname if set, fall back to display_name
+  const name = personalisation?.nickname || personalisation?.display_name;
+  if (name) parts.push(`- Address the user as "${name}".`);
+
+  // Member and above: include occupation, business, about
+  if (tier && tier !== "freemium") {
+    if (personalisation?.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
+    if (personalisation?.business) parts.push(`- The user's business: ${personalisation.business}.`);
+    if (personalisation?.about) parts.push(`- About the user: ${personalisation.about}.`);
+  }
+
+  // Pro and Enterprise: include AI-generated summary
+  if (aiSummary && tier && (tier === "reid_base_pro" || tier === "enterprise")) {
+    parts.push(`- User profile summary: ${aiSummary}`);
+  }
+
   if (parts.length === 0) return "";
-  return `\nUSER PERSONALISATION (use this to tailor your responses):\n${parts.join("\n")}\n`;
+  return `\nUSER PROFILE (use this to personalise your responses and build on prior context):\n${parts.join("\n")}\n`;
 }
 
 export function buildRagSystemPrompt(
   tier: string,
   ragContent: string,
   modePrompt: string,
-  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string },
-  userMemory?: string
+  personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string; display_name?: string },
+  userMemory?: string,
+  aiSummary?: string
 ): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
-  const personalisationBlock = buildPersonalisationBlock(personalisation);
+  const personalisationBlock = buildPersonalisationBlock(personalisation, aiSummary, tier);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
 CRITICAL — CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
@@ -170,39 +187,60 @@ export async function resolveVerifiedTier(wixAccessToken?: string): Promise<stri
   }
 }
 
-/* ── Cross-conversation memory: fetch past chat summaries for higher tiers ── */
-export async function buildUserMemory(supabase: any, wixUserId: string, tier: string): Promise<string> {
-  const isEnterprise = tier === "enterprise";
-  const limit = isEnterprise ? 1000 : tier === "reid_base_pro" ? 5 : 0;
-  if (limit === 0 || !wixUserId) return "";
+/* ── Cross-conversation memory: fetch past chat summaries and ai_summary for higher tiers ── */
+export async function buildUserMemory(
+  supabase: any,
+  wixUserId: string,
+  tier: string
+): Promise<{ memory: string; aiSummary: string }> {
+  if (!wixUserId) return { memory: "", aiSummary: "" };
 
+  // Fetch ai_summary from user_profiles
+  let aiSummary = "";
+  try {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("ai_summary")
+      .eq("wix_user_id", wixUserId)
+      .single();
+    if (profile?.ai_summary) aiSummary = profile.ai_summary;
+  } catch (err) {
+    console.error("Failed to fetch user profile:", err);
+  }
+
+  // Determine conversation limit by tier
+  const limit = tier === "enterprise" ? 30
+    : tier === "reid_base_pro" ? 15
+    : tier === "reid_base" ? 5
+    : 0;
+
+  if (limit === 0) return { memory: "", aiSummary };
+
+  // Fetch recent conversations from chat_logs
+  let memory = "";
   try {
     const { data, error } = await supabase
       .from("chat_logs")
       .select("title, search_mode, messages, updated_at")
       .eq("wix_user_id", wixUserId)
       .order("updated_at", { ascending: false })
-      .limit(limit + 1);
+      .limit(limit);
 
-    if (error || !data || data.length === 0) return "";
+    if (!error && data && data.length > 0) {
+      const summaries = (data as any[]).map((c: any) => {
+        const msgs = Array.isArray(c.messages) ? c.messages : [];
+        const userMsgs = msgs.filter((m: any) => m.role === "user");
+        const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
+        const firstQuery = userMsgs[0]?.content?.slice(0, 150) || "";
+        const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 200) || "";
+        return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || ""}): ${firstQuery}${lastResponse ? ` | ${lastResponse}` : ""}`;
+      });
 
-    const pastConvos = (data as any[]).slice(0, limit);
-    if (pastConvos.length === 0) return "";
-
-    const summaries = pastConvos.map((c: any) => {
-      const msgs = Array.isArray(c.messages) ? c.messages : [];
-      const userMsgs = msgs.filter((m: any) => m.role === "user");
-      const assistantMsgs = msgs.filter((m: any) => m.role === "assistant");
-      const firstQuery = userMsgs[0]?.content?.slice(0, 200) || "";
-      const lastResponse = assistantMsgs[assistantMsgs.length - 1]?.content?.slice(0, 300) || "";
-      return `- "${c.title}" (${c.search_mode || "data-analyst"}, ${c.updated_at?.slice(0, 10) || "unknown date"}): User asked about: ${firstQuery}${lastResponse ? ` | Key finding: ${lastResponse}` : ""}`;
-    });
-
-    return `\nUSER CONVERSATION HISTORY (use this to understand the user's interests and provide continuity across sessions):
-The user has ${pastConvos.length} recent conversation(s). Reference these naturally when relevant, but do not repeat previous answers verbatim. Use this context to tailor responses to their demonstrated interests and avoid re-explaining concepts they have already explored.
-${summaries.join("\n")}\n`;
+      memory = `\nRECENT CONVERSATION HISTORY (use for continuity, do not repeat verbatim):\n${summaries.join("\n")}\n`;
+    }
   } catch (err) {
-    console.error("Failed to build user memory:", err);
-    return "";
+    console.error("Failed to fetch conversation history:", err);
   }
+
+  return { memory, aiSummary };
 }

@@ -136,14 +136,25 @@ async function streamChat({
   onDelta,
   onDone
 }: {messages: Msg[];tier: string;fileContents?: {name: string;content: string;}[];searchMode?: string;conversationId?: string;onDelta: (text: string) => void;onDone: () => void;}) {
-  // Load personalisation from localStorage
+  // Load personalisation from localStorage, enriched with display_name from Wix session
   let personalisation: Record<string, string> | undefined;
   try {
     const raw = localStorage.getItem(PERSONALISATION_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed.nickname || parsed.occupation || parsed.business || parsed.about) {
-        personalisation = parsed;
+        personalisation = { ...parsed };
+      }
+    }
+  } catch {}
+  try {
+    const memberRaw = localStorage.getItem("wix-member");
+    if (memberRaw) {
+      const member = JSON.parse(memberRaw);
+      const displayName = member?.displayName;
+      if (displayName) {
+        personalisation = personalisation || {};
+        personalisation.display_name = displayName;
       }
     }
   } catch {}

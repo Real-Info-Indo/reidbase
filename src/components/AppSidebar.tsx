@@ -234,9 +234,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       {!collapsed && conversations.length > 0 &&
         <div className="flex-1 min-h-0 overflow-y-auto px-2">
           <div className="px-3">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sidebar-muted">
-                <Search className="h-3.5 w-3.5" />
                 Recent Analysis
               </div>
               {(tier === "reid_base_pro" || tier === "enterprise") && (
@@ -247,6 +246,15 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
                 <FolderPlus className="h-3.5 w-3.5" />
               </button>
               )}
+            </div>
+            <div className="relative mb-3">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-muted pointer-events-none" />
+              <input
+                value={convoSearch}
+                onChange={(e) => setConvoSearch(e.target.value)}
+                placeholder="Search conversations"
+                className="w-full bg-sidebar-accent/50 border border-sidebar-border rounded-md pl-7 pr-2 py-1.5 text-xs text-sidebar-foreground placeholder:text-sidebar-muted focus:outline-none focus:ring-1 focus:ring-sidebar-primary"
+              />
             </div>
 
             {/* Folders */}

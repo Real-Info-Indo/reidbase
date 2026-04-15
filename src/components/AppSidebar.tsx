@@ -33,6 +33,7 @@ const navItems = [
 export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; isMobile?: boolean;}) {
   const [collapsed, setCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [convoSearch, setConvoSearch] = useState("");
   const { tier, userName } = useTier();
   const { logout, member } = useWixAuth();
   const navigate = useNavigate();

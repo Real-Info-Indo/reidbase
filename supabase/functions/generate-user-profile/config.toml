@@ -1,0 +1,2 @@
+[functions.generate-user-profile]
+schedule = "0 */6 * * *"

@@ -112,8 +112,12 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     window.dispatchEvent(new Event("conversations-updated"));
   };
 
-  const unfolderedConvos = conversations.filter((c) => !c.folderId);
-  const convosInFolder = (folderId: string) => conversations.filter((c) => c.folderId === folderId);
+  const searchLower = convoSearch.toLowerCase();
+  const filteredConversations = convoSearch
+    ? conversations.filter((c) => c.title.toLowerCase().includes(searchLower))
+    : conversations;
+  const unfolderedConvos = filteredConversations.filter((c) => !c.folderId);
+  const convosInFolder = (folderId: string) => filteredConversations.filter((c) => c.folderId === folderId);
 
   const submitConvoRename = (id: string) => {
     if (convoRenameValue.trim()) {

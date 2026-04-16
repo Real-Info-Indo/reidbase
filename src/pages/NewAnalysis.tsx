@@ -396,8 +396,10 @@ export default function NewAnalysis() {
     }
     persistRef.current = id;
     const title = customTitle || deriveTitle(messages);
-    saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned });
-    logConversation({ conversationId: id, title, messages, searchMode, userTier: tier });
+    // Read folderId from existing record before saveConversation overwrites it
+    const folderId = getConversation(id)?.folderId;
+    saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned, folderId });
+    logConversation({ conversationId: id, title, messages, searchMode, userTier: tier, pinned: isPinned, folderId });
     window.dispatchEvent(new Event("conversations-updated"));
   }, [messages, conversationId]);
 

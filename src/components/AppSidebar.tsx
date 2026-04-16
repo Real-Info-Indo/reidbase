@@ -16,6 +16,7 @@ import {
   renameFolder, deleteFolder, moveToFolder, renameConversation,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
+import { logFolder, deleteFolder as deleteLogFolder } from "@/lib/chatLogger";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from
 "@/components/ui/dropdown-menu";
@@ -96,6 +97,13 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     if (folderRenameValue.trim()) {
       renameFolder(id, folderRenameValue.trim());
       refresh();
+      // Sync to Supabase after rename is committed
+      if (member?.id) {
+        logFolder(
+          { id, name: folderRenameValue.trim() },
+          member.id
+        ).catch(err => console.error("logFolder failed:", err));
+      }
     }
     setRenamingFolderId(null);
   };
@@ -104,6 +112,10 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     deleteFolder(id);
     refresh();
     window.dispatchEvent(new Event("conversations-updated"));
+    // Sync deletion to Supabase
+    if (member?.id) {
+      deleteLogFolder(id).catch(err => console.error("deleteLogFolder failed:", err));
+    }
   };
 
   const handleMoveToFolder = (convoId: string, folderId: string | undefined) => {

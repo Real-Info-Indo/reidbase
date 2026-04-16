@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { wixClient } from "@/lib/wixClient";
 import { syncUserProfile } from "@/lib/syncUserProfile";
+import { hydrateFromSupabase } from "@/lib/hydrateFromSupabase";
 
 interface WixMember {
   id: string;
@@ -72,6 +73,12 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           displayName: memberData.name,
         }));
         console.log("Wix member persisted:", memberData.id, memberData.name, memberData.email);
+        // Hydrate conversations and folders from Supabase if localStorage is empty
+        try {
+          await hydrateFromSupabase(memberData.id);
+        } catch (err) {
+          console.error("Hydration failed silently:", err);
+        }
         // Sync profile to database (fire-and-forget)
         setTimeout(() => syncUserProfile(), 500);
       }

@@ -7,6 +7,8 @@ interface LogPayload {
   messages: Msg[];
   searchMode?: string;
   userTier?: string;
+  pinned?: boolean;
+  folderId?: string;
 }
 
 function getWixUserInfo(): { id?: string; name?: string; email?: string } {
@@ -42,11 +44,40 @@ export async function logConversation(payload: LogPayload) {
       user_tier: payload.userTier || null,
       message_count: payload.messages.length,
       updated_at: new Date().toISOString(),
+      pinned: payload.pinned || false,
+      folder_id: payload.folderId || null,
     } as any,
     { onConflict: "conversation_id" } as any
   );
 
   if (error) console.warn("Chat log upsert failed:", error.message);
+}
+
+export async function logFolder(folder: { id: string; name: string }, wixUserId: string): Promise<void> {
+  if (!wixUserId) return;
+  try {
+    await supabase
+      .from("folders")
+      .upsert({
+        id: folder.id,
+        name: folder.name,
+        wix_user_id: wixUserId,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "id" } as any);
+  } catch (err) {
+    console.error("logFolder failed:", err);
+  }
+}
+
+export async function deleteFolder(folderId: string): Promise<void> {
+  try {
+    await supabase
+      .from("folders")
+      .delete()
+      .eq("id", folderId);
+  } catch (err) {
+    console.error("deleteFolder failed:", err);
+  }
 }
 
 export async function logFeedback(conversationId: string, action: "copy" | "like" | "dislike") {

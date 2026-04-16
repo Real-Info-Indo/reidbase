@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { moderateMessage } from "../_shared/moderation.ts";
+import { resolveVerifiedTier } from "../_shared/utils.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -682,43 +683,6 @@ REID 2025 Intelligence Report:
 ${ragContent}`;
 }
 
-/* ── Server-side tier verification via Wix Pricing Plans REST API ── */
-const TIER_PRIORITY = ["member", "reid_base", "reid_base_pro", "enterprise"];
-
-function planNameToTier(planName: string): string {
-  const lower = planName.toLowerCase();
-  if (lower.includes("enterprise")) return "enterprise";
-  if (lower.includes("pro")) return "reid_base_pro";
-  if (lower.includes("reid base") || lower.includes("base")) return "reid_base";
-  if (TIER_PRIORITY.includes(planName)) return planName;
-  return "member";
-}
-
-async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
-  if (!wixAccessToken) return "member";
-  try {
-    const resp = await fetch(
-      "https://www.wixapis.com/pricing-plans/v2/member/orders?orderStatuses=ACTIVE",
-      { headers: { Authorization: `Bearer ${wixAccessToken}` } }
-    );
-    if (!resp.ok) {
-      console.warn("Wix tier verification failed:", resp.status);
-      return "member";
-    }
-    const data = await resp.json();
-    const orders: Array<{ planName?: string }> = data.orders ?? [];
-    if (orders.length === 0) return "member";
-    let highest = "member";
-    for (const order of orders) {
-      const t = planNameToTier(order.planName ?? "");
-      if (TIER_PRIORITY.indexOf(t) > TIER_PRIORITY.indexOf(highest)) highest = t;
-    }
-    return highest;
-  } catch (err) {
-    console.error("Wix tier resolution error:", err);
-    return "member";
-  }
-}
 
 const ENTERPRISE_ONLY_MODES = ["marketing-assistant", "portfolio-analyst"];
 const PRO_AND_ENTERPRISE_MODES = ["sales-assistant"];
@@ -781,7 +745,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId, conversationId } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, tier: requestTier, wixUserId, conversationId } = await req.json();
 
     // Moderate the latest user message (silent, non-blocking)
     const lastMsg = messages?.[messages.length - 1];
@@ -791,12 +755,12 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Verify tier server-side against Wix; if no token, fall back to request body tier (for testing/dev)
-    const wixTier = await resolveVerifiedTier(wixAccessToken);
-    const effectiveTier = wixAccessToken
-      ? wixTier
-      : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member");
-    console.log("Tier resolution:", { wixAccessToken: !!wixAccessToken, wixTier, requestTier, effectiveTier });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const effectiveTier = await resolveVerifiedTier(supabase, wixUserId, requestTier);
+    console.log("Tier resolution:", { wixUserId, effectiveTier });
 
     // Enforce mode access by tier
     let effectiveSearchMode = searchMode || "data-analyst";
@@ -805,10 +769,6 @@ serve(async (req) => {
     } else if (PRO_AND_ENTERPRISE_MODES.includes(effectiveSearchMode) && effectiveTier !== "enterprise" && effectiveTier !== "reid_base_pro") {
       effectiveSearchMode = "data-analyst";
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Build cross-conversation memory for Pro/Enterprise users
     const { memory: userMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);

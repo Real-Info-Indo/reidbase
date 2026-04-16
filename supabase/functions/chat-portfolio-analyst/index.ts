@@ -11,7 +11,6 @@ import {
   buildRagSystemPrompt,
   buildUserMemory,
   resolveVerifiedTier,
-  TIER_PRIORITY,
 } from "../_shared/utils.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
@@ -66,7 +65,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, wixAccessToken, tier: requestTier, wixUserId, conversationId } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, tier: requestTier, wixUserId, conversationId } = await req.json();
 
     // Moderate the latest user message (silent, non-blocking)
     const lastMsg = messages?.[messages.length - 1];
@@ -76,12 +75,12 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Verify tier server-side against Wix; if no token, fall back to request body tier (for testing/dev)
-    const wixTier = await resolveVerifiedTier(wixAccessToken);
-    const effectiveTier = wixAccessToken
-      ? wixTier
-      : (requestTier && TIER_PRIORITY.includes(requestTier) ? requestTier : "member");
-    console.log("Tier resolution:", { wixAccessToken: !!wixAccessToken, wixTier, requestTier, effectiveTier });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const effectiveTier = await resolveVerifiedTier(supabase, wixUserId, requestTier);
+    console.log("Tier resolution:", { wixUserId, effectiveTier });
 
     // Portfolio Analyst: enterprise only
     if (effectiveTier !== "enterprise") {
@@ -90,10 +89,6 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const { memory: userMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
 

@@ -155,43 +155,35 @@ REID 2025 Intelligence Report:
 ${ragContent}`;
 }
 
-/* ── Server-side tier verification via Wix Pricing Plans REST API ── */
-export const TIER_PRIORITY = ["member", "reid_base", "reid_base_pro", "enterprise"];
+export async function resolveVerifiedTier(
+  supabase: any,
+  wixUserId?: string,
+  requestTier?: string
+): Promise<string> {
+  const validTiers = ["member", "reid_base", "reid_base_pro", "enterprise"];
 
-export function planNameToTier(planName: string): string {
-  const lower = planName.toLowerCase();
-  if (lower.includes("enterprise")) return "enterprise";
-  if (lower.includes("pro")) return "reid_base_pro";
-  if (lower.includes("reid base") || lower.includes("base")) return "reid_base";
-  if (TIER_PRIORITY.includes(planName)) return planName;
-  return "member";
-}
+  if (!wixUserId) {
+    return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
+  }
 
-export async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
-  console.log("resolveVerifiedTier called:", { hasToken: !!wixAccessToken, tokenLength: wixAccessToken?.length });
-  if (!wixAccessToken) return "member";
   try {
-    const resp = await fetch(
-      "https://www.wixapis.com/pricing-plans/v2/member/orders?orderStatuses=ACTIVE",
-      { headers: { Authorization: `Bearer ${wixAccessToken}` } }
-    );
-    if (!resp.ok) {
-      console.warn("Wix tier verification failed:", resp.status);
-      return "member";
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("tier")
+      .eq("wix_user_id", wixUserId)
+      .single();
+
+    if (error || !data?.tier) {
+      console.warn("Tier lookup failed, falling back to requestTier:", error?.message);
+      return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
     }
-    const data = await resp.json();
-    const orders: Array<{ planName?: string }> = data.orders ?? [];
-    console.log("Wix orders raw:", JSON.stringify(orders.map(o => ({ planName: o.planName }))));
-    if (orders.length === 0) return "member";
-    let highest = "member";
-    for (const order of orders) {
-      const t = planNameToTier(order.planName ?? "");
-      if (TIER_PRIORITY.indexOf(t) > TIER_PRIORITY.indexOf(highest)) highest = t;
-    }
-    return highest;
+
+    const tier = data.tier.toLowerCase();
+    console.log("Tier resolved from user_profiles:", { wixUserId, tier });
+    return validTiers.includes(tier) ? tier : "member";
   } catch (err) {
-    console.error("Wix tier resolution error:", err);
-    return "member";
+    console.error("resolveVerifiedTier error:", err);
+    return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
   }
 }
 

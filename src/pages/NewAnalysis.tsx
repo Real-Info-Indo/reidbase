@@ -130,62 +130,6 @@ const modeToFunction: Record<string, string> = {
   "portfolio-analyst": "chat-portfolio-analyst",
 };
 
-const PERSONALISATION_KEY = "reid-personalisation";
-
-async function streamChat({
-  messages,
-  tier,
-  fileContents,
-  searchMode,
-  conversationId,
-  onDelta,
-  onDone
-}: {messages: Msg[];tier: string;fileContents?: {name: string;content: string;}[];searchMode?: string;conversationId?: string;onDelta: (text: string) => void;onDone: () => void;}) {
-  // Load personalisation from localStorage, enriched with display_name from Wix session
-  let personalisation: Record<string, string> | undefined;
-  try {
-    const raw = localStorage.getItem(PERSONALISATION_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.nickname || parsed.occupation || parsed.business || parsed.about) {
-        personalisation = { ...parsed };
-      }
-    }
-  } catch {}
-  try {
-    const memberRaw = localStorage.getItem("wix-member");
-    if (memberRaw) {
-      const member = JSON.parse(memberRaw);
-      const displayName = member?.displayName;
-      if (displayName) {
-        personalisation = personalisation || {};
-        personalisation.display_name = displayName;
-      }
-    }
-  } catch {}
-
-  // Load Wix access token and user ID for server-side tier verification and memory
-  let wixAccessToken: string | undefined;
-  let wixUserId: string | undefined;
-  try {
-    const raw = localStorage.getItem("wix-tokens");
-    if (raw) {
-      const tokens = JSON.parse(raw);
-      wixAccessToken = tokens?.accessToken?.value;
-    }
-  } catch {}
-  try {
-    const raw = localStorage.getItem("wix-member");
-    if (raw) {
-      const member = JSON.parse(raw);
-      wixUserId = member?.id;
-    }
-  } catch {}
-
-  const functionName = modeToFunction[searchMode ?? "data-analyst"] ?? "chat-data-analyst";
-  const chatUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`;
-
-  const resp = await fetch(chatUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

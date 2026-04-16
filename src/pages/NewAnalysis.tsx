@@ -182,7 +182,10 @@ async function streamChat({
     }
   } catch {}
 
-  const resp = await fetch(CHAT_URL, {
+  const functionName = modeToFunction[searchMode ?? "data-analyst"] ?? "chat-data-analyst";
+  const chatUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`;
+
+  const resp = await fetch(chatUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

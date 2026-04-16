@@ -181,6 +181,7 @@ export async function resolveVerifiedTier(wixAccessToken?: string): Promise<stri
     }
     const data = await resp.json();
     const orders: Array<{ planName?: string }> = data.orders ?? [];
+    console.log("Wix orders raw:", JSON.stringify(orders.map(o => ({ planName: o.planName }))));
     if (orders.length === 0) return "member";
     let highest = "member";
     for (const order of orders) {

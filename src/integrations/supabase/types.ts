@@ -188,10 +188,12 @@ export type Database = {
           copy_count: number
           created_at: string
           dislikes: number
+          folder_id: string | null
           id: string
           likes: number
           message_count: number
           messages: Json
+          pinned: boolean
           search_mode: string | null
           title: string
           updated_at: string
@@ -205,10 +207,12 @@ export type Database = {
           copy_count?: number
           created_at?: string
           dislikes?: number
+          folder_id?: string | null
           id?: string
           likes?: number
           message_count?: number
           messages?: Json
+          pinned?: boolean
           search_mode?: string | null
           title?: string
           updated_at?: string
@@ -222,10 +226,12 @@ export type Database = {
           copy_count?: number
           created_at?: string
           dislikes?: number
+          folder_id?: string | null
           id?: string
           likes?: number
           message_count?: number
           messages?: Json
+          pinned?: boolean
           search_mode?: string | null
           title?: string
           updated_at?: string
@@ -233,6 +239,30 @@ export type Database = {
           wix_user_email?: string | null
           wix_user_id?: string | null
           wix_user_name?: string | null
+        }
+        Relationships: []
+      }
+      folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          wix_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          name: string
+          updated_at?: string
+          wix_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          wix_user_id?: string
         }
         Relationships: []
       }

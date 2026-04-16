@@ -123,7 +123,12 @@ function downloadResponseAsPdf(content: string, chatTitle?: string) {
 }
 
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+const modeToFunction: Record<string, string> = {
+  "data-analyst": "chat-data-analyst",
+  "sales-assistant": "chat-sales-assistant",
+  "marketing-assistant": "chat-marketing-assistant",
+  "portfolio-analyst": "chat-portfolio-analyst",
+};
 
 const PERSONALISATION_KEY = "reid-personalisation";
 

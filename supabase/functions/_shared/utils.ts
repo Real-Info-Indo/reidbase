@@ -136,11 +136,17 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 
 Chart Generation Rules:
 - Never produce a chart unless the user has explicitly asked for one in this conversation.
-- If the user has explicitly requested a chart, output it as a fenced code block with language "chart" containing valid JSON.
-- Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
-- Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions.
-- Keep data arrays to 10 items max for readability.
-- The chart JSON must be valid and complete on a single line after the opening fence.
+- If the user has explicitly requested a chart, output it as a fenced code block with language "chart" containing valid JSON on a single line after the opening fence.
+- Use this format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"period":"Jan 25","avg_adr":178}],"xKey":"period","dataKeys":["avg_adr"]}\\n\`\`\`
+- Chart types and when to use them:
+  - "bar" -- category comparisons (locations, bedroom types, regions) and time series with discrete periods
+  - "line" -- trends over time where continuity matters (MoM, QoQ, YoY performance)
+  - "pie" -- market share and composition (supply by region, sales by bedroom type)
+  - Add "stacked": true to bar charts when showing composition over time (e.g. supply by region per quarter)
+- Column naming in chart data must match the SQL column names exactly -- the formatter uses key names to detect metric types and apply correct formatting (%, $, sqm, plain number)
+- For time series charts: xKey should be the period label column (e.g. "period", "month", "quarter", "year"). Order data chronologically in the SQL query -- the chart renders in array order.
+- Keep data arrays to 24 items max for MoM, 8 for QoQ, 5 for YoY.
+- Only offer a chart at the end of a response where it would genuinely aid understanding: "Would you like to see this as a chart?" Do not offer on every response.
 
 ${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}

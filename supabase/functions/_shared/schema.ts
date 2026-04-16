@@ -63,7 +63,24 @@ Rules:
 - Handle nulls properly with WHERE col IS NOT NULL
 - For median calculations use: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)
 - Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
-- Only SELECT queries are allowed`;
+- Only SELECT queries are allowed
+
+TIME SERIES QUERIES:
+- For MoM (month-on-month) queries, group by the date column and order chronologically. Format date labels as "Mon YY" (e.g. "Jan 25", "Feb 25") using string manipulation on the date column.
+- For QoQ (quarter-on-quarter) queries, derive the quarter from the date column. Label as "Q1 2025", "Q2 2025" etc.
+- For YoY (year-on-year) queries, extract the year from the date column. Label as "2023", "2024", "2025".
+- Always ORDER BY date ascending for time series queries so charts render chronologically left to right.
+- When querying rentals_2025 for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
+- Limit time series results to 24 months max for MoM, 8 quarters for QoQ, and 5 years for YoY.
+
+COLUMN NAMING FOR CHARTS:
+- Name columns descriptively so the chart formatter can detect the metric type:
+  - Occupancy metrics: use names containing "occupancy" e.g. "avg_occupancy"
+  - Price/revenue metrics: use names containing "price", "adr", "revenue", or "usd" e.g. "median_price_usd", "avg_adr"
+  - Yield metrics: use names containing "yield" e.g. "gross_yield"
+  - Count/volume metrics: use plain names e.g. "transaction_count", "property_count"
+  - Size metrics: use names containing "sqm" e.g. "avg_size_sqm"
+- Never use ambiguous column aliases like "value", "amount", or "total" alone -- always include the metric type in the name.`;
 
 export const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
 
@@ -81,8 +98,14 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 
 Chart Generation Rules:
 - Never produce a chart unless the user has explicitly asked for one in this conversation.
-- If the user has explicitly requested a chart, output it as a fenced code block with language "chart" containing valid JSON.
-- Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
-- Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions.
-- Keep data arrays to 10 items max for readability.
-- The chart JSON must be valid and complete on a single line after the opening fence.`;
+- If the user has explicitly requested a chart, output it as a fenced code block with language "chart" containing valid JSON on a single line after the opening fence.
+- Use this format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"period":"Jan 25","avg_adr":178}],"xKey":"period","dataKeys":["avg_adr"]}\\n\`\`\`
+- Chart types and when to use them:
+  - "bar" -- category comparisons (locations, bedroom types, regions) and time series with discrete periods
+  - "line" -- trends over time where continuity matters (MoM, QoQ, YoY performance)
+  - "pie" -- market share and composition (supply by region, sales by bedroom type)
+  - Add "stacked": true to bar charts when showing composition over time (e.g. supply by region per quarter)
+- Column naming in chart data must match the SQL column names exactly -- the formatter uses key names to detect metric types and apply correct formatting (%, $, sqm, plain number)
+- For time series charts: xKey should be the period label column (e.g. "period", "month", "quarter", "year"). Order data chronologically in the SQL query -- the chart renders in array order.
+- Keep data arrays to 24 items max for MoM, 8 for QoQ, 5 for YoY.
+- Only offer a chart at the end of a response where it would genuinely aid understanding: "Would you like to see this as a chart?" Do not offer on every response.`;

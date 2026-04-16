@@ -1,7 +1,6 @@
 import { useRef, useCallback, useMemo, memo } from "react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Download, Share2, Mail } from "lucide-react";
-import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const COLORS = [
@@ -21,13 +20,23 @@ export interface ChartData {
   data: Record<string, unknown>[];
   xKey?: string;
   dataKeys?: string[];
+  stacked?: boolean;
 }
 
-function formatValue(val: unknown): string {
-  if (typeof val !== "number") return String(val ?? "");
-  if (Math.abs(val) >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(val) >= 1_000) return `$${(val / 1_000).toFixed(0)}k`;
-  return val.toLocaleString();
+function formatValue(value: number, key?: string): string {
+  if (typeof value !== "number") return String(value ?? "");
+  if (!key) return value.toLocaleString();
+  const lower = key.toLowerCase();
+  if (lower.includes("occupancy") || lower.includes("rate") || lower.includes("yield") || lower.includes("percent") || lower.includes("pct") || lower.includes("%")) {
+    return `${value.toFixed(1)}%`;
+  }
+  if (lower.includes("price") || lower.includes("usd") || lower.includes("adr") || lower.includes("revenue") || lower.includes("value") || lower.includes("cost")) {
+    return value >= 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value.toLocaleString()}`;
+  }
+  if (lower.includes("sqm") || lower.includes("size") || lower.includes("area")) {
+    return `${value.toLocaleString()} sqm`;
+  }
+  return value.toLocaleString();
 }
 
 const chartCache = new Map<string, ChartData>();
@@ -43,7 +52,7 @@ export function parseChartBlock(json: string): ChartData | null {
     const xKey = parsed.xKey || allKeys[0];
     const dataKeys = parsed.dataKeys || allKeys.filter((k) => k !== xKey && typeof parsed.data[0][k] === "number");
     if (dataKeys.length === 0) return null;
-    const result: ChartData = { type, title: parsed.title, data: parsed.data, xKey, dataKeys };
+    const result: ChartData = { type, title: parsed.title, data: parsed.data, xKey, dataKeys, stacked: parsed.stacked };
     chartCache.set(json, result);
     return result;
   } catch {
@@ -76,8 +85,10 @@ function getChartCanvas(chartRef: React.RefObject<HTMLDivElement>): Promise<HTML
 }
 
 const ChatChart = memo(function ChatChart({ chart }: { chart: ChartData }) {
-  const { type, title, data, xKey = "name", dataKeys = [] } = chart;
+  const { type, title, data, xKey = "name", dataKeys = [], stacked } = chart;
   const chartRef = useRef<HTMLDivElement>(null);
+  const needsAngle = data.length > 6;
+  const primaryDataKey = dataKeys[0] || "";
 
   const handleDownload = useCallback(async () => {
     const canvas = await getChartCanvas(chartRef);
@@ -102,7 +113,6 @@ const ChatChart = memo(function ChatChart({ chart }: { chart: ChartData }) {
           return;
         }
       }
-      // Fallback: open WhatsApp with text only
       const text = encodeURIComponent(title || "REID Base Market Intelligence chart");
       window.open(`https://wa.me/?text=${text}`, "_blank");
     } catch (e: unknown) {
@@ -164,21 +174,28 @@ const ChatChart = memo(function ChatChart({ chart }: { chart: ChartData }) {
               cx="50%"
               cy="50%"
               outerRadius={100}
-              label={({ name, value }) => `${name}: ${formatValue(value)}`}
+              label={({ name, value }) => `${name}: ${formatValue(value, primaryDataKey)}`}
             >
               {stableData.map((_, i) => (
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(v: number) => formatValue(v)} />
+            <Tooltip formatter={(v: number, name: string) => formatValue(v, name)} />
             <Legend />
           </PieChart>
         ) : type === "line" ? (
           <LineChart data={stableData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v)} />
-            <Tooltip formatter={(v: number) => formatValue(v)} />
+            <XAxis
+              dataKey={xKey}
+              tick={{ fontSize: 11 }}
+              stroke="hsl(var(--muted-foreground))"
+              angle={needsAngle ? -35 : 0}
+              textAnchor={needsAngle ? "end" : "middle"}
+              height={needsAngle ? 50 : 30}
+            />
+            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v, primaryDataKey)} />
+            <Tooltip formatter={(v: number, name: string) => formatValue(v, name)} />
             {dataKeys.length > 1 && <Legend />}
             {dataKeys.map((key, i) => (
               <Line key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} strokeWidth={2} dot={{ r: 3 }} />
@@ -187,12 +204,19 @@ const ChatChart = memo(function ChatChart({ chart }: { chart: ChartData }) {
         ) : (
           <BarChart data={stableData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v)} />
-            <Tooltip formatter={(v: number) => formatValue(v)} />
+            <XAxis
+              dataKey={xKey}
+              tick={{ fontSize: 11 }}
+              stroke="hsl(var(--muted-foreground))"
+              angle={needsAngle ? -35 : 0}
+              textAnchor={needsAngle ? "end" : "middle"}
+              height={needsAngle ? 50 : 30}
+            />
+            <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => formatValue(v, primaryDataKey)} />
+            <Tooltip formatter={(v: number, name: string) => formatValue(v, name)} />
             {dataKeys.length > 1 && <Legend />}
             {dataKeys.map((key, i) => (
-              <Bar key={key} dataKey={key} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
+              <Bar key={key} dataKey={key} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} {...(stacked ? { stackId: "a" } : {})} />
             ))}
           </BarChart>
         )}

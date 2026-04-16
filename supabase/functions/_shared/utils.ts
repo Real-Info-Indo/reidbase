@@ -168,6 +168,7 @@ export function planNameToTier(planName: string): string {
 }
 
 export async function resolveVerifiedTier(wixAccessToken?: string): Promise<string> {
+  console.log("resolveVerifiedTier called:", { hasToken: !!wixAccessToken, tokenLength: wixAccessToken?.length });
   if (!wixAccessToken) return "member";
   try {
     const resp = await fetch(

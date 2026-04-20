@@ -46,6 +46,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const [folderRenameValue, setFolderRenameValue] = useState("");
   const [renamingConvoId, setRenamingConvoId] = useState<string | null>(null);
   const [convoRenameValue, setConvoRenameValue] = useState("");
+  const [pinnedOpen, setPinnedOpen] = useState(true);
+  const [recentOpen, setRecentOpen] = useState(true);
   const activeConvoId = searchParams.get("c");
 
   const refresh = () => {

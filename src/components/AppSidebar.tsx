@@ -126,11 +126,19 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     window.dispatchEvent(new Event("conversations-updated"));
   };
 
+  const handleTogglePin = (convoId: string) => {
+    togglePin(convoId);
+    refresh();
+    window.dispatchEvent(new Event("conversations-updated"));
+  };
+
   const searchLower = convoSearch.toLowerCase();
   const filteredConversations = convoSearch
     ? conversations.filter((c) => c.title.toLowerCase().includes(searchLower))
     : conversations;
   const unfolderedConvos = filteredConversations.filter((c) => !c.folderId);
+  const pinnedConvos = unfolderedConvos.filter((c) => c.pinned);
+  const recentConvos = unfolderedConvos.filter((c) => !c.pinned);
   const convosInFolder = (folderId: string) => filteredConversations.filter((c) => c.folderId === folderId);
 
   const submitConvoRename = (id: string) => {

@@ -13,7 +13,7 @@ import { useWixAuth } from "@/contexts/WixAuthContext";
 import { cn } from "@/lib/utils";
 import {
   getConversations, deleteConversation, getFolders, createFolder,
-  renameFolder, deleteFolder, moveToFolder, renameConversation,
+  renameFolder, deleteFolder, moveToFolder, renameConversation, togglePin,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
 import { logFolder, deleteFolder as deleteLogFolder } from "@/lib/chatLogger";

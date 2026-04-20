@@ -283,70 +283,104 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
               />
             </div>
 
-            {/* Folders */}
-            {folders.map((folder) => {
-            const folderConvos = convosInFolder(folder.id);
-            const isExpanded = expandedFolders.has(folder.id);
-            return (
-              <div key={folder.id} className="mb-1">
-                  <div className="flex items-center gap-1 group">
-                    <button
-                    onClick={() => toggleFolder(folder.id)}
-                    className="flex items-center gap-1.5 flex-1 min-w-0 text-xs font-extralight text-sidebar-foreground hover:text-sidebar-foreground py-1 px-1 rounded transition-colors">
-
-                      {isExpanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
-                      <Folder className="h-3.5 w-3.5 shrink-0" />
-                      {renamingFolderId === folder.id ?
-                    <input
-                      value={folderRenameValue}
-                      onChange={(e) => setFolderRenameValue(e.target.value)}
-                      onKeyDown={(e) => {if (e.key === "Enter") submitFolderRename(folder.id);if (e.key === "Escape") setRenamingFolderId(null);}}
-                      onBlur={() => submitFolderRename(folder.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="bg-transparent border-b border-primary/50 focus:outline-none text-xs w-full"
-                      autoFocus /> :
-
-
-                    <span className="truncate">{folder.name}</span>
-                    }
-                      <span className="text-[10px] text-sidebar-muted ml-auto">{folderConvos.length}</span>
-                    </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5">
-                          <MoreHorizontal className="h-3 w-3" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-popover min-w-[120px]">
-                        <DropdownMenuItem onClick={() => {setRenamingFolderId(folder.id);setFolderRenameValue(folder.name);}} className="cursor-pointer text-xs">
-                          <Pencil className="h-3.5 w-3.5 mr-2" />
-                          Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDeleteFolder(folder.id)} className="cursor-pointer text-xs text-destructive">
-                          <Trash2 className="h-3.5 w-3.5 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            {/* Pinned section */}
+            {pinnedConvos.length > 0 && (
+              <div className="mb-3">
+                <button
+                  onClick={() => setPinnedOpen((v) => !v)}
+                  className="flex items-center gap-1.5 w-full text-xs font-bold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground py-1 transition-colors"
+                >
+                  {pinnedOpen ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                  <span>Pinned</span>
+                  <span className="text-[10px] ml-auto font-normal">{pinnedConvos.length}</span>
+                </button>
+                {pinnedOpen && (
+                  <div className="space-y-0.5 mt-1">
+                    {pinnedConvos.map((convo) => <ConvoItem key={convo.id} convo={convo} />)}
                   </div>
-                  {isExpanded &&
-                <div className="ml-4 space-y-0.5 mt-0.5">
-                      {folderConvos.length === 0 ?
-                  <p className="text-[10px] text-sidebar-muted italic px-2 py-1">Empty</p> :
-
-                  folderConvos.map((convo) => <ConvoItem key={convo.id} convo={convo} />)
-                  }
-                    </div>
-                }
-                </div>);
-
-          })}
-
-            {/* Unfoldered conversations - no limit */}
-            <div className="space-y-0.5 pb-2">
-              {unfolderedConvos.map((convo) =>
-            <ConvoItem key={convo.id} convo={convo} />
+                )}
+              </div>
             )}
+
+            {/* Recent section (collapsible) */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <button
+                  onClick={() => setRecentOpen((v) => !v)}
+                  className="flex items-center gap-1.5 flex-1 text-xs font-bold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground py-1 transition-colors"
+                >
+                  {recentOpen ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                  <span>Recent Analysis</span>
+                </button>
+              </div>
+
+              {recentOpen && (
+                <>
+                  {/* Folders */}
+                  {folders.map((folder) => {
+                    const folderConvos = convosInFolder(folder.id);
+                    const isExpanded = expandedFolders.has(folder.id);
+                    return (
+                      <div key={folder.id} className="mb-1">
+                        <div className="flex items-center gap-1 group">
+                          <button
+                            onClick={() => toggleFolder(folder.id)}
+                            className="flex items-center gap-1.5 flex-1 min-w-0 text-xs font-extralight text-sidebar-foreground hover:text-sidebar-foreground py-1 px-1 rounded transition-colors"
+                          >
+                            {isExpanded ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                            <Folder className="h-3.5 w-3.5 shrink-0" />
+                            {renamingFolderId === folder.id ? (
+                              <input
+                                value={folderRenameValue}
+                                onChange={(e) => setFolderRenameValue(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") submitFolderRename(folder.id); if (e.key === "Escape") setRenamingFolderId(null); }}
+                                onBlur={() => submitFolderRename(folder.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-transparent border-b border-primary/50 focus:outline-none text-xs w-full"
+                                autoFocus
+                              />
+                            ) : (
+                              <span className="truncate">{folder.name}</span>
+                            )}
+                            <span className="text-[10px] text-sidebar-muted ml-auto">{folderConvos.length}</span>
+                          </button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5">
+                                <MoreHorizontal className="h-3 w-3" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover min-w-[120px]">
+                              <DropdownMenuItem onClick={() => { setRenamingFolderId(folder.id); setFolderRenameValue(folder.name); }} className="cursor-pointer text-xs">
+                                <Pencil className="h-3.5 w-3.5 mr-2" />
+                                Rename
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteFolder(folder.id)} className="cursor-pointer text-xs text-destructive">
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        {isExpanded && (
+                          <div className="ml-4 space-y-0.5 mt-0.5">
+                            {folderConvos.length === 0 ? (
+                              <p className="text-[10px] text-sidebar-muted italic px-2 py-1">Empty</p>
+                            ) : (
+                              folderConvos.map((convo) => <ConvoItem key={convo.id} convo={convo} />)
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Unpinned, unfoldered conversations */}
+                  <div className="space-y-0.5 pb-2">
+                    {recentConvos.map((convo) => <ConvoItem key={convo.id} convo={convo} />)}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

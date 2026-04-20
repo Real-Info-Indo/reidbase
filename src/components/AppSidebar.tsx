@@ -186,6 +186,10 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             <Pencil className="h-3.5 w-3.5 mr-2" />
             Rename
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleTogglePin(convo.id); }} className="cursor-pointer text-xs">
+            <Pin className="h-3.5 w-3.5 mr-2" />
+            {convo.pinned ? "Unpin" : "Pin"}
+          </DropdownMenuItem>
           {folders.length > 0 &&
         <>
               <DropdownMenuSeparator />

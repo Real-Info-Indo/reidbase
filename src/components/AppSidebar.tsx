@@ -260,19 +260,17 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       {!collapsed && conversations.length > 0 &&
         <div className="flex-1 min-h-0 overflow-y-auto px-2">
           <div className="px-3">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sidebar-muted">
-                Recent Analysis
+            {(tier === "reid_base_pro" || tier === "enterprise") && (
+              <div className="flex items-center justify-end mb-1">
+                <button
+                  onClick={handleCreateFolder}
+                  className="p-1 rounded hover:bg-sidebar-accent transition-colors text-sidebar-muted hover:text-sidebar-foreground"
+                  title="New folder"
+                >
+                  <FolderPlus className="h-3.5 w-3.5" />
+                </button>
               </div>
-              {(tier === "reid_base_pro" || tier === "enterprise") && (
-              <button
-              onClick={handleCreateFolder}
-              className="p-1 rounded hover:bg-sidebar-accent transition-colors text-sidebar-muted hover:text-sidebar-foreground"
-              title="New folder">
-                <FolderPlus className="h-3.5 w-3.5" />
-              </button>
-              )}
-            </div>
+            )}
             <div className="relative mb-3">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-muted pointer-events-none" />
               <input

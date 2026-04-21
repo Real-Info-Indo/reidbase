@@ -15,7 +15,8 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation, logFeedback } from "@/lib/chatLogger";
+import { logConversation, logFeedback, submitFeedbackComment } from "@/lib/chatLogger";
+import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 
 /* ── Freemium daily prompt limit ── */
@@ -322,6 +323,7 @@ export default function NewAnalysis() {
   const [searchMode, setSearchMode] = useState<string>("data-analyst");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [showWaPopup, setShowWaPopup] = useState(false);
+  const [feedbackDialog, setFeedbackDialog] = useState<{ open: boolean; rating: "like" | "dislike" | null; messageIndex: number | null }>({ open: false, rating: null, messageIndex: null });
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
   const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
@@ -918,14 +920,14 @@ export default function NewAnalysis() {
                       <Copy className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => { toast.success("Thanks for the feedback"); if (conversationId) logFeedback(conversationId, "like"); }}
+                      onClick={() => { if (conversationId) logFeedback(conversationId, "like"); setFeedbackDialog({ open: true, rating: "like", messageIndex: i }); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Good response"
                     >
                       <ThumbsUp className="h-3.5 w-3.5" />
                     </button>
                     <button
-                      onClick={() => { toast.success("Thanks for the feedback"); if (conversationId) logFeedback(conversationId, "dislike"); }}
+                      onClick={() => { if (conversationId) logFeedback(conversationId, "dislike"); setFeedbackDialog({ open: true, rating: "dislike", messageIndex: i }); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Poor response"
                     >
@@ -1152,6 +1154,18 @@ export default function NewAnalysis() {
         </div>
       }
       <WhatsAppPopup isOpen={showWaPopup} onClose={() => setShowWaPopup(false)} />
+      <FeedbackDialog
+        open={feedbackDialog.open}
+        rating={feedbackDialog.rating}
+        onClose={() => setFeedbackDialog({ open: false, rating: null, messageIndex: null })}
+        onSubmit={(comment) => {
+          if (conversationId && feedbackDialog.rating) {
+            submitFeedbackComment(conversationId, feedbackDialog.rating, comment, feedbackDialog.messageIndex ?? undefined);
+          }
+          setFeedbackDialog({ open: false, rating: null, messageIndex: null });
+          toast.success("Thanks for the feedback");
+        }}
+      />
     </div>);
 
 }

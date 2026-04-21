@@ -99,3 +99,22 @@ export async function logFeedback(conversationId: string, action: "copy" | "like
 
   if (error) console.warn(`Feedback log (${action}) failed:`, error.message);
 }
+
+export async function submitFeedbackComment(
+  conversationId: string,
+  rating: "like" | "dislike",
+  comment: string,
+  messageIndex?: number,
+) {
+  const user = getWixUserInfo();
+  const { error } = await supabase.from("chat_feedback" as any).insert({
+    conversation_id: conversationId,
+    message_index: messageIndex ?? null,
+    rating,
+    comment: comment.trim() || null,
+    wix_user_id: user.id || null,
+    wix_user_name: user.name || null,
+    wix_user_email: user.email || null,
+  } as any);
+  if (error) console.warn("Feedback comment submit failed:", error.message);
+}

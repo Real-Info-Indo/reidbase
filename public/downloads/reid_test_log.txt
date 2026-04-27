@@ -1,0 +1,1159 @@
+# REID AI Test Log
+_Generated: 2026-04-27 23:23 UTC_
+
+Each prompt is run against every tier where the mode is available. Responses are streamed live from the deployed edge functions.
+
+
+---
+
+## Data Analyst
+
+### Q1. Give me a full picture of what's happening in the Bali property market right now.
+
+**Tier: Freemium (member)**
+
+The Bali property market in 2025 is currently undergoing a structural consolidation following the rapid expansion seen between 2022 and 2024. The most significant signal in the data is a decisive shift toward smaller, more efficient assets, with 1 and 2-bedroom properties now accounting for over 53% of all transaction volume.
+
+## Sales Market and Pricing
+The market is currently bifurcated between a stable freehold segment and a recalibrating leasehold sector.
+
+- **Transaction Volume:** Total property transactions reached over 4,800 in 2025, a modest 5 percentage point decline year-on-year.
+- **Pricing Trends:** Median leasehold prices sit at $280,000, representing a 5% decline over the last 36 months. However, this is largely driven by the "compositional shift" toward smaller units rather than a loss in underlying asset value.
+- **Tenure Premium:** Freehold medians have risen 10% over the same three-year period to $505,000, reflecting the scarcity of titled land available for permanent ownership.
+
+## Rental Performance
+Operational resilience is the theme for 2025, as the market absorbs a significant influx of new inventory.
+
+- **Supply Growth:** The rental pool has expanded by 107% over the last 36 months, now totaling approximately 44,490 properties.
+- **Occupancy and Rates:** Island-wide occupancy rose 2 percentage points to 53% for 2025. This gain came at the cost of pricing power, with Average Daily Rates (ADR) softening by 14% to a market average of $178.
+- **Revenue:** Total rental revenue for the island reached $1.2B in 2025, a 15% decline from the previous year, driven by rate compression.
+
+## Supply and Development Pipeline
+Developers are becoming more selective as the market matures, leading to a tightening of the off-plan pipeline.
+
+- **New Build Volume:** Total new project square meterage launched fell to 160,000 sqm in 2025, a sharp 34% drop from the 2024 peak.
+- **Villa Dominance:** Villas continue to represent 86% of total supply, though apartments saw a 44% increase in market share as developers look for higher-density solutions.
+- **Regional Shifts:** North Badung remains the largest supply hub with a 34.9% share, while South Badung (Uluwatu/Bingin) is the fastest-growing corridor, now representing 21.6% of the market.
+
+Overall, 2025 marks the transition into a more disciplined marketplace where performance is driven by operational efficiency rather than speculative growth.
+
+Would you like to explore a specific location or dig deeper into the rental market performance?
+
+
+**Tier: REID Base Member (reid_base)**
+
+The Bali property market in 2025 is currently undergoing a structural recalibration following the rapid growth cycle of 2022 to 2024. The most significant signal in the data is a decisive shift toward professionalisation and compact asset dominance, as the market moves away from speculative volume toward operational stability.
+
+### Sales Market Performance
+The sales landscape is cooling in terms of volume but maturing in terms of product. Total market transactions reached over 4,800 in 2025, representing a 5% decline year-on-year.
+- **Pricing Dynamics**: Median leasehold prices sit at $280,000, a minor 5% softening over a 36-month period. This is largely a compositional shift rather than a value decline; more compact, lower-priced units are selling, which pulls the median down.
+- **Tenure Split**: Leasehold continues to anchor the market at approximately 80% of transactions. Freehold medians have remained more resilient, rising 10% over the last three years to $505,000 due to constrained supply and high demand for titled assets.
+- **Inventory Mix**: 1 and 2-bedroom assets now command over 53% of total sales volume, reflecting a pivot toward income-focused investment over large-scale residential compounds.
+
+### Rental Market and Yields
+Rental supply has surged, with total available properties reaching 44,490âa 107% increase over the last three years. While this has placed pressure on daily rates, demand remains healthy.
+- **Occupancy**: Despite the massive supply influx, market-wide occupancy rose 2 percentage points year-on-year to an average of 53%.
+- **Rate Compression**: Average Daily Rates (ADR) softened by 14% year-on-year to $178. Professionally managed stock is seeing sharper corrections as operators prioritise volume to maintain occupancy in a more competitive environment.
+- **Revenue**: Total rental revenue reached $1.2B in 2025, though this represents a 15% decline from the previous yearâs peak, driven by the shift toward smaller, more affordable rental units.
+
+### Supply and Development Pipeline
+Developer sentiment has become notably more cautious. Total new build square meterage launched in 2025 fell to roughly 160,000 sqm, a significant 34% drop from the 244,000 sqm peak in 2024.
+- **Off-Plan Shift**: Off-plan apartment supply fell by 55% year-on-year, signalling that the "apartment boom" has reached a saturation point in several key corridors.
+- **Size Trends**: The average property size in Bali now sits at 201 sqm, an 18% reduction over the last three years, as developers focus on land efficiency and floor space ratio (FSR), which is up to 83%.
+
+The 2025 market is defined by a flight to quality and a focus on high-yield, compact configurations rather than expansive land holdings. Would you like to explore how these trends are playing out in a specific location like Canggu or Uluwatu?
+
+1. Explore a specific location
+2. Dig into rental market performance
+3. Compare leasehold and freehold
+4. Look at a specific property type or bedroom size
+
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+The Bali property market in 2025 is currently undergoing a structural recalibration, moving away from the rapid post-pandemic surge toward a more mature phase of consolidation and density.
+
+## **Market Overview**
+The overarching signal in the data is a pivot toward compact, high-yield assets. While total market median prices have softened slightly by 2%, this is not a sign of value decline but rather a compositional shift; one and two-bedroom properties now account for over 53% of all transactions. This reflects a move by developers toward smaller, more efficient floor plans that cater to yield-focused investors.
+
+## **Sales and Pricing**
+Transaction volumes have moderated slightly, with approximately 4,800 sales recorded for the year, down 5% compared to 2024.
+
+- **Tenure Split:** Leasehold continues to dominate, representing roughly 80% of all activity. The median leasehold price sits at $280,000, while the freehold median has risen to $505,000.
+- **Micro-Market Performance:** Established hubs like Umalas (North Badung) have seen median prices climb by 25% to $350,000, while speculative areas like Ungasan (South Badung) have seen a 15% price correction as the market recalibrates.
+- **Sqm Pricing:** The market average price per SQM has actually increased by 2% year-on-year to $2,210, confirming that values remain resilient even as unit sizes shrink.
+
+## **Rental Performance**
+The rental sector is currently navigating a significant supply expansion, with 44,490 active listings across the islandâa 107% increase over the last 36 months.
+
+- **Occupancy:** Despite the supply surge, occupancy has held firm and even improved slightly to a market average of 53% (up 2 percentage points from 2024).
+- **Daily Rates:** Average Daily Rates (ADR) have faced pressure, falling 14% to a market average of $178. This compression is driven by increased competition and a higher volume of compact units entering the pool.
+- **Regional Strength:** South Badung (Uluwatu/Bingin) has shown the most resilience in revenue growth, now accounting for 18% of total island-wide rental income.
+
+## **Development Pipeline**
+Developer sentiment has turned more cautious. Total new build square meterage launched in 2025 fell to 160,000 SQM, a sharp 34% decline from the 2024 peak. This tightening of the pipeline suggests that supply-side pressure may begin to ease in the coming 12 to 18 months as the current inventory is absorbed.
+
+Would you like to look more closely at the performance data for a specific neighbourhood or bedroom count?
+
+
+**Tier: Enterprise (enterprise)**
+
+The Bali property market in 2025 is currently undergoing a structural recalibration, moving away from the rapid acceleration of the 2022 to 2024 cycle toward a more disciplined and consolidated phase.
+
+While aggregate transaction volumes and total sales values have dipped slightly, this is driven by a significant shift in buyer behaviour toward compact, high-efficiency assets rather than a broad loss of value across the island. 
+
+## Sales Market Performance
+
+The sales market is currently defined by a move toward smaller, more liquid property formats.
+
+- **Sales Volume:** Over 4,800 transactions were recorded in 2025, a decrease of 5 percentage points year-on-year.
+- **Asset Composition:** One and two-bedroom properties now command over 53% of all sales volume, a 51 percentage point increase over the last 36 months.
+- **Pricing:** The median leasehold price sits at $280,000, representing a 5 percentage point decline over three years. However, this is largely compositional, as the higher volume of compact assets pulls the median down even as per-category pricing holds firm.
+- **Freehold Premium:** Freehold medians have risen 10 percentage points over the same period to $505,000, reflecting the scarcity of titled land available to the market.
+
+## Rental Market Dynamics
+
+The rental sector is currently seeing high competition due to a substantial increase in inventory.
+
+- **Supply Growth:** Total rental supply has grown by 107% over the last 36 months, reaching over 44,000 properties.
+- **Occupancy:** Despite the supply surge, occupancy rates improved by 2 percentage points year-on-year, averaging 53% across the island.
+- **Daily Rates:** Average Daily Rates (ADR) softened by 14 percentage points to $178, as operators recalibrate pricing to maintain volume in a competitive landscape.
+- **Regional Performance:** North Badung remains the dominant rental hub with a 46.9% share of total supply, while South Badungâs revenue share grew by 17 percentage points this year.
+
+## Development and Supply Trends
+
+Developers have notably pulled back on new project launches, signalling a more cautious approach to the 2025 pipeline.
+
+- **New Build Volume:** Total new build square meterage launched in 2025 was approximately 160,000 sqm, a 34 percentage point decrease from the 2024 peak.
+- **Off-Plan Pivot:** Off-plan villa inventory fell by 12 percentage points, while off-plan apartments saw a sharp decline of 55 percentage points, suggesting the market for new-build apartments has reached a phase of temporary saturation.
+- **Efficiency:** The average property size across the market has contracted by 18 percentage points over three years to 201 sqm, as developers focus on land efficiency and higher floor space ratios.
+
+Would you like to drill into how a specific region like North Badung or South Badung is performing within this broader context?
+
+
+
+### Q2. Compare rental performance between Binging and Canggu.
+
+**Tier: Freemium (member)**
+
+Bingin (South Badung) and Canggu (North Badung) represent two of the most active rental markets on the island, though they operate with distinct performance profiles.
+
+While Canggu remains the island's high-volume liquidity engine, Bingin has established itself as a boutique coastal market that commands a pricing premium due to tighter supply and a focused asset mix.
+
+## **Rental Performance Metrics**
+
+- **Occupancy Rates**
+  - **Bingin:** Averaging 62% for two-bedroom properties, reflecting strong absorption in the boutique segment.
+  - **Canggu:** Averaging 59% to 61% across core villa categories, showing resilience despite much higher inventory levels.
+
+- **Average Daily Rates (ADR)**
+  - **Bingin:** Commands a higher regional ADR average of $154 for two-bedroom villas and $254 for three-bedrooms.
+  - **Canggu:** Sits at an average ADR of $117 for two-bedroom properties and $195 for three-bedroom villas.
+
+- **Supply Dynamics**
+  - **Bingin:** Represents just 2% of total market supply, with a heavy concentration of two-bedroom formats (the largest supply category in the area).
+  - **Canggu:** Anchors the market with 12% of total Bali supply, providing a much broader range of inventory across all bedroom counts.
+
+## **Market Context**
+
+Cangguâs performance is driven by its massive scale and established infrastructure, which supports consistent year-round demand but also creates higher competition. Binginâs performance is defined by its smaller, design-led villa stock and its positioning on the southern peninsula, where constrained supply allows for higher daily rate command, particularly for properties within walking distance of the coast.
+
+For specific rental performance data at the neighbourhood level, that level of detail is available on REID Base Member â see our pricing plans.
+
+Would you like to look at how the sales prices in these two areas compare to see how they impact prospective yields?
+
+
+**Tier: REID Base Member (reid_base)**
+
+Bingin (South Badung) and Canggu (North Badung) present two distinct operational profiles within the Bali rental market, with Bingin showing high efficiency in the compact segment while Canggu maintains its position as the island's high-volume revenue engine.
+
+## Rental Occupancy and Demand
+
+Bingin has seen a significant uplift in demand for smaller configurations, whereas Cangguâs broader supply base across all bedroom categories leads to more varied occupancy levels.
+
+- **Bingin Performance:** Currently, 1-bedroom assets in the Bingin area are standout performers with an occupancy rate of 57%, representing a 7 percentage point increase year-on-year.
+- **Canggu Performance:** Canggu maintains a stable 59% occupancy for 2 and 3-bedroom villas, consistent with the broader North Badung average.
+- **Market Context:** While Canggu benefits from established year-round demand, Binginâs tighter inventory has allowed for faster occupancy growth in the high-demand 1 and 2-bedroom segments.
+
+## Average Daily Rates (ADR)
+
+Pricing power skewed heavily toward South Badung in 2025, with Bingin commanding a premium for coastal proximity compared to the more saturated Canggu corridor.
+
+- **Bingin ADR:** The average daily rate for properties in the South Badung region (including Bingin) sits at $103 for 1-bedroom and $154 for 2-bedroom villas.
+- **Canggu ADR:** In North Badung (including Canggu), 1-bedroom assets average $87, while 2-bedroom villas sit at $117.
+- **Comparison:** Bingin commands a 15% to 25% premium on daily rates over Canggu across the most common rental typologies, largely due to the high concentration of new, design-led boutique stock in the south.
+
+## Revenue and Supply Dynamics
+
+The scale of these two markets dictates their total revenue contribution. Canggu remains the primary liquidity hub, while Bingin represents a more concentrated, high-yield niche.
+
+- **Canggu Scale:** North Badung remains the dominant rental market, accounting for 46.9% of all rental supply in Bali. This volume drove a significant portion of the island's $1.21B total rental revenue for 2025.
+- **Bingin Scale:** South Badungâs share of total revenue grew to 18% in 2025, a 17 percentage point increase year-on-year. This indicates that while the supply is lower, the revenue per unit is increasing at a faster rate than in the north.
+- **Yield Context:** In Bingin, the combination of higher ADRs and rising occupancy in compact formats is offsetting the general market trend of rate compression seen in more mature areas like Canggu.
+
+Would you like to look at how these rental figures translate into gross yield estimates based on current asking prices in these two areas?
+
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Bingin and Canggu represent two of the most active rental markets in Bali, yet they serve different segments of the island's tourism economy.
+
+## **Rental Occupancy and Revenue**
+Canggu (North Badung) remains the structural heart of the rental market with a 46.9% share of Bali's total rental supply, while Bingin (South Badung) operates as a high-demand boutique enclave.
+
+- **Bingin Performance:** South Badung, where Bingin is located, saw 1-bedroom occupancy hit 57% in 2025, a rise of 7 percentage points year-on-year. This area now accounts for 18% of Bali's total rental revenue, growing its revenue share by 17 percentage points over the last 12 months.
+- **Canggu Performance:** North Badung maintains a steady footprint with 1-bedroom occupancy at 61%, though total regional revenue declined 15% year-on-year alongside the broader market contraction.
+
+## **Pricing Dynamics (ADR)**
+Daily rates in these two markets reflect different asset types and visitor profiles.
+
+- **Bingin (South Badung):** Commands a premium for smaller configurations, with 1-bedroom ADR at $103 and 2-bedrooms at $154. High-end cliffside or view-oriented assets in this region often push these averages higher.
+- **Canggu (North Badung):** Shows a slightly lower entry point for 1-bedroom units at $87 ADR, but scales more competitively for larger groups, with 3-bedroom units averaging $195.
+
+## **Supply and Market Context**
+The nature of the stock in each location dictates the rental strategy.
+
+- **Canggu:** Dominated by 3-bedroom villas (representing 12% of the total Bali market), it is an established hub for families and digital nomads seeking infrastructure and long-stay amenities.
+- **Bingin:** Focuses on 2-bedroom formats (representing only 2% of total Bali supply). The limited inventory here contributes to the stronger occupancy growth seen in South Badung as demand outpaces new builds.
+
+Would you like me to run a yield estimate for a specific property size in either of these locations?
+
+
+**Tier: Enterprise (enterprise)**
+
+Bingin and Canggu present two very different rental profiles in the current market, with one excelling in nightly rates and the other in consistent occupancy.
+
+Canggu (North Badung) remains the more liquid and active rental market. It currently maintains an average occupancy of 62.3%, which is 6.4 percentage points higher than Bingin. This higher occupancy reflects the established nature of Canggu as a year-round destination with deep demand from both short-stay tourists and the long-term expat population.
+
+Bingin (South Badung) commands a significant premium on nightly rates. The average ADR in Bingin is $343, which is $28 higher than the $315 average seen in Canggu. While Bingin's occupancy is lower at 55.9%, the area is increasingly positioned as a high-value pocket within the Bukit peninsula, often attracting a different guest profile than the high-density Canggu market.
+
+Inventory volume is the most substantial differentiator between the two locations. Canggu has over 14 times the rental inventory of Bingin, which highlights the scale of the market you are competing in when looking at North Badung.
+
+Are you looking at how these rental figures impact the gross yield for a specific property type in these areas?
+
+
+
+### Q3. Is freehold worth the premium over leasehold in the current market?
+
+**Tier: Freemium (member)**
+
+Freehold and leasehold dynamics in the current market reflect two very different investment profiles, with the value of the freehold premium increasingly tied to long-term capital preservation rather than immediate rental efficiency.
+
+## Market Pricing and Tenure Split
+Leasehold remains the primary transaction structure in Bali, accounting for approximately 80.6% of the available supply. The pricing gap between the two tenures has widened over the last three years:
+
+- **Freehold Median Price:** $505,000 (up 10 percentage points over 36 months).
+- **Leasehold Median Price:** $280,000 (down 5 percentage points over 36 months).
+
+## Interpreting the Premium
+The 10 percentage point growth in freehold values underscores its role as a "hedge" asset. While leasehold medians have softened, this is largely due to a compositional shift toward smaller, compact assets (1 and 2-bedroom units now making up 53% of sales). Freehold supply remains constrained by access limitations for foreign buyers and the sheer scarcity of convertible land in key hubs, which helps sustain its price premium.
+
+## Yield vs. Capital Gains
+From a purely operational perspective, leasehold often delivers higher net yields because the entry price is significantly lower for the same rental revenue potential. However, leasehold is a wasting asset that depreciates as the term diminishes. 
+
+Freehold is generally preferred by those prioritising:
+- **Capital Appreciation:** Higher historical growth rates compared to leasehold.
+- **Asset Perpetuity:** No "ticking clock" on the investment.
+- **Security:** State-recognised land title (when held through a PT PMA or Hak Pakai structure).
+
+Bali's regulatory environment has tightened significantly, with foreign ownership structures subject to specific legal requirements around land title and business licensing. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+Do you want to see how the freehold price growth compares across different regions like North Badung or the Bukit Peninsula?
+
+
+**Tier: REID Base Member (reid_base)**
+
+The question of freehold versus leasehold value is one of the most significant structural debates in the Bali market right now, as the pricing gap between the two has widened over the last three fiscal years.
+
+## The Price-to-Tenure Premium
+In 2025, REID data shows a clear divergence in how these two structures are valued by the market. While leasehold remains the dominant transaction type at approximately 80% of volume, freehold is increasingly viewed as a scarcity-driven capital preservation play.
+
+- **Median Price Gap:** The gap has widened significantly. The median freehold price now sits at $505,000, while the leasehold median is $280,000.
+- **Appreciation Divergence:** Over a 36-month period, freehold medians have appreciated by 10%. In contrast, leasehold medians have softened by 5%âthough as I previously noted, this is largely due to the market shifting toward smaller, more compact leasehold assets rather than an actual loss in asset value.
+- **Leasehold Yield Advantage:** Most investors favouring leasehold do so because the lower entry price allows for significantly higher gross yields, often 3 to 5 percentage points higher than equivalent freehold assets in the same neighbourhood.
+
+## Strategic Context
+Choosing between the two generally depends on whether your primary objective is operational cash flow or long-term capital stability.
+
+- **Leasehold Dynamics:** These assets are typically treated as "yield machines." With an average lease term of 26 to 28 years across the island, your investment is essentially a depreciating asset that must be offset by high rental revenue.
+- **Freehold Dynamics:** These are often "legacy assets." Given the restrictions on foreign freehold ownership, these properties are more insulated from supply shocks and carry a higher premium for the security of permanent title, making them the preferred choice for those focused on capital gains.
+
+## Regional Variations
+The "worth" of the premium depends heavily on the location. In an established Key Market like Umalas (North Badung), where the median price rose 25% to $350,000 this year, the stability of freehold is highly prized. Conversely, in a high-turnover rental market like Uluwatu (South Badung), the shift toward compact, lower-priced leaseholds suggests that investors are prioritising immediate rental returns over title longevity.
+
+Bali's regulatory environment has tightened significantly, with foreign ownership structures subject to specific legal requirements around land title and business licensing. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+Are you looking at this from an investment yield perspective, or are you more focused on long-term capital appreciation?
+
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Freehold pricing currently commands a significant premium over leasehold in Bali, with the data reflecting a widening gap between the two tenure types as of 2025.
+
+The value proposition for freehold depends heavily on whether your primary objective is long-term capital preservation or immediate rental yield efficiency.
+
+## Tenure Price Performance
+The price delta between the two structures has expanded over the last three years, driven by a tightening supply of titled land and a shift toward compact rental-focused leasehold stock.
+
+- **Median Freehold Price**: $505,000 (up 10 percentage points over 36 months).
+- **Median Leasehold Price**: $280,000 (down 5 percentage points over 36 months).
+
+It is important to note that the decline in leasehold medians is largely compositional. 1 and 2-bedroom assets now account for over 53% of transactions, which naturally pulls the median down without necessarily indicating a drop in the value of individual properties.
+
+## Yield and Market Dynamics
+Leasehold remains the dominant structure for the rental market, accounting for approximately 80% of transactional volume. Because the entry price is significantly lower, leasehold properties typically achieve higher gross yields.
+
+- **Supply Concentration**: Villas make up 86% of the market, with the vast majority of these sitting on leasehold land in key hubs like North Badung and Mengwi.
+- **Capital Appreciation**: While freehold offers permanent ownership and steady appreciation (10% growth over 3 years), leasehold is a wasting asset that requires higher operational returns to offset the eventual expiration of the term.
+
+## Regional Variations
+The "worth" of the premium also shifts by location. In more established areas like Seminyak (Central Badung), leasehold terms are often shorter (averaging 23 years), making the freehold premium more attractive for long-term holders. Conversely, in the Bukit (South Badung) areas like Uluwatu, average lease terms are longer at 32 years, offering a more extended runway for leasehold investors to recoup their capital.
+
+Bali's regulatory environment has tightened significantly, with foreign ownership structures subject to specific legal requirements around land title and business licensing. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+Would you like to look at the price per SQM difference between freehold and leasehold in a specific area like Pererenan or Uluwatu?
+
+
+**Tier: Enterprise (enterprise)**
+
+Choosing between freehold and leasehold in Bali is currently a question of balancing high entry costs against long-term capital preservation, as the price gap between the two has widened significantly over the last three years.
+
+## Market Pricing and the Premium
+Current REID data shows that the premium for freehold is substantial. The median price for a freehold property in Bali now sits at $505,000, while the leasehold median is $280,000. 
+
+- **Freehold Appreciation**: Freehold values have risen 10 percentage points over the last 36 months.
+- **Leasehold Stability**: Leasehold medians declined 5 percentage points in the same period, though this is primarily due to a shift toward smaller, more affordable 1 and 2-bedroom units entering the market rather than an actual loss in asset value.
+- **The Gap**: On a median basis, you are paying an 80% premium to own the title outright.
+
+## Yield and Operational Performance
+From a pure rental yield perspective, leasehold often outperforms freehold because the lower acquisition cost allows for a faster return on capital. 
+
+- **Yield Compression**: Because freehold prices have appreciated while daily rental rates (ADR) moderated by 14% in 2025, gross yields on freehold properties are facing compression.
+- **Leasehold Utility**: Leasehold remains the dominant structure for the short-term rental market, accounting for approximately 80% of all transactions. 
+
+## Supply and Liquidity
+The choice often depends on your intended holding period and exit strategy.
+
+- **Inventory Split**: Leasehold represents 80.6% of total market supply, giving buyers significantly more choice in terms of location and modern design.
+- **Scarcity Value**: Freehold represents only 19.4% of supply and is increasingly rare in "Key Markets" like Berawa or Canggu. This scarcity supports the 10 percentage point price growth seen in the last three years.
+
+Whether that 80% price premium is "worth it" depends on whether you value the security of a perpetual asset over the higher annualised cash-on-cash returns typically found in the leasehold segment.
+
+Bali's regulatory environment has tightened significantly, with foreign ownership structures subject to specific legal requirements around land title and business licensing. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+Would you like to see how the freehold vs leasehold price gap differs in a specific area like Uluwatu or Umalas?
+
+
+
+### Q4. What is the average occupancy rate in Sanur?
+
+**Tier: Freemium (member)**
+
+Sanur (Denpasar) attracts a consistent segment of the market, typically leaning toward a more family-oriented and residential demographic compared to the west coast hubs.
+
+Across the broader Denpasar region, which includes the Sanur market, the average occupancy rate for 2025 sits at 62%. This reflects a performance level approximately 9 percentage points above the island-wide average of 53%.
+
+For Sanur-specific analysis, that level of detail is available on REID Base Member â see our pricing plans.
+
+### **Denpasar Regional Performance (2025)**
+- **Average Occupancy:** 62%
+- **Market Comparison:** +9 percentage points vs. Bali average
+- **Supply Share:** 3.6% of the total Bali market
+
+The stability in this region is often driven by a higher proportion of return visitors and long-stay residents, which helps maintain occupancy levels even as other areas experience more volatility.
+
+Would you like to see how the average daily rates in this area compare to the rest of the island?
+
+
+**Tier: REID Base Member (reid_base)**
+
+Sanur (Denpasar) attracts a steadier, often more long-stay or family-oriented demographic compared to the high-turnover hubs of the west coast.
+
+In the Sanur market, occupancy rates consistently outperform the broader Bali average of 53%. According to 2025 data, performance varies across bedroom configurations:
+
+- **1 Bedroom:** 61%
+- **2 Bedroom:** 64%
+- **3 Bedroom:** 61%
+- **4 Bedroom:** 60%
+- **5 Bedroom:** 65%
+
+### Market Context
+Sanur's performance is underpinned by its established infrastructure and its appeal as a primary residential choice for expats, which balances seasonal tourism volatility. While regions like North Badung see higher daily rates, Sanurâs higher occupancy floors suggest a more stable rental environment throughout the year.
+
+The 64% occupancy seen in 2-bedroom villas is particularly notable, sitting 11 percentage points above the island-wide median, reflecting strong demand for mid-sized family or couple-oriented accommodation in this precinct.
+
+Would you like to see how the Average Daily Rate (ADR) in Sanur compares to other coastal markets like Seminyak or Canggu?
+
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Sanur is currently showing strong operational fundamentals, particularly within the mid-sized villa segment.
+
+The average occupancy rate in Sanur (Denpasar) for 2025 is 61% across all property types. This performance sits 8 percentage points above the Bali-wide market average of 53%, reflecting Sanur's established appeal as a consistent residential and tourism hub.
+
+### Rental Performance Breakdown
+Sanur's occupancy varies by bedroom count, showing a slight premium for two-bedroom configurations:
+
+- **1 Bedroom:** 61%
+- **2 Bedrooms:** 64%
+- **3 Bedrooms:** 61%
+- **4 Bedrooms:** 60%
+- **5 Bedrooms:** 65%
+
+This high level of stability across different typologies is a characteristic of the Denpasar region, which tends to attract longer-stay tenants and repeat visitors compared to the more volatile western coastal markets. While occupancy is high, the average daily rate (ADR) for a 3-bedroom villa in Sanur sits at approximately $208, which balances high volume with accessible pricing compared to premium hubs like Seminyak or Berawa.
+
+Would you like to see how Sanur's occupancy compares to other Key Markets like Ubud or Uluwatu?
+
+
+**Tier: Enterprise (enterprise)**
+
+Sanur is seeing stable rental activity as it continues to establish itself as a primary alternative to the busier west coast hubs.
+
+Based on REID data for 2025, the average occupancy rate in Sanur (Denpasar) is 51%. This sits slightly below the island-wide median of 53%, reflecting the area's more consistent, long-stay residential profile compared to the high-turnover tourism markets of North Badung or Mengwi.
+
+For context, for location-specific rental analysis, that level of detail is available on REID Base Member â see our pricing plans.
+
+Would you like to see how Sanur's occupancy compares to other Denpasar neighbourhoods or the island-wide average?
+
+
+
+### Q5. The Bali market is clearly in decline - what does the data show?
+
+**Tier: Freemium (member)**
+
+The 2025 data shows a market in a phase of structural recalibration rather than a systemic loss of value, with several key indicators actually showing growth despite a softening in top-line medians.
+
+## Sales Market Performance
+The headline median price for leasehold properties dipped to $280,000, a 2% decline compared to 2024. However, REID analysis suggests this is primarily a compositional shift rather than a true drop in asset value:
+
+- **Volume by Type**: Compact 1 and 2 bedroom properties now account for over 53% of all transactions, a 51 percentage point increase over the last 36 months.
+- **Category Pricing**: While the overall median fell, specific categories held or gained ground. For instance, 4 bedroom property prices rose 4.7 percentage points year-on-year.
+- **Freehold Resilience**: The freehold median rose 10% over the last three years to $505,000, indicating sustained demand for titled assets.
+
+## Rental Market Dynamics
+Rental performance in 2025 provides a counter-narrative to the idea of a market in decline, showing increased efficiency despite growing competition:
+
+- **Occupancy Gains**: Island-wide average occupancy rose 2 percentage points to 53%, even as total rental supply grew by 12% year-on-year.
+- **Revenue Compression**: Total rental revenue fell 15% to $1.21B. This was driven by a 14% decline in Average Daily Rate (ADR) as operators recalibrated pricing to maintain volume in a more competitive landscape.
+- **Supply Surge**: Available rental stock has grown by 107% over the last 36 months, yet the market has successfully absorbed this inventory without an occupancy collapse.
+
+## Development Sentiment
+There is a clear tightening in the development pipeline, which suggests the market is moving toward a more disciplined phase:
+
+- **New Launches**: Total new-build square meterage launched in 2025 fell by 34% compared to the 2024 peak.
+- **Off-Plan Inventory**: Off-plan villa supply declined 12% year-on-year, while the off-plan apartment segment saw a sharp 55% contraction.
+
+The current environment reflects a market maturing away from speculative peaks toward operational stability, with buyers increasingly prioritising smaller, high-occupancy assets. 
+
+Would you like to look at how this shift is playing out in the rental occupancy rates specifically?
+
+
+**Tier: REID Base Member (reid_base)**
+
+The 2025 data suggests the Bali market is undergoing a structural recalibration rather than a systemic decline, with movement in median prices driven heavily by a shift in what is being sold.
+
+## Sales Market Performance
+While the total market median price softened by 2% year-on-year, a look at the transactional mix reveals that this is largely compositional. 
+
+- **Asset Mix:** One and two-bedroom properties now lead the market in sales volume at over 53%. This represents a 51 percentage point increase in the share of compact assets over the last 36 months.
+- **Volume and Value:** Total transactions fell by 5% to approximately 4,800 units, while total sales value dropped 9% to just over $2B. This confirms that while activity remains high, the average ticket price is lower as buyers pivot toward smaller, income-generating units.
+- **Tenure Split:** Tenure type also shows a divergence in value. The leasehold median sits at $280k (down 5% over 36 months), while the freehold median has risen 10% to $505k over the same period, reflecting sustained demand for titled assets.
+
+## Rental Market Resilience
+The rental sector is currently managing a significant influx of inventory, which has impacted top-line revenue but not broad occupancy.
+
+- **Supply Growth:** Total rental supply has grown 107% over the last 36 months, reaching 44,490 properties.
+- **Occupancy:** Despite this supply surge, island-wide occupancy rose by 2 percentage points to average 53% for 2025.
+- **Rate Compression:** To maintain those occupancy levels, the market has seen a 14% year-on-year decline in Average Daily Rate (ADR), now sitting at $178. This rate compression, combined with the shift toward smaller assets, led to a 15% decline in total rental revenue to $1.21B.
+
+## Development Pipeline
+Developer sentiment has adjusted to these conditions, with the pipeline for new builds tightening significantly.
+
+- **Off-Plan Contraction:** Total new-build square meterage launched in 2025 fell by 34% compared to the 2024 peak. 
+- **Product Evolution:** Developers are increasingly prioritising land efficiency, with the average villa size declining 3% year-on-year to 229 sqm.
+
+Overall, the data reflects a market moving from a phase of rapid, speculative expansion into one focused on operational efficiency and mid-market affordability.
+
+Would you like to look at how these trends are playing out in a specific region like North Badung or the Bukit?
+
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+The Bali property market is currently undergoing a structural recalibration rather than a systemic value decline.
+
+While headline medians and total revenue figures show downward movement, REID data indicates this is largely driven by a significant shift in the types of properties being transacted, rather than a broad loss of asset value.
+
+## Headline Market Shifts
+The most visible signals of "decline" in 2025 are actually reflections of a changing market composition:
+
+- **Median Price Compression:** The market-wide median leasehold price softened by 2.1% year-on-year to $280,000. However, this is primarily because 1 and 2-bedroom assets now account for over 53% of all sales. As more compact, lower-value units dominate the transaction mix, the "average" price naturally edges down.
+- **Revenue Contraction:** Total rental revenue fell to $1.2B in 2025, a 15% decline from the previous year. This was driven by a 14% compression in Average Daily Rates (ADR) as 12% more rental supply entered the market, forcing operators to compete more aggressively on price.
+- **Sales Volume:** Total transactions reached 4,800 in 2025, down 5% from 2024, signaling a moderation from the hyper-growth cycle of the previous 36 months.
+
+## Indicators of Resilience
+Despite the softening in macro medians, specific data points suggest fundamentally stable demand:
+
+- **Occupancy Gains:** Despite a 107% increase in rental supply over the last three years, market-wide occupancy actually rose 2 percentage points in 2025, averaging 53%.
+- **Segmented Appreciation:** While the overall median fell, the 4-bedroom leasehold segment saw price growth of 4.7 percentage points year-on-year, and freehold medians have risen 10% over the last three years to $505,000.
+- **Developer Sentiment:** New build square meterage launched in 2025 fell by 34% compared to 2024. This reduction in the off-plan pipeline suggests a necessary cooling of supply which may help stabilize rental rates in the medium term.
+
+## Regional Variance
+Performance is not uniform across the island. For example, while Tabanan saw a 6.2% decline in median prices due to a surge in compact stock, areas like Umalas (North Badung) saw median prices rise by 25% as the area consolidated its position as a premium residential hub.
+
+Are you looking at a specific region or bedroom count where you've noticed this softening?
+
+
+**Tier: Enterprise (enterprise)**
+
+Looking at the rental performance figures, the data does not show a market in decline, but rather one that is stabilising and becoming more competitive as supply increases.
+
+## Rental Performance Trends
+
+The long-term trend indicates a significant recovery from 2022 levels followed by a period of normalisation. Average Daily Rate (ADR) across Bali rose from $298 in January 2022 to peak at $426 in July 2023, representing a substantial increase in pricing power over an eighteen-month period. While December 2023 ADR ($410) is lower than the July peak, it remains 38% higher than the starting point in early 2022.
+
+## Supply and Occupancy Dynamics
+
+The primary shift in the market is found in active rental supply, which has more than doubled in two years.
+
+- Total active rental supply rose from 15,083 units in January 2022 to 32,706 units by December 2023.
+- Occupancy rates have navigated this supply surge relatively well, moving from 26.7% in January 2022 to 43.8% in December 2023.
+
+While occupancy reached a high of 51.9% in December 2022, the subsequent year-on-year dip to 43.8% in December 2023 (a decline of 8.1 percentage points) suggests that while demand remains strong, it is now being distributed across a much larger inventory pool. Monthly revenue per active unit has stayed well above 2022 levels, indicating that the market is currently absorbing the new supply without a collapse in rates.
+
+Would you like to see how the occupancy trend looks as a chart to better visualise this supply absorption?
+
+
+
+
+---
+
+## Sales Assistant
+
+### Q1. I have a 2-bedroom leasehold villa in Pererenan, 120 sqm, asking $310k, 28 years remaining. Help me position it.
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Pererenan (Mengwi) is currently one of the most active high-end corridors in Bali, and your asset sits in a very specific competitive bracket.
+
+## Market Position
+
+At $310k for a 120 sqm build, your asking price reflects a rate of $2,583 per sqm. This is notably higher than the Pererenan market average of $2,355 per sqm. While Pererenan saw a 17% jump in median prices over the last year, your property is being positioned at a premium even within that upward trend. The 28-year lease term is a strength, sitting just above the local average of 27 years, which provides a slightly better amortization window for yield-focused buyers.
+
+## Sales Positioning Points
+
+- **Lease Term Advantage**: The 28-year remaining term provides a competitive edge in a market where the average is 27 years. In Pererenanâs high-velocity rental market, those extra 12 months are a material factor in a buyerâs terminal value calculation.
+- **High Liquidity Segment**: Pererenan accounted for 9% of all Bali sales in 2025 (370+ transactions). You are selling into one of the most liquid sub-markets on the island, which supports a more aggressive pricing strategy if the finishing and location are top-tier.
+- **Strategic Micro-Market**: Pererenan has successfully decoupled from Canggu, establishing itself as a premium residential brand. Buyers here are increasingly looking for "Canggu proximity without Canggu density," which supports the $2,500+ per sqm price point.
+
+## Risk Flags
+
+- **Pricing Premium**: Your rate of $2,583 per sqm is roughly 10% above the neighbourhood average. To justify this, the villa needs to demonstrate superior design or a vastly better location (beachside of the main road) than the standard stock.
+- **Build Efficiency**: At 120 sqm for a 2-bedroom, this is a relatively compact layout compared to the Pererenan 2-bedroom average which typically trends higher. Buyers may compare this against larger footprints at similar price points in nearby Seseh or Padonan.
+- **Inventory Competition**: With nearly 900 properties currently available in Pererenan, buyers have significant choice. Positioning must lead with the "lifestyle" and "finish" rather than just the math, as the pure data puts you in the top 15% of the market by price per sqm.
+
+Would you like me to run the rental yield numbers based on Pererenanâs current 2-bedroom occupancy and ADR to see if the investment case supports this asking price?
+
+
+**Tier: Enterprise (enterprise)**
+
+Pererenan is a high-velocity market right now, and your pricing puts this villa in a very specific bracket relative to current inventory.
+
+### **Market Position**
+
+Your asking price of $310k sits slightly above the Pererenan (Mengwi) median of $279k for a 2-bedroom leasehold villa. At 120 sqm, your price per sqm is $2,583, which is a 19% premium over the location average of $2,162 per sqm. However, the 28-year lease term is a strong asset, as it sits above the typical 25-year entry point often seen in new listings, giving you a competitive edge on the effective annual cost.
+
+### **Sales Positioning Points**
+
+- The 28-year lease term is a significant closer for yield-focused buyers, as it extends the amortisation period beyond the standard market offering in Mengwi.
+
+- Pererenan remains one of the most liquid sub-markets in Bali, with 178 active 2-bedroom leasehold listings currently, indicating high buyer search volume and established comparable evidence to support valuations.
+
+- While priced at a premium per sqm, the $310k headline figure remains accessible for the largest segment of the leasehold buyer pool looking to stay under the $350k threshold.
+
+### **Risk Flags**
+
+- At $2,583 per sqm, you are positioned in the top quartile of the local market. Sophisticated buyers will scrutinise the build quality and finishing to justify the 19% gap between this asset and the local average of $2,162 per sqm.
+
+- The $310k price point faces heavy competition from slightly more compact units that carry lower headline prices. You will need to lead with the "extra space" and longer lease term to pivot the conversation away from the entry-level $270k-$280k stock.
+
+Do you have the current rental performance for this property, or would you like to see how the projected occupancy in Pererenan compares to the broader Mengwi region to support an investment case?
+
+
+
+### Q2. What are some sales figures I can provide to promote Uluwatu
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Uluwatu (South Badung) is currently one of the most compelling narratives in the Bali market, specifically due to its aggressive transition toward high-density, premium-priced compact stock.
+
+While the headline median price for the area has softened, this is not a sign of cooling demand; it is a direct result of the market shifting from large cliff-top estates to smaller, high-yield villas and apartments.
+
+### **Sales Positioning Points**
+
+- **Capital Appreciation on Rate:** Uluwatu recorded a 25 percentage point increase in average price per SQM year-on-year, now reaching $2,725/sqm. This is the highest rate growth of any key market in 2025.
+- **Liquidity and Volume:** The area captured 10% of all Bali property sales in 2025, with over 430 recorded transactions. It has moved from a niche surfers' outpost to a high-liquidity investment hub.
+- **Investor Confidence:** The average remaining lease term in Uluwatu stands at 32 years, significantly higher than the island average of 26 years. This provides a longer runway for ROI, which is a primary driver for institutional and portfolio investors.
+- **Compact Asset Dominance:** 2-bedroom assets are the highest-volume category, aligning with the "luxury-compact" trend that currently leads the market in absorption.
+
+### **Rental Performance Context**
+
+If you are positioning to investors, the yield story in Uluwatu is supported by strong operational data:
+
+- **ADR Premium:** At $254 for a 3-bedroom and $154 for a 2-bedroom, Uluwatu ADRs remain among the highest on the island, significantly outperforming the $178 market-wide average.
+- **Occupancy Resilience:** 2-bedroom occupancy in South Badung reached 62% in 2025, representing a 9 percentage point premium over the Bali market average of 53%.
+- **Revenue Growth:** South Badungâs share of total island rental revenue grew to 18%, a 17 percentage point increase year-on-year, indicating that capital is flowing heavily into the Bukit peninsula.
+
+### **Risk Management (The Honest View)**
+
+- **Price Compression:** Median prices fell 15% to $238k, but as noted, this reflects the sale of smaller units ($/sqm is up). When presenting this to a buyer, lead with the SQM appreciation to avoid the "falling market" misconception.
+- **Build Quality vs. Environment:** The aggressive 33% decline in average build size (now 145 sqm) means properties are smaller and more densely packed. Buyers should be advised to focus on design-led stock to maintain a competitive edge in a crowded rental market.
+
+Would you like me to pull some specific comparables for a particular bedroom count or price point to help back up a valuation?
+
+
+**Tier: Enterprise (enterprise)**
+
+Uluwatu (South Badung) is currently one of the most active markets on the island, with data showing a significant concentration of available stock and high value-per-metre.
+
+### **Market Intelligence Summary**
+
+Uluwatu has established itself as a high-value destination, with over 920 properties currently on the market. The data indicates a notable premium on built space compared to other emerging areas, reflecting its standing as a top-tier location for both lifestyle and investment.
+
+- **Median Asking Price:** $319,993 (Current 2025 data).
+- **Average Price per SQM:** $2,693 â this is a key metric for Uluwatu, showing that buyers are paying for the specific desirability and limited geography of the Bukit peninsula.
+- **Median Annual Lease Cost:** $9,473 â useful for benchmarking the underlying cost of land when assessing leasehold investment structures.
+
+### **Sales Positioning Points**
+
+- **Supply Depth:** With 921 active listings, Uluwatu offers one of the deepest pools of inventory in South Badung, providing buyers with significant choice across different project types.
+- **Premium Pricing Power:** The average rate of $2,693 per SQM places Uluwatu ahead of many Central and North Badung neighbourhoods, signalling strong market confidence and a high ceiling for capital appreciation on well-executed builds.
+- **Yield Drivers:** The annual lease median of $9,473 provides a clear baseline for investors to calculate their "ground rent" equivalent, making it easier to verify the feasibility of projected net returns.
+
+### **Market Context**
+
+While the median price sits at approximately $320k, this typically reflects a mix of compact one and two-bedroom villas. For larger family-sized or high-occupancy rental assets, the price per SQM remains the more reliable indicator of value. The absence of specific days-listed data for this period suggests high inventory turnover or a large volume of recent off-plan entries to the market.
+
+Are you using these figures to help a vendor set a realistic asking price, or are you looking to show a buyer why Uluwatu commands a higher premium than neighbouring areas?
+
+
+
+### Q3. My client's property is priced at $850k for a 3-bed in Seminyak with 18 years remaining. They won't budge on price. What bench marks can I provide them?
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Seminyak is a mature market where the pricing narrative is increasingly being dictated by remaining lease terms, and at $850k, this property is significantly out of step with current transaction data.
+
+To help you frame this for your client, here is the benchmark data for the Seminyak (Central Badung) market as of the most recent 2025 quarterly update.
+
+### **Market Position**
+
+The most immediate friction point is the pricing relative to the remaining lease. At $850k for an 18-year term, your client is asking for a headline price that is nearly 186% above the Seminyak median of $297k. While 3-bedroom assets naturally command a premium over the median, the "effective cost" here is high. With only 18 years remaining, a buyer is paying roughly $47,222 per year of tenure, compared to the Seminyak average of approximately $12,900 per year (based on a $297k median and 23-year average term).
+
+### **Sales Positioning Benchmarks**
+
+- **Price per SQM:** If we assume a typical 250 sqm build for a 3-bed in Seminyak, your client's rate is $3,400 per sqm. This is 61% higher than the Seminyak average of $2,110 per sqm.
+- **Lease Term Deficit:** The average remaining lease in Seminyak is 23 years. At 18 years, this asset is 22% below the market average for tenure, which typically triggers a steeper depreciation curve in buyer valuation models.
+- **Liquidity Context:** Seminyak recorded roughly 230 sales in 2025. The high-velocity segment of that market is currently concentrated between $250k and $450k. Assets priced above $800k in this region typically require 35+ years of lease or exceptional land size to justify the outlier status.
+
+### **Risk Flags**
+
+- **Yield Compression:** A buyer at $850k would need to generate over $100k in annual net profit just to amortise the purchase price over the 18 years, before even considering a return on investment. With Seminyak 3-bed ADRs averaging $173, reaching that threshold requires unrealistic occupancy levels.
+- **Comparison to Emerging High-End:** Investors at the $850k price point are likely comparing this to Pererenan ($328k median / 27 years) or Umalas ($350k median / 26 years), where they can secure nearly a decade more of "runway" and newer build quality for significantly less capital.
+
+### **Rental Benchmark (Investment Context)**
+
+If your client justifies the price based on rental income, these are the 2025 averages for 3-bedroom villas in Seminyak:
+- **Occupancy:** 56%
+- **Average Daily Rate (ADR):** $173
+- **Annual Gross Revenue:** ~$35,300
+
+At an $850k entry price, the gross yield would be approximately 4.1%. After standard opex (REID 50% assumption), the net yield drops to roughly 2%. This provides a very difficult case for an investment-focused buyer.
+
+Would you like me to model what a "market-aligned" price would look like for an 18-year lease, or should we look at drafting some specific language to help the vendor understand how the lease term is impacting their exit liquidity?
+
+
+**Tier: Enterprise (enterprise)**
+
+Seminyak is a mature market, but at that price point and lease term, your client is significantly out of step with current transaction data.
+
+## Market Position
+
+The asking price of $850k is more than double the Seminyak (Central Badung) median of $404k for a 3-bedroom leasehold villa. While a price premium can sometimes be justified by build quality or specific location, the 18-year remaining lease term is the primary friction point. The market average for competing 3-bedroom stock in Seminyak is 24 years.
+
+## Sales Positioning Points
+
+- The annualized cost of this property is $47,222 per year of lease ($850k divided by 18 years). This is 133 percentage points higher than the Seminyak market average of $20,244 per year.
+
+- There are currently 181 competing 3-bedroom leasehold listings in Seminyak. With a median price of $404k, buyers have extensive options at less than half your client's asking price, typically with six more years of lease security.
+
+- The gap between this asking price and the average build size baseline ($455k for 265 sqm) suggests the property must deliver extraordinary rental performance to justify the entry cost to a yield-sensitive buyer.
+
+## Risk Flags
+
+- At 18 years, the lease is entering the "depreciation zone" where traditional financing or long-term investment models become difficult to clear. Most buyers in this bracket look for a minimum 25-year window to ensure a full capital recovery and profit cycle.
+
+- The listing is positioned in a price bracket where buyers often pivot toward 4 or 5-bedroom assets or look toward freehold options in emerging areas. 
+
+- High inventory levels (181 active listings) mean buyers have the leverage to be highly selective on lease duration and price per sqm.
+
+Do you have the current occupancy and ADR for this property? If we can show top-tier rental performance, it might be the only way to bridge that $400k valuation gap.
+
+
+
+### Q4. Is this a good time for my client to buy in Canggu?
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Canggu (North Badung) is currently in a phase of structural consolidation, making the "good time" argument dependent on whether your client is prioritising immediate yield or long-term liquidity.
+
+## Market Context
+
+Canggu remains the liquidity engine of Bali, accounting for 12% of all island-wide transactions in 2025 with over 480 sales recorded. While the broader Bali market saw a 5% dip in volume, Cangguâs scale has helped it maintain pricing stability. The median price for the area sits at $296,000, showing a 6% increase, though this is heavily influenced by a shift toward more compact, high-efficiency 1 and 2-bedroom assets.
+
+## Buy-Side Considerations
+
+- **Pricing Trends:** Average price per SQM was flat at $2,170. This suggests that while headline prices are rising due to demand, the underlying value of the built space isn't experiencing the hyper-inflation seen in 2023-2024. For a buyer, this indicates a market that is pricing more rationally.
+- **Supply Dynamics:** With over 1,240 properties currently on the market, your client has significant choice. However, new project launches (measured in total SQM) fell by 34% across the island. This narrowing of the pipeline may limit future inventory, potentially supporting capital preservation for those buying into established or near-completion projects now.
+- **Rental Performance:** Occupancy in North Badung is healthy at 59% for 3-bedroom villas and 61% for 1-bedroom units. However, the market is facing significant rate compression; market-wide ADR fell 14% to $178. If your client is buying for yield, they must model on these "recalibrated" 2025 rates rather than the peak figures of 2024.
+
+## Strategic Outlook
+
+The "gold rush" phase of Canggu has transitioned into a mature cycle. It is a "good time" to buy if the client is looking for a lower-risk, high-liquidity exit in 3â5 years, as Canggu remains the first choice for the secondary market. It is a more challenging time if they are expecting 15%+ net yields, as rising opex and ADR compression are squeezing margins.
+
+Are you looking at a specific bedroom count or a particular price point to see how it benchmarks against these Canggu medians?
+
+
+**Tier: Enterprise (enterprise)**
+
+Canggu is currently in a phase of structural consolidation, making the "right time" highly dependent on whether your client is prioritising immediate rental yield or long-term capital preservation.
+
+While we are seeing a 2 percentage point increase in island-wide occupancy, the sheer volume of supply in Canggu (North Badung) has created a more competitive environment for landlords. Here is how the numbers look for your client.
+
+## Market Dynamics
+
+Canggu remains the high-liquidity engine of the Bali market, accounting for 12% of all sales in 2025. However, the days of rapid, speculative price escalation have shifted toward a more mature growth curve.
+
+- **Pricing Stability**: The median price in Canggu sits at $296,000, showing a moderate 6% increase. This suggests that while the "easy gains" of the post-pandemic surge have cooled, the area is not seeing the price corrections visible in more speculative emerging pockets.
+- **Supply Pressure**: With over 1,240 properties currently on the market in Canggu alone, buyers have significant leverage. Stock levels are high, which allows for more aggressive negotiation on price per SQM, which currently averages $2,170 for the area.
+- **Compositional Shift**: We are seeing a move toward more compact, efficient builds. If your client is looking at 3-bedroom villas, they should note that average build sizes have actually stabilised at around 230 SQM.
+
+## Commercial Considerations
+
+- **Rental Realities**: The market average daily rate (ADR) across the island has seen a 14% compression as supply catches up with demand. In Canggu, the play is no longer about charging a massive premium, but about operational efficiency and maintaining high occupancy through superior management.
+- **Leasehold Decay**: The average remaining lease term in Canggu has dipped to 26 years. If your client is looking at an asset with less than 20 years remaining, the "buy" decision rests entirely on the extension cost and the ability to amortise the investment quickly through rental income.
+- **Liquidity Advantage**: The primary reason to buy in Canggu right now is the exit strategy. It recorded more than 480 sales in 2025âthe highest of any single locationâmeaning that when your client wants to sell, there is a deep and active secondary market.
+
+## The Verdict
+
+It is a "buyer's market" in terms of choice and negotiation room, but a "manager's market" in terms of yield. If your client is expecting 15% net yields without professional management, they may be disappointed. If they are looking for a stable, high-liquidity asset with a $2,170/sqm entry point, the timing is disciplined.
+
+Does your client have a specific property type or bedroom count in mind, or are they comparing Canggu against neighbouring areas like Pererenan or Umalas?
+
+
+
+### Q5. My client is a developer in Pererenan with 18 off plan apartments. What sales narrative can we build to position these assets?
+
+**Tier: REID Base Pro (reid_base_pro)**
+
+Pererenan (Mengwi) is currently one of the most high-performance submarkets in Bali, having transitioned from a spillover zone to a premium destination with its own distinct pricing power.
+
+To build a narrative for 18 off-plan apartments, the strategy should pivot away from "Canggu proximity" and toward "Pererenan maturity." Here is the sales narrative and the data to back it.
+
+## Market Context
+
+Pererenan recorded a 17% increase in median price over the last year, reaching $328k. This outpaced the island-wide median growth, signaling strong buyer appetite for this specific pocket. While the area is traditionally known for villas, the apartment segment is the logical response to the 8% rise in price per SQM (now $2,355/sqm) and the shift toward higher-density, yield-focused products.
+
+## Sales Positioning Points
+
+- **Premium Price Momentum:** Pererenan is currently outperforming Canggu in median price ($328k vs $296k). Position these apartments as entry points into a submarket that has successfully decoupled from Canggu and established its own premium benchmark.
+- **Supply Scarcity for Apartments:** While Pererenan has significant villa inventory (890+ units), the apartment supply remains a fraction of that volume. As land prices in Mengwi rise, this off-plan project offers a compact, efficient alternative in a neighborhood where 3-bedroom villas are trending toward 245 sqm and higher price points.
+- **Operational Efficiency:** With 18 units, this project hits the "sweet spot" for professional management. It is large enough to support dedicated on-site servicesâwhich drive the ADR premiums seen in Berawa and North Badungâbut small enough to maintain the "boutique" feel that Pererenan buyers demand.
+- **Proven Liquid Market:** Pererenan accounted for 9% of all Bali sales in 2025 (370+ transactions). This high liquidity provides a clear exit strategy for off-plan investors looking at a 2- to 3-year flip or a long-term rental hold.
+
+## Risk Flags
+
+- **Yield Compression from Supply:** Average daily rates across Mengwi for apartments have faced pressure as more inventory enters the market. The narrative must focus on the "Pererenan Premium" to defend ADR against cheaper stock in nearby Munggu or Buduk.
+- **Construction Timelines:** With 33% of the total market currently sitting in off-plan inventory, buyers are increasingly cautious about delivery. The narrative should lead with the developer's track record or clear construction milestones to differentiate from speculative "paper" projects.
+- **Leasehold Decay:** Current Pererenan averages sit at 27 years. If these apartments are offered with a standard 25-year lease, you will need to highlight extension options early to satisfy yield models, as buyers in this price bracket are increasingly sophisticated regarding terminal value.
+
+Would you like me to model the potential rental yield for these units based on current Pererenan occupancy and ADR benchmarks to include in the investor deck?
+
+
+**Tier: Enterprise (enterprise)**
+
+Pererenan has transitioned from a Canggu spillover market into a premium residential enclave in its own right, and positioning 18 off-plan units requires a narrative built on that specific maturity. 
+
+Based on live REID data for Pererenan (Mengwi), here is the sales narrative and market positioning for your development.
+
+## Market Context
+
+Pererenan is currently one of Bali's highest-performing "Key Markets," recording over 370 sales in 2025 (9% of the total island volume). While the broader Mengwi region seen a 3.3% softening in median prices due to a shift toward compact stock, Pererenan has bucked this trend with a 17% increase in median villa pricing, now reaching $328,000. For an apartment project, you are competing in a space where the average price per SQM for apartments in Mengwi is $2,580 for 2-bedroom units and $3,505 for 1-bedroom units.
+
+## Sales Positioning Points
+
+- **The Premium Pivot:** Position Pererenan as the "sophisticated neighbor" to Canggu. REID data shows average build sizes here are increasing (up 12% to 245 SQM for villas), indicating a buyer preference for space and residential quality over high-density commercial stay. Your apartments should lean into this "high-end residential" identity.
+- **Supply Scarcity:** While 18 units is a healthy boutique size, the total off-plan apartment supply across Bali fell by 55% year-on-year in 2025. You are launching into a market with significantly less competing new-build apartment inventory than 12-24 months ago.
+- **Proven Liquidity:** Pererenan ranks in the top five locations for transaction volume. This provides a strong "exit strategy" narrative for your buyersâthere is demonstrated secondary market depth here that doesn't exist in emerging areas like Seseh or Kedungu.
+
+## Risk Flags and Obstacles
+
+- **Yield Compression:** Total rental revenue in Bali declined 15% in 2025 as the market moved toward volume over price. If your narrative is purely "ROI-led," ensure your opex modelling is conservative. We typically assume a 50% opex load (management, OTAs, maintenance) to arrive at a realistic net yield.
+- **Leasehold Thresholds:** The average remaining lease term in Pererenan is 27 years. If your units are being offered with a 25-year lease or shorter, you will face pushback from yield-focused investors who model on 30+ year horizons.
+- **Zoning and Compliance:** As Pererenan is now under high scrutiny, your sales narrative must lead with "Development Readiness." Having your PBG (Building Approval) and SLF (Certificate of Proper Function) clearly documented is no longer a 'bonus'âit is a mandatory requirement to close sophisticated buyers in this region.
+
+### Next Step for Analysis
+
+To sharpen this further, what is the bedroom configuration and the specific price per SQM you are targeting for these 18 units? I can run a direct benchmark against the current Pererenan apartment medians to see if your pricing is positioned for a fast sell-out or a premium hold.
+
+Bali's regulatory environment has tightened significantly, with heightened enforcement around zoning, permitting, and licensing directly shaping development activity across the island. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+
+
+
+---
+
+## Marketing Assistant
+
+### Q1. Write an Instagram caption about rental yields in Bali.
+
+**Tier: Enterprise (enterprise)**
+
+The rental story in Bali for 2025 is all about operational resilience and high-performing micro-markets. 
+
+While total available rental stock has surged 107% over the last 36 months, market-wide occupancy actually improved to 53% this year, proving that demand is more than keeping pace with supply. Smart investors are pivoting toward South Badung, where 1-bedroom assets are seeing a 7 percentage point jump in occupancy, or looking at established hubs like Canggu and Berawa which continue to anchor the island's rental revenue. Success in this recalibrated market now comes down to professional management and choosing the right bedroom configuration for the neighborhood.
+
+#BaliProperty #BaliRealEstate #RentalYields #BaliInvestment
+
+## Alternative Angle: The Compact Asset Play
+If you want to focus on a different hook, we could look at the 1 and 2-bedroom segment specifically. These smaller assets now lead the market at 53% of total sales volume because they offer a more accessible entry point while maintaining strong occupancy levels. 
+
+Would you like to see a version of this caption tailored specifically for 1-bedroom apartments?
+
+
+
+### Q2. Write a LinkedIn post about the growth of the compact property market in Bali.
+
+**Tier: Enterprise (enterprise)**
+
+The shift toward compact living is the most significant structural change in the Bali property market right now, and the 2025 data confirms this is more than just a passing trend.
+
+## The Rise of Compact Efficiency
+
+Bali's development landscape has undergone a decisive recalibration. We are seeing a strategic pivot away from sprawling estates toward high-efficiency, design-led compact assets. This movement is driven by a maturing investor base that prioritises yield potential and operational leanheadedness over sheer square meterage.
+
+The data tells a clear story of this "downsizing" success:
+
+- **Volume Leadership**: 1 and 2-bedroom assets now command over 53% of total sales volume across the island, a 51 percentage point increase over the last 36 months.
+- **Supply Rebalancing**: 2-bedroom villas saw an 8 percentage point increase in market share YoY, now representing 32% of all available listings.
+- **Footprint Contraction**: The average Bali property size has settled at 201 SQM, reflecting an 18% decline over a three-year horizon.
+- **Yield Resilience**: 1-bedroom apartments in high-demand hubs like South Badung are seeing occupancy rates as high as 57%, outperforming many larger multi-bedroom formats.
+
+## Why the "Micro" Shift Matters
+
+This isn't just about affordability; it is about performance. Smaller footprints allow for higher density and better land efficiency, as evidenced by the average Floor Space Ratio (FSR) rising to 83%. For the rental market, these assets are easier to manage, cheaper to maintain, and tap into the largest segment of inbound demand: couples and solo "workationers."
+
+While the market median price softened slightly to $280,000 for leasehold properties, this is a compositional shift rather than a loss in value. Investors are simply choosing "smarter" over "bigger."
+
+As Baliâs regulatory environment tightens around zoning and licensing, the projects that succeed will be those that master the art of the compact, high-yielding footprint.
+
+Here is a first pass â happy to adjust the angle, tone, or data hook if this isn't quite right.
+
+Would you like to see how the occupancy rates of 1-bedroom units compare specifically between North and South Badung?
+
+
+
+### Q3. Give me a market snapshot for a sales deck of Villas in Padonan.
+
+**Tier: Enterprise (enterprise)**
+
+Padonan is currently functioning as a strategic affordability-driven extension of the North Badung corridor, attracting investors looking for entry points just outside the Canggu core.
+
+## Padonan Villa Market Snapshot
+
+- Median property prices in Padonan currently sit at $250,000, reflecting an 11 percentage point cooling as the market recalibrates toward more accessible entry levels.
+
+- The 3-bedroom villa remains the dominant configuration in the area, though average build sizes have contracted by 11 percentage points to 195 SQM.
+
+- Pricing at the micro-level shows a more significant adjustment than the broader region, with average price per SQM declining 20 percentage points to $1,740.
+
+- Investment activity is increasingly focused on spillover demand from Canggu (North Badung), with Padonan offering a lower cost of entry for secondary rental stock.
+
+- Leasehold remains the primary transaction structure in this precinct, with average lease terms holding steady at approximately 26 years.
+
+Bali's regulatory environment has tightened significantly, with foreign ownership structures subject to specific legal requirements around land title and business licensing. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+Would you like to see how these Padonan figures compare against the neighbouring Berawa or Umalas markets?
+
+
+
+### Q4. Write marketing copy for a developer launch - the key message should be that buyers can expect strong guaranteed returns. The developer is launching 10 1,2, & 3 bedroom villas in Nyanyi
+
+**Tier: Enterprise (enterprise)**
+
+Nyanyi is emerging as a strategic high-value niche for those looking to get ahead of the next west coast growth cycle, particularly as development pushes north of Canggu.
+
+That framing sits outside what REID's data can support â we don't use urgency or scarcity language because the market data makes a stronger case on its own. While we cannot guarantee future returns, the data for Nyanyi points to a clear premium trajectory that we can use to anchor your copy.
+
+Here is a draft for a LinkedIn announcement and an Instagram caption using a data-led approach to commercial potential.
+
+## LinkedIn Launch Announcement
+
+**A New Benchmark for Emerging Bali: The Nyanyi Collection**
+
+While the market recalibrates in 2025, smart capital is moving toward the "Canggu spillover" zones where the entry price still allows for significant capital padding.
+
+Our latest project in Nyanyi (Tabanan) delivers a targeted response to current buyer demand: a boutique collection of ten 1, 2, and 3-bedroom villas designed for the modern high-yield rental market. 
+
+Why Nyanyi? The data shows a market in transition. While transaction depth in Tabanan is still building, Nyanyi itself is outperforming the regional median. Median prices here rose 7 percentage points over the last year to $299,000, bucking the broader regional trend.
+
+More importantly, the price per SQM in Nyanyi has climbed to $2,540 â a 17 percentage point increase that signals a move toward premium, design-led stock. This isn't just a land play; it is a play on the densification of Baliâs luxury coastal corridor.
+
+- 1, 2, & 3 Bedroom Configurations
+- Strategic location in an emerging premium hub
+- Data-backed positioning for the 2025/26 rental cycle
+
+Connect with our team to review the full project specifications and projected performance Modelling.
+
+---
+
+## Instagram Launch Caption
+
+The next chapter of Baliâs west coast starts in Nyanyi. ð´
+
+We are officially launching 10 boutique 1, 2, and 3-bedroom villas in one of the islandâs most watched emerging markets. While the broader region recalibrates, Nyanyi is holding a premium edge with median prices up 7 percentage points year-on-year.
+
+With average price per SQM in the area rising 17 percentage points to $2,540, this is the window to secure a footprint in a location transitioning from "hidden gem" to "premium hub." ð
+
+Direct message us for the full investor prospectus and floor plans.
+
+#BaliProperty #NyanyiRealEstate #BaliInvestment #VillaDevelopment #Bali2025
+
+---
+
+**Alternative Hooks**
+
+- **The Compact Yield Angle:** Focus exclusively on the 1 and 2-bedroom units, as these types now lead the market in sales volume at over 53%, highlighting the "income-focused" nature of the project.
+- **The Premium Transition Angle:** Focus on why the price per SQM in Nyanyi is rising so much faster than the regional average, positioning these 10 villas as the new "gold standard" for the area.
+
+Would you like to see a draft of a three-part EDM sequence focusing on these specific data hooks?
+
+
+
+### Q5. I'd like a blog post about the 2025 performance of the Bali market, highlighting key trends and where opportunities and risks might be for buyers.
+
+**Tier: Enterprise (enterprise)**
+
+The 2025 market cycle has been one of structural discipline and recalibration, which makes for a great narrative for serious buyers. 
+
+Here is a draft of an article designed to position you as an authority on the current state of the market.
+
+## The Great Recalibration: Navigating the Bali Property Market in 2025
+
+The Bali property market has entered a new phase of maturity. Following a period of aggressive, post-pandemic expansion between 2022 and 2024, 2025 has emerged as a year of structural consolidation. For the informed buyer, this shift from speculative heat to operational discipline represents a significant window of opportunity, provided they understand the new rules of the game.
+
+The headline data from REID underscores this transition. While the market saw a slight -2% soften in median prices, this is not a sign of value decline, but rather a sophisticated pivot in what is being built and sold.
+
+### The Rise of the Compact Asset
+
+One of the most defining trends of the year is the move toward high-efficiency, compact assets. One and two-bedroom properties now account for 53% of all sales volume. Developers have responded to global economic pressures and a desire for higher rental yields by prioritising density and land efficiency.
+
+- The average Bali property size has contracted to 201 SQM, an 18% decline over the last 36 months.
+- Floor Space Ratios (FSR) have risen to an average of 83%, up 3 percentage points year-on-year.
+
+For buyers, the opportunity lies in these "yield-engines" â smaller footprints that command professional management and maintain high occupancy levels.
+
+### A Two-Speed Rental Market
+
+The rental sector is currently navigating a period of intense competition. With over 44,490 rental properties now active on the island â a staggering 107% increase over three years â the market has become bifurcated. 
+
+While total rental revenue dipped to $1.2B in 2025 (a 15% year-on-year decline), occupancy actually grew by 2 percentage points to reach a market average of 53%. This suggests that while daily rates are compressing, demand for Bali remains robust. The risk now lies in "unmanaged" stock. Professionally managed properties are seeing a significant premium, even as the market-wide average daily rate (ADR) moderated to $178.
+
+### Regional Hotspots and Emerging Frontiers
+
+North Badung remains the island's heavyweight, holding 34.9% of total supply, but the narrative is shifting South.
+
+- South Badung (including Uluwatu and Bingin) grew its market share to 22%.
+- Uluwatu is seeing a 25% increase in price per SQM, reflecting a move toward premium, design-led compact villas.
+- Pererenan (Mengwi) has officially decoupled from Canggu, with median prices rising 17% as it matures into a high-end residential enclave.
+
+### Navigating the Regulatory Shift
+
+Perhaps the most critical consideration for 2025 is the tightening regulatory environment. The Provincial Government has significantly heightened enforcement around zoning (RDTR), building approvals (PBG), and tourism licensing. Projects that lack formal alignment with land-use requirements face genuine operational risks. 
+
+Success in the 2025 market is no longer about simply "buying a piece of paradise." It is about data-led selection, operational excellence, and strict legal compliance.
+
+Bali's regulatory environment has tightened significantly, with heightened enforcement around zoning, permitting, and licensing directly shaping development activity across the island. REID recommends seeking professional legal and property advice for all property-related transactions.
+
+***
+
+Happy to tailor this if you want to lean harder into the "luxury" segment or perhaps focus more on the "first-time investor" angle? Or, would you like to see a chart showing the supply shift between North and South Badung to accompany this?
+
+
+
+
+---
+
+## Portfolio Analyst
+
+### Q1. I own a 1-bedroom villa in Sanur, 65 sqm, purchased at $180k, leasehold with 30 years remaining. Current occupancy 61%, ADR $110. How does it sit against the market?
+
+**Tier: Enterprise (enterprise)**
+
+Sanur (Denpasar) is an interesting market right now, and your villa is performing almost exactly in line with the neighborhood median, though there is a clear opportunity to refine your returns.
+
+### **Rental Performance**
+
+Your ADR of $110 is currently 10% higher than the Sanur average of $100 for a 1-bedroom villa. This suggests your product or management is outperforming the local baseline on pricing. However, your 61% occupancy sits just below the neighborhood average of 62%.
+
+- Your Annual Revenue: $24,501
+- Market Average Revenue (at $100 ADR / 62% Occ): $22,630
+
+You are generating roughly $1,870 more in annual top-line revenue than the average Sanur 1-bedroom by trading a single percentage point of occupancy for a $10 ADR premium. This is a solid trade-off, but it indicates you are at the ceiling for this specific occupancy level in the current market.
+
+### **Valuation and Yield**
+
+The median purchase price for a 1-bedroom leasehold villa in Sanur is $173,634. Your $180,000 entry point is slightly above the median, but at 65 SQM, you are likely sitting on a larger build than the typical entry-level Sanur unit.
+
+- Gross Yield: 13.6%
+- Net Yield (REID 50% Opex assumption): 6.8%
+- Payback Period: 14.7 years
+
+With 30 years remaining on your lease, you have a 15.3-year profit window after you have recovered your initial capital. This is a healthy runway for a Sanur asset, where lease terms are often shorter than in emerging markets like Tabanan.
+
+### **Market Benchmarking**
+
+- Price per SQM: Your $2,769 per SQM sits slightly above the local median, which aligns with your higher ADR.
+- Lease Cost: The median annual lease cost in Sanur is $6,300. Your implied annual cost (purchase price divided by lease term) is $6,000, meaning you secured your lease at a better-than-average rate for the area.
+
+Your main lever for growth is maintaining that ADR while pushing occupancy toward the 65% mark, which would shorten your payback period by nearly a full year.
+
+Are you looking to hold this long-term for cash flow, or are you gauging the right time for an exit before the lease runway drops below 25 years?
+
+
+
+### Q2. How can I benchmark my portfolio of property sales from Q1?.
+
+**Tier: Enterprise (enterprise)**
+
+The Q1 2025 market data shows significant pricing variance across Bali's key corridors, particularly between established villa markets like Canggu and emerging high-density segments in South Badung.
+
+To benchmark your portfolio effectively, I need you to share the specific details for each property: location, property type, bedroom count, build size, purchase price, current occupancy, and ADR. If these are leasehold assets, please also include the remaining lease term so I can calculate the payback period and profit window for you.
+
+Based on the broader market performance from January to March 2025, here are the core benchmarks across the most active segments to compare against your baseline:
+
+### **North Badung and Mengwi Benchmarks**
+The Canggu and Pererenan corridor remains the high-volume benchmark for the island, though pricing signals vary significantly by bedroom count.
+
+- **Canggu (North Badung) 3-Bedroom Villas**
+  - Median Price: $360,441
+  - Avg Price per SQM: $1,880
+- **Berawa (North Badung) 3-Bedroom Villas**
+  - Median Price: $345,000
+  - Avg Price per SQM: $2,036 (reflecting a 8 percentage point premium over general Canggu pricing)
+- **Pererenan (Mengwi) 2-Bedroom Villas**
+  - Median Price: $236,065
+  - Avg Price per SQM: $1,893
+
+### **South Badung Benchmarks**
+Uluwatu is currently commanding the highest capital values for small-format luxury stock and high-density apartments.
+
+- **Uluwatu (South Badung) 2-Bedroom Villas**
+  - Median Price: $259,714
+  - Avg Price per SQM: $2,058
+- **Uluwatu (South Badung) 1-Bedroom Apartments**
+  - Median Price: $157,553
+  - Avg Price per SQM: $3,257 (the highest price per SQM across all primary categories in Q1)
+
+### **Central Badung and Gianyar Benchmarks**
+While sales volumes are lower, these areas show distinct pricing characteristics for existing stock.
+
+- **Seminyak (Central Badung) 3-Bedroom Villas**
+  - Median Price: $338,048
+  - Avg Price per SQM: $1,758
+- **Ubud (Gianyar) 2-Bedroom Villas**
+  - Median Price: $265,000
+  - Avg Price per SQM: $2,135
+
+The data suggests a clear trend where smaller units and apartments in South Badung are outperforming larger villas on a price-per-SQM basis. If your portfolio is weighted toward older 3-bedroom stock in Central Badung, you may find your exit pricing is being squeezed by the more efficient modern builds in Mengwi.
+
+Which location or bedroom category represents the largest portion of your holdings?
+
+
+
+### Q3. Villa in Kerobokan, 3-bed, 180 sqm, $350k purchase, 45% occupancy, $145 ADR, 22 years remaining. What's the read? I have been operating for the past 3 years at these averages, what is my optimal strategy to divest or hold?
+
+**Tier: Enterprise (enterprise)**
+
+Kerobokan (North Badung) presents a unique operational profile where urban proximity often offsets the lack of immediate beach access, but your current performance metrics suggest this asset is under-indexing against its peer group.
+
+### Portfolio Analysis: 3-Bedroom Villa, Kerobokan
+
+- **Price per SQM:** $1,944 (Market Average: $1,740)
+- **Occupancy:** 45% (Market Average: 59%)
+- **ADR:** $145 (Market Average: $195)
+- **Gross Yield:** 6.7% (Market Average: 11.9%)
+- **Net Yield (50% Opex):** 3.3%
+- **Payback Period:** 14.8 Years
+- **Profit Window:** 7.2 Years
+
+### Performance Diagnosis
+
+The data indicates a significant double-drag on performance. Your occupancy is 14 percentage points below the Kerobokan 3-bedroom median, and your ADR is lagging by $50 per night. In North Badung, an occupancy of 45% is typically a signal of either a "lifestyle" pricing strategy (setting rates too high) or, more likely here given the low ADR, a management and visibility issue. 
+
+Your price per SQM is roughly 11% higher than the regional average, which is acceptable for a well-maintained asset, but your yields are not currently supporting that premium valuation.
+
+### Strategic Review: Divest vs. Hold
+
+**The Hold Case: Turnaround Potential**
+The "Profit Window" of 7.2 years is thin for a leasehold asset with 22 years remaining. However, if you can close the gap to the market median ($195 ADR at 59% occupancy), your annual revenue would jump from ~$23,800 to ~$42,000. This would slash your payback period and triple your net profit. The question is whether the "built" quality and specific micro-location in Kerobokan support a 34% hike in ADR.
+
+**The Divest Case: Time Erosion**
+Leasehold liquidity in Bali begins to contract sharply once the remaining term drops below 20 years. At 22 years, you are in the "sweet spot" for a secondary market buyer who can still secure bank financing or see a clear 20-year horizon. If you cannot improve the yield within the next 12 months, the naturally eroding lease term will begin to devalue the asset faster than your current 3.3% net yield is returning capital.
+
+**Analyst's View**
+The current numbers suggest you are "drifting" in a high-demand region. An optimal strategy would be a 6-month aggressive "performance sprint" to prove a higher yieldâimproving the ADR and occupancy through professional managementâto then exit at a premium "yield-based" valuation rather than a "brick-and-mortar" value.
+
+Would you like to see how these yield projections change if we model a shift to the Kerobokan market median ADR?
+
+
+
+### Q4. My villa in Umalas is generating 95% occupancy year-round at $450 ADR for a 1-bedroom.
+
+**Tier: Enterprise (enterprise)**
+
+That 95% occupancy figure sits well outside the typical range for this category â worth confirming before we build a picture around it.
+
+Based on REID data for Umalas (North Badung), a 1-bedroom villa typically averages 61% occupancy with an ADR of $87. Your current performance profile reflects a significantly differentiated asset or a highly specialised management strategy.
+
+To provide a benchmark and calculate your payback period against the Umalas market, I need a few more details:
+
+- What was the purchase price of the villa?
+- What is the build size in SQM?
+- Is the property Leasehold or Freehold?
+- If Leasehold, how many years are remaining on the term?
+
+Once you provide these, I can run the yield analysis and show you exactly where this asset sits relative to the $350k median for the area. Would you like to start with the purchase price?
+
+
+
+### Q5. Based on my portfolio performance, should I sell Villa A and reinvest in Berawa?
+
+**Tier: Enterprise (enterprise)**
+
+Evaluating a potential exit in favour of Berawa (North Badung) requires a direct comparison of your current asset's performance against the local market benchmarks.
+
+To provide a sharp benchmark, I need a few specific details for Villa A: its location, bedroom count, build size, current occupancy, and average daily rate (ADR). I also need the purchase price and the remaining lease term to calculate your current payback period and profit window.
+
+In the meantime, based on live REID data for the last three months, here is how the Berawa market is performing.
+
+### **Berawa Market Benchmarks (Dec 2024 â Feb 2025)**
+
+- **Average Daily Rate (ADR):** $254
+- **Occupancy:** 56.3%
+- **Market Context:** Berawa remains a high-volume rental market, though the current occupancy level reflects the broader seasonal trend across North Badung.
+
+If you share the specifics for Villa A, I can tell you exactly where it sits against these Berawa medians and whether the move represents a genuine yield play or just a change of scenery.
+
+What is the current ADR and occupancy for Villa A?
+
+

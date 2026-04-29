@@ -193,9 +193,9 @@ export default function AdminAnalytics() {
     [events],
   );
 
-  // Page views over time (last 30 days)
+  // Page views over time (selected range)
   const pageViewsByDay = useMemo(() => {
-    const days = last30Days();
+    const days = daysBetween(rangeFrom, rangeTo);
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     pageViews.forEach((e) => {
@@ -203,7 +203,7 @@ export default function AdminAnalytics() {
       if (counts[day] !== undefined) counts[day]++;
     });
     return days.map((d) => ({ date: formatDate(new Date(d)), views: counts[d] }));
-  }, [pageViews]);
+  }, [pageViews, rangeFrom, rangeTo]);
 
   // Top pages
   const topPages = useMemo(() => {

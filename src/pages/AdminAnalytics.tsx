@@ -704,7 +704,7 @@ export default function AdminAnalytics() {
           {/* Chat activity over time */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Chat activity (last 30 days)</CardTitle>
+              <CardTitle className="text-sm font-medium">Chat activity</CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">

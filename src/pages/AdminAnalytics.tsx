@@ -454,18 +454,144 @@ export default function AdminAnalytics() {
     );
   }
 
+  // ── CSV exports ──
+  const exportAll = () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const sections: { name: string; rows: (string | number)[][] }[] = [];
+
+    sections.push({
+      name: "summary",
+      rows: [
+        ["Metric", "Value"],
+        ["Date range", rangeLabel],
+        ["Page views", pageViews.length],
+        ["Unique users", uniqueUsers],
+        ["Unique sessions", uniqueSessions],
+        ["Conversations", chatLogs.length],
+        ["Total messages", totalMessages],
+        ["Appraisal submissions", appraisalCount],
+      ],
+    });
+
+    sections.push({
+      name: "page_views_by_day",
+      rows: [["Date", "Views"], ...pageViewsByDay.map((r) => [r.date, r.views])],
+    });
+    sections.push({
+      name: "chats_by_day",
+      rows: [["Date", "Chats"], ...chatsByDay.map((r) => [r.date, r.chats])],
+    });
+    sections.push({
+      name: "top_pages",
+      rows: [["Page", "Views"], ...topPages.map((r) => [r.page, r.count])],
+    });
+    sections.push({
+      name: "feature_usage",
+      rows: [["Feature", "Count"], ...featureCounts.map((r) => [r.name, r.count])],
+    });
+    sections.push({
+      name: "conversations_by_mode",
+      rows: [["Mode", "Conversations"], ...chatByMode.map((r) => [r.name, r.value])],
+    });
+    sections.push({
+      name: "conversion_funnel",
+      rows: [
+        ["Step", "Label", "Value", "Rate from previous (%)"],
+        ...funnelSteps.map((s, i) => [
+          i + 1, s.label, s.value, s.rateFromPrevious === null ? "" : s.rateFromPrevious.toFixed(1),
+        ]),
+      ],
+    });
+    sections.push({
+      name: "mode_performance",
+      rows: [
+        ["Mode", "Conversations", "Prompts", "Avg messages", "Completion (%)", "Unique users"],
+        ...modePerformance.map((r) => [
+          r.mode, r.conversations, r.prompts,
+          r.avgMessagesPerConversation.toFixed(1),
+          r.completionRate.toFixed(1), r.uniqueUsers,
+        ]),
+      ],
+    });
+    sections.push({
+      name: "retention_snapshot",
+      rows: [
+        ["Metric", "Value"],
+        ["Active users 7d", retentionMetrics.activeUsers7d],
+        ["Active users 30d", retentionMetrics.activeUsers30d],
+        ["New users 30d", retentionMetrics.newUsers30d],
+        ["Repeat user rate (%)", retentionMetrics.repeatRate.toFixed(1)],
+        ["Avg sessions per user", retentionMetrics.avgSessionsPerUser.toFixed(2)],
+      ],
+    });
+    sections.push({
+      name: "weekly_retention_cohorts",
+      rows: [
+        ["Cohort week", "Users", "Returned", "Retention (%)"],
+        ...retentionMetrics.cohortRows.map((r) => [
+          r.cohort, r.users, r.retained, r.retentionRate.toFixed(1),
+        ]),
+      ],
+    });
+
+    const combined: (string | number)[][] = [];
+    sections.forEach((sec, i) => {
+      if (i > 0) combined.push([]);
+      combined.push([`# ${sec.name}`]);
+      sec.rows.forEach((r) => combined.push(r));
+    });
+    downloadCsv(`reid-analytics-${stamp}.csv`, combined);
+  };
+
   // ── Dashboard ──
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Admin nav */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <BarChart3 className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
+            <span className="text-xs text-muted-foreground hidden md:inline">{rangeLabel}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={rangePreset} onValueChange={(v) => setRangePreset(v as RangePreset)}>
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+                <SelectItem value="180">Last 180 days</SelectItem>
+                <SelectItem value="365">Last 12 months</SelectItem>
+                <SelectItem value="custom">Custom range</SelectItem>
+              </SelectContent>
+            </Select>
+            {rangePreset === "custom" && (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("h-9", !customFrom && "text-muted-foreground")}>
+                      {customFrom ? customFrom.toLocaleDateString("en-GB") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("h-9", !customTo && "text-muted-foreground")}>
+                      {customTo ? customTo.toLocaleDateString("en-GB") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customTo} onSelect={setCustomTo} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </>
+            )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/alerts")}>
               <Shield className="h-4 w-4 mr-1.5" /> Alerts
             </Button>
@@ -483,9 +609,15 @@ export default function AdminAnalytics() {
                 </span>
               )}
             </Button>
+            <Button variant="outline" size="sm" onClick={exportAll}>
+              <Download className="h-4 w-4 mr-1.5" /> Export CSV
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Loading" : "Refresh"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut} title="Sign out of admin">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>

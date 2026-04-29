@@ -92,29 +92,30 @@ function formatWeekLabel(date: Date) {
   return startOfWeek(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-function last30Days() {
+function daysBetween(from: Date, to: Date): string[] {
   const days: string[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+  const start = new Date(from); start.setHours(0, 0, 0, 0);
+  const end = new Date(to); end.setHours(0, 0, 0, 0);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     days.push(d.toISOString().slice(0, 10));
   }
   return days;
 }
 
 export default function AdminAnalytics() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const { authenticated, signIn, signOut } = useAdminAuth();
   const [password, setPassword] = useState("");
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [chatLogs, setChatLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [newAppraisalCount, setNewAppraisalCount] = useState(0);
+  const [rangePreset, setRangePreset] = useState<RangePreset>("30");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    }
+    if (!signIn(password)) setPassword("");
   };
 
   const fetchData = async () => {

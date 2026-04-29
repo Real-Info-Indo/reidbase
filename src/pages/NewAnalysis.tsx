@@ -378,6 +378,22 @@ export default function NewAnalysis() {
     window.history.replaceState({}, "", url.toString());
   }, []);
 
+  const handleModeSelect = (modeId: string, isLocked: boolean) => {
+    if (isLocked) {
+      window.open("https://www.realinfo.id/pricing", "_blank");
+      return;
+    }
+
+    if (searchMode !== modeId) {
+      trackFeature("mode_selected", {
+        search_mode: modeId,
+        previous_mode: searchMode,
+      });
+    }
+
+    setSearchMode(modeId);
+  };
+
   useEffect(() => {
     if (paramConvoId) {
       const convo = getConversation(paramConvoId);
@@ -493,7 +509,22 @@ export default function NewAnalysis() {
         return;
       }
     }
-    trackFeature("chat_message_sent", { search_mode: searchMode });
+    const existingUserMessageCount = messages.filter((message) => message.role === "user").length;
+    const isFirstPrompt = existingUserMessageCount === 0;
+
+    if (isFirstPrompt) {
+      trackFeature("conversation_started", {
+        search_mode: searchMode,
+        entry_point: paramPrompt ? "widget" : "app",
+      });
+      trackFeature("funnel_first_prompt", { search_mode: searchMode });
+    }
+
+    trackFeature("chat_message_sent", {
+      search_mode: searchMode,
+      message_index: existingUserMessageCount + (skipAddUserMsg ? 0 : 1),
+      has_attachments: attachedFiles.length > 0,
+    });
 
     // Append tenure context if provided
     const enrichedInput = tenure && tenure !== "both"
@@ -548,10 +579,17 @@ export default function NewAnalysis() {
         searchMode,
         conversationId: conversationId ?? undefined,
         onDelta: (chunk) => upsertAssistant(chunk),
-        onDone: () => setIsLoading(false)
+        onDone: () => {
+          setIsLoading(false);
+          trackFeature("chat_response_completed", {
+            search_mode: searchMode,
+            response_chars: assistantSoFar.length,
+          });
+        }
       });
     } catch (e) {
       console.error(e);
+      trackFeature("chat_response_failed", { search_mode: searchMode });
       setIsLoading(false);
       if (!assistantSoFar) {
         setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again.", mode: searchMode }]);
@@ -633,13 +671,7 @@ export default function NewAnalysis() {
           return (
             <DropdownMenuItem
               key={mode.id}
-              onClick={() => {
-                if (isLocked) {
-                  window.open("https://www.realinfo.id/pricing", "_blank");
-                } else {
-                  setSearchMode(mode.id);
-                }
-              }}
+              onClick={() => handleModeSelect(mode.id, isLocked)}
               className={`cursor-pointer relative ${searchMode === mode.id ? "bg-accent" : ""} ${isLocked ? "opacity-60" : ""}`}>
               <mode.icon className="h-4 w-4 mr-2" />
               {mode.label}

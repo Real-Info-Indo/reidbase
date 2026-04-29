@@ -52,6 +52,22 @@ function formatDate(d: Date) {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
+function formatPercent(value: number) {
+  return `${value.toFixed(1)}%`;
+}
+
+function startOfWeek(date: Date) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function formatWeekLabel(date: Date) {
+  return startOfWeek(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
 function last30Days() {
   const days: string[] = [];
   for (let i = 29; i >= 0; i--) {
@@ -152,6 +168,14 @@ export default function AdminAnalytics() {
       .map(([name, count]) => ({ name: name.replace(/_/g, " "), count }));
   }, [featureEvents]);
 
+  const featureCountByName = useMemo(() => {
+    const map: Record<string, number> = {};
+    featureEvents.forEach((event) => {
+      map[event.event_name] = (map[event.event_name] || 0) + 1;
+    });
+    return map;
+  }, [featureEvents]);
+
   // Unique users & sessions
   const uniqueUsers = useMemo(() => {
     const set = new Set<string>();
@@ -200,6 +224,151 @@ export default function AdminAnalytics() {
     () => chatLogs.reduce((sum, l) => sum + l.message_count, 0),
     [chatLogs],
   );
+
+  const funnelSteps = useMemo(() => {
+    const baseSteps = [
+      { label: "Landing views", value: pageViews.filter((e) => (e.page_path || "/") === "/").length },
+      { label: "Login starts", value: featureCountByName.login_started ?? 0 },
+      { label: "Logins", value: featureCountByName.login_success ?? 0 },
+      { label: "First prompts", value: featureCountByName.funnel_first_prompt ?? 0 },
+      { label: "Report views", value: featureCountByName.funnel_report_view ?? 0 },
+      { label: "Appraisal requests", value: featureCountByName.appraisal_submitted ?? 0 },
+    ];
+
+    return baseSteps.map((step, index) => ({
+      ...step,
+      rateFromPrevious:
+        index === 0 || baseSteps[index - 1].value === 0
+          ? null
+          : (step.value / baseSteps[index - 1].value) * 100,
+    }));
+  }, [pageViews, featureCountByName]);
+
+  const modePerformance = useMemo(() => {
+    const stats = new Map<string, {
+      mode: string;
+      conversations: number;
+      totalMessages: number;
+      prompts: number;
+      completedResponses: number;
+      users: Set<string>;
+    }>();
+
+    const ensureMode = (modeKey: string) => {
+      if (!stats.has(modeKey)) {
+        stats.set(modeKey, {
+          mode: modeKey,
+          conversations: 0,
+          totalMessages: 0,
+          prompts: 0,
+          completedResponses: 0,
+          users: new Set<string>(),
+        });
+      }
+      return stats.get(modeKey)!;
+    };
+
+    chatLogs.forEach((log) => {
+      const modeKey = log.search_mode || "data-analyst";
+      const entry = ensureMode(modeKey);
+      entry.conversations += 1;
+      entry.totalMessages += log.message_count;
+      if (log.wix_user_id) entry.users.add(log.wix_user_id);
+    });
+
+    featureEvents.forEach((event) => {
+      const modeKey = typeof event.metadata?.search_mode === "string"
+        ? event.metadata.search_mode
+        : "data-analyst";
+      const entry = ensureMode(modeKey);
+      if (event.event_name === "chat_message_sent") entry.prompts += 1;
+      if (event.event_name === "chat_response_completed") entry.completedResponses += 1;
+      if (event.wix_user_id) entry.users.add(event.wix_user_id);
+    });
+
+    return Array.from(stats.values())
+      .map((entry) => ({
+        ...entry,
+        avgMessagesPerConversation: entry.conversations ? entry.totalMessages / entry.conversations : 0,
+        completionRate: entry.prompts ? (entry.completedResponses / entry.prompts) * 100 : 0,
+        uniqueUsers: entry.users.size,
+      }))
+      .sort((a, b) => b.conversations - a.conversations);
+  }, [chatLogs, featureEvents]);
+
+  const retentionMetrics = useMemo(() => {
+    const userMap = new Map<string, {
+      firstSeen: number;
+      lastSeen: number;
+      sessions: Map<string, number>;
+    }>();
+
+    events.forEach((event) => {
+      if (!event.wix_user_id) return;
+      const timestamp = new Date(event.created_at).getTime();
+      if (!userMap.has(event.wix_user_id)) {
+        userMap.set(event.wix_user_id, {
+          firstSeen: timestamp,
+          lastSeen: timestamp,
+          sessions: new Map<string, number>(),
+        });
+      }
+
+      const user = userMap.get(event.wix_user_id)!;
+      user.firstSeen = Math.min(user.firstSeen, timestamp);
+      user.lastSeen = Math.max(user.lastSeen, timestamp);
+      if (event.session_id) {
+        const existing = user.sessions.get(event.session_id);
+        user.sessions.set(event.session_id, existing ? Math.min(existing, timestamp) : timestamp);
+      }
+    });
+
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    let returningUsers = 0;
+    let activeUsers7d = 0;
+    let activeUsers30d = 0;
+    let newUsers30d = 0;
+    const cohorts = new Map<string, { cohort: string; users: number; retained: number }>();
+
+    userMap.forEach((user) => {
+      if (user.lastSeen >= sevenDaysAgo) activeUsers7d += 1;
+      if (user.lastSeen >= thirtyDaysAgo) activeUsers30d += 1;
+      if (user.firstSeen >= thirtyDaysAgo) newUsers30d += 1;
+
+      const sessionStarts = Array.from(user.sessions.values()).sort((a, b) => a - b);
+      const hasReturnVisit = sessionStarts.some((time, index) => index > 0 && time - sessionStarts[0] >= 24 * 60 * 60 * 1000);
+      if (hasReturnVisit) returningUsers += 1;
+
+      const cohort = formatWeekLabel(new Date(user.firstSeen));
+      if (!cohorts.has(cohort)) cohorts.set(cohort, { cohort, users: 0, retained: 0 });
+      const entry = cohorts.get(cohort)!;
+      entry.users += 1;
+      if (hasReturnVisit) entry.retained += 1;
+    });
+
+    const totalUsers = userMap.size;
+    const cohortRows = Array.from(cohorts.values())
+      .sort((a, b) => new Date(b.cohort).getTime() - new Date(a.cohort).getTime())
+      .slice(0, 6)
+      .map((entry) => ({
+        ...entry,
+        retentionRate: entry.users ? (entry.retained / entry.users) * 100 : 0,
+      }));
+
+    return {
+      activeUsers7d,
+      activeUsers30d,
+      newUsers30d,
+      returningUsers,
+      avgSessionsPerUser: totalUsers
+        ? Array.from(userMap.values()).reduce((sum, user) => sum + user.sessions.size, 0) / totalUsers
+        : 0,
+      repeatRate: totalUsers ? (returningUsers / totalUsers) * 100 : 0,
+      cohortRows,
+    };
+  }, [events]);
 
   // ── Auth gate ──
 
@@ -469,6 +638,121 @@ export default function AdminAnalytics() {
                   />
                 </PieChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Conversion funnel</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {funnelSteps.map((step, index) => (
+                <div key={step.label} className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-b-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{index + 1}. {step.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {step.rateFromPrevious === null ? "Baseline" : `${formatPercent(step.rateFromPrevious)} from previous step`}
+                    </p>
+                  </div>
+                  <p className="text-lg font-semibold text-foreground">{step.value.toLocaleString()}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Mode performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Mode</th>
+                      <th className="py-2 pr-4 font-medium">Conversations</th>
+                      <th className="py-2 pr-4 font-medium">Prompts</th>
+                      <th className="py-2 pr-4 font-medium">Avg messages</th>
+                      <th className="py-2 pr-4 font-medium">Completion</th>
+                      <th className="py-2 font-medium">Users</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modePerformance.map((row) => (
+                      <tr key={row.mode} className="border-b border-border last:border-b-0">
+                        <td className="py-3 pr-4 text-foreground">{row.mode.replace(/-/g, " ")}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.conversations}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.prompts}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.avgMessagesPerConversation.toFixed(1)}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatPercent(row.completionRate)}</td>
+                        <td className="py-3 text-foreground">{row.uniqueUsers}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Retention snapshot</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Active users, 7 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers7d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Active users, 30 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers30d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">New users, 30 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.newUsers30d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Repeat user rate</p>
+                <p className="text-xl font-semibold text-foreground">{formatPercent(retentionMetrics.repeatRate)}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Average sessions per user</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.avgSessionsPerUser.toFixed(1)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Weekly retention cohorts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Cohort week</th>
+                      <th className="py-2 pr-4 font-medium">Users</th>
+                      <th className="py-2 pr-4 font-medium">Returned</th>
+                      <th className="py-2 font-medium">Retention</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {retentionMetrics.cohortRows.map((row) => (
+                      <tr key={row.cohort} className="border-b border-border last:border-b-0">
+                        <td className="py-3 pr-4 text-foreground">{row.cohort}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.users}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.retained}</td>
+                        <td className="py-3 text-foreground">{formatPercent(row.retentionRate)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -19,6 +19,11 @@ export default function MarketReports() {
   const [search, setSearch] = useState("");
   const filtered = reports.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()));
 
+  const handleDownload = (report: Report) => {
+    trackFeature("report_download", { report: report.name, type: "market" });
+    trackFeature("funnel_report_view", { report: report.name, report_type: "market" });
+  };
+
   return (
     <div className="p-8">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -53,7 +58,7 @@ export default function MarketReports() {
               <a
                 href={report.file}
                 download
-                onClick={() => trackFeature("report_download", { report: report.name, type: "market" })}
+                onClick={() => handleDownload(report)}
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
                 title={`Download ${report.name}`}
               >

@@ -19,6 +19,14 @@ function getWixUserId(): string | null {
   return null;
 }
 
+function getUserTier(): string | null {
+  try {
+    return localStorage.getItem("reid-user-tier");
+  } catch {
+    return null;
+  }
+}
+
 interface TrackOptions {
   eventType: "page_view" | "feature";
   eventName: string;
@@ -32,7 +40,10 @@ export async function track({ eventType, eventName, pagePath, metadata }: TrackO
       event_type: eventType,
       event_name: eventName,
       page_path: pagePath ?? window.location.pathname,
-      metadata: metadata ?? {},
+      metadata: {
+        user_tier: getUserTier(),
+        ...(metadata ?? {}),
+      },
       wix_user_id: getWixUserId(),
       session_id: getSessionId(),
     } as any);
@@ -42,7 +53,7 @@ export async function track({ eventType, eventName, pagePath, metadata }: TrackO
 }
 
 export function trackPageView(pagePath?: string) {
-  track({
+  return track({
     eventType: "page_view",
     eventName: "page_view",
     pagePath: pagePath ?? window.location.pathname,
@@ -50,7 +61,7 @@ export function trackPageView(pagePath?: string) {
 }
 
 export function trackFeature(eventName: string, metadata?: Record<string, unknown>) {
-  track({
+  return track({
     eventType: "feature",
     eventName,
     metadata,

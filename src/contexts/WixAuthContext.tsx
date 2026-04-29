@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { wixClient } from "@/lib/wixClient";
 import { syncUserProfile } from "@/lib/syncUserProfile";
 import { hydrateFromSupabase } from "@/lib/hydrateFromSupabase";
+import { trackFeature } from "@/lib/analytics";
 
 interface WixMember {
   id: string;
@@ -72,6 +73,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           email: memberData.email,
           displayName: memberData.name,
         }));
+        trackFeature("login_success", { wix_user_id: memberData.id });
         console.log("Wix member persisted:", memberData.id, memberData.name, memberData.email);
         // Hydrate conversations and folders from Supabase if localStorage is empty
         try {
@@ -109,6 +111,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async () => {
     // Preserve the current URL so we can restore it after OAuth callback
     localStorage.setItem("wix-post-login-redirect", window.location.href);
+    trackFeature("login_started", { source_path: window.location.pathname });
     const oauthData = wixClient.auth.generateOAuthData(
       `${window.location.origin}/callback`,
       window.location.href

@@ -8,16 +8,17 @@ html {
   html { font-size: 16px; }
 }
 
-/* Prevent horizontal scrollbar across all browsers (Firefox/Safari can show one
-   on routes outside AppLayout due to sub-pixel rounding or scrollbar gutters). */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevent horizontal scrollbar across all browsers (Firefox/Safari can show one
+   on routes outside AppLayout due to sub-pixel rounding or scrollbar gutters).
+   Placed AFTER @tailwind directives so it isn't overridden by preflight. */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 
 @layer base {
   :root {

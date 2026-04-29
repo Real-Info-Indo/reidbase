@@ -23,6 +23,11 @@ export default function LocationReports() {
   const hasAccess = canAccess("/location-reports");
   const filtered = reports.filter((r) => r.location.toLowerCase().includes(search.toLowerCase()));
 
+  const handleDownload = (location: string) => {
+    trackFeature("report_download", { report: location, type: "location" });
+    trackFeature("funnel_report_view", { report: location, report_type: "location" });
+  };
+
   return (
     <div className="relative p-8">
       {!hasAccess && <UpgradeOverlay />}
@@ -65,7 +70,7 @@ export default function LocationReports() {
                 <a
                   href={report.file}
                   download
-                  onClick={() => trackFeature("report_download", { report: report.location, type: "location" })}
+                  onClick={() => handleDownload(report.location)}
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0"
                   title={`Download ${report.location} report`}
                 >

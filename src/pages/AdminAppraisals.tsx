@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface AppraisalRequest {
   id: string;

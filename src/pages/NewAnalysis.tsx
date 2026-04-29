@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, ArrowDown, TrendingUp, Building2, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock, Copy, ThumbsUp, ThumbsDown, RefreshCw, Share2, Download, Mail, ExternalLink } from "lucide-react";
 import jsPDF from "jspdf";
@@ -326,7 +326,24 @@ export default function NewAnalysis() {
   const [feedbackDialog, setFeedbackDialog] = useState<{ open: boolean; rating: "like" | "dislike" | null; messageIndex: number | null }>({ open: false, rating: null, messageIndex: null });
   const [pendingTenureQuery, setPendingTenureQuery] = useState<string | null>(null);
   const [selectedTenure, setSelectedTenure] = useState<string | null>(null);
-  const [clarifiedLocations, setClarifiedLocations] = useState<Set<string>>(new Set());
+  // Derived from message history so tenure clarification persists across reloads
+  // and is scoped to the current conversation. A location is "clarified" once a
+  // user message in this conversation contains a [Tenure filter: ...] marker
+  // (added by sendWithTenure) or the user explicitly typed leasehold/freehold.
+  const clarifiedLocations = useMemo<Set<string>>(() => {
+    const set = new Set<string>();
+    for (const m of messages) {
+      if (m.role !== "user") continue;
+      const content = m.content || "";
+      const lower = content.toLowerCase();
+      const hasTenureMarker =
+        lower.includes("[tenure filter:") ||
+        TENURE_ALREADY_SPECIFIED.some((t) => lower.includes(t));
+      if (!hasTenureMarker) continue;
+      for (const loc of extractLocations(content)) set.add(loc);
+    }
+    return set;
+  }, [messages]);
   const [dailyPromptCount, setDailyPromptCount] = useState(() => getDailyPromptData().count);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -559,13 +576,8 @@ export default function NewAnalysis() {
   const handleTenureSelect = (tenure: string) => {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
-    // Record the locations from this query as clarified
-    const locs = extractLocations(q);
-    setClarifiedLocations((prev) => {
-      const next = new Set(prev);
-      locs.forEach((l) => next.add(l));
-      return next;
-    });
+    // Locations are derived from messages; the [Tenure filter: ...] marker
+    // appended by sendWithTenure marks them clarified for the rest of this conversation.
     setPendingTenureQuery(null);
     setSelectedTenure(null);
     // The user message is already in messages from send(); tell sendWithTenure to skip adding it again

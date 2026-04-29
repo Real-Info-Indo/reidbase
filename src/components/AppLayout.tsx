@@ -44,8 +44,8 @@ export function AppLayout() {
       <div
         className={
           isMobile
-            ? `overflow-x-hidden fixed top-14 left-0 bottom-0 z-40 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`
-            : "overflow-x-hidden"
+            ? `fixed top-14 left-0 bottom-0 z-40 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`
+            : "relative z-10"
         }
         style={isMobile ? { height: 'calc(100dvh - 3.5rem)' } : undefined}
       >

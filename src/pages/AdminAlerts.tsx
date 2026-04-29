@@ -24,8 +24,8 @@ interface ChatFlag {
 }
 
 export default function AdminAlerts() {
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
-  const [authed, setAuthed] = useState(false);
   const [flags, setFlags] = useState<ChatFlag[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -45,12 +45,12 @@ export default function AdminAlerts() {
   };
 
   useEffect(() => {
-    if (authed) fetchFlags();
-  }, [authed]);
+    if (authenticated) fetchFlags();
+  }, [authenticated]);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) setAuthed(true);
+    if (!signIn(password)) setPassword("");
   };
 
   const markReviewed = async (flag: ChatFlag) => {

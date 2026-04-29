@@ -18,7 +18,7 @@ export function AppLayout() {
   useSessionEnforcement();
 
   return (
-    <div className="flex min-h-screen w-full relative">
+    <div className="flex h-screen w-full relative overflow-hidden">
       {/* Mobile header */}
       {isMobile && (
         <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-14 bg-sidebar/90 backdrop-blur-xl border-b border-sidebar-border">

@@ -177,7 +177,7 @@ export default function AdminAlerts() {
                       variant="link"
                       size="sm"
                       className="h-auto p-0 text-xs"
-                      onClick={() => navigate(`/admin/chat-logs?search=${encodeURIComponent(flag.conversation_id)}`)}
+                      onClick={() => navigate(`/admin/chat-logs?conversation=${encodeURIComponent(flag.conversation_id)}&search=${encodeURIComponent(flag.flagged_message.substring(0, 40))}`)}
                     >
                       View chat
                     </Button>

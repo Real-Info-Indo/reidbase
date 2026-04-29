@@ -60,7 +60,7 @@ export default function LocationReports() {
               <div className="p-4 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">{report.location}</h3>
-                  <p className="text-xs text-muted-foreground font-extralight">2024 Annual Report</p>
+                  <p className="text-xs text-muted-foreground font-extralight">2025 Annual Report</p>
                 </div>
                 <a
                   href={report.file}

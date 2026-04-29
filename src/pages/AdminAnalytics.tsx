@@ -673,7 +673,7 @@ export default function AdminAnalytics() {
           {/* Page views over time */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Page views (last 30 days)</CardTitle>
+              <CardTitle className="text-sm font-medium">Page views</CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">

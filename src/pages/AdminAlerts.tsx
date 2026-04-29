@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface ChatFlag {
   id: string;
@@ -24,8 +24,8 @@ interface ChatFlag {
 }
 
 export default function AdminAlerts() {
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
-  const [authed, setAuthed] = useState(false);
   const [flags, setFlags] = useState<ChatFlag[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -45,12 +45,12 @@ export default function AdminAlerts() {
   };
 
   useEffect(() => {
-    if (authed) fetchFlags();
-  }, [authed]);
+    if (authenticated) fetchFlags();
+  }, [authenticated]);
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) setAuthed(true);
+    if (!signIn(password)) setPassword("");
   };
 
   const markReviewed = async (flag: ChatFlag) => {
@@ -83,7 +83,7 @@ export default function AdminAlerts() {
 
   const unreviewed = flags.filter((f) => !f.reviewed).length;
 
-  if (!authed) {
+  if (!authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <form onSubmit={handleAuth} className="space-y-4 w-80">
@@ -177,7 +177,7 @@ export default function AdminAlerts() {
                       variant="link"
                       size="sm"
                       className="h-auto p-0 text-xs"
-                      onClick={() => navigate(`/admin/chat-logs?search=${encodeURIComponent(flag.conversation_id)}`)}
+                      onClick={() => navigate(`/admin/chat-logs?conversation=${encodeURIComponent(flag.conversation_id)}&search=${encodeURIComponent(flag.flagged_message.substring(0, 40))}`)}
                     >
                       View chat
                     </Button>

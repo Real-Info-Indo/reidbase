@@ -2,18 +2,42 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Lock, BarChart3, Users, FileText, MessageSquare, MousePointerClick,
-  RefreshCw, ClipboardList, Shield,
+  RefreshCw, ClipboardList, Shield, Download, LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover, PopoverTrigger, PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { cn } from "@/lib/utils";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
+type RangePreset = "30" | "90" | "180" | "365" | "custom";
+
+function downloadCsv(filename: string, rows: (string | number)[][]) {
+  const esc = (v: string | number) => {
+    const s = String(v ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const csv = rows.map((r) => r.map(esc).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 interface AnalyticsEvent {
   id: string;
@@ -68,29 +92,30 @@ function formatWeekLabel(date: Date) {
   return startOfWeek(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-function last30Days() {
+function daysBetween(from: Date, to: Date): string[] {
   const days: string[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+  const start = new Date(from); start.setHours(0, 0, 0, 0);
+  const end = new Date(to); end.setHours(0, 0, 0, 0);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     days.push(d.toISOString().slice(0, 10));
   }
   return days;
 }
 
 export default function AdminAnalytics() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const { authenticated, signIn, signOut } = useAdminAuth();
   const [password, setPassword] = useState("");
-  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
-  const [chatLogs, setChatLogs] = useState<ChatLog[]>([]);
+  const [allEvents, setAllEvents] = useState<AnalyticsEvent[]>([]);
+  const [allChatLogs, setAllChatLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [newAppraisalCount, setNewAppraisalCount] = useState(0);
+  const [rangePreset, setRangePreset] = useState<RangePreset>("30");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    }
+    if (!signIn(password)) setPassword("");
   };
 
   const fetchData = async () => {
@@ -100,19 +125,19 @@ export default function AdminAnalytics() {
         .from("analytics_events" as any)
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(5000) as any,
+        .limit(20000) as any,
       supabase
         .from("chat_logs" as any)
         .select("id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at")
         .order("updated_at", { ascending: false })
-        .limit(1000) as any,
+        .limit(5000) as any,
       supabase
         .from("appraisal_requests" as any)
         .select("id", { count: "exact", head: true })
         .eq("status", "new") as any,
     ]);
-    if (eventsRes.data) setEvents(eventsRes.data);
-    if (logsRes.data) setChatLogs(logsRes.data);
+    if (eventsRes.data) setAllEvents(eventsRes.data);
+    if (logsRes.data) setAllChatLogs(logsRes.data);
     setNewAppraisalCount(appraisalRes.count ?? 0);
     setLoading(false);
   };
@@ -120,6 +145,42 @@ export default function AdminAnalytics() {
   useEffect(() => {
     if (authenticated) fetchData();
   }, [authenticated]);
+
+  // ── Date range ──
+  const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
+    const to = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
+    let from: Date;
+    if (rangePreset === "custom" && customFrom) {
+      from = new Date(customFrom);
+    } else {
+      const days = rangePreset === "custom" ? 30 : parseInt(rangePreset, 10);
+      from = new Date();
+      from.setDate(from.getDate() - (days - 1));
+    }
+    from.setHours(0, 0, 0, 0);
+    const toEnd = new Date(to); toEnd.setHours(23, 59, 59, 999);
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return { rangeFrom: from, rangeTo: toEnd, rangeLabel: `${fmt(from)} to ${fmt(toEnd)}` };
+  }, [rangePreset, customFrom, customTo]);
+
+  const events = useMemo(() => {
+    const fromMs = rangeFrom.getTime();
+    const toMs = rangeTo.getTime();
+    return allEvents.filter((e) => {
+      const t = new Date(e.created_at).getTime();
+      return t >= fromMs && t <= toMs;
+    });
+  }, [allEvents, rangeFrom, rangeTo]);
+
+  const chatLogs = useMemo(() => {
+    const fromMs = rangeFrom.getTime();
+    const toMs = rangeTo.getTime();
+    return allChatLogs.filter((l) => {
+      const t = new Date(l.updated_at).getTime();
+      return t >= fromMs && t <= toMs;
+    });
+  }, [allChatLogs, rangeFrom, rangeTo]);
+
 
   // ── Derived metrics ──
 
@@ -132,9 +193,9 @@ export default function AdminAnalytics() {
     [events],
   );
 
-  // Page views over time (last 30 days)
+  // Page views over time (selected range)
   const pageViewsByDay = useMemo(() => {
-    const days = last30Days();
+    const days = daysBetween(rangeFrom, rangeTo);
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     pageViews.forEach((e) => {
@@ -142,7 +203,7 @@ export default function AdminAnalytics() {
       if (counts[day] !== undefined) counts[day]++;
     });
     return days.map((d) => ({ date: formatDate(new Date(d)), views: counts[d] }));
-  }, [pageViews]);
+  }, [pageViews, rangeFrom, rangeTo]);
 
   // Top pages
   const topPages = useMemo(() => {
@@ -210,7 +271,7 @@ export default function AdminAnalytics() {
 
   // Chat activity over time
   const chatsByDay = useMemo(() => {
-    const days = last30Days();
+    const days = daysBetween(rangeFrom, rangeTo);
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     chatLogs.forEach((l) => {
@@ -218,7 +279,7 @@ export default function AdminAnalytics() {
       if (counts[day] !== undefined) counts[day]++;
     });
     return days.map((d) => ({ date: formatDate(new Date(d)), chats: counts[d] }));
-  }, [chatLogs]);
+  }, [chatLogs, rangeFrom, rangeTo]);
 
   const totalMessages = useMemo(
     () => chatLogs.reduce((sum, l) => sum + l.message_count, 0),
@@ -393,18 +454,144 @@ export default function AdminAnalytics() {
     );
   }
 
+  // ── CSV exports ──
+  const exportAll = () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const sections: { name: string; rows: (string | number)[][] }[] = [];
+
+    sections.push({
+      name: "summary",
+      rows: [
+        ["Metric", "Value"],
+        ["Date range", rangeLabel],
+        ["Page views", pageViews.length],
+        ["Unique users", uniqueUsers],
+        ["Unique sessions", uniqueSessions],
+        ["Conversations", chatLogs.length],
+        ["Total messages", totalMessages],
+        ["Appraisal submissions", appraisalCount],
+      ],
+    });
+
+    sections.push({
+      name: "page_views_by_day",
+      rows: [["Date", "Views"], ...pageViewsByDay.map((r) => [r.date, r.views])],
+    });
+    sections.push({
+      name: "chats_by_day",
+      rows: [["Date", "Chats"], ...chatsByDay.map((r) => [r.date, r.chats])],
+    });
+    sections.push({
+      name: "top_pages",
+      rows: [["Page", "Views"], ...topPages.map((r) => [r.page, r.count])],
+    });
+    sections.push({
+      name: "feature_usage",
+      rows: [["Feature", "Count"], ...featureCounts.map((r) => [r.name, r.count])],
+    });
+    sections.push({
+      name: "conversations_by_mode",
+      rows: [["Mode", "Conversations"], ...chatByMode.map((r) => [r.name, r.value])],
+    });
+    sections.push({
+      name: "conversion_funnel",
+      rows: [
+        ["Step", "Label", "Value", "Rate from previous (%)"],
+        ...funnelSteps.map((s, i) => [
+          i + 1, s.label, s.value, s.rateFromPrevious === null ? "" : s.rateFromPrevious.toFixed(1),
+        ]),
+      ],
+    });
+    sections.push({
+      name: "mode_performance",
+      rows: [
+        ["Mode", "Conversations", "Prompts", "Avg messages", "Completion (%)", "Unique users"],
+        ...modePerformance.map((r) => [
+          r.mode, r.conversations, r.prompts,
+          r.avgMessagesPerConversation.toFixed(1),
+          r.completionRate.toFixed(1), r.uniqueUsers,
+        ]),
+      ],
+    });
+    sections.push({
+      name: "retention_snapshot",
+      rows: [
+        ["Metric", "Value"],
+        ["Active users 7d", retentionMetrics.activeUsers7d],
+        ["Active users 30d", retentionMetrics.activeUsers30d],
+        ["New users 30d", retentionMetrics.newUsers30d],
+        ["Repeat user rate (%)", retentionMetrics.repeatRate.toFixed(1)],
+        ["Avg sessions per user", retentionMetrics.avgSessionsPerUser.toFixed(2)],
+      ],
+    });
+    sections.push({
+      name: "weekly_retention_cohorts",
+      rows: [
+        ["Cohort week", "Users", "Returned", "Retention (%)"],
+        ...retentionMetrics.cohortRows.map((r) => [
+          r.cohort, r.users, r.retained, r.retentionRate.toFixed(1),
+        ]),
+      ],
+    });
+
+    const combined: (string | number)[][] = [];
+    sections.forEach((sec, i) => {
+      if (i > 0) combined.push([]);
+      combined.push([`# ${sec.name}`]);
+      sec.rows.forEach((r) => combined.push(r));
+    });
+    downloadCsv(`reid-analytics-${stamp}.csv`, combined);
+  };
+
   // ── Dashboard ──
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Admin nav */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <BarChart3 className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
+            <span className="text-xs text-muted-foreground hidden md:inline">{rangeLabel}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={rangePreset} onValueChange={(v) => setRangePreset(v as RangePreset)}>
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+                <SelectItem value="180">Last 180 days</SelectItem>
+                <SelectItem value="365">Last 12 months</SelectItem>
+                <SelectItem value="custom">Custom range</SelectItem>
+              </SelectContent>
+            </Select>
+            {rangePreset === "custom" && (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("h-9", !customFrom && "text-muted-foreground")}>
+                      {customFrom ? customFrom.toLocaleDateString("en-GB") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn("h-9", !customTo && "text-muted-foreground")}>
+                      {customTo ? customTo.toLocaleDateString("en-GB") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={customTo} onSelect={setCustomTo} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </>
+            )}
             <Button variant="ghost" size="sm" onClick={() => navigate("/admin/alerts")}>
               <Shield className="h-4 w-4 mr-1.5" /> Alerts
             </Button>
@@ -422,9 +609,15 @@ export default function AdminAnalytics() {
                 </span>
               )}
             </Button>
+            <Button variant="outline" size="sm" onClick={exportAll}>
+              <Download className="h-4 w-4 mr-1.5" /> Export CSV
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Loading" : "Refresh"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={signOut} title="Sign out of admin">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -480,7 +673,7 @@ export default function AdminAnalytics() {
           {/* Page views over time */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Page views (last 30 days)</CardTitle>
+              <CardTitle className="text-sm font-medium">Page views</CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -511,7 +704,7 @@ export default function AdminAnalytics() {
           {/* Chat activity over time */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Chat activity (last 30 days)</CardTitle>
+              <CardTitle className="text-sm font-medium">Chat activity</CardTitle>
             </CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">

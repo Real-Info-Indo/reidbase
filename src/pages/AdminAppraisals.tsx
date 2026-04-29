@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface AppraisalRequest {
   id: string;
@@ -56,7 +56,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminAppraisals() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
   const [requests, setRequests] = useState<AppraisalRequest[]>([]);
   const [search, setSearch] = useState("");
@@ -66,9 +66,7 @@ export default function AdminAppraisals() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    }
+    if (!signIn(password)) setPassword("");
   };
 
   const fetchRequests = async () => {

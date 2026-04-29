@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import type { Msg } from "@/lib/conversations";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface ChatLog {
   id: string;
@@ -33,19 +33,20 @@ interface ChatLog {
 
 export default function AdminChatLogs() {
   const navigate = useNavigate();
-  const [authenticated, setAuthenticated] = useState(false);
+  const [searchParams] = useSearchParams();
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
   const [logs, setLogs] = useState<ChatLog[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const targetConvIdRef = useRef<string | null>(searchParams.get("conversation"));
+  const scrolledRef = useRef(false);
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-      fetchLogs();
-    }
+    if (signIn(password)) fetchLogs();
+    else setPassword("");
   };
 
   const fetchLogs = async () => {
@@ -63,6 +64,20 @@ export default function AdminChatLogs() {
   useEffect(() => {
     if (authenticated) fetchLogs();
   }, [authenticated]);
+
+  // Deep-link: auto-expand and scroll to specific conversation
+  useEffect(() => {
+    if (!targetConvIdRef.current || logs.length === 0 || scrolledRef.current) return;
+    const target = logs.find((l) => l.conversation_id === targetConvIdRef.current);
+    if (target) {
+      setExpandedId(target.id);
+      scrolledRef.current = true;
+      setTimeout(() => {
+        const el = document.getElementById(`chat-row-${target.id}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [logs]);
 
   const handleCopyChat = (log: ChatLog) => {
     const text = log.messages
@@ -227,11 +242,12 @@ export default function AdminChatLogs() {
             <TableBody>
               {filtered.map((log) => (
                 <>
-                  <TableRow
-                    key={log.id}
-                    className="cursor-pointer hover:bg-accent/50"
-                    onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
-                  >
+                   <TableRow
+                     key={log.id}
+                     id={`chat-row-${log.id}`}
+                     className={`cursor-pointer hover:bg-accent/50 ${targetConvIdRef.current === log.conversation_id ? "ring-2 ring-primary/40" : ""}`}
+                     onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
+                   >
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedIds.has(log.id)}

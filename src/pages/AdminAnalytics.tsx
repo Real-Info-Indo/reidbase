@@ -105,8 +105,8 @@ function daysBetween(from: Date, to: Date): string[] {
 export default function AdminAnalytics() {
   const { authenticated, signIn, signOut } = useAdminAuth();
   const [password, setPassword] = useState("");
-  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
-  const [chatLogs, setChatLogs] = useState<ChatLog[]>([]);
+  const [allEvents, setAllEvents] = useState<AnalyticsEvent[]>([]);
+  const [allChatLogs, setAllChatLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [newAppraisalCount, setNewAppraisalCount] = useState(0);
   const [rangePreset, setRangePreset] = useState<RangePreset>("30");
@@ -125,19 +125,19 @@ export default function AdminAnalytics() {
         .from("analytics_events" as any)
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(5000) as any,
+        .limit(20000) as any,
       supabase
         .from("chat_logs" as any)
         .select("id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at")
         .order("updated_at", { ascending: false })
-        .limit(1000) as any,
+        .limit(5000) as any,
       supabase
         .from("appraisal_requests" as any)
         .select("id", { count: "exact", head: true })
         .eq("status", "new") as any,
     ]);
-    if (eventsRes.data) setEvents(eventsRes.data);
-    if (logsRes.data) setChatLogs(logsRes.data);
+    if (eventsRes.data) setAllEvents(eventsRes.data);
+    if (logsRes.data) setAllChatLogs(logsRes.data);
     setNewAppraisalCount(appraisalRes.count ?? 0);
     setLoading(false);
   };
@@ -145,6 +145,42 @@ export default function AdminAnalytics() {
   useEffect(() => {
     if (authenticated) fetchData();
   }, [authenticated]);
+
+  // ── Date range ──
+  const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
+    const to = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
+    let from: Date;
+    if (rangePreset === "custom" && customFrom) {
+      from = new Date(customFrom);
+    } else {
+      const days = rangePreset === "custom" ? 30 : parseInt(rangePreset, 10);
+      from = new Date();
+      from.setDate(from.getDate() - (days - 1));
+    }
+    from.setHours(0, 0, 0, 0);
+    const toEnd = new Date(to); toEnd.setHours(23, 59, 59, 999);
+    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    return { rangeFrom: from, rangeTo: toEnd, rangeLabel: `${fmt(from)} to ${fmt(toEnd)}` };
+  }, [rangePreset, customFrom, customTo]);
+
+  const events = useMemo(() => {
+    const fromMs = rangeFrom.getTime();
+    const toMs = rangeTo.getTime();
+    return allEvents.filter((e) => {
+      const t = new Date(e.created_at).getTime();
+      return t >= fromMs && t <= toMs;
+    });
+  }, [allEvents, rangeFrom, rangeTo]);
+
+  const chatLogs = useMemo(() => {
+    const fromMs = rangeFrom.getTime();
+    const toMs = rangeTo.getTime();
+    return allChatLogs.filter((l) => {
+      const t = new Date(l.updated_at).getTime();
+      return t >= fromMs && t <= toMs;
+    });
+  }, [allChatLogs, rangeFrom, rangeTo]);
+
 
   // ── Derived metrics ──
 

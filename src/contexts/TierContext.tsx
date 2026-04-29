@@ -21,7 +21,7 @@ const tierAccess: Record<UserTier, string[]> = {
 const tierLabels: Record<UserTier, string> = {
   member: "Member",
   reid_base: "REID Base",
-  reid_base_pro: "REID Base Pro",
+  reid_base_pro: "REID Base Team",
   enterprise: "Enterprise",
 };
 
@@ -29,6 +29,7 @@ const tierLabels: Record<UserTier, string> = {
 const PLAN_NAME_TO_TIER: Record<string, UserTier> = {
   "Member": "member",
   "REID Base": "reid_base",
+  "REID Base Team": "reid_base_pro",
   "REID Base Pro": "reid_base_pro",
   "Enterprise": "enterprise",
 };
@@ -38,7 +39,7 @@ function planNameToTier(planName: string): UserTier {
   if (PLAN_NAME_TO_TIER[planName]) return PLAN_NAME_TO_TIER[planName];
   const lower = planName.toLowerCase();
   if (lower.includes("enterprise")) return "enterprise";
-  if (lower.includes("pro")) return "reid_base_pro";
+  if (lower.includes("team") || lower.includes("pro")) return "reid_base_pro";
   if (lower.includes("reid base") || lower.includes("base")) return "reid_base";
   return "member";
 }

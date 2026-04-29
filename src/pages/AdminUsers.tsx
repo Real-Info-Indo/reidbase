@@ -11,8 +11,8 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface UserProfile {
   wix_user_id: string;

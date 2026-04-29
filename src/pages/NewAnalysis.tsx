@@ -15,7 +15,7 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation, logFeedback, submitFeedbackComment } from "@/lib/chatLogger";
+import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder } from "@/lib/chatLogger";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 
@@ -410,9 +410,11 @@ export default function NewAnalysis() {
   const handlePin = () => {
     if (!conversationId) return;
     togglePin(conversationId);
-    setIsPinned(!isPinned);
+    const next = !isPinned;
+    setIsPinned(next);
     window.dispatchEvent(new Event("conversations-updated"));
-    toast.success(isPinned ? "Unpinned" : "Pinned to top");
+    cloudTogglePin(conversationId, next).catch(err => console.error("cloudTogglePin failed:", err));
+    toast.success(next ? "Pinned to top" : "Unpinned");
   };
 
   const handleRename = () => {
@@ -426,6 +428,7 @@ export default function NewAnalysis() {
     setCustomTitle(renameValue.trim());
     setIsRenaming(false);
     window.dispatchEvent(new Event("conversations-updated"));
+    cloudRenameConversation(conversationId, renameValue.trim()).catch(err => console.error("cloudRename failed:", err));
     toast.success("Conversation renamed");
   };
 
@@ -691,13 +694,13 @@ export default function NewAnalysis() {
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-popover">
                         {allFolders.map((f) =>
-                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
+                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, f.id).catch(err => console.error("cloudMoveToFolder failed:", err));toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
                             <FolderIcon className="h-3.5 w-3.5 mr-2" />
                             {f.name}
                           </DropdownMenuItem>
                     )}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => {if (conversationId) {moveToFolder(conversationId, undefined);window.dispatchEvent(new Event("conversations-updated"));toast.success("Removed from folder");}}} className="cursor-pointer text-xs">
+                        <DropdownMenuItem onClick={() => {if (conversationId) {moveToFolder(conversationId, undefined);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, undefined).catch(err => console.error("cloudMoveToFolder failed:", err));toast.success("Removed from folder");}}} className="cursor-pointer text-xs">
                           Remove from folder
                         </DropdownMenuItem>
                       </DropdownMenuSubContent>

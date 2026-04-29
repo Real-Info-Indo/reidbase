@@ -75,10 +75,41 @@ export async function deleteFolder(folderId: string): Promise<void> {
       .from("folders")
       .delete()
       .eq("id", folderId);
+    // Also clear folder_id from any conversations that referenced it
+    await supabase
+      .from("chat_logs" as any)
+      .update({ folder_id: null } as any)
+      .eq("folder_id", folderId);
   } catch (err) {
     console.error("deleteFolder failed:", err);
   }
 }
+
+/* ── Per-conversation cloud mutations ── */
+
+async function patchChatLog(conversationId: string, patch: Record<string, any>) {
+  try {
+    const { error } = await supabase
+      .from("chat_logs" as any)
+      .update({ ...patch, updated_at: new Date().toISOString() } as any)
+      .eq("conversation_id", conversationId);
+    if (error) console.warn("patchChatLog failed:", error.message);
+  } catch (err) {
+    console.error("patchChatLog failed:", err);
+  }
+}
+
+export const cloudRenameConversation = (id: string, title: string) =>
+  patchChatLog(id, { title });
+
+export const cloudTogglePin = (id: string, pinned: boolean) =>
+  patchChatLog(id, { pinned });
+
+export const cloudMoveToFolder = (id: string, folderId: string | undefined) =>
+  patchChatLog(id, { folder_id: folderId ?? null });
+
+export const cloudSoftDeleteConversation = (id: string) =>
+  patchChatLog(id, { deleted_at: new Date().toISOString() });
 
 export async function logFeedback(conversationId: string, action: "copy" | "like" | "dislike") {
   const col = action === "copy" ? "copy_count" : action === "like" ? "likes" : "dislikes";

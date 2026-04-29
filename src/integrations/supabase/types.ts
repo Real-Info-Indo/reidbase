@@ -223,6 +223,7 @@ export type Database = {
           conversation_id: string
           copy_count: number
           created_at: string
+          deleted_at: string | null
           dislikes: number
           folder_id: string | null
           id: string
@@ -242,6 +243,7 @@ export type Database = {
           conversation_id: string
           copy_count?: number
           created_at?: string
+          deleted_at?: string | null
           dislikes?: number
           folder_id?: string | null
           id?: string
@@ -261,6 +263,7 @@ export type Database = {
           conversation_id?: string
           copy_count?: number
           created_at?: string
+          deleted_at?: string | null
           dislikes?: number
           folder_id?: string | null
           id?: string

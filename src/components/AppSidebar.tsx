@@ -16,7 +16,7 @@ import {
   renameFolder, deleteFolder, moveToFolder, renameConversation, togglePin,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
-import { logFolder, deleteFolder as deleteLogFolder } from "@/lib/chatLogger";
+import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation } from "@/lib/chatLogger";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from
 "@/components/ui/dropdown-menu";
@@ -66,6 +66,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     e.stopPropagation();
     deleteConversation(id);
     refresh();
+    cloudSoftDeleteConversation(id).catch(err => console.error("cloudSoftDelete failed:", err));
     if (activeConvoId === id) navigate("/");
   };
 
@@ -93,6 +94,11 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     setExpandedFolders((prev) => new Set(prev).add(folder.id));
     setRenamingFolderId(folder.id);
     setFolderRenameValue(folder.name);
+    // Persist immediately so the folder exists across devices even before rename
+    if (member?.id) {
+      logFolder({ id: folder.id, name: folder.name }, member.id)
+        .catch(err => console.error("logFolder failed:", err));
+    }
   };
 
   const submitFolderRename = (id: string) => {
@@ -124,12 +130,15 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     moveToFolder(convoId, folderId);
     refresh();
     window.dispatchEvent(new Event("conversations-updated"));
+    cloudMoveToFolder(convoId, folderId).catch(err => console.error("cloudMoveToFolder failed:", err));
   };
 
   const handleTogglePin = (convoId: string) => {
     togglePin(convoId);
     refresh();
     window.dispatchEvent(new Event("conversations-updated"));
+    const updated = getConversations().find(c => c.id === convoId);
+    cloudTogglePin(convoId, !!updated?.pinned).catch(err => console.error("cloudTogglePin failed:", err));
   };
 
   const searchLower = convoSearch.toLowerCase();
@@ -146,6 +155,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       renameConversation(id, convoRenameValue.trim());
       refresh();
       window.dispatchEvent(new Event("conversations-updated"));
+      cloudRenameConversation(id, convoRenameValue.trim()).catch(err => console.error("cloudRename failed:", err));
     }
     setRenamingConvoId(null);
   };

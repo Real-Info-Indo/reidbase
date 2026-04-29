@@ -83,7 +83,7 @@ export default function AdminAlerts() {
 
   const unreviewed = flags.filter((f) => !f.reviewed).length;
 
-  if (!authed) {
+  if (!authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <form onSubmit={handleAuth} className="space-y-4 w-80">

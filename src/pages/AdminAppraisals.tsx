@@ -56,7 +56,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminAppraisals() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
   const [requests, setRequests] = useState<AppraisalRequest[]>([]);
   const [search, setSearch] = useState("");
@@ -66,9 +66,7 @@ export default function AdminAppraisals() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    }
+    if (!signIn(password)) setPassword("");
   };
 
   const fetchRequests = async () => {

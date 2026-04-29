@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Upload, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Upload, CheckCircle2, FileText } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,8 +75,22 @@ export default function AppraisalRequest() {
       {!hasAccess && <UpgradeOverlay />}
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-1">Appraisal Request</h1>
-          <p className="text-muted-foreground font-extralight mb-8">Discover your property fair market value.</p>
+          <div className="flex items-start justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-2xl font-bold mb-1">Appraisal Request</h1>
+              <p className="text-muted-foreground font-extralight">Discover your property fair market value.</p>
+            </div>
+            <a
+              href="/downloads/REID_Property_Appraisal_Sample.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackFeature("appraisal_sample_viewed")}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-accent transition-colors shrink-0"
+            >
+              <FileText className="h-4 w-4" />
+              Sample Report
+            </a>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Row 1 */}

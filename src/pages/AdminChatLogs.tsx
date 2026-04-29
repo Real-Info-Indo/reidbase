@@ -10,8 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import type { Msg } from "@/lib/conversations";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-const ADMIN_PASSWORD = "reid-admin-2025";
 
 interface ChatLog {
   id: string;

@@ -85,7 +85,7 @@ export default function AdminAlerts() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background">
         <form onSubmit={handleAuth} className="space-y-4 w-80">
           <h1 className="text-xl font-bold text-center">Admin Alerts</h1>
           <Input type="password" placeholder="Admin password" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -96,7 +96,7 @@ export default function AdminAlerts() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background p-4 md:p-8 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin/analytics")}>

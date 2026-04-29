@@ -25,7 +25,7 @@ export default function MarketReports() {
   };
 
   return (
-    <div className="p-8">
+    <div className="w-full overflow-x-hidden p-8">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Market Reports</h1>

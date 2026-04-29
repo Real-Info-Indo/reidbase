@@ -187,7 +187,7 @@ export default function AdminUsers() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background p-4">
         <div className="w-full max-w-xs space-y-4 text-center">
           <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
           <h1 className="text-lg font-semibold">Admin Users</h1>
@@ -209,7 +209,7 @@ export default function AdminUsers() {
   const colCount = 10;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

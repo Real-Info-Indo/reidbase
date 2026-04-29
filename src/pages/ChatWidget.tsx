@@ -29,7 +29,8 @@ export default function ChatWidget() {
   return (
     <div
       style={{
-        width: "500px",
+        width: "100%",
+        maxWidth: "500px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -37,6 +38,8 @@ export default function ChatWidget() {
         padding: 0,
         margin: 0,
         gap: "10px",
+        overflowX: "hidden",
+        boxSizing: "border-box",
       }}
     >
       {/* Prompt bar */}
@@ -96,7 +99,7 @@ export default function ChatWidget() {
       </div>
 
       {/* Quick buttons */}
-      <div style={{ display: "flex", gap: "8px", alignSelf: "flex-start" }}>
+      <div style={{ display: "flex", gap: "8px", alignSelf: "flex-start", flexWrap: "wrap", width: "100%" }}>
         {quickButtons.map((btn) => (
           <button
             key={btn.label}

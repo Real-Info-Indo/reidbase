@@ -34,29 +34,31 @@ const App = () => (
         <TierProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <PageViewTracker />
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/callback" element={<WixCallback />} />
-              <Route path="/widget" element={<ChatWidget />} />
-              <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
-              <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
-                <Route path="/" element={<NewAnalysis />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/market-reports" element={<MarketReports />} />
-                <Route path="/location-reports" element={<LocationReports />} />
-                <Route path="/appraisal-request" element={<AppraisalRequest />} />
-              </Route>
-              <Route path="/import-data" element={<ImportData />} />
-              <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/appraisals" element={<AdminAppraisals />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/alerts" element={<AdminAlerts />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <div className="min-h-screen w-full overflow-x-hidden bg-background">
+            <BrowserRouter>
+              <PageViewTracker />
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/callback" element={<WixCallback />} />
+                <Route path="/widget" element={<ChatWidget />} />
+                <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
+                <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
+                  <Route path="/" element={<NewAnalysis />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/market-reports" element={<MarketReports />} />
+                  <Route path="/location-reports" element={<LocationReports />} />
+                  <Route path="/appraisal-request" element={<AppraisalRequest />} />
+                </Route>
+                <Route path="/import-data" element={<ImportData />} />
+                <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/appraisals" element={<AdminAppraisals />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/alerts" element={<AdminAlerts />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </div>
         </TierProvider>
       </WixAuthProvider>
     </TooltipProvider>

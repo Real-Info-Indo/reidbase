@@ -229,7 +229,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
   return (
     <aside
-      className={cn("flex flex-col backdrop-blur-xl text-sidebar-foreground transition-all duration-300 shrink-0 bg-sidebar shadow-[3px_0_8px_-2px_rgba(0,0,0,0.12)] relative z-10",
+      className={cn("flex flex-col overflow-x-hidden backdrop-blur-xl text-sidebar-foreground transition-all duration-300 shrink-0 bg-sidebar shadow-[3px_0_8px_-2px_rgba(0,0,0,0.12)] relative z-10",
       isMobile ? "h-full" : "h-screen",
       collapsed ? "w-16" : "w-64"
       )}>

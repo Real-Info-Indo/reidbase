@@ -58,6 +58,32 @@ export async function hydrateFromSupabase(wixUserId: string): Promise<HydrateRes
       foldersRestored = folderList.length;
     }
 
+    // ── Personalisation (nickname, occupation, business, about) ──
+    const { data: profile, error: profileError } = await supabase
+      .from("user_profiles" as any)
+      .select("nickname, occupation, business, about")
+      .eq("wix_user_id", wixUserId)
+      .maybeSingle();
+
+    if (!profileError && profile) {
+      const p: any = profile;
+      // Only overwrite if the cloud has at least one non-empty field,
+      // so we don't wipe an unsynced first-time entry.
+      const hasAny = p.nickname || p.occupation || p.business || p.about;
+      if (hasAny) {
+        localStorage.setItem(
+          "reid-personalisation",
+          JSON.stringify({
+            nickname: p.nickname || "",
+            occupation: p.occupation || "",
+            business: p.business || "",
+            about: p.about || "",
+          })
+        );
+        window.dispatchEvent(new Event("personalisation-updated"));
+      }
+    }
+
     // Notify any mounted UI to re-read from localStorage
     window.dispatchEvent(new Event("conversations-updated"));
   } catch (err) {

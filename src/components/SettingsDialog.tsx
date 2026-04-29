@@ -52,6 +52,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     }
   }, [open]);
 
+  useEffect(() => {
+    const handler = () => setPersonalisation(loadPersonalisation());
+    window.addEventListener("personalisation-updated", handler);
+    return () => window.removeEventListener("personalisation-updated", handler);
+  }, []);
+
   const handleSave = () => {
     savePersonalisation(personalisation);
     onOpenChange(false);

@@ -108,7 +108,7 @@ export function buildRagSystemPrompt(
   userMemory?: string,
   aiSummary?: string
 ): string {
-  const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Pro" : tier === "reid_base" ? "Member" : "Freemium";
+  const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Team" : tier === "reid_base" ? "Member" : "Freemium";
   const personalisationBlock = buildPersonalisationBlock(personalisation, aiSummary, tier);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 

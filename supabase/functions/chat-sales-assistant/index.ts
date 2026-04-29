@@ -55,9 +55,9 @@ INSUFFICIENT DATA:
 - Offer to broaden to regional level or suggest the REID data team for a custom analysis.
 
 TIER:
-This mode is available to REID Base Pro and REID Base Enterprise users.
+This mode is available to REID Base Team and REID Base Enterprise users.
 
-Pro users: Full location-level sales and rental data available for property benchmarking. All Key Markets and Emerging Markets supported. Granular CSV-level data (individual transaction records, management type, contract type) is not available at Pro tier. If a Pro user requests record-level data, respond: "That level of detail is available on REID Base Enterprise — see our pricing plans."
+Team users: Full location-level sales and rental data available for property benchmarking. All Key Markets and Emerging Markets supported. Granular CSV-level data (individual transaction records, management type, contract type) is not available at Team tier. If a Team user requests record-level data, respond: "That level of detail is available on REID Base Enterprise — see our pricing plans."
 
 Enterprise users: Full granular access including CSV-level transaction and rental data. Maximum 5 individual property records per response. No upgrade path — when a query hits a data gap, trigger the REID data team contact button.
 
@@ -111,7 +111,7 @@ serve(async (req) => {
     // Sales Assistant: reid_base_pro and enterprise only
     if (effectiveTier !== "enterprise" && effectiveTier !== "reid_base_pro") {
       return new Response(
-        JSON.stringify({ error: "Sales Assistant is available on REID Base Pro and Enterprise only." }),
+        JSON.stringify({ error: "Sales Assistant is available on REID Base Team and Enterprise only." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -284,7 +284,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Pro tier: pure RAG with Pro content
+    // Team tier: pure RAG with Pro content
     const systemPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

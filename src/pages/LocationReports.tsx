@@ -5,16 +5,16 @@ import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { trackFeature } from "@/lib/analytics";
 
 const reports = [
-  { location: "Berawa", file: "/reports/Berawa_2024.pdf", thumb: "/reports/thumbnails/Berawa.jpg" },
-  { location: "Bingin", file: "/reports/Bingin_2024.pdf", thumb: "/reports/thumbnails/Bingin.jpg" },
-  { location: "Canggu", file: "/reports/Canggu_2024.pdf", thumb: "/reports/thumbnails/Canggu.jpg" },
-  { location: "Kerobokan", file: "/reports/Kerobokan_2024.pdf", thumb: "/reports/thumbnails/Kerobokan.jpg" },
-  { location: "Pererenan", file: "/reports/Pererenan_2024.pdf", thumb: "/reports/thumbnails/Pererenan.jpg" },
-  { location: "Sanur", file: "/reports/Sanur_2024.pdf", thumb: "/reports/thumbnails/Sanur.jpg" },
-  { location: "Seminyak", file: "/reports/Seminyak_2024.pdf", thumb: "/reports/thumbnails/Seminyak.jpg" },
-  { location: "Ubud", file: "/reports/Ubud_2024.pdf", thumb: "/reports/thumbnails/Ubud.jpg" },
-  { location: "Uluwatu", file: "/reports/Uluwatu_2024.pdf", thumb: "/reports/thumbnails/Uluwatu.jpg" },
-  { location: "Umalas", file: "/reports/Umalas_2024.pdf", thumb: "/reports/thumbnails/Umalas.jpg" },
+  { location: "Berawa", file: "/reports/Berawa_2025.pdf", thumb: "/reports/thumbnails/Berawa.jpg" },
+  { location: "Bingin", file: "/reports/Bingin_2025.pdf", thumb: "/reports/thumbnails/Bingin.jpg" },
+  { location: "Canggu", file: "/reports/Canggu_2025.pdf", thumb: "/reports/thumbnails/Canggu.jpg" },
+  { location: "Kerobokan", file: "/reports/Kerobokan_2025.pdf", thumb: "/reports/thumbnails/Kerobokan.jpg" },
+  { location: "Pererenan", file: "/reports/Pererenan_2025.pdf", thumb: "/reports/thumbnails/Pererenan.jpg" },
+  { location: "Sanur", file: "/reports/Sanur_2025.pdf", thumb: "/reports/thumbnails/Sanur.jpg" },
+  { location: "Seminyak", file: "/reports/Seminyak_2025.pdf", thumb: "/reports/thumbnails/Seminyak.jpg" },
+  { location: "Ubud", file: "/reports/Ubud_2025.pdf", thumb: "/reports/thumbnails/Ubud.jpg" },
+  { location: "Uluwatu", file: "/reports/Uluwatu_2025.pdf", thumb: "/reports/thumbnails/Uluwatu.jpg" },
+  { location: "Umalas", file: "/reports/Umalas_2025.pdf", thumb: "/reports/thumbnails/Umalas.jpg" },
 ];
 
 export default function LocationReports() {
@@ -60,7 +60,7 @@ export default function LocationReports() {
               <div className="p-4 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">{report.location}</h3>
-                  <p className="text-xs text-muted-foreground font-extralight">2024 Annual Report</p>
+                  <p className="text-xs text-muted-foreground font-extralight">2025 Annual Report</p>
                 </div>
                 <a
                   href={report.file}

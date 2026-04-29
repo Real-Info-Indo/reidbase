@@ -576,13 +576,8 @@ export default function NewAnalysis() {
   const handleTenureSelect = (tenure: string) => {
     if (!pendingTenureQuery) return;
     const q = pendingTenureQuery;
-    // Record the locations from this query as clarified
-    const locs = extractLocations(q);
-    setClarifiedLocations((prev) => {
-      const next = new Set(prev);
-      locs.forEach((l) => next.add(l));
-      return next;
-    });
+    // Locations are derived from messages; the [Tenure filter: ...] marker
+    // appended by sendWithTenure marks them clarified for the rest of this conversation.
     setPendingTenureQuery(null);
     setSelectedTenure(null);
     // The user message is already in messages from send(); tell sendWithTenure to skip adding it again

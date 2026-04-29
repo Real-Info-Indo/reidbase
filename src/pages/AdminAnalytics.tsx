@@ -271,7 +271,7 @@ export default function AdminAnalytics() {
 
   // Chat activity over time
   const chatsByDay = useMemo(() => {
-    const days = last30Days();
+    const days = daysBetween(rangeFrom, rangeTo);
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     chatLogs.forEach((l) => {
@@ -279,7 +279,7 @@ export default function AdminAnalytics() {
       if (counts[day] !== undefined) counts[day]++;
     });
     return days.map((d) => ({ date: formatDate(new Date(d)), chats: counts[d] }));
-  }, [chatLogs]);
+  }, [chatLogs, rangeFrom, rangeTo]);
 
   const totalMessages = useMemo(
     () => chatLogs.reduce((sum, l) => sum + l.message_count, 0),

@@ -46,7 +46,7 @@ export default function WixCallback() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background px-4">
         <div className="text-center space-y-4 max-w-sm">
           <h2 className="text-xl font-bold text-destructive">Login Failed</h2>
           <p className="text-sm text-muted-foreground">{error}</p>
@@ -62,7 +62,7 @@ export default function WixCallback() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background">
       <div className="text-center space-y-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
         <p className="text-sm text-muted-foreground">Completing sign in...</p>

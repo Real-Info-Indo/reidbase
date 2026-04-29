@@ -71,7 +71,7 @@ export default function AppraisalRequest() {
   const labelClass = "block text-sm font-extralight mb-1.5";
 
   return (
-    <div className="relative p-8">
+    <div className="relative w-full overflow-x-hidden p-8">
       {!hasAccess && <UpgradeOverlay />}
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
         <div className="max-w-4xl mx-auto">

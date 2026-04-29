@@ -29,7 +29,7 @@ export default function LocationReports() {
   };
 
   return (
-    <div className="relative p-8">
+    <div className="relative w-full overflow-x-hidden p-8">
       {!hasAccess && <UpgradeOverlay />}
       <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

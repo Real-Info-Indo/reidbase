@@ -16,14 +16,14 @@ export default function Login() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background/50 backdrop-blur-sm px-4">
+    <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background/50 backdrop-blur-sm px-4">
       <div className="w-full max-w-sm text-center space-y-8 bg-card/90 backdrop-blur-md border border-border rounded-2xl p-10 shadow-lg">
         <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer"><img src={reidLogo} alt="REID" className="h-8 mx-auto" /></a>
         <p className="text-sm text-muted-foreground font-extralight">

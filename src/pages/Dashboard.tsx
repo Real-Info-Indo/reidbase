@@ -38,7 +38,7 @@ export default function Dashboard() {
 
   if (isMobile) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-card">
+      <div className="w-full h-screen overflow-x-hidden flex items-center justify-center bg-card">
         <div className="text-center text-muted-foreground px-6">
           <Monitor className="h-12 w-12 mx-auto mb-4 text-primary/50" />
           <p className="text-lg font-bold mb-2">Desktop Only</p>
@@ -49,7 +49,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="relative h-screen flex flex-col overflow-hidden">
+    <div className="relative h-screen w-full overflow-x-hidden overflow-y-hidden flex flex-col">
       {!hasAccess && <UpgradeOverlay />}
 
       {/* Floating download button */}

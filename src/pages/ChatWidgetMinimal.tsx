@@ -22,12 +22,15 @@ export default function ChatWidgetMinimal() {
   return (
     <div
       style={{
-        width: "500px",
+        width: "100%",
+        maxWidth: "500px",
         display: "flex",
         alignItems: "center",
         background: "transparent",
         padding: 0,
         margin: 0,
+        overflowX: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <div

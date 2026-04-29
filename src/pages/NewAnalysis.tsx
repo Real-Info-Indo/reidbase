@@ -688,7 +688,7 @@ export default function NewAnalysis() {
 
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen w-full min-w-0 overflow-x-hidden">
       <input
         ref={fileInputRef}
         type="file"

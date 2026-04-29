@@ -18,7 +18,7 @@ export function AppLayout() {
   useSessionEnforcement();
 
   return (
-    <div className="flex h-screen w-full relative overflow-hidden">
+    <div className="flex h-screen w-full min-w-0 relative overflow-x-hidden overflow-y-hidden">
       {/* Mobile header */}
       {isMobile && (
         <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-14 bg-sidebar/90 backdrop-blur-xl border-b border-sidebar-border">
@@ -44,8 +44,8 @@ export function AppLayout() {
       <div
         className={
           isMobile
-            ? `fixed top-14 left-0 bottom-0 z-40 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`
-            : ""
+            ? `overflow-x-hidden fixed top-14 left-0 bottom-0 z-40 transition-transform duration-300 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`
+            : "overflow-x-hidden"
         }
         style={isMobile ? { height: 'calc(100dvh - 3.5rem)' } : undefined}
       >
@@ -53,12 +53,12 @@ export function AppLayout() {
       </div>
 
       {/* Main content */}
-      <main className={`flex-1 overflow-auto bg-background relative ${isMobile ? "pt-14" : ""}`}>
+      <main className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto bg-background relative ${isMobile ? "pt-14" : ""}`}>
         {/* Persistent dashboard iframe (hidden when not on /dashboard) */}
         {!isMobile && <PersistentDashboard ref={dashboardRef} visible={isDashboard} />}
 
         {/* Normal routed content - hide when dashboard is active on desktop */}
-        <div style={isDashboard && !isMobile ? { visibility: "hidden" } : undefined}>
+        <div className="min-w-0 overflow-x-hidden" style={isDashboard && !isMobile ? { visibility: "hidden" } : undefined}>
           <Outlet context={{ dashboardRef }} />
         </div>
       </main>

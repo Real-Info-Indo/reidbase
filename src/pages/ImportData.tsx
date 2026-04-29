@@ -174,7 +174,7 @@ export default function ImportData() {
   };
 
   return (
-    <div className="p-8 max-w-xl mx-auto">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background p-8 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Import Property Data</h1>
       <p className="text-muted-foreground font-extralight mb-6">
         This will import the REID property CSV data into the database.

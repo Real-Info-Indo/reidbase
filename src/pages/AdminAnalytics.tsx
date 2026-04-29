@@ -435,7 +435,7 @@ export default function AdminAnalytics() {
 
   if (!authenticated) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen w-full overflow-x-hidden bg-background">
         <div className="w-full max-w-sm space-y-4 p-8 border border-border rounded-xl bg-card">
           <div className="flex items-center gap-2 text-foreground">
             <Lock className="h-5 w-5" />
@@ -546,7 +546,7 @@ export default function AdminAnalytics() {
   // ── Dashboard ──
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen w-full overflow-x-hidden bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Admin nav */}
         <div className="flex flex-wrap items-center justify-between gap-3">

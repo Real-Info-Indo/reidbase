@@ -55,7 +55,7 @@ INSUFFICIENT DATA:
 - Offer to broaden to regional level or suggest the REID data team for a custom analysis.
 
 TIER:
-This mode is available to REID Base Pro and REID Base Enterprise users.
+This mode is available to REID Base Team and REID Base Enterprise users.
 
 Pro users: Full location-level sales and rental data available for property benchmarking. All Key Markets and Emerging Markets supported. Granular CSV-level data (individual transaction records, management type, contract type) is not available at Pro tier. If a Pro user requests record-level data, respond: "That level of detail is available on REID Base Enterprise — see our pricing plans."
 
@@ -111,7 +111,7 @@ serve(async (req) => {
     // Sales Assistant: reid_base_pro and enterprise only
     if (effectiveTier !== "enterprise" && effectiveTier !== "reid_base_pro") {
       return new Response(
-        JSON.stringify({ error: "Sales Assistant is available on REID Base Pro and Enterprise only." }),
+        JSON.stringify({ error: "Sales Assistant is available on REID Base Team and Enterprise only." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

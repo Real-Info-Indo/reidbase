@@ -37,7 +37,7 @@ interface UserStats {
 
 export default function AdminUsers() {
   const navigate = useNavigate();
-  const [authenticated, setAuthenticated] = useState(false);
+  const { authenticated, signIn } = useAdminAuth();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -55,10 +55,9 @@ export default function AdminUsers() {
   };
 
   const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-    } else {
+    if (!signIn(password)) {
       toast.error("Incorrect password");
+      setPassword("");
     }
   };
 

@@ -641,6 +641,121 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Conversion funnel</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {funnelSteps.map((step, index) => (
+                <div key={step.label} className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-b-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{index + 1}. {step.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {step.rateFromPrevious === null ? "Baseline" : `${formatPercent(step.rateFromPrevious)} from previous step`}
+                    </p>
+                  </div>
+                  <p className="text-lg font-semibold text-foreground">{step.value.toLocaleString()}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Mode performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Mode</th>
+                      <th className="py-2 pr-4 font-medium">Conversations</th>
+                      <th className="py-2 pr-4 font-medium">Prompts</th>
+                      <th className="py-2 pr-4 font-medium">Avg messages</th>
+                      <th className="py-2 pr-4 font-medium">Completion</th>
+                      <th className="py-2 font-medium">Users</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modePerformance.map((row) => (
+                      <tr key={row.mode} className="border-b border-border last:border-b-0">
+                        <td className="py-3 pr-4 text-foreground">{row.mode.replace(/-/g, " ")}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.conversations}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.prompts}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.avgMessagesPerConversation.toFixed(1)}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatPercent(row.completionRate)}</td>
+                        <td className="py-3 text-foreground">{row.uniqueUsers}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Retention snapshot</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Active users, 7 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers7d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Active users, 30 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers30d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">New users, 30 days</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.newUsers30d}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Repeat user rate</p>
+                <p className="text-xl font-semibold text-foreground">{formatPercent(retentionMetrics.repeatRate)}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Average sessions per user</p>
+                <p className="text-xl font-semibold text-foreground">{retentionMetrics.avgSessionsPerUser.toFixed(1)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Weekly retention cohorts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Cohort week</th>
+                      <th className="py-2 pr-4 font-medium">Users</th>
+                      <th className="py-2 pr-4 font-medium">Returned</th>
+                      <th className="py-2 font-medium">Retention</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {retentionMetrics.cohortRows.map((row) => (
+                      <tr key={row.cohort} className="border-b border-border last:border-b-0">
+                        <td className="py-3 pr-4 text-foreground">{row.cohort}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.users}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.retained}</td>
+                        <td className="py-3 text-foreground">{formatPercent(row.retentionRate)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

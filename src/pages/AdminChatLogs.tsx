@@ -242,11 +242,12 @@ export default function AdminChatLogs() {
             <TableBody>
               {filtered.map((log) => (
                 <>
-                  <TableRow
-                    key={log.id}
-                    className="cursor-pointer hover:bg-accent/50"
-                    onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
-                  >
+                   <TableRow
+                     key={log.id}
+                     id={`chat-row-${log.id}`}
+                     className={`cursor-pointer hover:bg-accent/50 ${targetConvIdRef.current === log.conversation_id ? "ring-2 ring-primary/40" : ""}`}
+                     onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
+                   >
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedIds.has(log.id)}

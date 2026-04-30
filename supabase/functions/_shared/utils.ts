@@ -244,3 +244,62 @@ export async function buildUserMemory(
 
   return { memory, aiSummary };
 }
+
+/* ── Folder memory: pull sibling-conversation summaries from the same folder (paid tiers) ── */
+export async function buildFolderMemory(
+  supabase: any,
+  wixUserId: string | undefined,
+  conversationId: string | undefined,
+  tier: string,
+): Promise<string> {
+  if (!wixUserId || !conversationId) return "";
+  if (tier !== "reid_base" && tier !== "reid_base_pro" && tier !== "enterprise") return "";
+
+  try {
+    const { data: current } = await supabase
+      .from("chat_logs")
+      .select("folder_id")
+      .eq("conversation_id", conversationId)
+      .maybeSingle();
+
+    const folderId = current?.folder_id;
+    if (!folderId) return "";
+
+    const { data: siblings, error } = await supabase
+      .from("chat_logs")
+      .select("conversation_id, title, summary, summary_updated_at, updated_at")
+      .eq("wix_user_id", wixUserId)
+      .eq("folder_id", folderId)
+      .is("deleted_at", null)
+      .neq("conversation_id", conversationId)
+      .order("updated_at", { ascending: false })
+      .limit(6);
+
+    if (error || !siblings || siblings.length === 0) return "";
+
+    const withSummary = (siblings as any[]).filter((s: any) => s.summary && s.summary.trim().length > 0);
+    if (withSummary.length === 0) return "";
+
+    const { data: folder } = await supabase
+      .from("folders")
+      .select("name")
+      .eq("id", folderId)
+      .maybeSingle();
+    const folderName = folder?.name || "this project";
+
+    const lines = withSummary
+      .map((s: any) => `- "${s.title}": ${s.summary}`)
+      .join("\n");
+
+    return `
+
+FOLDER CONTEXT — this conversation belongs to the user's project folder "${folderName}". The following are short summaries of related conversations in the same folder. Treat them as established working context for this project. When directly relevant, reference them naturally (e.g. "as we explored earlier in this project", "building on the Pererenan analysis from earlier"). Do NOT invent details beyond what these summaries contain. Do NOT list or quote them verbatim.
+
+Related conversations in "${folderName}":
+${lines}
+`;
+  } catch (err) {
+    console.error("buildFolderMemory failed:", err);
+    return "";
+  }
+}

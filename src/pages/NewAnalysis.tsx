@@ -1093,8 +1093,8 @@ export default function NewAnalysis() {
                         <DropdownMenuItem onClick={() => {
                           const clean = stripMarkdown(m.content);
                           const subject = encodeURIComponent("REID Base Market Intelligence");
-                          const body = encodeURIComponent(clean);
-                          window.open(`mailto:?subject=${subject}&body=${body}`, "_self");
+                          const body = encodeURIComponent(clean.slice(0, 1800));
+                          window.location.href = `mailto:?subject=${subject}&body=${body}`;
                         }}>
                           <Mail className="h-4 w-4 mr-2 shrink-0" />
                           Share via email

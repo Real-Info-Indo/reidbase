@@ -728,6 +728,7 @@ export default function NewAnalysis() {
 
       {hasConversation &&
       <div className="border-b border-border px-8 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
           {isRenaming ?
         <div className="flex items-center gap-2">
               <input
@@ -783,6 +784,21 @@ export default function NewAnalysis() {
               </DropdownMenuContent>
             </DropdownMenu>
         }
+          {folderContext && (
+            <span
+              title={folderContext.count > 0
+                ? `REID is drawing on ${folderContext.count} related conversation${folderContext.count === 1 ? "" : "s"} in this folder.`
+                : "This conversation will build context for others added to this folder."}
+              className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-extralight text-muted-foreground bg-primary/10 border border-primary/20 rounded-full px-2.5 py-1"
+            >
+              <FolderIcon className="h-3 w-3 text-primary" />
+              <span className="truncate max-w-[180px]">{folderContext.name}</span>
+              {folderContext.count > 0 && (
+                <span className="text-primary font-medium">· {folderContext.count} related</span>
+              )}
+            </span>
+          )}
+          </div>
         </div>
       }
 

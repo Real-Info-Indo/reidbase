@@ -962,6 +962,10 @@ export default function NewAnalysis() {
                   <Pencil className="h-4 w-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareLink} className="cursor-pointer">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share via link
+                </DropdownMenuItem>
                 {(() => {
               const allFolders = getFolders();
               if (allFolders.length === 0) return null;

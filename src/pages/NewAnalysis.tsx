@@ -1235,8 +1235,8 @@ export default function NewAnalysis() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="min-w-[160px]">
                         <DropdownMenuItem onClick={() => {
-                          const clean = stripMarkdown(m.content);
-                          const text = encodeURIComponent(clean.slice(0, 2000));
+                          const formatted = markdownToWhatsApp(m.content);
+                          const text = encodeURIComponent(formatted.slice(0, 2000));
                           window.open(`https://wa.me/?text=${text}`, "_blank");
                         }}>
                           <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#25D366] mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -1245,9 +1245,9 @@ export default function NewAnalysis() {
                           Share via WhatsApp
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => {
-                          const clean = stripMarkdown(m.content);
+                          const formatted = markdownToReadablePlainText(m.content);
                           const subject = encodeURIComponent("REID Base Market Intelligence");
-                          const body = encodeURIComponent(clean.slice(0, 1800));
+                          const body = encodeURIComponent(formatted.slice(0, 1800));
                           window.location.href = `mailto:?subject=${subject}&body=${body}`;
                         }}>
                           <Mail className="h-4 w-4 mr-2 shrink-0" />

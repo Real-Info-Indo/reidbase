@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, ArrowDown, TrendingUp, Building2, BarChart3, Calculator, Loader2, ChevronDown, Pin, Pencil, Folder as FolderIcon, FolderInput, Plus, Paperclip, LineChart, Megaphone, ShoppingCart, PieChart, X, Lock, Copy, ThumbsUp, ThumbsDown, RefreshCw, Share2, Download, Mail, ExternalLink } from "lucide-react";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";

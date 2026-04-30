@@ -1191,7 +1191,7 @@ export default function NewAnalysis() {
                 {m.role === "assistant" && !isLoading && (
                   <div className="flex items-center gap-1 mt-1.5">
                     <button
-                      onClick={() => { navigator.clipboard.writeText(stripMarkdown(m.content)); toast.success("Copied to clipboard"); if (conversationId) logFeedback(conversationId, "copy"); }}
+                      onClick={async () => { try { await copyFormatted(m.content); toast.success("Copied to clipboard"); } catch { toast.error("Copy failed"); } if (conversationId) logFeedback(conversationId, "copy"); }}
                       className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-colors"
                       title="Copy response"
                     >

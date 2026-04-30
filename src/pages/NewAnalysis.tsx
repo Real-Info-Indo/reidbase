@@ -468,11 +468,14 @@ export default function NewAnalysis() {
 
   const displayTitle = customTitle || deriveTitle(messages);
 
-  // Folder context indicator: show when this conversation belongs to a folder.
+  // Folder context indicator: show when this conversation belongs to a folder,
+  // OR when a new conversation has been started inside a folder via ?folder=.
   const folderContext = useMemo(() => {
-    if (!conversationId) return null;
-    const convo = getConversation(conversationId);
-    const folderId = convo?.folderId;
+    let folderId: string | undefined;
+    if (conversationId) {
+      folderId = getConversation(conversationId)?.folderId;
+    }
+    if (!folderId) folderId = pendingFolderIdRef.current ?? paramFolderId ?? undefined;
     if (!folderId) return null;
     const folder = getFolders().find((f) => f.id === folderId);
     if (!folder) return null;
@@ -480,7 +483,7 @@ export default function NewAnalysis() {
       (c) => c.folderId === folderId && c.id !== conversationId
     );
     return { name: folder.name, count: siblings.length };
-  }, [conversationId, messages.length]);
+  }, [conversationId, messages.length, paramFolderId]);
 
   const handlePin = () => {
     if (!conversationId) return;
@@ -822,6 +825,22 @@ export default function NewAnalysis() {
                Hi {greetingName},
              </p>
              <h1 className="text-2xl md:text-4xl font-extralight mb-8">What would you like to discover?</h1>
+            {folderContext && (
+              <div className="mb-2 flex justify-start">
+                <span
+                  title={folderContext.count > 0
+                    ? `REID is drawing on ${folderContext.count} related conversation${folderContext.count === 1 ? "" : "s"} in this folder.`
+                    : "This conversation will build context for others added to this folder."}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs text-foreground"
+                >
+                  <FolderIcon className="h-3 w-3 text-primary" />
+                  <span className="truncate max-w-[180px]">{folderContext.name}</span>
+                  {folderContext.count > 0 && (
+                    <span className="text-primary font-medium">· {folderContext.count} related</span>
+                  )}
+                </span>
+              </div>
+            )}
             <div className="relative mb-12">
               {attachedFiles.length > 0 &&
             <div className="flex flex-wrap gap-2 mb-2">
@@ -1203,6 +1222,22 @@ export default function NewAnalysis() {
             )}
               </div>
           }
+            {folderContext && !limitReached && (
+              <div className="mb-2 flex justify-start">
+                <span
+                  title={folderContext.count > 0
+                    ? `REID is drawing on ${folderContext.count} related conversation${folderContext.count === 1 ? "" : "s"} in this folder.`
+                    : "This conversation will build context for others added to this folder."}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs text-foreground"
+                >
+                  <FolderIcon className="h-3 w-3 text-primary" />
+                  <span className="truncate max-w-[180px]">{folderContext.name}</span>
+                  {folderContext.count > 0 && (
+                    <span className="text-primary font-medium">· {folderContext.count} related</span>
+                  )}
+                </span>
+              </div>
+            )}
             {limitReached ? (
               <div className="rounded-xl border border-border bg-card p-5 text-center">
                 <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>

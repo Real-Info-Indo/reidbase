@@ -353,6 +353,8 @@ export default function NewAnalysis() {
   const [searchParams] = useSearchParams();
   const paramConvoId = searchParams.get("c");
   const paramPrompt = searchParams.get("prompt");
+  const paramFolderId = searchParams.get("folder");
+  const pendingFolderIdRef = useRef<string | null>(null);
   const { tier, userName } = useTier();
   const isFreemium = tier === "member";
   const limitReached = isFreemium && dailyPromptCount >= DAILY_LIMIT;

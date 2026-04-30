@@ -86,7 +86,7 @@ export default function SharedConversation() {
   const handleContinue = async () => {
     if (!snapshot) return;
     if (!isLoggedIn) {
-      try { localStorage.setItem("post-login-target", `/shared/${snapshot.id}`); } catch {}
+      try { localStorage.setItem("wix-post-login-redirect", `${window.location.origin}/shared/${snapshot.id}`); } catch {}
       navigate("/login");
       return;
     }
@@ -115,7 +115,7 @@ export default function SharedConversation() {
 
   const handleSignIn = () => {
     if (snapshot) {
-      try { localStorage.setItem("post-login-target", `/shared/${snapshot.id}`); } catch {}
+      try { localStorage.setItem("wix-post-login-redirect", `${window.location.origin}/shared/${snapshot.id}`); } catch {}
     }
     navigate("/login");
   };

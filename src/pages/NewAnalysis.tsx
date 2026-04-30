@@ -420,6 +420,7 @@ export default function NewAnalysis() {
   }, [startNew]);
 
   const persistRef = useRef<string | null>(null);
+  const lastSummarisedCountRef = useRef<number>(0);
   useEffect(() => {
     if (messages.length === 0) return;
     const id = conversationId ?? generateId();
@@ -436,6 +437,20 @@ export default function NewAnalysis() {
     saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned, folderId });
     logConversation({ conversationId: id, title, messages, searchMode, userTier: tier, pinned: isPinned, folderId });
     window.dispatchEvent(new Event("conversations-updated"));
+
+    // Folder memory: ask the backend to refresh this conversation's summary
+    // after each completed assistant turn when it belongs to a folder.
+    // The backend skips work unless 4+ new messages have accrued.
+    const last = messages[messages.length - 1];
+    if (
+      folderId &&
+      last?.role === "assistant" &&
+      messages.length !== lastSummarisedCountRef.current &&
+      messages.length >= 2
+    ) {
+      lastSummarisedCountRef.current = messages.length;
+      refreshConversationSummary(id).catch(() => {});
+    }
   }, [messages, conversationId]);
 
   const displayTitle = customTitle || deriveTitle(messages);

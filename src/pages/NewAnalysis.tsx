@@ -455,6 +455,20 @@ export default function NewAnalysis() {
 
   const displayTitle = customTitle || deriveTitle(messages);
 
+  // Folder context indicator: show when this conversation belongs to a folder.
+  const folderContext = useMemo(() => {
+    if (!conversationId) return null;
+    const convo = getConversation(conversationId);
+    const folderId = convo?.folderId;
+    if (!folderId) return null;
+    const folder = getFolders().find((f) => f.id === folderId);
+    if (!folder) return null;
+    const siblings = getConversations().filter(
+      (c) => c.folderId === folderId && c.id !== conversationId
+    );
+    return { name: folder.name, count: siblings.length };
+  }, [conversationId, messages.length]);
+
   const handlePin = () => {
     if (!conversationId) return;
     togglePin(conversationId);

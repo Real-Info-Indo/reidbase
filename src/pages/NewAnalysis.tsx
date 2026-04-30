@@ -668,7 +668,7 @@ export default function NewAnalysis() {
       id: shareId,
       source_conversation_id: conversationId,
       title: displayTitle,
-      messages: messages as unknown as object[],
+      messages: messages as any,
       search_mode: searchMode,
       sharer_wix_user_id: wixId ?? undefined,
       sharer_name: userName || undefined,

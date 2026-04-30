@@ -10,6 +10,7 @@ import {
   buildPersonalisationBlock,
   buildRagSystemPrompt,
   buildUserMemory,
+  buildFolderMemory,
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
 
@@ -116,7 +117,9 @@ serve(async (req) => {
       );
     }
 
-    const { memory: userMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
+    const { memory: baseMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
+    const folderMemory = await buildFolderMemory(supabase, wixUserId, conversationId, effectiveTier);
+    const userMemory = (baseMemory || "") + (folderMemory || "");
 
     const modePrompt = MODE_PROMPTS["sales-assistant"];
 

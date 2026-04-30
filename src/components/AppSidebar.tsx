@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import {
   getConversations, deleteConversation, getFolders, createFolder,
   renameFolder, deleteFolder, moveToFolder, renameConversation, togglePin,
+  folderLimitForTier,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
 import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation } from "@/lib/chatLogger";

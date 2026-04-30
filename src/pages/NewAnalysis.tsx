@@ -413,7 +413,11 @@ export default function NewAnalysis() {
       setQuery("");
       setCustomTitle(null);
     }
-  }, [paramConvoId]);
+    // Capture folder hint for the next conversation that gets created.
+    if (!paramConvoId && paramFolderId) {
+      pendingFolderIdRef.current = paramFolderId;
+    }
+  }, [paramConvoId, paramFolderId]);
 
   useEffect(() => {
     const handler = () => startNew();

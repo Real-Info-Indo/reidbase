@@ -1222,6 +1222,22 @@ export default function NewAnalysis() {
             )}
               </div>
           }
+            {folderContext && !limitReached && (
+              <div className="mb-2 flex justify-start">
+                <span
+                  title={folderContext.count > 0
+                    ? `REID is drawing on ${folderContext.count} related conversation${folderContext.count === 1 ? "" : "s"} in this folder.`
+                    : "This conversation will build context for others added to this folder."}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs text-foreground"
+                >
+                  <FolderIcon className="h-3 w-3 text-primary" />
+                  <span className="truncate max-w-[180px]">{folderContext.name}</span>
+                  {folderContext.count > 0 && (
+                    <span className="text-primary font-medium">· {folderContext.count} related</span>
+                  )}
+                </span>
+              </div>
+            )}
             {limitReached ? (
               <div className="rounded-xl border border-border bg-card p-5 text-center">
                 <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>

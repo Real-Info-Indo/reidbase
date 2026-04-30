@@ -834,7 +834,10 @@ serve(async (req) => {
     }
 
     // Build cross-conversation memory for Pro/Enterprise users
-    const { memory: userMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
+    const { memory: rawUserMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
+    // Build folder memory: sibling-conversation summaries from the same folder (paid tiers)
+    const folderMemory = await buildFolderMemory(supabase, wixUserId, conversationId, effectiveTier);
+    const userMemory = (rawUserMemory || "") + (folderMemory || "");
 
     // If files are attached, prepend their contents to the last user message
     let enrichedMessages = [...messages];

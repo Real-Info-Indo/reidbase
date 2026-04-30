@@ -69,59 +69,212 @@ const searchModes = [
 { id: "marketing-assistant", label: "Marketing assistant", icon: Megaphone },
 { id: "portfolio-analyst", label: "Portfolio analyst", icon: PieChart }];
 
-/** Strip markdown formatting characters for plain text output */
+/** Strip markdown formatting characters for plain text output (fallback only) */
 function stripMarkdown(text: string): string {
   return text
-    .replace(/^#{1,6}\s+/gm, "")       // headings
-    .replace(/\*\*(.+?)\*\*/g, "$1")    // bold
-    .replace(/\*(.+?)\*/g, "$1")        // italic
-    .replace(/__(.+?)__/g, "$1")        // bold alt
-    .replace(/_(.+?)_/g, "$1")          // italic alt
-    .replace(/~~(.+?)~~/g, "$1")        // strikethrough
-    .replace(/`{1,3}[^`]*`{1,3}/g, (m) => m.replace(/`/g, "")) // code
-    .replace(/^\s*[-*+]\s+/gm, "- ")    // list markers normalise
-    .replace(/^\s*\d+\.\s+/gm, (m) => m) // keep numbered lists
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links
-    .replace(/^---+$/gm, "")            // horizontal rules
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/`{1,3}[^`]*`{1,3}/g, (m) => m.replace(/`/g, ""))
+    .replace(/^\s*[-*+]\s+/gm, "- ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^---+$/gm, "")
     .trim();
 }
 
-function downloadResponseAsPdf(content: string, chatTitle?: string) {
-  const clean = stripMarkdown(content);
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const margin = 15;
-  const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
-  const lineHeight = 6;
-  let y = margin + 5;
+/** Convert markdown to a readable plain-text form that preserves structure
+ *  (headings as upper-case lines, list bullets, numbered lists, table pipes). */
+function markdownToReadablePlainText(md: string): string {
+  let out = md;
+  // Headings -> blank line + UPPERCASE label
+  out = out.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, txt) => {
+    const level = hashes.length;
+    return level <= 2 ? `\n${txt.toUpperCase()}\n` : `\n${txt}\n`;
+  });
+  // Bold/italic/strike/code -> drop markers, keep text
+  out = out
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "$1")
+    .replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/`{1,3}([^`]+)`{1,3}/g, "$1");
+  // Links [text](url) -> "text (url)"
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  // List markers normalise
+  out = out.replace(/^\s*[-*+]\s+/gm, "• ");
+  // Horizontal rules
+  out = out.replace(/^---+$/gm, "------------------------------");
+  // Collapse 3+ blank lines
+  out = out.replace(/\n{3,}/g, "\n\n");
+  return out.trim();
+}
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+/** Convert markdown to WhatsApp-flavoured text (WhatsApp supports *bold*, _italic_, ~strike~, ```mono```). */
+function markdownToWhatsApp(md: string): string {
+  let out = md;
+  // Headings -> *bold* on own line
+  out = out.replace(/^#{1,6}\s+(.+)$/gm, "*$1*");
+  // **bold** -> *bold*
+  out = out.replace(/\*\*(.+?)\*\*/g, "*$1*");
+  out = out.replace(/__(.+?)__/g, "*$1*");
+  // *italic* (single) stays as _italic_; convert _italic_ already valid
+  // Links -> "text (url)"
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  // Lists: keep "- " bullets (WhatsApp renders them fine)
+  out = out.replace(/^\s*[-*+]\s+/gm, "• ");
+  out = out.replace(/^---+$/gm, "──────────────");
+  out = out.replace(/\n{3,}/g, "\n\n");
+  return out.trim();
+}
 
-  // Add REID header
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("REID Base", margin, y);
-  y += 8;
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(120, 120, 120);
-  doc.text(new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }), margin, y);
-  doc.setTextColor(0, 0, 0);
-  y += 10;
-
-  doc.setFontSize(10);
-  const lines = doc.splitTextToSize(clean, pageWidth);
-  for (const line of lines) {
-    if (y > doc.internal.pageSize.getHeight() - margin) {
-      doc.addPage();
-      y = margin;
+/** Build an HTML string for clipboard rich-text copy (preserves bold, headings, lists, tables). */
+function markdownToHtmlForClipboard(md: string): string {
+  // Minimal markdown -> HTML conversion good enough for paste targets (Word, Gmail, Docs).
+  const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const lines = md.split(/\n/);
+  let html = "";
+  let inUl = false, inOl = false, inTable = false;
+  let tableRows: string[][] = [];
+  const flushList = () => { if (inUl) { html += "</ul>"; inUl = false; } if (inOl) { html += "</ol>"; inOl = false; } };
+  const renderInline = (s: string) => {
+    let t = escapeHtml(s);
+    t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    t = t.replace(/__(.+?)__/g, "<strong>$1</strong>");
+    t = t.replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "<em>$1</em>");
+    t = t.replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "<em>$1</em>");
+    t = t.replace(/~~(.+?)~~/g, "<s>$1</s>");
+    t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    return t;
+  };
+  const flushTable = () => {
+    if (!inTable || tableRows.length === 0) { inTable = false; tableRows = []; return; }
+    html += '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;">';
+    tableRows.forEach((row, idx) => {
+      const tag = idx === 0 ? "th" : "td";
+      html += "<tr>" + row.map(c => `<${tag}>${renderInline(c.trim())}</${tag}>`).join("") + "</tr>";
+    });
+    html += "</table>";
+    inTable = false; tableRows = [];
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const line = raw.replace(/\s+$/, "");
+    // Table detection: row of pipes
+    if (/^\s*\|.+\|\s*$/.test(line)) {
+      const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
+      // Skip separator row (---|---)
+      if (/^[\s\-:|]+$/.test(line.replace(/\|/g, ""))) continue;
+      flushList();
+      inTable = true;
+      tableRows.push(cells);
+      continue;
+    } else if (inTable) {
+      flushTable();
     }
-    doc.text(line, margin, y);
-    y += lineHeight;
+    const h = line.match(/^(#{1,6})\s+(.+)$/);
+    if (h) { flushList(); html += `<h${h[1].length}>${renderInline(h[2])}</h${h[1].length}>`; continue; }
+    const ul = line.match(/^\s*[-*+]\s+(.+)$/);
+    if (ul) {
+      if (inOl) { html += "</ol>"; inOl = false; }
+      if (!inUl) { html += "<ul>"; inUl = true; }
+      html += `<li>${renderInline(ul[1])}</li>`;
+      continue;
+    }
+    const ol = line.match(/^\s*\d+\.\s+(.+)$/);
+    if (ol) {
+      if (inUl) { html += "</ul>"; inUl = false; }
+      if (!inOl) { html += "<ol>"; inOl = true; }
+      html += `<li>${renderInline(ol[1])}</li>`;
+      continue;
+    }
+    if (/^---+$/.test(line)) { flushList(); html += "<hr/>"; continue; }
+    if (line.trim() === "") { flushList(); html += ""; continue; }
+    flushList();
+    html += `<p>${renderInline(line)}</p>`;
   }
+  flushList();
+  flushTable();
+  return html;
+}
 
-  const safeName = (chatTitle || "REID_Response").replace(/[^a-zA-Z0-9 _-]/g, "").trim().replace(/\s+/g, "_");
-  doc.save(`${safeName}.pdf`);
+/** Copy markdown content as both rich HTML and plain text so paste targets keep formatting. */
+async function copyFormatted(md: string): Promise<void> {
+  const html = markdownToHtmlForClipboard(md);
+  const plain = markdownToReadablePlainText(md);
+  try {
+    if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+      const item = new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([plain], { type: "text/plain" }),
+      });
+      await navigator.clipboard.write([item]);
+      return;
+    }
+  } catch { /* fall through to plain text */ }
+  await navigator.clipboard.writeText(plain);
+}
+
+/** Render markdown to a styled PDF by rasterising a hidden HTML node so headings, bold,
+ *  lists and tables are preserved visually. */
+async function downloadResponseAsPdf(content: string, chatTitle?: string) {
+  const html = markdownToHtmlForClipboard(content);
+  const container = document.createElement("div");
+  container.style.cssText = [
+    "position:fixed", "left:-10000px", "top:0", "width:760px",
+    "padding:32px", "background:#ffffff", "color:#0f172a",
+    "font-family:'Poppins',Arial,sans-serif", "font-size:13px", "line-height:1.55",
+  ].join(";");
+  container.innerHTML = `
+    <div style="border-bottom:1px solid #e5e7eb;padding-bottom:12px;margin-bottom:16px;">
+      <div style="font-weight:600;font-size:16px;color:#0f172a;">REID Base</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:2px;">${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+    </div>
+    <style>
+      h1,h2,h3,h4,h5,h6 { color:#0f172a; margin:14px 0 6px; line-height:1.3; }
+      h1 { font-size:20px; } h2 { font-size:17px; } h3 { font-size:15px; }
+      h4,h5,h6 { font-size:13px; }
+      p { margin:6px 0; }
+      ul,ol { margin:6px 0 6px 22px; padding:0; }
+      li { margin:3px 0; }
+      table { width:100%; margin:10px 0; font-size:12px; border-color:#e5e7eb !important; }
+      th { background:#f8f4ec; text-align:left; }
+      th, td { border:1px solid #e5e7eb; padding:6px 8px; }
+      hr { border:none; border-top:1px solid #e5e7eb; margin:12px 0; }
+      code { background:#f3f4f6; padding:1px 4px; border-radius:3px; font-size:12px; }
+      a { color:#b07a1c; text-decoration:none; }
+      strong { color:#0f172a; }
+    </style>
+    <div>${html}</div>
+  `;
+  document.body.appendChild(container);
+  try {
+    const canvas = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ unit: "mm", format: "a4" });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    const safeName = (chatTitle || "REID_Response").replace(/[^a-zA-Z0-9 _-]/g, "").trim().replace(/\s+/g, "_");
+    pdf.save(`${safeName}.pdf`);
+  } finally {
+    document.body.removeChild(container);
+  }
 }
 
 

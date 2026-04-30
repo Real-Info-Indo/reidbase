@@ -45,6 +45,20 @@ function writeFolders(folders: Folder[]) {
   localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
 }
 
+/**
+ * Folder limits per tier.
+ * Freemium: not allowed (UI should hide creation).
+ * Member: 5, Team: 20, Enterprise: 50.
+ */
+export function folderLimitForTier(tier: string | undefined): number {
+  switch (tier) {
+    case "enterprise": return 50;
+    case "reid_base_pro": return 20;
+    case "reid_base": return 5;
+    default: return 0;
+  }
+}
+
 export function createFolder(name: string): Folder {
   const folder: Folder = { id: crypto.randomUUID(), name };
   writeFolders([...getFolders(), folder]);

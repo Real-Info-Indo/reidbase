@@ -111,6 +111,17 @@ export const cloudMoveToFolder = (id: string, folderId: string | undefined) =>
 export const cloudSoftDeleteConversation = (id: string) =>
   patchChatLog(id, { deleted_at: new Date().toISOString() });
 
+/* ── Folder memory: regenerate summary for a conversation ── */
+export async function refreshConversationSummary(conversationId: string, force = false): Promise<void> {
+  try {
+    await supabase.functions.invoke("summarise-conversation", {
+      body: { conversationId, force },
+    });
+  } catch (err) {
+    console.warn("refreshConversationSummary failed:", err);
+  }
+}
+
 export async function logFeedback(conversationId: string, action: "copy" | "like" | "dislike") {
   const col = action === "copy" ? "copy_count" : action === "like" ? "likes" : "dislikes";
 

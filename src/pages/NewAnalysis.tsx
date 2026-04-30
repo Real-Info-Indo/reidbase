@@ -10,12 +10,12 @@ import {
 "@/components/ui/dropdown-menu";
 import {
   type Msg, type Conversation,
-  getConversation, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
+  getConversation, getConversations, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
   getFolders, moveToFolder, type Folder } from
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder } from "@/lib/chatLogger";
+import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, refreshConversationSummary } from "@/lib/chatLogger";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 
@@ -420,6 +420,7 @@ export default function NewAnalysis() {
   }, [startNew]);
 
   const persistRef = useRef<string | null>(null);
+  const lastSummarisedCountRef = useRef<number>(0);
   useEffect(() => {
     if (messages.length === 0) return;
     const id = conversationId ?? generateId();
@@ -436,9 +437,37 @@ export default function NewAnalysis() {
     saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned, folderId });
     logConversation({ conversationId: id, title, messages, searchMode, userTier: tier, pinned: isPinned, folderId });
     window.dispatchEvent(new Event("conversations-updated"));
+
+    // Folder memory: ask the backend to refresh this conversation's summary
+    // after each completed assistant turn when it belongs to a folder.
+    // The backend skips work unless 4+ new messages have accrued.
+    const last = messages[messages.length - 1];
+    if (
+      folderId &&
+      last?.role === "assistant" &&
+      messages.length !== lastSummarisedCountRef.current &&
+      messages.length >= 2
+    ) {
+      lastSummarisedCountRef.current = messages.length;
+      refreshConversationSummary(id).catch(() => {});
+    }
   }, [messages, conversationId]);
 
   const displayTitle = customTitle || deriveTitle(messages);
+
+  // Folder context indicator: show when this conversation belongs to a folder.
+  const folderContext = useMemo(() => {
+    if (!conversationId) return null;
+    const convo = getConversation(conversationId);
+    const folderId = convo?.folderId;
+    if (!folderId) return null;
+    const folder = getFolders().find((f) => f.id === folderId);
+    if (!folder) return null;
+    const siblings = getConversations().filter(
+      (c) => c.folderId === folderId && c.id !== conversationId
+    );
+    return { name: folder.name, count: siblings.length };
+  }, [conversationId, messages.length]);
 
   const handlePin = () => {
     if (!conversationId) return;
@@ -699,6 +728,7 @@ export default function NewAnalysis() {
 
       {hasConversation &&
       <div className="border-b border-border px-8 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
           {isRenaming ?
         <div className="flex items-center gap-2">
               <input
@@ -738,7 +768,7 @@ export default function NewAnalysis() {
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-popover">
                         {allFolders.map((f) =>
-                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, f.id).catch(err => console.error("cloudMoveToFolder failed:", err));toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
+                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, f.id).catch(err => console.error("cloudMoveToFolder failed:", err));refreshConversationSummary(conversationId, true).catch(() => {});toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
                             <FolderIcon className="h-3.5 w-3.5 mr-2" />
                             {f.name}
                           </DropdownMenuItem>
@@ -754,6 +784,21 @@ export default function NewAnalysis() {
               </DropdownMenuContent>
             </DropdownMenu>
         }
+          {folderContext && (
+            <span
+              title={folderContext.count > 0
+                ? `REID is drawing on ${folderContext.count} related conversation${folderContext.count === 1 ? "" : "s"} in this folder.`
+                : "This conversation will build context for others added to this folder."}
+              className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-extralight text-muted-foreground bg-primary/10 border border-primary/20 rounded-full px-2.5 py-1"
+            >
+              <FolderIcon className="h-3 w-3 text-primary" />
+              <span className="truncate max-w-[180px]">{folderContext.name}</span>
+              {folderContext.count > 0 && (
+                <span className="text-primary font-medium">· {folderContext.count} related</span>
+              )}
+            </span>
+          )}
+          </div>
         </div>
       }
 

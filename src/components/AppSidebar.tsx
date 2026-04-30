@@ -14,14 +14,16 @@ import { cn } from "@/lib/utils";
 import {
   getConversations, deleteConversation, getFolders, createFolder,
   renameFolder, deleteFolder, moveToFolder, renameConversation, togglePin,
+  folderLimitForTier,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
-import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation } from "@/lib/chatLogger";
+import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation, refreshConversationSummary } from "@/lib/chatLogger";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from
 "@/components/ui/dropdown-menu";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { toast } from "sonner";
 
 const navItems = [
 { title: "New Analysis", url: "/", icon: PlusCircle },
@@ -89,6 +91,16 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   };
 
   const handleCreateFolder = () => {
+    const limit = folderLimitForTier(tier);
+    if (limit === 0) {
+      toast.error("Folders are available on REID Base Member, Team, and Enterprise plans.");
+      return;
+    }
+    if (folders.length >= limit) {
+      const tierLabel = tierLabels[tier];
+      toast.error(`Folder limit reached (${limit} on ${tierLabel}). Delete an existing folder or upgrade to add more.`);
+      return;
+    }
     const folder = createFolder("New Folder");
     refresh();
     setExpandedFolders((prev) => new Set(prev).add(folder.id));
@@ -131,6 +143,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     refresh();
     window.dispatchEvent(new Event("conversations-updated"));
     cloudMoveToFolder(convoId, folderId).catch(err => console.error("cloudMoveToFolder failed:", err));
+    // When added to a folder, force a fresh summary so folder context is immediately available.
+    if (folderId) refreshConversationSummary(convoId, true).catch(() => {});
   };
 
   const handleTogglePin = (convoId: string) => {

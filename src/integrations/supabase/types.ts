@@ -232,6 +232,9 @@ export type Database = {
           messages: Json
           pinned: boolean
           search_mode: string | null
+          summary: string | null
+          summary_message_count: number | null
+          summary_updated_at: string | null
           title: string
           updated_at: string
           user_tier: string | null
@@ -252,6 +255,9 @@ export type Database = {
           messages?: Json
           pinned?: boolean
           search_mode?: string | null
+          summary?: string | null
+          summary_message_count?: number | null
+          summary_updated_at?: string | null
           title?: string
           updated_at?: string
           user_tier?: string | null
@@ -272,6 +278,9 @@ export type Database = {
           messages?: Json
           pinned?: boolean
           search_mode?: string | null
+          summary?: string | null
+          summary_message_count?: number | null
+          summary_updated_at?: string | null
           title?: string
           updated_at?: string
           user_tier?: string | null

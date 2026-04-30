@@ -954,7 +954,7 @@ export default function NewAnalysis() {
                 <ChevronDown className="h-3.5 w-3.5 shrink-0" />
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="start" className="bg-popover">
+              <DropdownMenuContent align="start" className="bg-popover min-w-[200px] py-1.5">
                 <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
                   <Pin className="h-4 w-4 mr-2" />
                   {isPinned ? "Unpin" : "Pin to top"}

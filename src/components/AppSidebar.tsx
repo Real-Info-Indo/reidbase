@@ -91,6 +91,16 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   };
 
   const handleCreateFolder = () => {
+    const limit = folderLimitForTier(tier);
+    if (limit === 0) {
+      toast.error("Folders are available on REID Base Member, Team, and Enterprise plans.");
+      return;
+    }
+    if (folders.length >= limit) {
+      const tierLabel = tierLabels[tier];
+      toast.error(`Folder limit reached (${limit} on ${tierLabel}). Delete an existing folder or upgrade to add more.`);
+      return;
+    }
     const folder = createFolder("New Folder");
     refresh();
     setExpandedFolders((prev) => new Set(prev).add(folder.id));

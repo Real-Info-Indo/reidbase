@@ -430,16 +430,23 @@ export default function NewAnalysis() {
   useEffect(() => {
     if (messages.length === 0) return;
     const id = conversationId ?? generateId();
-    if (!conversationId) {
+    const isNewConvo = !conversationId;
+    if (isNewConvo) {
       setConversationId(id);
       const url = new URL(window.location.href);
       url.searchParams.set("c", id);
+      url.searchParams.delete("folder");
       window.history.replaceState({}, "", url.toString());
     }
     persistRef.current = id;
     const title = customTitle || deriveTitle(messages);
-    // Read folderId from existing record before saveConversation overwrites it
-    const folderId = getConversation(id)?.folderId;
+    // Read folderId from existing record before saveConversation overwrites it.
+    // For brand-new conversations created with a ?folder= hint, use that.
+    const existingFolderId = getConversation(id)?.folderId;
+    const folderId = existingFolderId ?? (isNewConvo ? pendingFolderIdRef.current ?? undefined : undefined);
+    if (isNewConvo && pendingFolderIdRef.current) {
+      pendingFolderIdRef.current = null;
+    }
     saveConversation({ id, title, messages, updatedAt: Date.now(), pinned: isPinned, folderId });
     logConversation({ conversationId: id, title, messages, searchMode, userTier: tier, pinned: isPinned, folderId });
     window.dispatchEvent(new Event("conversations-updated"));

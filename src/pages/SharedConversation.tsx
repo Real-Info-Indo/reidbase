@@ -41,9 +41,7 @@ export default function SharedConversation() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isLoggedIn, isLoading: authLoading } = useWixAuth();
-  // useTier may throw if rendered outside provider, but App wraps everything.
-  const tierCtx = (() => { try { return useTier(); } catch { return null; } })();
-  const viewerTier: UserTier = (tierCtx?.tier ?? "member") as UserTier;
+  const { tier: viewerTier } = useTier();
 
   const [snapshot, setSnapshot] = useState<SharedConversationRow | null>(null);
   const [loading, setLoading] = useState(true);

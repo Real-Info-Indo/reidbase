@@ -23,6 +23,7 @@ import {
 "@/components/ui/dropdown-menu";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { toast } from "sonner";
 
 const navItems = [
 { title: "New Analysis", url: "/", icon: PlusCircle },

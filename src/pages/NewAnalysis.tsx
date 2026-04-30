@@ -468,11 +468,14 @@ export default function NewAnalysis() {
 
   const displayTitle = customTitle || deriveTitle(messages);
 
-  // Folder context indicator: show when this conversation belongs to a folder.
+  // Folder context indicator: show when this conversation belongs to a folder,
+  // OR when a new conversation has been started inside a folder via ?folder=.
   const folderContext = useMemo(() => {
-    if (!conversationId) return null;
-    const convo = getConversation(conversationId);
-    const folderId = convo?.folderId;
+    let folderId: string | undefined;
+    if (conversationId) {
+      folderId = getConversation(conversationId)?.folderId;
+    }
+    if (!folderId) folderId = pendingFolderIdRef.current ?? paramFolderId ?? undefined;
     if (!folderId) return null;
     const folder = getFolders().find((f) => f.id === folderId);
     if (!folder) return null;
@@ -480,7 +483,7 @@ export default function NewAnalysis() {
       (c) => c.folderId === folderId && c.id !== conversationId
     );
     return { name: folder.name, count: siblings.length };
-  }, [conversationId, messages.length]);
+  }, [conversationId, messages.length, paramFolderId]);
 
   const handlePin = () => {
     if (!conversationId) return;

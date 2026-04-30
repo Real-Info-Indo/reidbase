@@ -932,7 +932,7 @@ export default function NewAnalysis() {
         accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json" />
 
       {hasConversation &&
-      <div className="border-b border-border px-4 md:px-8 py-4 md:py-5 flex items-center justify-between gap-4">
+      <div className="border-b border-border px-4 md:px-8 p-4 flex items-center justify-between gap-4 min-h-[3.625rem]">
           <div className="flex items-center gap-4 min-w-0 flex-1">
           {isRenaming ?
         <div className="flex items-center gap-2 min-w-0">

@@ -4,7 +4,7 @@ import { ArrowRight, Loader2, Lock, Share2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import { useWixAuth } from "@/contexts/WixAuthContext";
-import { useTier, type UserTier } from "@/contexts/TierContext";
+import { useTier } from "@/contexts/TierContext";
 import { saveConversation, generateId, type Msg } from "@/lib/conversations";
 import { logConversation } from "@/lib/chatLogger";
 import { toast } from "sonner";

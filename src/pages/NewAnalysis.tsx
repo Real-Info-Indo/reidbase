@@ -655,7 +655,39 @@ export default function NewAnalysis() {
     setIsRenaming(true);
   };
 
-  const submitRename = () => {
+  const handleShareLink = async () => {
+    if (!conversationId || messages.length === 0) {
+      toast.error("Nothing to share yet");
+      return;
+    }
+    const shareId = generateId();
+    const wixId = (() => {
+      try { const m = localStorage.getItem("wix-member"); return m ? (JSON.parse(m).id ?? null) : null; } catch { return null; }
+    })();
+    const { error } = await supabase.from("shared_conversations").insert({
+      id: shareId,
+      source_conversation_id: conversationId,
+      title: displayTitle,
+      messages: messages as unknown as object[],
+      search_mode: searchMode,
+      sharer_wix_user_id: wixId,
+      sharer_name: userName || null,
+      sharer_tier: tier,
+    });
+    if (error) {
+      console.error(error);
+      toast.error("Could not create share link");
+      return;
+    }
+    const url = `${window.location.origin}/shared/${shareId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Share link copied to clipboard");
+    } catch {
+      toast.message("Share link", { description: url });
+    }
+    trackFeature("conversation_shared", { conversation_id: conversationId, share_id: shareId });
+  };
     if (!conversationId || !renameValue.trim()) return;
     renameConversation(conversationId, renameValue.trim());
     setCustomTitle(renameValue.trim());

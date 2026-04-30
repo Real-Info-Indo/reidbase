@@ -10,7 +10,7 @@ import {
 "@/components/ui/dropdown-menu";
 import {
   type Msg, type Conversation,
-  getConversation, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
+  getConversation, getConversations, saveConversation, generateId, deriveTitle, togglePin, renameConversation,
   getFolders, moveToFolder, type Folder } from
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";

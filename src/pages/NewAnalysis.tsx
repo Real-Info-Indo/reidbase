@@ -768,7 +768,7 @@ export default function NewAnalysis() {
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-popover">
                         {allFolders.map((f) =>
-                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, f.id).catch(err => console.error("cloudMoveToFolder failed:", err));toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
+                    <DropdownMenuItem key={f.id} onClick={() => {if (conversationId) {moveToFolder(conversationId, f.id);window.dispatchEvent(new Event("conversations-updated"));cloudMoveToFolder(conversationId, f.id).catch(err => console.error("cloudMoveToFolder failed:", err));refreshConversationSummary(conversationId, true).catch(() => {});toast.success(`Moved to ${f.name}`);}}} className="cursor-pointer text-xs">
                             <FolderIcon className="h-3.5 w-3.5 mr-2" />
                             {f.name}
                           </DropdownMenuItem>

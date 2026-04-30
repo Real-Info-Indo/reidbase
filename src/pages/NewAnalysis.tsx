@@ -664,16 +664,16 @@ export default function NewAnalysis() {
     const wixId = (() => {
       try { const m = localStorage.getItem("wix-member"); return m ? (JSON.parse(m).id ?? null) : null; } catch { return null; }
     })();
-    const { error } = await supabase.from("shared_conversations").insert({
+    const { error } = await supabase.from("shared_conversations").insert([{
       id: shareId,
       source_conversation_id: conversationId,
       title: displayTitle,
       messages: messages as unknown as object[],
       search_mode: searchMode,
-      sharer_wix_user_id: wixId,
-      sharer_name: userName || null,
+      sharer_wix_user_id: wixId ?? undefined,
+      sharer_name: userName || undefined,
       sharer_tier: tier,
-    });
+    }]);
     if (error) {
       console.error(error);
       toast.error("Could not create share link");

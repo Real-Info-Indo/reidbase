@@ -265,9 +265,10 @@ export async function buildFolderMemory(
     const folderId = current?.folder_id;
     if (!folderId) return "";
 
-    const { data: siblings, error } = await supabase
+    // Recent siblings (exclude current chat)
+    const { data: recent, error } = await supabase
       .from("chat_logs")
-      .select("conversation_id, title, summary, summary_updated_at, updated_at")
+      .select("conversation_id, title, summary, summary_updated_at, updated_at, created_at")
       .eq("wix_user_id", wixUserId)
       .eq("folder_id", folderId)
       .is("deleted_at", null)
@@ -275,10 +276,36 @@ export async function buildFolderMemory(
       .order("updated_at", { ascending: false })
       .limit(6);
 
-    if (error || !siblings || siblings.length === 0) return "";
+    if (error) return "";
 
-    const withSummary = (siblings as any[]).filter((s: any) => s.summary && s.summary.trim().length > 0);
-    if (withSummary.length === 0) return "";
+    // Founding (oldest) conversation in the folder — include even if it's the current chat,
+    // so the AI always has the project's starting context.
+    const { data: founding } = await supabase
+      .from("chat_logs")
+      .select("conversation_id, title, summary, created_at")
+      .eq("wix_user_id", wixUserId)
+      .eq("folder_id", folderId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    // Merge: founding first, then recent siblings, deduped by conversation_id
+    const merged: any[] = [];
+    const seen = new Set<string>();
+    if (founding && founding.summary && founding.summary.trim().length > 0) {
+      merged.push({ ...founding, _founding: true });
+      seen.add(founding.conversation_id);
+    }
+    for (const s of (recent as any[]) || []) {
+      if (seen.has(s.conversation_id)) continue;
+      if (s.summary && s.summary.trim().length > 0) {
+        merged.push(s);
+        seen.add(s.conversation_id);
+      }
+    }
+
+    if (merged.length === 0) return "";
 
     const { data: folder } = await supabase
       .from("folders")
@@ -287,13 +314,17 @@ export async function buildFolderMemory(
       .maybeSingle();
     const folderName = folder?.name || "this project";
 
-    const lines = withSummary
-      .map((s: any) => `- "${s.title}": ${s.summary}`)
+    const lines = merged
+      .map((s: any) =>
+        s._founding
+          ? `- "${s.title}" (founding conversation): ${s.summary}`
+          : `- "${s.title}": ${s.summary}`,
+      )
       .join("\n");
 
     return `
 
-FOLDER CONTEXT — this conversation belongs to the user's project folder "${folderName}". The following are short summaries of related conversations in the same folder. Treat them as established working context for this project. When directly relevant, reference them naturally (e.g. "as we explored earlier in this project", "building on the Pererenan analysis from earlier"). Do NOT invent details beyond what these summaries contain. Do NOT list or quote them verbatim.
+FOLDER CONTEXT — this conversation belongs to the user's project folder "${folderName}". The following are short summaries of related conversations in the same folder, beginning with the founding conversation that established this project's context. Treat them as established working context. When directly relevant, reference them naturally (e.g. "as we explored earlier in this project", "building on the Pererenan analysis from earlier"). Do NOT invent details beyond what these summaries contain. Do NOT list or quote them verbatim.
 
 Related conversations in "${folderName}":
 ${lines}

@@ -688,6 +688,8 @@ export default function NewAnalysis() {
     }
     trackFeature("conversation_shared", { conversation_id: conversationId, share_id: shareId });
   };
+
+  const submitRename = () => {
     if (!conversationId || !renameValue.trim()) return;
     renameConversation(conversationId, renameValue.trim());
     setCustomTitle(renameValue.trim());

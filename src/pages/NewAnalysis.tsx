@@ -932,28 +932,29 @@ export default function NewAnalysis() {
         accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json" />
 
       {hasConversation &&
-      <div className="border-b border-border px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
+      <div className="border-b border-border px-4 md:px-8 py-4 md:py-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
           {isRenaming ?
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
               <input
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submitRename()}
-            className="text-sm font-extralight border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card"
+            className="text-sm font-extralight border border-border rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 bg-card min-w-0 flex-1"
             autoFocus />
 
-              <button onClick={submitRename} className="text-xs text-primary font-medium hover:underline">Save</button>
-              <button onClick={() => setIsRenaming(false)} className="text-xs text-muted-foreground hover:underline">Cancel</button>
+              <button onClick={submitRename} className="text-xs text-primary font-medium hover:underline shrink-0">Save</button>
+              <button onClick={() => setIsRenaming(false)} className="text-xs text-muted-foreground hover:underline shrink-0">Cancel</button>
             </div> :
 
         <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors focus:outline-none">
-                {isPinned && <Pin className="h-3 w-3 text-primary" />}
-                {displayTitle}
-                <ChevronDown className="h-3.5 w-3.5" />
+              <DropdownMenuTrigger className="flex items-center gap-2 text-sm font-extralight text-muted-foreground hover:text-foreground transition-colors focus:outline-none min-w-0 max-w-full px-1 py-1 -mx-1 rounded-md">
+                {isPinned && <Pin className="h-3 w-3 text-primary shrink-0" />}
+                <span className="truncate">{displayTitle}</span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="bg-popover">
+
+              <DropdownMenuContent align="start" className="bg-popover min-w-[200px] py-1.5">
                 <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
                   <Pin className="h-4 w-4 mr-2" />
                   {isPinned ? "Unpin" : "Pin to top"}

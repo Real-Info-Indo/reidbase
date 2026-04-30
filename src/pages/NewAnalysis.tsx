@@ -15,7 +15,7 @@ import {
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder } from "@/lib/chatLogger";
+import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, refreshConversationSummary } from "@/lib/chatLogger";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 

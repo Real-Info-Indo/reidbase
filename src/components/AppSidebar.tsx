@@ -366,13 +366,38 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
                             )}
                             <span className="text-[10px] text-sidebar-muted ml-auto">{folderConvos.length}</span>
                           </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/?folder=${folder.id}`);
+                              window.dispatchEvent(new Event("new-analysis-reset"));
+                              setExpandedFolders((prev) => new Set(prev).add(folder.id));
+                              onNavigate?.();
+                            }}
+                            title="New chat in this folder"
+                            className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5"
+                          >
+                            <PlusCircle className="h-3 w-3" />
+                          </button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <button className="shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity p-0.5">
                                 <MoreHorizontal className="h-3 w-3" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-popover min-w-[120px]">
+                            <DropdownMenuContent align="end" className="bg-popover min-w-[160px]">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  navigate(`/?folder=${folder.id}`);
+                                  window.dispatchEvent(new Event("new-analysis-reset"));
+                                  setExpandedFolders((prev) => new Set(prev).add(folder.id));
+                                  onNavigate?.();
+                                }}
+                                className="cursor-pointer text-xs"
+                              >
+                                <PlusCircle className="h-3.5 w-3.5 mr-2" />
+                                New chat in folder
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => { setRenamingFolderId(folder.id); setFolderRenameValue(folder.name); }} className="cursor-pointer text-xs">
                                 <Pencil className="h-3.5 w-3.5 mr-2" />
                                 Rename

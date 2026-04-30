@@ -143,6 +143,8 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
     refresh();
     window.dispatchEvent(new Event("conversations-updated"));
     cloudMoveToFolder(convoId, folderId).catch(err => console.error("cloudMoveToFolder failed:", err));
+    // When added to a folder, force a fresh summary so folder context is immediately available.
+    if (folderId) refreshConversationSummary(convoId, true).catch(() => {});
   };
 
   const handleTogglePin = (convoId: string) => {

@@ -47,6 +47,21 @@ export default function SharedConversation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Persist this shared URL as the post-login destination, so that whenever
+  // the recipient signs in (via our CTA, the sidebar, or any other entry
+  // point), they are returned to this conversation rather than the home page.
+  useEffect(() => {
+    if (!id) return;
+    if (authLoading) return;
+    if (isLoggedIn) return;
+    try {
+      localStorage.setItem(
+        "wix-post-login-redirect",
+        `${window.location.origin}/shared/${id}`,
+      );
+    } catch {}
+  }, [id, isLoggedIn, authLoading]);
+
   useEffect(() => {
     if (!id) return;
     (async () => {

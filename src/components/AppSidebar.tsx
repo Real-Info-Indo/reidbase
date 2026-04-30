@@ -17,7 +17,7 @@ import {
   folderLimitForTier,
   type Conversation, type Folder as FolderType } from
 "@/lib/conversations";
-import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation } from "@/lib/chatLogger";
+import { logFolder, deleteFolder as deleteLogFolder, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, cloudSoftDeleteConversation, refreshConversationSummary } from "@/lib/chatLogger";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from
 "@/components/ui/dropdown-menu";

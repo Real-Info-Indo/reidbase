@@ -431,6 +431,42 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          search_mode: string | null
+          sharer_name: string | null
+          sharer_tier: string | null
+          sharer_wix_user_id: string | null
+          source_conversation_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          messages?: Json
+          search_mode?: string | null
+          sharer_name?: string | null
+          sharer_tier?: string | null
+          sharer_wix_user_id?: string | null
+          source_conversation_id?: string | null
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          search_mode?: string | null
+          sharer_name?: string | null
+          sharer_tier?: string | null
+          sharer_wix_user_id?: string | null
+          source_conversation_id?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           about: string | null

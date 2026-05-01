@@ -1,9 +1,9 @@
 import { useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { useTier } from "@/contexts/TierContext";
 import { toast } from "@/hooks/use-toast";
 import { trackFeature } from "@/lib/analytics";
+import { invokeUserData } from "@/lib/userDataApi";
 
 const SESSION_KEY = "reid-session-id";
 const POLL_INTERVAL = 15_000; // 15 seconds
@@ -27,71 +27,47 @@ export function useSessionEnforcement() {
 
   const isPaid = PAID_TIERS.includes(tier);
 
-  const registerSession = useCallback(async (wixUserId: string) => {
-    // Upsert: replace any existing session for this user
-    const { error } = await supabase
-      .from("user_sessions")
-      .upsert(
-        {
-          wix_user_id: wixUserId,
-          session_id: sessionId.current,
-          last_seen: new Date().toISOString(),
-        },
-        { onConflict: "wix_user_id" }
-      );
-    if (error) console.error("Session register error:", error);
+  const registerSession = useCallback(async () => {
+    const { error } = await invokeUserData("register_session", {
+      session_id: sessionId.current,
+    });
+    if (error) console.error("Session register error:", error.error, error.message);
   }, []);
 
-  const checkSession = useCallback(
-    async (wixUserId: string) => {
-      const { data, error } = await supabase
-        .from("user_sessions")
-        .select("session_id")
-        .eq("wix_user_id", wixUserId)
-        .single();
+  const checkSession = useCallback(async () => {
+    const { data, error } = await invokeUserData<{
+      session_id: string | null;
+      is_owner: boolean;
+    }>("check_session", { session_id: sessionId.current });
 
-      if (error) {
-        console.error("Session check error:", error);
-        return;
-      }
+    if (error) {
+      console.error("Session check error:", error.error, error.message);
+      return;
+    }
+    if (!data) return;
 
-      if (data && data.session_id !== sessionId.current) {
-        // Another device has taken over
-        trackFeature("session_kicked", {
-          kicked_session_id: sessionId.current,
-          new_session_id: data.session_id,
-        });
-        toast({
-          title: "Session ended",
-          description:
-            "Your account was signed in on another device. You have been logged out.",
-          variant: "destructive",
-        });
-        // Small delay so the toast is visible
-        setTimeout(() => logout(), 2500);
-      } else {
-        // Heartbeat: update last_seen
-        await supabase
-          .from("user_sessions")
-          .update({ last_seen: new Date().toISOString() })
-          .eq("wix_user_id", wixUserId)
-          .eq("session_id", sessionId.current);
-      }
-    },
-    [logout]
-  );
+    if (data.session_id && !data.is_owner) {
+      // Another device has taken over
+      trackFeature("session_kicked", {
+        kicked_session_id: sessionId.current,
+        new_session_id: data.session_id,
+      });
+      toast({
+        title: "Session ended",
+        description:
+          "Your account was signed in on another device. You have been logged out.",
+        variant: "destructive",
+      });
+      setTimeout(() => logout(), 2500);
+    }
+  }, [logout]);
 
   useEffect(() => {
     if (!isLoggedIn || !member?.id || !isPaid) return;
 
-    const userId = member.id;
-
-    // Register immediately
-    registerSession(userId);
-
-    // Poll
+    registerSession();
     intervalRef.current = setInterval(() => {
-      checkSession(userId);
+      checkSession();
     }, POLL_INTERVAL);
 
     return () => {

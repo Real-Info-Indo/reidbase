@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { invokeUserData } from "@/lib/userDataApi";
 
 interface HydrateResult {
   conversationsRestored: number;
@@ -7,68 +7,49 @@ interface HydrateResult {
 
 /**
  * Cloud-wins reconciliation.
- * On every login we replace localStorage with whatever Supabase has for this Wix user.
- * Soft-deleted conversations (deleted_at IS NOT NULL) are filtered out.
+ * On every login we replace localStorage with whatever the server has for this
+ * Wix user. The server is the only thing that can read these tables now —
+ * identity is verified from the Wix access token in the Authorization header.
  */
-export async function hydrateFromSupabase(wixUserId: string): Promise<HydrateResult> {
+export async function hydrateFromSupabase(_wixUserId?: string): Promise<HydrateResult> {
   let conversationsRestored = 0;
   let foldersRestored = 0;
 
-  if (!wixUserId) return { conversationsRestored, foldersRestored };
-
   try {
-    // ── Conversations ──
-    const { data: chatLogs, error } = await supabase
-      .from("chat_logs" as any)
-      .select("conversation_id, title, messages, search_mode, updated_at, pinned, folder_id, deleted_at")
-      .eq("wix_user_id", wixUserId)
-      .order("updated_at", { ascending: false })
-      .limit(500);
+    const { data, error } = await invokeUserData<{
+      conversations: any[];
+      folders: any[];
+      profile: any;
+    }>("hydrate");
 
-    if (!error && chatLogs) {
-      const conversations = (chatLogs as any[])
-        .filter((log: any) => !log.deleted_at)
-        .map((log: any) => ({
-          id: log.conversation_id,
-          title: log.title || "New conversation",
-          messages: Array.isArray(log.messages) ? log.messages : [],
-          updatedAt: new Date(log.updated_at).getTime(),
-          pinned: log.pinned || false,
-          folderId: log.folder_id || undefined,
-        }));
-
-      localStorage.setItem("reid_conversations", JSON.stringify(conversations));
-      conversationsRestored = conversations.length;
+    if (error || !data) {
+      if (error) console.warn("hydrate failed:", error.error, error.message);
+      return { conversationsRestored, foldersRestored };
     }
+
+    // ── Conversations ──
+    const conversations = (data.conversations ?? []).map((log: any) => ({
+      id: log.conversation_id,
+      title: log.title || "New conversation",
+      messages: Array.isArray(log.messages) ? log.messages : [],
+      updatedAt: log.updated_at ? new Date(log.updated_at).getTime() : Date.now(),
+      pinned: log.pinned || false,
+      folderId: log.folder_id || undefined,
+    }));
+    localStorage.setItem("reid_conversations", JSON.stringify(conversations));
+    conversationsRestored = conversations.length;
 
     // ── Folders ──
-    const { data: folders, error: foldersError } = await supabase
-      .from("folders")
-      .select("id, name, created_at")
-      .eq("wix_user_id", wixUserId)
-      .order("created_at", { ascending: true });
+    const folderList = (data.folders ?? []).map((f: any) => ({
+      id: f.id,
+      name: f.name,
+    }));
+    localStorage.setItem("reid_folders", JSON.stringify(folderList));
+    foldersRestored = folderList.length;
 
-    if (!foldersError && folders) {
-      const folderList = folders.map((f: any) => ({
-        id: f.id,
-        name: f.name,
-      }));
-
-      localStorage.setItem("reid_folders", JSON.stringify(folderList));
-      foldersRestored = folderList.length;
-    }
-
-    // ── Personalisation (nickname, occupation, business, about) ──
-    const { data: profile, error: profileError } = await supabase
-      .from("user_profiles" as any)
-      .select("nickname, occupation, business, about")
-      .eq("wix_user_id", wixUserId)
-      .maybeSingle();
-
-    if (!profileError && profile) {
-      const p: any = profile;
-      // Only overwrite if the cloud has at least one non-empty field,
-      // so we don't wipe an unsynced first-time entry.
+    // ── Personalisation ──
+    const p = data.profile;
+    if (p) {
       const hasAny = p.nickname || p.occupation || p.business || p.about;
       if (hasAny) {
         localStorage.setItem(
@@ -78,13 +59,12 @@ export async function hydrateFromSupabase(wixUserId: string): Promise<HydrateRes
             occupation: p.occupation || "",
             business: p.business || "",
             about: p.about || "",
-          })
+          }),
         );
         window.dispatchEvent(new Event("personalisation-updated"));
       }
     }
 
-    // Notify any mounted UI to re-read from localStorage
     window.dispatchEvent(new Event("conversations-updated"));
   } catch (err) {
     console.error("hydrateFromSupabase failed:", err);

@@ -30,10 +30,16 @@ Tables already locked down in Phase 1 (no anon/authenticated policies):
 
 ## Phase 2 checklist
 
-1. Ship Phase 1B/1C/1D Edge Functions (`admin-data`, `user-data`, hardened
-   chat / appraisal / import / session endpoints). Every direct
-   `supabase.from(...)` call against the tables above must be replaced with
-   a call to one of these functions before lockdown.
+1. Ship Phase 1B/1C/1D Edge Functions (`admin-data`, `admin-mutate`,
+   `check-admin`, hardened import / chat / appraisal / session / user-data
+   endpoints). Every direct `supabase.from(...)` call against the tables
+   above must be replaced with a call to one of these functions before
+   lockdown.
+   - **Phase 1B (done):** `check-admin`, `admin-data`, `admin-mutate`
+     deployed; admin pages (`AdminUsers`, `AdminAnalytics`, `AdminChatLogs`,
+     `AdminAppraisals`, `AdminAlerts`, `ImportData`) all rewired off the
+     hardcoded password and direct `supabase.from(...)` reads/writes.
+     `import-csv` and `import-rentals` now require admin Wix bearer token.
 2. Verify with the user that the new flows work end-to-end in preview.
 3. Run the lockdown migration that, for each table above:
    - Drops the permissive `USING (true)` / `WITH CHECK (true)` policies.

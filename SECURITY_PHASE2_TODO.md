@@ -42,15 +42,35 @@ Tables already locked down in Phase 1 (no anon/authenticated policies):
      `import-csv` and `import-rentals` now require admin Wix bearer token.
    - **Phase 1C (done):** `user-data` Edge Function deployed (hydrate,
      upsert/patch chat_log, feedback count + comment, upsert/delete folder,
-     upsert profile, register/check session, share conversation). All
-     owner-scoped frontend writes now route through it via
-     `src/lib/userDataApi.ts`: `chatLogger`, `hydrateFromSupabase`,
+     upsert profile, register/check session, share conversation,
+     refresh_summary). All owner-scoped frontend writes now route through
+     it via `src/lib/userDataApi.ts`: `chatLogger`, `hydrateFromSupabase`,
      `syncUserProfile`, `useSessionEnforcement`, and the share-link path
      in `NewAnalysis`. The four `chat-*` Edge Functions now verify the
-     Wix bearer token (required for sales/marketing/portfolio, optional
-     for data-analyst), ignore any client-supplied `wixUserId`, and
-     resolve tier from `public.user_entitlements` rather than
-     `user_profiles.tier`.
+     Wix bearer token (mandatory for sales/marketing/portfolio, optional
+     for data-analyst — see note below), ignore any client-supplied
+     `wixUserId` and `tier`, and resolve tier from
+     `public.user_entitlements` rather than `user_profiles.tier`.
+   - **Phase 1C hardening (done):**
+     - `upsert_chat_log` and `upsert_folder` reject overwriting rows owned
+       by a different Wix user (returns 403).
+     - `log_feedback_count` is now atomic via the
+       `public.increment_chat_feedback_counter` SECURITY DEFINER RPC,
+       which only increments rows where `wix_user_id` matches the verified
+       caller. EXECUTE on the RPC is revoked from PUBLIC/anon/authenticated.
+     - `resolveVerifiedTier` no longer falls back to client-supplied
+       `requestTier` for new users. No entitlement row -> `free`.
+     - `upsert_profile` no longer accepts `body.tier`. Tier is written
+       only by `refresh-entitlements` to `user_entitlements`.
+     - `summarise-conversation` now requires the `x-internal-token`
+       header and is invoked exclusively by `user-data`'s
+       `refresh_summary` action, which checks owner before calling.
+   - **`chat-data-analyst` auth posture:** anonymous calls remain allowed
+     to support the embedded chat widgets (`/widget`, `/widget-minimal`).
+     The main app sends a Wix bearer when one is available. Phase 2 will
+     either (a) keep this dual-mode behaviour and add a per-IP free-tier
+     rate limit, or (b) split the widget into its own dedicated function
+     so the main `chat-data-analyst` can require Wix auth.
    - **Phase 1C deferred:** `analytics_events` insert path is intentionally
      left as a direct client insert per the table strategy above
      (write-only beacon; SELECT will be revoked in Phase 2). Move it

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          wix_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          wix_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          wix_user_id?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -431,6 +452,36 @@ export type Database = {
         }
         Relationships: []
       }
+      report_downloads: {
+        Row: {
+          created_at: string
+          id: string
+          report_key: string
+          report_type: string
+          storage_path: string
+          user_tier: string | null
+          wix_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          report_key: string
+          report_type: string
+          storage_path: string
+          user_tier?: string | null
+          wix_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          report_key?: string
+          report_type?: string
+          storage_path?: string
+          user_tier?: string | null
+          wix_user_id?: string
+        }
+        Relationships: []
+      }
       shared_conversations: {
         Row: {
           created_at: string
@@ -464,6 +515,39 @@ export type Database = {
           sharer_wix_user_id?: string | null
           source_conversation_id?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      user_entitlements: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          refreshed_at: string
+          source: string
+          tier: string
+          updated_at: string
+          wix_plan_names: string[] | null
+          wix_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          refreshed_at?: string
+          source?: string
+          tier?: string
+          updated_at?: string
+          wix_plan_names?: string[] | null
+          wix_user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          refreshed_at?: string
+          source?: string
+          tier?: string
+          updated_at?: string
+          wix_plan_names?: string[] | null
+          wix_user_id?: string
         }
         Relationships: []
       }
@@ -542,6 +626,7 @@ export type Database = {
     }
     Functions: {
       execute_readonly_query: { Args: { query_text: string }; Returns: Json }
+      has_admin: { Args: { _wix_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

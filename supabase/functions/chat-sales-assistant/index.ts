@@ -13,6 +13,7 @@ import {
   buildFolderMemory,
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
+import { verifyWixToken, wixAuthErrorResponse } from "../_shared/wix-auth.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -92,7 +93,17 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, tier: requestTier, wixUserId, conversationId } = await req.json();
+    // Verify Wix identity. Tier-gated chat modes require an authenticated
+    // caller — anonymous requests are rejected before any work happens.
+    let wixUserId: string;
+    try {
+      const identity = await verifyWixToken(req.headers.get("Authorization"));
+      wixUserId = identity.wixUserId;
+    } catch (err) {
+      return wixAuthErrorResponse(err, corsHeaders);
+    }
+
+    const { messages, fileContents, searchMode, personalisation, tier: requestTier, conversationId } = await req.json();
 
     // Moderate the latest user message (silent, non-blocking)
     const lastMsg = messages?.[messages.length - 1];

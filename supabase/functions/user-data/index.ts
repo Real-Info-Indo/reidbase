@@ -118,6 +118,27 @@ Deno.serve(async (req) => {
       case "upsert_chat_log": {
         const c = body.conversation;
         if (!c || !isString(c.conversation_id)) return badRequest("missing_conversation");
+
+        // Owner check: if a row already exists for this conversation_id and
+        // it belongs to a different Wix user, refuse. Service role bypasses
+        // RLS, so without this check a caller could overwrite anyone's row
+        // by guessing or reusing a conversation_id.
+        const { data: existing, error: existingErr } = await supabase
+          .from("chat_logs")
+          .select("wix_user_id")
+          .eq("conversation_id", c.conversation_id)
+          .maybeSingle();
+        if (existingErr) {
+          return jsonResponse({ error: "lookup_failed", message: existingErr.message }, 500);
+        }
+        if (
+          existing &&
+          (existing as any).wix_user_id &&
+          (existing as any).wix_user_id !== wixUserId
+        ) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
         const row = {
           conversation_id: c.conversation_id,
           wix_user_id: wixUserId,
@@ -168,30 +189,28 @@ Deno.serve(async (req) => {
         const conversationId = body.conversation_id;
         const kind = body.kind;
         if (!isString(conversationId)) return badRequest("missing_conversation_id");
+        if (kind !== "copy" && kind !== "like" && kind !== "dislike") {
+          return badRequest("invalid_kind");
+        }
+        // Atomic increment via SECURITY DEFINER RPC. The function only
+        // increments rows where wix_user_id matches the verified caller
+        // (or is null/legacy). Returns the new value, or null if the row
+        // did not match.
+        const { data, error } = await supabase.rpc("increment_chat_feedback_counter", {
+          _conversation_id: conversationId,
+          _wix_user_id: wixUserId,
+          _kind: kind,
+        });
+        if (error) return jsonResponse({ error: "update_failed", message: error.message }, 500);
+        if (data === null || typeof data === "undefined") {
+          return jsonResponse({ error: "not_found_or_forbidden" }, 404);
+        }
         const colMap: Record<string, string> = {
           copy: "copy_count",
           like: "likes",
           dislike: "dislikes",
         };
-        const col = colMap[kind];
-        if (!col) return badRequest("invalid_kind");
-
-        const { data: row } = await supabase
-          .from("chat_logs")
-          .select(`${col}, wix_user_id`)
-          .eq("conversation_id", conversationId)
-          .maybeSingle();
-        if (!row) return jsonResponse({ error: "not_found" }, 404);
-        if ((row as any).wix_user_id && (row as any).wix_user_id !== wixUserId) {
-          return jsonResponse({ error: "forbidden" }, 403);
-        }
-        const next = ((row as any)[col] ?? 0) + 1;
-        const { error } = await supabase
-          .from("chat_logs")
-          .update({ [col]: next })
-          .eq("conversation_id", conversationId);
-        if (error) return jsonResponse({ error: "update_failed", message: error.message }, 500);
-        return jsonResponse({ ok: true, [col]: next });
+        return jsonResponse({ ok: true, [colMap[kind]]: data });
       }
 
       case "submit_feedback_comment": {
@@ -220,6 +239,24 @@ Deno.serve(async (req) => {
         if (!folder || !isString(folder.id) || !isString(folder.name)) {
           return badRequest("missing_folder");
         }
+
+        // Owner check: refuse to overwrite a folder owned by someone else.
+        const { data: existing, error: existingErr } = await supabase
+          .from("folders")
+          .select("wix_user_id")
+          .eq("id", folder.id)
+          .maybeSingle();
+        if (existingErr) {
+          return jsonResponse({ error: "lookup_failed", message: existingErr.message }, 500);
+        }
+        if (
+          existing &&
+          (existing as any).wix_user_id &&
+          (existing as any).wix_user_id !== wixUserId
+        ) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
         const { error } = await supabase.from("folders").upsert(
           {
             id: folder.id,
@@ -261,9 +298,12 @@ Deno.serve(async (req) => {
       }
 
       // ── PROFILE ──────────────────────────────────────────
+      // Note: tier is intentionally NOT writable here. Entitlement / tier
+      // lives only in `public.user_entitlements`, populated by
+      // `refresh-entitlements` after talking to Wix. Any `body.tier` sent
+      // by the client is silently ignored.
       case "upsert_profile": {
         const p = body.profile ?? {};
-        const tier = isString(body.tier) ? body.tier : null;
         const row = {
           wix_user_id: wixUserId,
           display_name: identity.displayName,
@@ -272,7 +312,6 @@ Deno.serve(async (req) => {
           nickname: typeof p.nickname === "string" ? p.nickname : null,
           occupation: typeof p.occupation === "string" ? p.occupation : null,
           about: typeof p.about === "string" ? p.about : null,
-          tier,
           last_login: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -351,6 +390,50 @@ Deno.serve(async (req) => {
         });
         if (error) return jsonResponse({ error: "insert_failed", message: error.message }, 500);
         return jsonResponse({ ok: true, share_id: shareId });
+      }
+
+
+      // ── SUMMARY REFRESH ──────────────────────────────────
+      // Owner-scoped wrapper around `summarise-conversation`. Verifies the
+      // caller owns the conversation, then calls the internal function with
+      // a shared internal token (see summarise-conversation auth check).
+      case "refresh_summary": {
+        const conversationId = body.conversation_id;
+        const force = !!body.force;
+        if (!isString(conversationId)) return badRequest("missing_conversation_id");
+
+        const { data: src, error: srcErr } = await supabase
+          .from("chat_logs")
+          .select("wix_user_id")
+          .eq("conversation_id", conversationId)
+          .maybeSingle();
+        if (srcErr) return jsonResponse({ error: "lookup_failed", message: srcErr.message }, 500);
+        if (!src) return jsonResponse({ error: "not_found" }, 404);
+        if ((src as any).wix_user_id && (src as any).wix_user_id !== wixUserId) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const internalToken = Deno.env.get("INTERNAL_FUNCTION_TOKEN") || serviceRoleKey;
+        try {
+          const resp = await fetch(`${supabaseUrl}/functions/v1/summarise-conversation`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceRoleKey}`,
+              "x-internal-token": internalToken,
+            },
+            body: JSON.stringify({ conversationId, force }),
+          });
+          const out = await resp.json().catch(() => ({}));
+          return jsonResponse(out, resp.status);
+        } catch (err) {
+          return jsonResponse(
+            { error: "summarise_invoke_failed", message: (err as Error).message },
+            502,
+          );
+        }
       }
 
       default:

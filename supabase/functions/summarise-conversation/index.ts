@@ -26,6 +26,20 @@ Rules:
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Internal-only function. Must be called from another Edge Function
+  // (currently `user-data`) which has already verified the caller's Wix
+  // identity and confirmed they own the conversation. Public callers
+  // (anon Wix users) cannot invoke this directly.
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const internalToken = Deno.env.get("INTERNAL_FUNCTION_TOKEN") || serviceRoleKey;
+  const presented = req.headers.get("x-internal-token") || "";
+  if (!presented || presented !== internalToken) {
+    return new Response(JSON.stringify({ error: "forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { conversationId, force } = await req.json();
     if (!conversationId) {

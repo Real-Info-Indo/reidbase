@@ -1,5 +1,4 @@
 import { invokeUserData } from "@/lib/userDataApi";
-import { supabase } from "@/integrations/supabase/client";
 import type { Msg } from "./conversations";
 
 interface LogPayload {
@@ -59,15 +58,16 @@ export const cloudMoveToFolder = (id: string, folderId: string | undefined) =>
 export const cloudSoftDeleteConversation = (id: string) =>
   patchChatLog(id, { deleted_at: new Date().toISOString() });
 
-/* ── Folder memory: regenerate summary for a conversation ── */
+/* ── Folder memory: regenerate summary for a conversation ──
+   Goes through the owner-scoped `refresh_summary` action on user-data,
+   which verifies the caller owns the conversation before invoking the
+   internal `summarise-conversation` function. */
 export async function refreshConversationSummary(conversationId: string, force = false): Promise<void> {
-  try {
-    await supabase.functions.invoke("summarise-conversation", {
-      body: { conversationId, force },
-    });
-  } catch (err) {
-    console.warn("refreshConversationSummary failed:", err);
-  }
+  const { error } = await invokeUserData("refresh_summary", {
+    conversation_id: conversationId,
+    force,
+  });
+  if (error) console.warn("refreshConversationSummary failed:", error.error, error.message);
 }
 
 export async function logFeedback(conversationId: string, action: "copy" | "like" | "dislike") {

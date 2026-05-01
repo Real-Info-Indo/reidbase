@@ -77,7 +77,7 @@ serve(async (req) => {
       return wixAuthErrorResponse(err, corsHeaders);
     }
 
-    const { messages, fileContents, searchMode, personalisation, tier: requestTier, conversationId } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, conversationId } = await req.json();
 
     // Moderate the latest user message (silent, non-blocking)
     const lastMsg = messages?.[messages.length - 1];
@@ -91,7 +91,7 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const effectiveTier = await resolveVerifiedTier(supabase, wixUserId, requestTier);
+    const effectiveTier = await resolveVerifiedTier(supabase, wixUserId);
     console.log("Tier resolution:", { wixUserId, effectiveTier });
 
     // Portfolio Analyst: enterprise only

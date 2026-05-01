@@ -175,24 +175,7 @@ export default function AdminUsers() {
   };
 
   if (!authenticated) {
-    return (
-      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-xs space-y-4 text-center">
-          <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">Admin Users</h1>
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          />
-          <Button onClick={handleLogin} className="w-full">
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   const colCount = 10;

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { wixAuthHeader } from "@/lib/wixToken";
 
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];

@@ -14,11 +14,17 @@
 
 import { verifyWixToken, wixAuthErrorResponse, WixAuthError } from "../_shared/wix-auth.ts";
 import {
+  getEntitlement,
   highestTier,
   planNameToTier,
   upsertEntitlement,
   type Tier,
 } from "../_shared/entitlements.ts";
+
+// If the Wix orders lookup fails, we fall back to the cached entitlement
+// instead of downgrading paying users to free. The cache is considered
+// usable if it was refreshed within this many milliseconds.
+const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,15 +104,56 @@ Deno.serve(async (req) => {
     const identity = await verifyWixToken(authHeader);
     const token = extractBearer(authHeader)!;
 
-    let orders: WixOrder[] = [];
+    let orders: WixOrder[] | null = null;
     let ordersError: string | null = null;
     try {
       orders = await fetchActiveOrders(token);
     } catch (err) {
-      // Don't fail the whole refresh if orders lookup blips: fall back to
-      // free tier so the user is at least not stuck on a stale paid tier.
       ordersError = (err as Error).message;
       console.error("[refresh-entitlements] orders fetch failed:", ordersError);
+    }
+
+    // Hybrid fallback: if Wix orders lookup failed, do NOT downgrade paying
+    // users to free. Try the cached entitlement first; only fall back to
+    // `free` when there is no usable cache.
+    if (orders === null) {
+      const cached = await getEntitlement(identity.wixUserId);
+      const cacheAgeMs = Date.now() - new Date(cached.refreshedAt).getTime();
+      const cacheUsable =
+        cached.tier !== "free" || cached.source === "wix";
+      const cacheFresh = Number.isFinite(cacheAgeMs) && cacheAgeMs < CACHE_MAX_AGE_MS;
+
+      if (cacheUsable && cacheFresh) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            wix_user_id: cached.wixUserId,
+            tier: cached.tier,
+            wix_plan_names: cached.wixPlanNames,
+            refreshed_at: cached.refreshedAt,
+            expires_at: cached.expiresAt,
+            source: "cached",
+            orders_error: ordersError,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      // No usable cache: return free WITHOUT writing, so a transient outage
+      // never persists a downgrade to disk.
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          wix_user_id: identity.wixUserId,
+          tier: "free" as Tier,
+          wix_plan_names: [],
+          refreshed_at: cached.refreshedAt,
+          expires_at: null,
+          source: "fallback_no_cache",
+          orders_error: ordersError,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const planNames = orders
@@ -141,7 +188,8 @@ Deno.serve(async (req) => {
         wix_plan_names: ent.wixPlanNames,
         refreshed_at: ent.refreshedAt,
         expires_at: ent.expiresAt,
-        orders_error: ordersError,
+        source: "wix",
+        orders_error: null,
       }),
       {
         status: 200,

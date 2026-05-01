@@ -13,6 +13,7 @@ import {
   buildFolderMemory,
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
+import { verifyWixToken, WixAuthError } from "../_shared/wix-auth.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -176,7 +177,33 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, fileContents, searchMode, personalisation, tier: requestTier, wixUserId, conversationId } = await req.json();
+    const { messages, fileContents, searchMode, personalisation, tier: requestTier, wixUserId: clientWixUserId, conversationId } = await req.json();
+
+    // Verify Wix identity. Data Analyst is open to anonymous (free) callers,
+    // so we tolerate a missing token, but if a token IS sent it MUST verify
+    // and overrides any client-supplied wixUserId.
+    let wixUserId: string | undefined = undefined;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader && /^Bearer\s+/i.test(authHeader)) {
+      try {
+        const identity = await verifyWixToken(authHeader);
+        wixUserId = identity.wixUserId;
+      } catch (err) {
+        if (err instanceof WixAuthError) {
+          return new Response(
+            JSON.stringify({ error: err.code, message: err.message }),
+            { status: err.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        throw err;
+      }
+    }
+    if (!wixUserId && clientWixUserId) {
+      // Unverified caller: do not trust the supplied wixUserId for anything
+      // that gates data access. Leave it undefined so resolveVerifiedTier
+      // returns "free".
+      console.log("chat-data-analyst: ignoring unverified client wixUserId");
+    }
 
     // Moderate the latest user message (silent, non-blocking)
     const lastMsg = messages?.[messages.length - 1];

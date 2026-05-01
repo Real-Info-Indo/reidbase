@@ -342,11 +342,22 @@ async function streamChat({
   const functionName = modeToFunction[searchMode ?? "data-analyst"] ?? "chat-data-analyst";
   const chatUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`;
 
+  // Wix access token for server-side identity verification. Tier-gated chat
+  // modes require it; anonymous data-analyst calls fall back to the Supabase
+  // publishable key as before.
+  let wixAccessToken: string | null = null;
+  try {
+    const raw = localStorage.getItem("wix-tokens");
+    if (raw) wixAccessToken = JSON.parse(raw)?.accessToken?.value ?? null;
+  } catch {}
+  const authToken = wixAccessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
   const resp = await fetch(chatUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+      Authorization: `Bearer ${authToken}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
     body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })
   });
@@ -663,19 +674,17 @@ export default function NewAnalysis() {
       return;
     }
     const shareId = generateId();
-    const wixId = (() => {
-      try { const m = localStorage.getItem("wix-member"); return m ? (JSON.parse(m).id ?? null) : null; } catch { return null; }
-    })();
-    const { error } = await supabase.from("shared_conversations").insert([{
-      id: shareId,
-      source_conversation_id: conversationId,
-      title: displayTitle,
-      messages: messages as any,
-      search_mode: searchMode,
-      sharer_wix_user_id: wixId ?? undefined,
-      sharer_name: userName || undefined,
-      sharer_tier: tier,
-    }]);
+    const { invokeUserData } = await import("@/lib/userDataApi");
+    const { error } = await invokeUserData("share_conversation", {
+      share_id: shareId,
+      conversation: {
+        conversation_id: conversationId,
+        title: displayTitle,
+        messages: messages as any,
+        search_mode: searchMode,
+        tier,
+      },
+    });
     if (error) {
       console.error(error);
       toast.error("Could not create share link");

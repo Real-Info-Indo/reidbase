@@ -155,35 +155,49 @@ REID 2025 Intelligence Report:
 ${ragContent}`;
 }
 
+/**
+ * Resolve the canonical tier for a Wix-verified user.
+ *
+ * Source of truth: `public.user_entitlements`, populated server-side by
+ * `refresh-entitlements`. The `requestTier` from the client is ONLY used
+ * as a last-resort fallback when there is no entitlement row yet.
+ * If `wixUserId` is missing, the user is treated as unauthenticated and
+ * resolved to "free".
+ */
 export async function resolveVerifiedTier(
   supabase: any,
   wixUserId?: string,
-  requestTier?: string
+  requestTier?: string,
 ): Promise<string> {
-  const validTiers = ["member", "reid_base", "reid_base_pro", "enterprise"];
+  const validTiers = ["free", "reid_base", "reid_base_pro", "enterprise"];
 
-  if (!wixUserId) {
-    return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
-  }
+  if (!wixUserId) return "free";
 
   try {
     const { data, error } = await supabase
-      .from("user_profiles")
+      .from("user_entitlements")
       .select("tier")
       .eq("wix_user_id", wixUserId)
-      .single();
+      .maybeSingle();
 
-    if (error || !data?.tier) {
-      console.warn("Tier lookup failed, falling back to requestTier:", error?.message);
-      return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
+    if (error) {
+      console.warn("Entitlement lookup error:", error.message);
+      return "free";
     }
 
-    const tier = data.tier.toLowerCase();
-    console.log("Tier resolved from user_profiles:", { wixUserId, tier });
-    return validTiers.includes(tier) ? tier : "member";
+    if (data?.tier) {
+      const tier = String(data.tier).toLowerCase();
+      if (tier === "member" || tier === "freemium") return "free";
+      if (validTiers.includes(tier)) return tier;
+      return "free";
+    }
+
+    // No entitlement row yet: cautiously honour requestTier only if valid.
+    if (validTiers.includes(requestTier ?? "")) return requestTier!;
+    return "free";
   } catch (err) {
     console.error("resolveVerifiedTier error:", err);
-    return validTiers.includes(requestTier ?? "") ? requestTier! : "member";
+    return "free";
   }
 }
 

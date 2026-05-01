@@ -40,6 +40,21 @@ Tables already locked down in Phase 1 (no anon/authenticated policies):
      `AdminAppraisals`, `AdminAlerts`, `ImportData`) all rewired off the
      hardcoded password and direct `supabase.from(...)` reads/writes.
      `import-csv` and `import-rentals` now require admin Wix bearer token.
+   - **Phase 1C (done):** `user-data` Edge Function deployed (hydrate,
+     upsert/patch chat_log, feedback count + comment, upsert/delete folder,
+     upsert profile, register/check session, share conversation). All
+     owner-scoped frontend writes now route through it via
+     `src/lib/userDataApi.ts`: `chatLogger`, `hydrateFromSupabase`,
+     `syncUserProfile`, `useSessionEnforcement`, and the share-link path
+     in `NewAnalysis`. The four `chat-*` Edge Functions now verify the
+     Wix bearer token (required for sales/marketing/portfolio, optional
+     for data-analyst), ignore any client-supplied `wixUserId`, and
+     resolve tier from `public.user_entitlements` rather than
+     `user_profiles.tier`.
+   - **Phase 1C deferred:** `analytics_events` insert path is intentionally
+     left as a direct client insert per the table strategy above
+     (write-only beacon; SELECT will be revoked in Phase 2). Move it
+     behind `user-data` only if Phase 2 changes that policy.
 2. Verify with the user that the new flows work end-to-end in preview.
 3. Run the lockdown migration that, for each table above:
    - Drops the permissive `USING (true)` / `WITH CHECK (true)` policies.

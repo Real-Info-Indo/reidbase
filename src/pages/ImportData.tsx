@@ -45,6 +45,7 @@ function toPercent(v: string): number | null {
 }
 
 export default function ImportData() {
+  const { authenticated, checking, error } = useAdminAuth();
   const [status, setStatus] = useState("");
   const [rentalStatus, setRentalStatus] = useState("");
   const [isImporting, setIsImporting] = useState(false);

@@ -424,24 +424,7 @@ export default function AdminAnalytics() {
   // ── Auth gate ──
 
   if (!authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full overflow-x-hidden bg-background">
-        <div className="w-full max-w-sm space-y-4 p-8 border border-border rounded-xl bg-card">
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5" />
-            <h1 className="text-lg font-medium">Admin access</h1>
-          </div>
-          <Input
-            type="password"
-            placeholder="Enter admin password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          />
-          <Button onClick={handleLogin} className="w-full">Sign in</Button>
-        </div>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   // ── CSV exports ──

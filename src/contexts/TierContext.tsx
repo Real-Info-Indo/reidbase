@@ -1,105 +1,112 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWixAuth } from "@/contexts/WixAuthContext";
-import { wixClient } from "@/lib/wixClient";
+import { supabase } from "@/integrations/supabase/client";
 
-export type UserTier = "member" | "reid_base" | "reid_base_pro" | "enterprise";
+// Canonical internal tier codes. Note: legacy "member" meant unpaid free and
+// is no longer a valid value going forward. The paid Member plan is
+// `reid_base`. We keep "member" in the union only for backward compatibility
+// with old persisted strings; it is treated as "free" everywhere.
+export type UserTier = "free" | "reid_base" | "reid_base_pro" | "enterprise" | "member";
 
 interface TierContextType {
   tier: UserTier;
   setTier: (tier: UserTier) => void;
   userName: string;
   canAccess: (page: string) => boolean;
+  refreshTier: () => Promise<void>;
+  isRefreshing: boolean;
 }
 
-const tierAccess: Record<UserTier, string[]> = {
-  member: ["/", "/appraisal-request"],
+const tierAccess: Record<Exclude<UserTier, "member">, string[]> = {
+  free: ["/", "/appraisal-request"],
   reid_base: ["/", "/dashboard", "/appraisal-request"],
   reid_base_pro: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
   enterprise: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
 };
 
 const tierLabels: Record<UserTier, string> = {
-  member: "Member",
-  reid_base: "REID Base",
-  reid_base_pro: "REID Base Team",
+  free: "Free",
+  member: "Free", // legacy display
+  reid_base: "Member",
+  reid_base_pro: "Team",
   enterprise: "Enterprise",
 };
 
-// Map Wix pricing plan names to app tiers
-const PLAN_NAME_TO_TIER: Record<string, UserTier> = {
-  "Member": "member",
-  "REID Base": "reid_base",
-  "REID Base Team": "reid_base_pro",
-  "REID Base Pro": "reid_base_pro",
-  "Enterprise": "enterprise",
-};
-
-function planNameToTier(planName: string): UserTier {
-  // Try exact match first, then case-insensitive
-  if (PLAN_NAME_TO_TIER[planName]) return PLAN_NAME_TO_TIER[planName];
-  const lower = planName.toLowerCase();
-  if (lower.includes("enterprise")) return "enterprise";
-  if (lower.includes("team") || lower.includes("pro")) return "reid_base_pro";
-  if (lower.includes("reid base") || lower.includes("base")) return "reid_base";
-  return "member";
+function normaliseTier(value: unknown): UserTier {
+  if (typeof value !== "string") return "free";
+  const v = value.trim().toLowerCase();
+  if (v === "member" || v === "freemium" || v === "" || v === "null") return "free";
+  if (v === "reid_base" || v === "reid_base_pro" || v === "enterprise" || v === "free") {
+    return v as UserTier;
+  }
+  return "free";
 }
 
 const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export function TierProvider({ children }: { children: React.ReactNode }) {
   const { member, isLoggedIn } = useWixAuth();
-  const [tier, setTier] = useState<UserTier>("member");
+  const [tier, setTier] = useState<UserTier>("free");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const refreshTier = async () => {
+    try {
+      const raw = localStorage.getItem("wix-tokens");
+      if (!raw) {
+        setTier("free");
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      const accessToken = parsed?.accessToken?.value;
+      if (!accessToken) {
+        setTier("free");
+        return;
+      }
+
+      setIsRefreshing(true);
+      // Ask the server for the canonical tier. The server reads Wix orders
+      // and writes the result to public.user_entitlements (the source of
+      // truth for all gated server logic). We only mirror the result here
+      // for UI presentation.
+      const { data, error } = await supabase.functions.invoke("refresh-entitlements", {
+        body: {},
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (error) {
+        console.error("refresh-entitlements failed:", error);
+        return;
+      }
+
+      const next = normaliseTier(data?.tier);
+      setTier(next);
+      localStorage.setItem("reid-user-tier", next);
+      console.log("Canonical tier from server:", next, "plans:", data?.wix_plan_names);
+    } catch (err) {
+      console.error("Failed to refresh canonical tier:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn || !member) {
-      setTier("member");
+      setTier("free");
       return;
     }
-
-    const fetchTier = async () => {
-      try {
-        // Fetch the member's active pricing plan orders
-        const response = await wixClient.orders.memberListOrders({
-          orderStatuses: ["ACTIVE"],
-        });
-
-        const activeOrders = response.orders ?? [];
-        
-        if (activeOrders.length === 0) {
-          setTier("member");
-          return;
-        }
-
-        // Find the highest tier among active orders
-        const tierPriority: UserTier[] = ["member", "reid_base", "reid_base_pro", "enterprise"];
-        let highestTier: UserTier = "member";
-
-        for (const order of activeOrders) {
-          const planName = order.planName ?? "";
-          const orderTier = planNameToTier(planName);
-          if (tierPriority.indexOf(orderTier) > tierPriority.indexOf(highestTier)) {
-            highestTier = orderTier;
-          }
-        }
-
-        console.log("Wix active orders:", activeOrders.map(o => o.planName));
-        console.log("Resolved tier:", highestTier);
-        setTier(highestTier);
-        localStorage.setItem("reid-user-tier", highestTier);
-      } catch (err) {
-        console.error("Failed to fetch Wix pricing plan orders:", err);
-        setTier("member");
-      }
-    };
-
-    fetchTier();
-  }, [isLoggedIn, member]);
+    refreshTier();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, member?.id]);
 
   const userName = member?.name ?? "Guest";
-  const canAccess = (page: string) => tierAccess[tier].includes(page);
+  const canAccess = (page: string) => {
+    const t = normaliseTier(tier);
+    const list = tierAccess[t as Exclude<UserTier, "member">] ?? tierAccess.free;
+    return list.includes(page);
+  };
 
   return (
-    <TierContext.Provider value={{ tier, setTier, userName, canAccess }}>
+    <TierContext.Provider value={{ tier, setTier, userName, canAccess, refreshTier, isRefreshing }}>
       {children}
     </TierContext.Provider>
   );

@@ -189,30 +189,28 @@ Deno.serve(async (req) => {
         const conversationId = body.conversation_id;
         const kind = body.kind;
         if (!isString(conversationId)) return badRequest("missing_conversation_id");
+        if (kind !== "copy" && kind !== "like" && kind !== "dislike") {
+          return badRequest("invalid_kind");
+        }
+        // Atomic increment via SECURITY DEFINER RPC. The function only
+        // increments rows where wix_user_id matches the verified caller
+        // (or is null/legacy). Returns the new value, or null if the row
+        // did not match.
+        const { data, error } = await supabase.rpc("increment_chat_feedback_counter", {
+          _conversation_id: conversationId,
+          _wix_user_id: wixUserId,
+          _kind: kind,
+        });
+        if (error) return jsonResponse({ error: "update_failed", message: error.message }, 500);
+        if (data === null || typeof data === "undefined") {
+          return jsonResponse({ error: "not_found_or_forbidden" }, 404);
+        }
         const colMap: Record<string, string> = {
           copy: "copy_count",
           like: "likes",
           dislike: "dislikes",
         };
-        const col = colMap[kind];
-        if (!col) return badRequest("invalid_kind");
-
-        const { data: row } = await supabase
-          .from("chat_logs")
-          .select(`${col}, wix_user_id`)
-          .eq("conversation_id", conversationId)
-          .maybeSingle();
-        if (!row) return jsonResponse({ error: "not_found" }, 404);
-        if ((row as any).wix_user_id && (row as any).wix_user_id !== wixUserId) {
-          return jsonResponse({ error: "forbidden" }, 403);
-        }
-        const next = ((row as any)[col] ?? 0) + 1;
-        const { error } = await supabase
-          .from("chat_logs")
-          .update({ [col]: next })
-          .eq("conversation_id", conversationId);
-        if (error) return jsonResponse({ error: "update_failed", message: error.message }, 500);
-        return jsonResponse({ ok: true, [col]: next });
+        return jsonResponse({ ok: true, [colMap[kind]]: data });
       }
 
       case "submit_feedback_comment": {

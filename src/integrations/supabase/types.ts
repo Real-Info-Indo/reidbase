@@ -627,6 +627,10 @@ export type Database = {
     Functions: {
       execute_readonly_query: { Args: { query_text: string }; Returns: Json }
       has_admin: { Args: { _wix_user_id: string }; Returns: boolean }
+      increment_chat_feedback_counter: {
+        Args: { _conversation_id: string; _kind: string; _wix_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  Lock, BarChart3, Users, FileText, MessageSquare, MousePointerClick,
+  BarChart3, Users, FileText, MessageSquare, MousePointerClick,
   RefreshCw, ClipboardList, Shield, Download, LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,6 +19,9 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { invokeAdmin } from "@/lib/adminApi";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type RangePreset = "30" | "90" | "180" | "365" | "custom";
@@ -103,8 +105,7 @@ function daysBetween(from: Date, to: Date): string[] {
 }
 
 export default function AdminAnalytics() {
-  const { authenticated, signIn, signOut } = useAdminAuth();
-  const [password, setPassword] = useState("");
+  const { authenticated, checking, error, signOut } = useAdminAuth();
   const [allEvents, setAllEvents] = useState<AnalyticsEvent[]>([]);
   const [allChatLogs, setAllChatLogs] = useState<ChatLog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -114,31 +115,20 @@ export default function AdminAnalytics() {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (!signIn(password)) setPassword("");
-  };
-
   const fetchData = async () => {
     setLoading(true);
-    const [eventsRes, logsRes, appraisalRes] = await Promise.all([
-      supabase
-        .from("analytics_events" as any)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20000) as any,
-      supabase
-        .from("chat_logs" as any)
-        .select("id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at")
-        .order("updated_at", { ascending: false })
-        .limit(5000) as any,
-      supabase
-        .from("appraisal_requests" as any)
-        .select("id", { count: "exact", head: true })
-        .eq("status", "new") as any,
-    ]);
-    if (eventsRes.data) setAllEvents(eventsRes.data);
-    if (logsRes.data) setAllChatLogs(logsRes.data);
-    setNewAppraisalCount(appraisalRes.count ?? 0);
+    try {
+      const result = await invokeAdmin<{
+        events: AnalyticsEvent[];
+        chatLogs: ChatLog[];
+        newAppraisalCount: number;
+      }>("admin-data", { action: "analytics" });
+      setAllEvents(result.events || []);
+      setAllChatLogs(result.chatLogs || []);
+      setNewAppraisalCount(result.newAppraisalCount ?? 0);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to load analytics");
+    }
     setLoading(false);
   };
 

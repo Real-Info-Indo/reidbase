@@ -4,6 +4,7 @@ import { ArrowRight, ArrowDown, TrendingUp, Building2, BarChart3, Calculator, Lo
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ReactMarkdown from "react-markdown";
+import { injectRegionHovers } from "@/components/RegionHover";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import { toast } from "sonner";
 import {
@@ -1187,42 +1188,48 @@ export default function NewAnalysis() {
                          pre({ children }) {
                            return <>{children}</>;
                          },
-                         h2({ children }) {
-                           return <h2 className="text-base font-bold text-foreground mt-5 mb-2">{children}</h2>;
-                         },
-                         h3({ children }) {
-                           return <h3 className="text-sm font-semibold text-foreground mt-4 mb-1.5">{children}</h3>;
-                         },
-                         hr() {
-                           return <hr className="border-t border-border/60 my-4" />;
-                         },
-                         ul({ children }) {
-                           return <ul className="list-disc ml-5 space-y-1">{children}</ul>;
-                         },
-                         ol({ children }) {
-                           return <ol className="list-decimal ml-5 space-y-1">{children}</ol>;
-                         },
-                          strong({ children }) {
-                            return <strong className="font-semibold text-foreground">{children}</strong>;
+                          p({ children }) {
+                            return <p>{injectRegionHovers(children)}</p>;
                           },
-                          table({ children }) {
-                            return <div className="my-4 overflow-x-auto"><table className="w-full text-sm border-collapse">{children}</table></div>;
+                          li({ children }) {
+                            return <li>{injectRegionHovers(children)}</li>;
                           },
-                          thead({ children }) {
-                            return <thead className="border-b border-border">{children}</thead>;
+                          h2({ children }) {
+                            return <h2 className="text-base font-bold text-foreground mt-5 mb-2">{injectRegionHovers(children)}</h2>;
                           },
-                          tbody({ children }) {
-                            return <tbody>{children}</tbody>;
+                          h3({ children }) {
+                            return <h3 className="text-sm font-semibold text-foreground mt-4 mb-1.5">{injectRegionHovers(children)}</h3>;
                           },
-                          tr({ children }) {
-                            return <tr className="border-b border-border/40">{children}</tr>;
+                          hr() {
+                            return <hr className="border-t border-border/60 my-4" />;
                           },
-                          th({ children }) {
-                            return <th className="text-left py-2 pr-4 font-semibold text-foreground whitespace-nowrap">{children}</th>;
+                          ul({ children }) {
+                            return <ul className="list-disc ml-5 space-y-1">{children}</ul>;
                           },
-                          td({ children }) {
-                            return <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">{children}</td>;
+                          ol({ children }) {
+                            return <ol className="list-decimal ml-5 space-y-1">{children}</ol>;
                           },
+                           strong({ children }) {
+                             return <strong className="font-semibold text-foreground">{injectRegionHovers(children)}</strong>;
+                           },
+                           table({ children }) {
+                             return <div className="my-4 overflow-x-auto"><table className="w-full text-sm border-collapse">{children}</table></div>;
+                           },
+                           thead({ children }) {
+                             return <thead className="border-b border-border">{children}</thead>;
+                           },
+                           tbody({ children }) {
+                             return <tbody>{children}</tbody>;
+                           },
+                           tr({ children }) {
+                             return <tr className="border-b border-border/40">{children}</tr>;
+                           },
+                           th({ children }) {
+                             return <th className="text-left py-2 pr-4 font-semibold text-foreground whitespace-nowrap">{injectRegionHovers(children)}</th>;
+                           },
+                           td({ children }) {
+                             return <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">{injectRegionHovers(children)}</td>;
+                           },
                         }}>
                        {m.content}</ReactMarkdown>
                      </div>

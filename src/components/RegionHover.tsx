@@ -1,5 +1,7 @@
 import React from "react";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Maximize2 } from "lucide-react";
 import centralBadung from "@/assets/regions/central-badung.png";
 import denpasar from "@/assets/regions/denpasar.png";
 import gianyar from "@/assets/regions/gianyar.png";
@@ -52,31 +54,56 @@ if (typeof window !== "undefined") {
 export function RegionHover({ name }: { name: string }) {
   const key = name === "Bukit" ? "South Badung (Bukit)" : name;
   const img = REGION_IMAGES[key] || REGION_IMAGES[name];
+  const [expanded, setExpanded] = React.useState(false);
   if (!img) return <>{name}</>;
   return (
-    <HoverCard openDelay={60} closeDelay={40}>
-      <HoverCardTrigger asChild>
-        <span className="underline decoration-solid decoration-primary decoration-2 underline-offset-2 cursor-help">
-          {name}
-        </span>
-      </HoverCardTrigger>
-      <HoverCardContent
-        side="top"
-        align="center"
-        className="w-72 p-2 bg-card/95 backdrop-blur border-border shadow-lg"
-      >
-        <img
-          src={img}
-          alt={`${key} region map`}
-          loading="eager"
-          decoding="sync"
-          className="w-full h-auto rounded-sm"
-        />
-        <div className="mt-1 text-xs font-medium text-foreground text-center">
-          {key}
-        </div>
-      </HoverCardContent>
-    </HoverCard>
+    <>
+      <HoverCard openDelay={60} closeDelay={40}>
+        <HoverCardTrigger asChild>
+          <span className="underline decoration-solid decoration-primary decoration-2 underline-offset-2 cursor-help">
+            {name}
+          </span>
+        </HoverCardTrigger>
+        <HoverCardContent
+          side="top"
+          align="center"
+          className="w-72 p-2 bg-card/95 backdrop-blur border-border shadow-lg"
+        >
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="relative block w-full group"
+            aria-label={`Expand ${key} map`}
+          >
+            <img
+              src={img}
+              alt={`${key} region map`}
+              loading="eager"
+              decoding="sync"
+              className="w-full h-auto rounded-sm"
+            />
+            <span className="absolute top-1 right-1 rounded-sm bg-background/80 backdrop-blur p-1 opacity-80 group-hover:opacity-100 transition-opacity">
+              <Maximize2 className="h-3.5 w-3.5 text-foreground" />
+            </span>
+          </button>
+          <div className="mt-1 text-xs font-medium text-foreground text-center">
+            Click to enlarge
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="max-w-3xl p-4 bg-card/95 backdrop-blur">
+          <DialogTitle className="text-sm font-medium text-foreground text-center">
+            {key}
+          </DialogTitle>
+          <img
+            src={img}
+            alt={`${key} region map enlarged`}
+            className="w-full h-auto rounded-sm"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

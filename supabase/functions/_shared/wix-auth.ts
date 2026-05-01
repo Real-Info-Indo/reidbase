@@ -82,15 +82,40 @@ export async function verifyWixToken(authHeader: string | null): Promise<WixIden
     return cached.identity;
   }
 
-  let res: Response;
-  try {
-    res = await fetch(WIX_MEMBERS_ME_URL, {
+  const wixClientId = Deno.env.get("WIX_CLIENT_ID");
+  if (!wixClientId) {
+    throw new WixAuthError(
+      "missing_wix_client_id",
+      "WIX_CLIENT_ID env var is not set on the Edge Function",
+      500,
+    );
+  }
+
+  // Wix's documented format is `Authorization: Bearer <token>`. The Wix
+  // Headless JS SDK has historically also sent the raw token. We try the
+  // documented form first and, only on 401/403, retry with the raw token
+  // before giving up. The probe endpoint will tell us which path Wix
+  // actually accepts for our Headless tokens.
+  async function callWix(authValue: string): Promise<Response> {
+    return await fetch(WIX_MEMBERS_ME_URL, {
       method: "GET",
       headers: {
-        Authorization: token,
+        Authorization: authValue,
+        "wix-client-id": wixClientId!,
         Accept: "application/json",
       },
     });
+  }
+
+  let res: Response;
+  let usedFormat: "bearer" | "raw" = "bearer";
+  try {
+    res = await callWix(`Bearer ${token}`);
+    if (res.status === 401 || res.status === 403) {
+      await res.text().catch(() => undefined);
+      usedFormat = "raw";
+      res = await callWix(token);
+    }
   } catch (err) {
     throw new WixAuthError(
       "wix_unreachable",
@@ -100,16 +125,19 @@ export async function verifyWixToken(authHeader: string | null): Promise<WixIden
   }
 
   if (res.status === 401 || res.status === 403) {
-    // Consume body to release the connection.
     await res.text().catch(() => undefined);
-    throw new WixAuthError("invalid_token", "Wix rejected the token", 401);
+    throw new WixAuthError(
+      "invalid_token",
+      `Wix rejected the token (tried bearer then raw)`,
+      401,
+    );
   }
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new WixAuthError(
       "wix_error",
-      `Wix returned ${res.status}: ${body.slice(0, 200)}`,
+      `Wix returned ${res.status} (${usedFormat}): ${body.slice(0, 200)}`,
       502,
     );
   }

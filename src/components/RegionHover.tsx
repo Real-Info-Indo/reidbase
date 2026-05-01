@@ -40,14 +40,23 @@ const REGION_REGEX = new RegExp(
   "g",
 );
 
+// Preload all region images once on module load so the hover popover
+// shows instantly without a network round-trip on first hover.
+if (typeof window !== "undefined") {
+  Object.values(REGION_IMAGES).forEach((src) => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
 export function RegionHover({ name }: { name: string }) {
   const key = name === "Bukit" ? "South Badung (Bukit)" : name;
   const img = REGION_IMAGES[key] || REGION_IMAGES[name];
   if (!img) return <>{name}</>;
   return (
-    <HoverCard openDelay={120} closeDelay={60}>
+    <HoverCard openDelay={60} closeDelay={40}>
       <HoverCardTrigger asChild>
-        <span className="underline decoration-dotted decoration-primary/60 underline-offset-2 cursor-help">
+        <span className="underline decoration-solid decoration-primary decoration-2 underline-offset-2 cursor-help">
           {name}
         </span>
       </HoverCardTrigger>
@@ -59,6 +68,8 @@ export function RegionHover({ name }: { name: string }) {
         <img
           src={img}
           alt={`${key} region map`}
+          loading="eager"
+          decoding="sync"
           className="w-full h-auto rounded-sm"
         />
         <div className="mt-1 text-xs font-medium text-foreground text-center">

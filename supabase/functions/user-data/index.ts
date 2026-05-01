@@ -392,6 +392,50 @@ Deno.serve(async (req) => {
         return jsonResponse({ ok: true, share_id: shareId });
       }
 
+
+      // ── SUMMARY REFRESH ──────────────────────────────────
+      // Owner-scoped wrapper around `summarise-conversation`. Verifies the
+      // caller owns the conversation, then calls the internal function with
+      // a shared internal token (see summarise-conversation auth check).
+      case "refresh_summary": {
+        const conversationId = body.conversation_id;
+        const force = !!body.force;
+        if (!isString(conversationId)) return badRequest("missing_conversation_id");
+
+        const { data: src, error: srcErr } = await supabase
+          .from("chat_logs")
+          .select("wix_user_id")
+          .eq("conversation_id", conversationId)
+          .maybeSingle();
+        if (srcErr) return jsonResponse({ error: "lookup_failed", message: srcErr.message }, 500);
+        if (!src) return jsonResponse({ error: "not_found" }, 404);
+        if ((src as any).wix_user_id && (src as any).wix_user_id !== wixUserId) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const internalToken = Deno.env.get("INTERNAL_FUNCTION_TOKEN") || serviceRoleKey;
+        try {
+          const resp = await fetch(`${supabaseUrl}/functions/v1/summarise-conversation`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${serviceRoleKey}`,
+              "x-internal-token": internalToken,
+            },
+            body: JSON.stringify({ conversationId, force }),
+          });
+          const out = await resp.json().catch(() => ({}));
+          return jsonResponse(out, resp.status);
+        } catch (err) {
+          return jsonResponse(
+            { error: "summarise_invoke_failed", message: (err as Error).message },
+            502,
+          );
+        }
+      }
+
       default:
         return badRequest(`unknown_action: ${action}`);
     }

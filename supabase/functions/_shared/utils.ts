@@ -159,15 +159,18 @@ ${ragContent}`;
  * Resolve the canonical tier for a Wix-verified user.
  *
  * Source of truth: `public.user_entitlements`, populated server-side by
- * `refresh-entitlements`. The `requestTier` from the client is ONLY used
- * as a last-resort fallback when there is no entitlement row yet.
- * If `wixUserId` is missing, the user is treated as unauthenticated and
- * resolved to "free".
+ * `refresh-entitlements`. The client-supplied `requestTier` is NEVER
+ * trusted — it is accepted only for logging/diagnostics and ignored.
+ *
+ * - No `wixUserId` (anonymous caller) -> "free".
+ * - No entitlement row yet -> "free". Callers should hit
+ *   `refresh-entitlements` to materialise a row.
+ * - Legacy `member` / `freemium` rows -> "free".
  */
 export async function resolveVerifiedTier(
   supabase: any,
   wixUserId?: string,
-  requestTier?: string,
+  _requestTier?: string,
 ): Promise<string> {
   const validTiers = ["free", "reid_base", "reid_base_pro", "enterprise"];
 
@@ -184,16 +187,11 @@ export async function resolveVerifiedTier(
       console.warn("Entitlement lookup error:", error.message);
       return "free";
     }
+    if (!data?.tier) return "free";
 
-    if (data?.tier) {
-      const tier = String(data.tier).toLowerCase();
-      if (tier === "member" || tier === "freemium") return "free";
-      if (validTiers.includes(tier)) return tier;
-      return "free";
-    }
-
-    // No entitlement row yet: cautiously honour requestTier only if valid.
-    if (validTiers.includes(requestTier ?? "")) return requestTier!;
+    const tier = String(data.tier).toLowerCase();
+    if (tier === "member" || tier === "freemium") return "free";
+    if (validTiers.includes(tier)) return tier;
     return "free";
   } catch (err) {
     console.error("resolveVerifiedTier error:", err);

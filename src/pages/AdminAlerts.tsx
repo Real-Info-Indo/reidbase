@@ -85,15 +85,7 @@ export default function AdminAlerts() {
   const unreviewed = flags.filter((f) => !f.reviewed).length;
 
   if (!authenticated) {
-    return (
-      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background">
-        <form onSubmit={handleAuth} className="space-y-4 w-80">
-          <h1 className="text-xl font-bold text-center">Admin Alerts</h1>
-          <Input type="password" placeholder="Admin password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button type="submit" className="w-full">Enter</Button>
-        </form>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   return (

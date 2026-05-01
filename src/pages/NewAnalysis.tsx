@@ -663,19 +663,17 @@ export default function NewAnalysis() {
       return;
     }
     const shareId = generateId();
-    const wixId = (() => {
-      try { const m = localStorage.getItem("wix-member"); return m ? (JSON.parse(m).id ?? null) : null; } catch { return null; }
-    })();
-    const { error } = await supabase.from("shared_conversations").insert([{
-      id: shareId,
-      source_conversation_id: conversationId,
-      title: displayTitle,
-      messages: messages as any,
-      search_mode: searchMode,
-      sharer_wix_user_id: wixId ?? undefined,
-      sharer_name: userName || undefined,
-      sharer_tier: tier,
-    }]);
+    const { invokeUserData } = await import("@/lib/userDataApi");
+    const { error } = await invokeUserData("share_conversation", {
+      share_id: shareId,
+      conversation: {
+        conversation_id: conversationId,
+        title: displayTitle,
+        messages: messages as any,
+        search_mode: searchMode,
+        tier,
+      },
+    });
     if (error) {
       console.error(error);
       toast.error("Could not create share link");

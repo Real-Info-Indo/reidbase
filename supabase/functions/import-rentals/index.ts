@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyWixToken, wixAuthErrorResponse } from "../_shared/wix-auth.ts";
+import { requireAdmin, AdminForbiddenError } from "../_shared/admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +10,28 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Phase 1B: import endpoints are admin-only.
+  let identity;
+  try {
+    identity = await verifyWixToken(req.headers.get("Authorization"));
+  } catch (err) {
+    return wixAuthErrorResponse(err, corsHeaders);
+  }
+  try {
+    await requireAdmin(identity.wixUserId);
+  } catch (err) {
+    if (err instanceof AdminForbiddenError) {
+      return new Response(
+        JSON.stringify({ error: err.code, message: err.message }),
+        { status: err.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: "internal_error", message: (err as Error).message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  Lock, Users, ArrowLeft, RefreshCw, Download, Search, ExternalLink,
+  Users, ArrowLeft, RefreshCw, Download, Search, ExternalLink,
   ChevronDown, ChevronRight, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,8 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { invokeAdmin } from "@/lib/adminApi";
 
 
 interface UserProfile {
@@ -37,8 +38,7 @@ interface UserStats {
 
 export default function AdminUsers() {
   const navigate = useNavigate();
-  const { authenticated, signIn } = useAdminAuth();
-  const [password, setPassword] = useState("");
+  const { authenticated, checking, error } = useAdminAuth();
   const [loading, setLoading] = useState(false);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [statsMap, setStatsMap] = useState<Record<string, UserStats>>({});
@@ -54,33 +54,22 @@ export default function AdminUsers() {
     });
   };
 
-  const handleLogin = () => {
-    if (!signIn(password)) {
-      toast.error("Incorrect password");
-      setPassword("");
-    }
-  };
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: profileData } = await supabase
-        .from("user_profiles" as any)
-        .select("*")
-        .order("last_login", { ascending: false });
+      const result = await invokeAdmin<{
+        profiles: UserProfile[];
+        events: Array<{ wix_user_id: string | null; event_type: string; event_name: string; page_path: string | null; metadata: Record<string, unknown> }>;
+        chatLogs: Array<{ wix_user_id: string | null }>;
+      }>("admin-data", { action: "users" });
 
-      const users = (profileData as unknown as UserProfile[]) || [];
+      const users = result.profiles || [];
       setProfiles(users);
 
-      // Fetch analytics events with page_path for detail
-      const { data: events } = await supabase
-        .from("analytics_events")
-        .select("wix_user_id, event_type, event_name, page_path, metadata");
+      const events = result.events || [];
 
       // Fetch chat log counts
-      const { data: chatLogs } = await supabase
-        .from("chat_logs")
-        .select("wix_user_id");
+      const chatLogs = result.chatLogs || [];
 
       // Fetch appraisal counts per user from analytics feature events
       // (appraisal_submitted events are tracked in analytics_events)
@@ -186,24 +175,7 @@ export default function AdminUsers() {
   };
 
   if (!authenticated) {
-    return (
-      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-xs space-y-4 text-center">
-          <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">Admin Users</h1>
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          />
-          <Button onClick={handleLogin} className="w-full">
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   const colCount = 10;

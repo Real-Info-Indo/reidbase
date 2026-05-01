@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { wixAuthHeader } from "@/lib/wixToken";
 
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];
@@ -42,6 +45,7 @@ function toPercent(v: string): number | null {
 }
 
 export default function ImportData() {
+  const { authenticated, checking, error } = useAdminAuth();
   const [status, setStatus] = useState("");
   const [rentalStatus, setRentalStatus] = useState("");
   const [isImporting, setIsImporting] = useState(false);
@@ -94,6 +98,7 @@ export default function ImportData() {
         const chunk = rows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-csv", {
           body: { rows: chunk },
+          headers: wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
         totalInserted += data.inserted;
@@ -156,6 +161,7 @@ export default function ImportData() {
         const chunk = uniqueRows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-rentals", {
           body: { rows: chunk },
+          headers: wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
         totalInserted += data.inserted;
@@ -172,6 +178,10 @@ export default function ImportData() {
       setIsImportingRentals(false);
     }
   };
+
+  if (!authenticated) {
+    return <AdminGate checking={checking} error={error} />;
+  }
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-background p-8 max-w-xl mx-auto">

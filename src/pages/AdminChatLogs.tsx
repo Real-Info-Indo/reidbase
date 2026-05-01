@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Search, Lock, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
+import { Search, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -11,6 +10,8 @@ import ReactMarkdown from "react-markdown";
 import ChatChart, { parseChartBlock } from "@/components/ChatChart";
 import type { Msg } from "@/lib/conversations";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { invokeAdmin } from "@/lib/adminApi";
 
 
 interface ChatLog {
@@ -34,8 +35,7 @@ interface ChatLog {
 export default function AdminChatLogs() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { authenticated, signIn } = useAdminAuth();
-  const [password, setPassword] = useState("");
+  const { authenticated, checking, error } = useAdminAuth();
   const [logs, setLogs] = useState<ChatLog[]>([]);
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -44,20 +44,14 @@ export default function AdminChatLogs() {
   const targetConvIdRef = useRef<string | null>(searchParams.get("conversation"));
   const scrolledRef = useRef(false);
 
-  const handleLogin = () => {
-    if (signIn(password)) fetchLogs();
-    else setPassword("");
-  };
-
   const fetchLogs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("chat_logs" as any)
-      .select("*")
-      .order("updated_at", { ascending: false })
-      .limit(500) as any;
-
-    if (!error && data) setLogs(data);
+    try {
+      const result = await invokeAdmin<{ logs: ChatLog[] }>("admin-data", { action: "chat_logs" });
+      setLogs(result.logs || []);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to load chat logs");
+    }
     setLoading(false);
   };
 
@@ -88,17 +82,13 @@ export default function AdminChatLogs() {
   };
 
   const handleDelete = async (log: ChatLog) => {
-    const { error } = await supabase
-      .from("chat_logs" as any)
-      .delete()
-      .eq("id", log.id) as any;
-
-    if (error) {
-      toast.error("Failed to delete");
-    } else {
+    try {
+      await invokeAdmin("admin-mutate", { action: "delete_chat_log", id: log.id });
       setLogs((prev) => prev.filter((l) => l.id !== log.id));
       if (expandedId === log.id) setExpandedId(null);
       toast.success("Conversation deleted");
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to delete");
     }
   };
 
@@ -164,24 +154,7 @@ export default function AdminChatLogs() {
   };
 
   if (!authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full overflow-x-hidden bg-background">
-        <div className="w-full max-w-sm space-y-4 p-8 border border-border rounded-xl bg-card">
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5" />
-            <h1 className="text-lg font-medium">Admin access</h1>
-          </div>
-          <Input
-            type="password"
-            placeholder="Enter admin password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          />
-          <Button onClick={handleLogin} className="w-full">Sign in</Button>
-        </div>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   return (

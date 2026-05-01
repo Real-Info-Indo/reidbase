@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  Lock, ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
+  ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
   ArrowLeft, ChevronDown, ChevronUp, Save,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { invokeAdmin } from "@/lib/adminApi";
+import { toast } from "sonner";
 
 
 interface AppraisalRequest {
@@ -56,8 +58,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminAppraisals() {
-  const { authenticated, signIn } = useAdminAuth();
-  const [password, setPassword] = useState("");
+  const { authenticated, checking, error } = useAdminAuth();
   const [requests, setRequests] = useState<AppraisalRequest[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -65,19 +66,14 @@ export default function AdminAppraisals() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (!signIn(password)) setPassword("");
-  };
-
   const fetchRequests = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("appraisal_requests" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500) as any;
-
-    if (!error && data) setRequests(data);
+    try {
+      const result = await invokeAdmin<{ requests: AppraisalRequest[] }>("admin-data", { action: "appraisals" });
+      setRequests(result.requests || []);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to load appraisals");
+    }
     setLoading(false);
   };
 
@@ -86,15 +82,16 @@ export default function AdminAppraisals() {
   }, [authenticated]);
 
   const markReviewed = async (id: string) => {
-    await supabase
-      .from("appraisal_requests" as any)
-      .update({ status: "reviewed", reviewed_at: new Date().toISOString() } as any)
-      .eq("id", id) as any;
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: "reviewed", reviewed_at: new Date().toISOString() } : r
-      )
-    );
+    try {
+      await invokeAdmin("admin-mutate", { action: "review_appraisal", id });
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === id ? { ...r, status: "reviewed", reviewed_at: new Date().toISOString() } : r
+        )
+      );
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to update");
+    }
   };
 
   const [notesValue, setNotesValue] = useState("");
@@ -109,13 +106,14 @@ export default function AdminAppraisals() {
 
   const saveNotes = async (id: string) => {
     setSavingNotes(true);
-    await supabase
-      .from("appraisal_requests" as any)
-      .update({ admin_notes: notesValue } as any)
-      .eq("id", id) as any;
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, admin_notes: notesValue } : r))
-    );
+    try {
+      await invokeAdmin("admin-mutate", { action: "save_appraisal_notes", id, admin_notes: notesValue });
+      setRequests((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, admin_notes: notesValue } : r))
+      );
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to save notes");
+    }
     setSavingNotes(false);
   };
 
@@ -136,24 +134,7 @@ export default function AdminAppraisals() {
   const newCount = requests.filter((r) => r.status === "new").length;
 
   if (!authenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full overflow-x-hidden bg-background">
-        <div className="w-full max-w-sm space-y-4 p-8 border border-border rounded-xl bg-card">
-          <div className="flex items-center gap-2 text-foreground">
-            <Lock className="h-5 w-5" />
-            <h1 className="text-lg font-medium">Admin access</h1>
-          </div>
-          <Input
-            type="password"
-            placeholder="Enter admin password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-          />
-          <Button onClick={handleLogin} className="w-full">Sign in</Button>
-        </div>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   const detailRow = (label: string, value: string | null) => {

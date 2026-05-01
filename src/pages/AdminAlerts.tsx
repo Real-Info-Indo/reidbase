@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Shield, AlertTriangle, Eye, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminGate } from "@/components/AdminGate";
+import { invokeAdmin } from "@/lib/adminApi";
+import { toast } from "sonner";
 
 
 interface ChatFlag {
@@ -24,8 +26,7 @@ interface ChatFlag {
 }
 
 export default function AdminAlerts() {
-  const { authenticated, signIn } = useAdminAuth();
-  const [password, setPassword] = useState("");
+  const { authenticated, checking, error } = useAdminAuth();
   const [flags, setFlags] = useState<ChatFlag[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -35,12 +36,12 @@ export default function AdminAlerts() {
 
   const fetchFlags = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("chat_flags" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500) as any;
-    if (!error && data) setFlags(data);
+    try {
+      const result = await invokeAdmin<{ flags: ChatFlag[] }>("admin-data", { action: "chat_flags" });
+      setFlags(result.flags || []);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to load flags");
+    }
     setLoading(false);
   };
 
@@ -48,18 +49,18 @@ export default function AdminAlerts() {
     if (authenticated) fetchFlags();
   }, [authenticated]);
 
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signIn(password)) setPassword("");
-  };
-
   const markReviewed = async (flag: ChatFlag) => {
     const notes = noteInputs[flag.id] || "";
-    await supabase
-      .from("chat_flags" as any)
-      .update({ reviewed: true, admin_notes: notes || null } as any)
-      .eq("id", flag.id) as any;
-    fetchFlags();
+    try {
+      await invokeAdmin("admin-mutate", {
+        action: "review_chat_flag",
+        id: flag.id,
+        admin_notes: notes || undefined,
+      });
+      fetchFlags();
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to update");
+    }
   };
 
   const severityColour = (s: string) => {
@@ -84,15 +85,7 @@ export default function AdminAlerts() {
   const unreviewed = flags.filter((f) => !f.reviewed).length;
 
   if (!authenticated) {
-    return (
-      <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-background">
-        <form onSubmit={handleAuth} className="space-y-4 w-80">
-          <h1 className="text-xl font-bold text-center">Admin Alerts</h1>
-          <Input type="password" placeholder="Admin password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <Button type="submit" className="w-full">Enter</Button>
-        </form>
-      </div>
-    );
+    return <AdminGate checking={checking} error={error} />;
   }
 
   return (

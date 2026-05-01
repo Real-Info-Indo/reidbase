@@ -239,6 +239,24 @@ Deno.serve(async (req) => {
         if (!folder || !isString(folder.id) || !isString(folder.name)) {
           return badRequest("missing_folder");
         }
+
+        // Owner check: refuse to overwrite a folder owned by someone else.
+        const { data: existing, error: existingErr } = await supabase
+          .from("folders")
+          .select("wix_user_id")
+          .eq("id", folder.id)
+          .maybeSingle();
+        if (existingErr) {
+          return jsonResponse({ error: "lookup_failed", message: existingErr.message }, 500);
+        }
+        if (
+          existing &&
+          (existing as any).wix_user_id &&
+          (existing as any).wix_user_id !== wixUserId
+        ) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
         const { error } = await supabase.from("folders").upsert(
           {
             id: folder.id,

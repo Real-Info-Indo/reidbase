@@ -29,7 +29,7 @@ const TIER_RANK: Record<string, number> = {
 
 function tierLabel(t?: string | null): string {
   switch (t) {
-    case "member": return "Freemium";
+    case "member": return "Free";
     case "reid_base": return "Member";
     case "reid_base_pro": return "Pro";
     case "enterprise": return "Enterprise";

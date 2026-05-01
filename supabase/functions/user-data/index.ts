@@ -298,9 +298,12 @@ Deno.serve(async (req) => {
       }
 
       // ── PROFILE ──────────────────────────────────────────
+      // Note: tier is intentionally NOT writable here. Entitlement / tier
+      // lives only in `public.user_entitlements`, populated by
+      // `refresh-entitlements` after talking to Wix. Any `body.tier` sent
+      // by the client is silently ignored.
       case "upsert_profile": {
         const p = body.profile ?? {};
-        const tier = isString(body.tier) ? body.tier : null;
         const row = {
           wix_user_id: wixUserId,
           display_name: identity.displayName,
@@ -309,7 +312,6 @@ Deno.serve(async (req) => {
           nickname: typeof p.nickname === "string" ? p.nickname : null,
           occupation: typeof p.occupation === "string" ? p.occupation : null,
           about: typeof p.about === "string" ? p.about : null,
-          tier,
           last_login: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };

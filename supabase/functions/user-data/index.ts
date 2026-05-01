@@ -118,6 +118,27 @@ Deno.serve(async (req) => {
       case "upsert_chat_log": {
         const c = body.conversation;
         if (!c || !isString(c.conversation_id)) return badRequest("missing_conversation");
+
+        // Owner check: if a row already exists for this conversation_id and
+        // it belongs to a different Wix user, refuse. Service role bypasses
+        // RLS, so without this check a caller could overwrite anyone's row
+        // by guessing or reusing a conversation_id.
+        const { data: existing, error: existingErr } = await supabase
+          .from("chat_logs")
+          .select("wix_user_id")
+          .eq("conversation_id", c.conversation_id)
+          .maybeSingle();
+        if (existingErr) {
+          return jsonResponse({ error: "lookup_failed", message: existingErr.message }, 500);
+        }
+        if (
+          existing &&
+          (existing as any).wix_user_id &&
+          (existing as any).wix_user_id !== wixUserId
+        ) {
+          return jsonResponse({ error: "forbidden" }, 403);
+        }
+
         const row = {
           conversation_id: c.conversation_id,
           wix_user_id: wixUserId,

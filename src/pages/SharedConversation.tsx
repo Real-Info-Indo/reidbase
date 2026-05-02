@@ -21,7 +21,8 @@ interface SharedConversationRow {
 }
 
 const TIER_RANK: Record<string, number> = {
-  member: 0,
+  free: 0,
+  member: 0, // legacy alias for free
   reid_base: 1,
   reid_base_pro: 2,
   enterprise: 3,
@@ -29,11 +30,12 @@ const TIER_RANK: Record<string, number> = {
 
 function tierLabel(t?: string | null): string {
   switch (t) {
+    case "free":
     case "member": return "Free";
     case "reid_base": return "Member";
     case "reid_base_pro": return "Pro";
     case "enterprise": return "Enterprise";
-    default: return "Member";
+    default: return "Free";
   }
 }
 

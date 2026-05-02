@@ -71,21 +71,43 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function sanitiseInput(raw: any): { ok: true; data: AppraisalData } | { ok: false; error: string } {
+const REQUIRED_FIELDS: (keyof AppraisalData)[] = [
+  "propertyType",
+  "location",
+  "ownershipType",
+  "landZone",
+  "leaseTerm",
+  "landSize",
+  "internalSize",
+  "propertyStatus",
+  "bedrooms",
+];
+
+function sanitiseInput(
+  raw: any,
+):
+  | { ok: true; data: AppraisalData }
+  | { ok: false; error: string; missing?: string[]; field?: string } {
   if (!raw || typeof raw !== "object") return { ok: false, error: "invalid_body" };
   const out: AppraisalData = {};
   for (const key of Object.keys(FIELD_LIMITS) as (keyof AppraisalData)[]) {
     const v = (raw as any)[key];
     if (v == null || v === "") continue;
-    if (typeof v !== "string") return { ok: false, error: `invalid_field:${key}` };
-    if (v.length > FIELD_LIMITS[key]) return { ok: false, error: `field_too_long:${key}` };
-    out[key] = v;
+    if (typeof v !== "string") return { ok: false, error: "invalid_field", field: key };
+    const trimmed = v.trim();
+    if (!trimmed) continue;
+    if (trimmed.length > FIELD_LIMITS[key]) {
+      return { ok: false, error: "field_too_long", field: key };
+    }
+    out[key] = trimmed;
   }
-  if (!out.propertyType && !out.location) {
-    return { ok: false, error: "missing_required_fields" };
+  const missing = REQUIRED_FIELDS.filter((f) => !out[f]);
+  if (missing.length > 0) {
+    return { ok: false, error: "missing_required_fields", missing };
   }
   return { ok: true, data: out };
 }
+
 
 function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | null; email: string | null }): string {
   const row = (label: string, value?: string) =>
@@ -144,7 +166,10 @@ const handler = async (req: Request): Promise<Response> => {
     const rawBody = await req.json().catch(() => null);
     const parsed = sanitiseInput(rawBody);
     if (!parsed.ok) {
-      return new Response(JSON.stringify({ error: parsed.error }), {
+      const payload: Record<string, unknown> = { error: parsed.error };
+      if (parsed.missing) payload.missing = parsed.missing;
+      if (parsed.field) payload.field = parsed.field;
+      return new Response(JSON.stringify(payload), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -199,6 +224,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (dbError) {
       console.error("DB insert error:", dbError);
+      return new Response(
+        JSON.stringify({ error: "db_insert_failed", message: dbError.message }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
     }
 
     const emailResponse = await resend.emails.send({

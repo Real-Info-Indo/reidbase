@@ -73,6 +73,38 @@ TIME SERIES QUERIES:
 - When querying rentals_2025 for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
 - Limit time series results to 24 months max for MoM, 8 quarters for QoQ, and 5 years for YoY.
 
+DATA RECENCY -- DEFAULT DATE RANGES:
+When a user asks about "current", "latest", "recent", "now", or "the market" without specifying a time period, apply these defaults. Never aggregate across all historical records -- always anchor to the most recent data in the table.
+
+RENTAL DATA (rentals_2025):
+- Default to trailing 12 months (T12) anchored to the most recent date present in the dataset -- not CURRENT_DATE, as the data may lag several months behind today.
+- T12 pattern (apply any location/type filters inside the subquery too):
+  WHERE TO_DATE(date, 'Mon/YY') >= (
+    SELECT MAX(TO_DATE(date, 'Mon/YY')) - INTERVAL '11 months'
+    FROM rentals_2025
+    WHERE location ILIKE '%...'  -- mirror outer filters here
+  )
+- For "most recent month only" (e.g. "latest occupancy"): use WHERE TO_DATE(date, 'Mon/YY') = (SELECT MAX(TO_DATE(date, 'Mon/YY')) FROM rentals_2025).
+
+SALES & SUPPLY DATA (properties_2025):
+- For current supply / active listings / median asking price: filter to properties scraped in the most recent 6 months.
+  WHERE TO_DATE(scrape_date, 'Mon/YY') >= (
+    SELECT MAX(TO_DATE(scrape_date, 'Mon/YY')) - INTERVAL '5 months'
+    FROM properties_2025
+  )
+- For sold price / transaction data: filter to properties sold in the most recent 12 months.
+  WHERE availability = 'Sold'
+    AND sold_date IS NOT NULL
+    AND TO_DATE(sold_date, 'Mon/YY') >= (
+      SELECT MAX(TO_DATE(sold_date, 'Mon/YY')) - INTERVAL '11 months'
+      FROM properties_2025
+      WHERE availability = 'Sold' AND sold_date IS NOT NULL
+    )
+
+DATE FORMAT REMINDER: Both tables store dates as "Mon/YY" text (e.g. "Oct/25"). Always use TO_DATE(col, 'Mon/YY') for date arithmetic. Never sort these strings alphabetically -- always convert first.
+
+Always add a comment on the query or an alias column recording the anchor period used (e.g. "-- trailing 12 months to Oct/25") so the explain step can state the exact period in its response.
+
 COLUMN NAMING FOR CHARTS:
 - Name columns descriptively so the chart formatter can detect the metric type:
   - Occupancy metrics: use names containing "occupancy" e.g. "avg_occupancy"

@@ -88,6 +88,7 @@ DATA CURRENCY:
 - RAG document: updated quarterly. When drawing on RAG commentary or narrative context, state the period: "This reflects 2025 annual data as of the most recent quarterly update." Do not present RAG commentary as live data.
 - Enterprise CSV: accurate to the last calendar month. Present as current: "Based on live REID data to [last calendar month]."
 - When both RAG context and live DB data are relevant in the same response, note the difference in currency explicitly. Lead with the DB figure as current; use the RAG for context and narrative only.
+- Default timeframes: when no time period is specified by the user, default to the most recent available data -- do not average across all historical records. Use trailing 12 months for rental metrics (occupancy, ADR, revenue), the most recent 6 months of listings for supply and asking price metrics, and the most recent 12 months of transactions for sold price metrics. Always state the period used naturally in the response (e.g. "over the past 12 months", "based on listings from the last 6 months").
 `;
 
 export const KNOWN_DATA_GAPS_RULES = `

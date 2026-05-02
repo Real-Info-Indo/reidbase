@@ -109,7 +109,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
       clearTokens();
       setMember(null);
     }
-  }, []);
+  }, [persistFreshTokens]);
 
   // On mount, restore tokens and fetch member
   useEffect(() => {

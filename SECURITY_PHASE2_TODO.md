@@ -75,6 +75,24 @@ Tables already locked down in Phase 1 (no anon/authenticated policies):
      left as a direct client insert per the table strategy above
      (write-only beacon; SELECT will be revoked in Phase 2). Move it
      behind `user-data` only if Phase 2 changes that policy.
+   - **Phase 1D (done):**
+     - `send-appraisal` now performs strict input validation (typed
+       fields, per-field length caps, HTML escape on render),
+       optionally verifies the caller's Wix bearer token to stamp the
+       submitter id/email into the admin email, and never trusts
+       client-supplied identity fields. Returns `{ ok: true }` on
+       success and structured `{ error }` codes on failure.
+     - New public `shared-conversation` Edge Function reads
+       `shared_conversations` via service role and returns only the
+       safe column subset (no `sharer_wix_user_id`,
+       no `source_conversation_id`). `SharedConversation.tsx` now
+       calls this function instead of querying the table directly.
+     - Session enforcement (`useSessionEnforcement`) already routes
+       through `user-data` (`register_session` / `check_session`),
+       so no additional change is required for the session path.
+     - Import endpoints (`import-csv`, `import-rentals`) and chat
+       endpoints already require Wix bearer + admin / verified
+       identity from Phase 1B/1C — confirmed still in force.
 2. Verify with the user that the new flows work end-to-end in preview.
 3. Run the lockdown migration that, for each table above:
    - Drops the permissive `USING (true)` / `WITH CHECK (true)` policies.

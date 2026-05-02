@@ -4,6 +4,7 @@ import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { trackFeature } from "@/lib/analytics";
+import { wixAuthHeader } from "@/lib/wixToken";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ export default function AppraisalRequest() {
     try {
       const { error } = await supabase.functions.invoke("send-appraisal", {
         body: { ...form, propertyStatus },
+        headers: wixAuthHeader(),
       });
       if (error) throw error;
       setShowConfirmation(true);

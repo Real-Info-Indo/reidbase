@@ -66,18 +66,20 @@ export default function SharedConversation() {
     if (!id) return;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("shared_conversations")
-        .select("id,title,messages,search_mode,sharer_name,sharer_tier,created_at")
-        .eq("id", id)
-        .maybeSingle();
+      const { data: resp, error } = await supabase.functions.invoke(
+        "shared-conversation",
+        { body: { id } },
+      );
       if (error) {
         console.error(error);
         setError("Could not load shared conversation.");
-      } else if (!data) {
+      } else if (!resp || (resp as any).error === "not_found") {
         setError("This shared conversation no longer exists.");
+      } else if ((resp as any).error) {
+        console.error("shared-conversation error:", resp);
+        setError("Could not load shared conversation.");
       } else {
-        setSnapshot(data as unknown as SharedConversationRow);
+        setSnapshot((resp as any).snapshot as SharedConversationRow);
       }
       setLoading(false);
     })();

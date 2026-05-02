@@ -2,3 +2,6 @@ project_id = "rijjkabwsgcsfjftlusa"
 
 [functions.send-appraisal]
 verify_jwt = false
+
+[functions.shared-conversation]
+verify_jwt = false

@@ -32,6 +32,7 @@ export default function AppraisalRequest() {
   const [propertyStatus, setPropertyStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   // Form state
   const [form, setForm] = useState({
@@ -58,22 +59,80 @@ export default function AppraisalRequest() {
     overheads: "",
   });
 
-  const update = (field: string, value: string) =>
+  const update = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (missingFields.includes(field) && value.trim() !== "") {
+      setMissingFields((prev) => prev.filter((f) => f !== field));
+    }
+  };
+
+  const isMissing = (key: string) => missingFields.includes(key);
+  const fieldClass = (base: string, key: string) =>
+    `${base} ${isMissing(key) ? "border-destructive ring-1 ring-destructive/40" : ""}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Client-side check mirroring server REQUIRED_FIELDS
+    const payload: Record<string, string> = { ...form, propertyStatus };
+    const missingNow = REQUIRED_FIELDS.filter(
+      (f) => !payload[f.key] || String(payload[f.key]).trim() === "",
+    );
+    if (missingNow.length > 0) {
+      const keys = missingNow.map((f) => f.key);
+      setMissingFields(keys);
+      toast.error("Please complete the required fields", {
+        description: missingNow.map((f) => f.label).join(", "),
+      });
+      return;
+    }
+
+    setMissingFields([]);
     setSubmitting(true);
     try {
-      const { error } = await supabase.functions.invoke("send-appraisal", {
-        body: { ...form, propertyStatus },
+      const { data, error } = await supabase.functions.invoke("send-appraisal", {
+        body: payload,
         headers: wixAuthHeader(),
       });
-      if (error) throw error;
-      setShowConfirmation(true);
-      trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
-    } catch (err) {
+      if (error) {
+        // Try to surface server-side missing fields if returned
+        const ctx: any = (error as any).context;
+        let serverMissing: string[] | undefined;
+        try {
+          const body = ctx?.body ? JSON.parse(ctx.body) : undefined;
+          if (body?.error === "missing_required_fields" && Array.isArray(body.missing)) {
+            serverMissing = body.missing;
+          }
+        } catch {}
+        if (serverMissing && serverMissing.length > 0) {
+          setMissingFields(serverMissing);
+          const labels = serverMissing.map(
+            (k) => REQUIRED_FIELDS.find((f) => f.key === k)?.label ?? k,
+          );
+          toast.error("Please complete the required fields", {
+            description: labels.join(", "),
+          });
+        } else {
+          toast.error("Submission failed", {
+            description: error.message ?? "Please try again in a moment.",
+          });
+        }
+        return;
+      }
+
+      if ((data as any)?.ok === true) {
+        setShowConfirmation(true);
+        trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
+      } else {
+        toast.error("Submission failed", {
+          description: (data as any)?.message ?? "Unexpected response from server.",
+        });
+      }
+    } catch (err: any) {
       console.error("Submission error:", err);
+      toast.error("Submission failed", {
+        description: err?.message ?? "Network error. Please try again.",
+      });
     } finally {
       setSubmitting(false);
     }

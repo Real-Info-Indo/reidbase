@@ -18,8 +18,8 @@ interface TierContextType {
 }
 
 const tierAccess: Record<Exclude<UserTier, "member">, string[]> = {
-  free: ["/", "/appraisal-request"],
-  reid_base: ["/", "/dashboard", "/appraisal-request"],
+  free: ["/", "/market-reports", "/appraisal-request"],
+  reid_base: ["/", "/dashboard", "/market-reports", "/appraisal-request"],
   reid_base_pro: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
   enterprise: ["/", "/dashboard", "/market-reports", "/location-reports", "/appraisal-request"],
 };

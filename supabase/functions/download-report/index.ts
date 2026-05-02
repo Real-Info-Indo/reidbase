@@ -13,7 +13,7 @@
 //   location/<report_key>.pdf     e.g. location/canggu.pdf
 //
 // Tier requirements:
-//   market reports   -> reid_base_pro and above
+//   market reports   -> free and above (all logged-in users)
 //   location reports -> reid_base_pro and above
 // (Adjust the matrix below if the product tiering changes. Frontend gating
 // is presentational only; this server check is authoritative.)
@@ -38,7 +38,7 @@ const SIGNED_URL_TTL_SECONDS = 60;
 type ReportType = "market" | "location";
 
 const REQUIRED_TIER: Record<ReportType, Tier> = {
-  market: "reid_base_pro",
+  market: "free",
   location: "reid_base_pro",
 };
 

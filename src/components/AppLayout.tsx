@@ -5,6 +5,7 @@ import { AppSidebar } from "./AppSidebar";
 import { PersistentDashboard, type PersistentDashboardHandle } from "./PersistentDashboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSessionEnforcement } from "@/hooks/useSessionEnforcement";
+import { useTier } from "@/contexts/TierContext";
 import reidLogo from "@/assets/REID_Black.svg";
 
 export function AppLayout() {
@@ -13,6 +14,8 @@ export function AppLayout() {
   const location = useLocation();
   const isDashboard = location.pathname === "/dashboard";
   const dashboardRef = useRef<PersistentDashboardHandle>(null);
+  const { canAccess } = useTier();
+  const canViewDashboard = canAccess("/dashboard");
 
   // Enforce single-device sessions for paid tiers
   useSessionEnforcement();
@@ -54,11 +57,11 @@ export function AppLayout() {
 
       {/* Main content */}
       <main className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto bg-background relative ${isMobile ? "pt-14" : ""}`}>
-        {/* Persistent dashboard iframe (hidden when not on /dashboard) */}
-        {!isMobile && <PersistentDashboard ref={dashboardRef} visible={isDashboard} />}
+        {/* Persistent dashboard iframe (hidden when not on /dashboard, and never rendered for users without access) */}
+        {!isMobile && canViewDashboard && <PersistentDashboard ref={dashboardRef} visible={isDashboard} />}
 
-        {/* Normal routed content - hide when dashboard is active on desktop */}
-        <div className="min-w-0 overflow-x-hidden" style={isDashboard && !isMobile ? { visibility: "hidden" } : undefined}>
+        {/* Normal routed content - hide when dashboard iframe is showing on desktop */}
+        <div className="min-w-0 overflow-x-hidden" style={isDashboard && !isMobile && canViewDashboard ? { visibility: "hidden" } : undefined}>
           <Outlet context={{ dashboardRef }} />
         </div>
       </main>

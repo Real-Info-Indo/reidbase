@@ -63,7 +63,7 @@ export default function LocationReports() {
         return;
       }
 
-      const failure = result;
+      const failure = result as Extract<typeof result, { ok: false }>;
       switch (failure.kind) {
         case "unauthenticated":
           toast.error(failure.message, {

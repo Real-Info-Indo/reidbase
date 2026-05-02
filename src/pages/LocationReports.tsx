@@ -63,14 +63,15 @@ export default function LocationReports() {
         return;
       }
 
-      switch (result.kind) {
+      const failure = result;
+      switch (failure.kind) {
         case "unauthenticated":
-          toast.error(result.message, {
+          toast.error(failure.message, {
             action: { label: "Sign in", onClick: () => login() },
           });
           break;
         case "tier_forbidden":
-          toast.error(result.message, {
+          toast.error(failure.message, {
             action: {
               label: "See plans",
               onClick: () =>
@@ -79,10 +80,10 @@ export default function LocationReports() {
           });
           break;
         case "not_found":
-          toast.error(result.message);
+          toast.error(failure.message);
           break;
         default:
-          toast.error(result.message);
+          toast.error(failure.message);
       }
     } finally {
       setDownloadingKey(null);

@@ -87,9 +87,14 @@ export default function SharedConversation() {
     })();
   }, [id]);
 
-  const sharerTier = snapshot?.sharer_tier ?? "member";
-  const viewerRank = TIER_RANK[viewerTier] ?? 0;
+  const sharerTier = snapshot?.sharer_tier ?? "free";
+  const viewerRank = TIER_RANK[viewerTier ?? "free"] ?? 0;
   const sharerRank = TIER_RANK[sharerTier] ?? 0;
+  // Three exhaustive states for the CTA:
+  //   - loggedOut          -> Sign in
+  //   - underTier          -> Upgrade
+  //   - canContinue        -> Continue this chat
+  const loggedOut = !isLoggedIn;
   const viewerCanContinue = isLoggedIn && viewerRank >= sharerRank;
   const viewerNeedsUpgrade = isLoggedIn && viewerRank < sharerRank;
 

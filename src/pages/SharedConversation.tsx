@@ -21,7 +21,8 @@ interface SharedConversationRow {
 }
 
 const TIER_RANK: Record<string, number> = {
-  member: 0,
+  free: 0,
+  member: 0, // legacy alias for free
   reid_base: 1,
   reid_base_pro: 2,
   enterprise: 3,
@@ -29,11 +30,12 @@ const TIER_RANK: Record<string, number> = {
 
 function tierLabel(t?: string | null): string {
   switch (t) {
+    case "free":
     case "member": return "Free";
     case "reid_base": return "Member";
     case "reid_base_pro": return "Pro";
     case "enterprise": return "Enterprise";
-    default: return "Member";
+    default: return "Free";
   }
 }
 
@@ -85,9 +87,14 @@ export default function SharedConversation() {
     })();
   }, [id]);
 
-  const sharerTier = snapshot?.sharer_tier ?? "member";
-  const viewerRank = TIER_RANK[viewerTier] ?? 0;
+  const sharerTier = snapshot?.sharer_tier ?? "free";
+  const viewerRank = TIER_RANK[viewerTier ?? "free"] ?? 0;
   const sharerRank = TIER_RANK[sharerTier] ?? 0;
+  // Three exhaustive states for the CTA:
+  //   - loggedOut          -> Sign in
+  //   - underTier          -> Upgrade
+  //   - canContinue        -> Continue this chat
+  const loggedOut = !isLoggedIn;
   const viewerCanContinue = isLoggedIn && viewerRank >= sharerRank;
   const viewerNeedsUpgrade = isLoggedIn && viewerRank < sharerRank;
 

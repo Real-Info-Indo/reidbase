@@ -1,0 +1,62 @@
+-- Phase 2A — Lock down execute_readonly_query
+REVOKE EXECUTE ON FUNCTION public.execute_readonly_query(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.execute_readonly_query(text) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.execute_readonly_query(text) FROM authenticated;
+GRANT  EXECUTE ON FUNCTION public.execute_readonly_query(text) TO service_role;
+
+-- Phase 2B — Table policy lockdown
+
+-- analytics_events — keep public INSERT (write-only beacon), drop SELECT
+DROP POLICY IF EXISTS "Analytics events readable by anyone"  ON public.analytics_events;
+
+-- appraisal_requests
+DROP POLICY IF EXISTS "Appraisal requests insertable by anyone" ON public.appraisal_requests;
+DROP POLICY IF EXISTS "Appraisal requests readable by anyone"   ON public.appraisal_requests;
+DROP POLICY IF EXISTS "Appraisal requests updatable by anyone"  ON public.appraisal_requests;
+
+-- chat_feedback — fully locked
+DROP POLICY IF EXISTS "Anyone can insert feedback" ON public.chat_feedback;
+DROP POLICY IF EXISTS "Anyone can read feedback"   ON public.chat_feedback;
+
+-- chat_flags
+DROP POLICY IF EXISTS "Chat flags insertable by anyone" ON public.chat_flags;
+DROP POLICY IF EXISTS "Chat flags readable by anyone"   ON public.chat_flags;
+DROP POLICY IF EXISTS "Chat flags updatable by anyone"  ON public.chat_flags;
+
+-- chat_logs
+DROP POLICY IF EXISTS "Chat logs are insertable by anyone" ON public.chat_logs;
+DROP POLICY IF EXISTS "Chat logs are readable by anyone"   ON public.chat_logs;
+DROP POLICY IF EXISTS "Chat logs are updatable by anyone"  ON public.chat_logs;
+DROP POLICY IF EXISTS "Chat logs are deletable by anyone"  ON public.chat_logs;
+
+-- folders
+DROP POLICY IF EXISTS "Folders insertable by anyone" ON public.folders;
+DROP POLICY IF EXISTS "Folders readable by anyone"   ON public.folders;
+DROP POLICY IF EXISTS "Folders updatable by anyone"  ON public.folders;
+DROP POLICY IF EXISTS "Folders deletable by anyone"  ON public.folders;
+
+-- shared_conversations
+DROP POLICY IF EXISTS "Shared conversations insertable by anyone" ON public.shared_conversations;
+DROP POLICY IF EXISTS "Shared conversations readable by anyone"   ON public.shared_conversations;
+
+-- user_profiles
+DROP POLICY IF EXISTS "User profiles insertable by anyone" ON public.user_profiles;
+DROP POLICY IF EXISTS "User profiles readable by anyone"   ON public.user_profiles;
+DROP POLICY IF EXISTS "User profiles updatable by anyone"  ON public.user_profiles;
+
+-- user_sessions
+DROP POLICY IF EXISTS "Sessions insertable by anyone" ON public.user_sessions;
+DROP POLICY IF EXISTS "Sessions readable by anyone"   ON public.user_sessions;
+DROP POLICY IF EXISTS "Sessions updatable by anyone"  ON public.user_sessions;
+DROP POLICY IF EXISTS "Sessions deletable by anyone"  ON public.user_sessions;
+
+-- Defensive RLS re-assert
+ALTER TABLE public.analytics_events     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.appraisal_requests   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_feedback        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_flags           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_logs            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.folders              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.shared_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_sessions        ENABLE ROW LEVEL SECURITY;

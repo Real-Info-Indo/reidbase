@@ -3,8 +3,6 @@ import { Search, Download, Loader2 } from "lucide-react";
 import { trackFeature } from "@/lib/analytics";
 import { toast } from "sonner";
 import { useWixAuth } from "@/contexts/WixAuthContext";
-import { useTier } from "@/contexts/TierContext";
-import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import {
   requestReportSignedUrl,
   openSignedDownload,
@@ -37,8 +35,6 @@ export default function MarketReports() {
   const [search, setSearch] = useState("");
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
   const { login } = useWixAuth();
-  const { canAccess } = useTier();
-  const hasAccess = canAccess("/market-reports");
   const filtered = reports.filter((r) =>
     r.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -92,8 +88,7 @@ export default function MarketReports() {
 
   return (
     <div className="relative w-full overflow-x-hidden p-8">
-      {!hasAccess && <UpgradeOverlay />}
-      <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
+      <div>
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Market Reports</h1>
@@ -137,7 +132,7 @@ export default function MarketReports() {
                 <button
                   type="button"
                   onClick={() => handleDownload(report)}
-                  disabled={isLoading || !hasAccess}
+                  disabled={isLoading}
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
                   title={`Download ${report.name}`}
                   aria-label={`Download ${report.name}`}

@@ -48,11 +48,31 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
   const [member, setMember] = useState<WixMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const persistFreshTokens = useCallback(() => {
+    // The Wix SDK auto-refreshes access tokens internally during API calls
+    // but does NOT write them back to localStorage. Edge function calls read
+    // the token directly from localStorage via getWixAccessToken(), so we
+    // must mirror the SDK's current tokens after every member fetch — else
+    // the first wave of edge calls (hydrate, sync profile, refresh tier)
+    // sends an expired token and gets 401 "Wix rejected the token".
+    try {
+      const fresh = wixClient.auth.getTokens?.();
+      if (fresh?.accessToken?.value) {
+        saveTokens(fresh);
+      }
+    } catch (err) {
+      console.warn("Could not persist refreshed Wix tokens:", err);
+    }
+  }, []);
+
   const fetchMember = useCallback(async () => {
     try {
       const response = await wixClient.members.getCurrentMember({
         fieldsets: ["FULL"],
       });
+      // Persist any refreshed token immediately, BEFORE downstream calls
+      // (hydrateFromSupabase, syncUserProfile) read from localStorage.
+      persistFreshTokens();
       const m = response.member;
       if (m) {
         const photoUrl = (m as any).profile?.photo?.url || undefined;

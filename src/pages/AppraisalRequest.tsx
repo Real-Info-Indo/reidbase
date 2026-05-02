@@ -166,12 +166,18 @@ export default function AppraisalRequest() {
             </a>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Property Type <span className="text-destructive">*</span></label>
-                <select className={selectClass} value={form.propertyType} onChange={(e) => update("propertyType", e.target.value)}>
+                <select
+                  required
+                  aria-invalid={isMissing("propertyType")}
+                  className={fieldClass(selectClass, "propertyType")}
+                  value={form.propertyType}
+                  onChange={(e) => update("propertyType", e.target.value)}
+                >
                   <option value="">Select type</option>
                   <option>Villa</option>
                   <option>Land</option>
@@ -181,7 +187,14 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Location <span className="text-destructive">*</span></label>
-                <input className={inputClass} placeholder="Search location..." value={form.location} onChange={(e) => update("location", e.target.value)} />
+                <input
+                  required
+                  aria-invalid={isMissing("location")}
+                  className={fieldClass(inputClass, "location")}
+                  placeholder="Search location..."
+                  value={form.location}
+                  onChange={(e) => update("location", e.target.value)}
+                />
               </div>
             </div>
 
@@ -195,7 +208,13 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Ownership Type <span className="text-destructive">*</span></label>
-                <select className={selectClass} value={form.ownershipType} onChange={(e) => update("ownershipType", e.target.value)}>
+                <select
+                  required
+                  aria-invalid={isMissing("ownershipType")}
+                  className={fieldClass(selectClass, "ownershipType")}
+                  value={form.ownershipType}
+                  onChange={(e) => update("ownershipType", e.target.value)}
+                >
                   <option value="">Select</option>
                   <option>Freehold</option>
                   <option>Leasehold</option>
@@ -203,7 +222,13 @@ export default function AppraisalRequest() {
               </div>
               <div>
                 <label className={labelClass}>Land Zone <span className="text-destructive">*</span></label>
-                <select className={selectClass} value={form.landZone} onChange={(e) => update("landZone", e.target.value)}>
+                <select
+                  required
+                  aria-invalid={isMissing("landZone")}
+                  className={fieldClass(selectClass, "landZone")}
+                  value={form.landZone}
+                  onChange={(e) => update("landZone", e.target.value)}
+                >
                   <option value="">Select</option>
                   <option value="Residential (Yellow)">Residential (Yellow)</option>
                   <option value="Tourism (Pink)">Tourism (Pink)</option>
@@ -217,11 +242,27 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Lease Term (years) <span className="text-destructive">*</span></label>
-                <input type="number" className={inputClass} placeholder="e.g. 25" value={form.leaseTerm} onChange={(e) => update("leaseTerm", e.target.value)} />
+                <input
+                  type="number"
+                  required
+                  aria-invalid={isMissing("leaseTerm")}
+                  className={fieldClass(inputClass, "leaseTerm")}
+                  placeholder="e.g. 25"
+                  value={form.leaseTerm}
+                  onChange={(e) => update("leaseTerm", e.target.value)}
+                />
               </div>
               <div>
                 <label className={labelClass}>Land Size (SQM) <span className="text-destructive">*</span></label>
-                <input type="number" className={inputClass} placeholder="e.g. 500" value={form.landSize} onChange={(e) => update("landSize", e.target.value)} />
+                <input
+                  type="number"
+                  required
+                  aria-invalid={isMissing("landSize")}
+                  className={fieldClass(inputClass, "landSize")}
+                  placeholder="e.g. 500"
+                  value={form.landSize}
+                  onChange={(e) => update("landSize", e.target.value)}
+                />
               </div>
             </div>
 
@@ -229,11 +270,30 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className={labelClass}>Internal Size (SQM) <span className="text-destructive">*</span></label>
-                <input type="number" className={inputClass} placeholder="e.g. 300" value={form.internalSize} onChange={(e) => update("internalSize", e.target.value)} />
+                <input
+                  type="number"
+                  required
+                  aria-invalid={isMissing("internalSize")}
+                  className={fieldClass(inputClass, "internalSize")}
+                  placeholder="e.g. 300"
+                  value={form.internalSize}
+                  onChange={(e) => update("internalSize", e.target.value)}
+                />
               </div>
               <div>
                 <label className={labelClass}>Property Status <span className="text-destructive">*</span></label>
-                <select className={selectClass} value={propertyStatus} onChange={(e) => setPropertyStatus(e.target.value)}>
+                <select
+                  required
+                  aria-invalid={isMissing("propertyStatus")}
+                  className={fieldClass(selectClass, "propertyStatus")}
+                  value={propertyStatus}
+                  onChange={(e) => {
+                    setPropertyStatus(e.target.value);
+                    if (missingFields.includes("propertyStatus") && e.target.value) {
+                      setMissingFields((prev) => prev.filter((f) => f !== "propertyStatus"));
+                    }
+                  }}
+                >
                   <option value="">Select</option>
                   <option value="completed">Completed</option>
                   <option value="off_plan">Off Plan</option>

@@ -33,7 +33,7 @@ Columns:
 - date (text) — month/year e.g. "Oct/25", "Jan/22"
 - region (text) — e.g. Central Badung, Denpasar, North Badung, South Badung, Gianyar, Mengwi, Tabanan
 - location (text) — e.g. Seminyak, Canggu, Ubud, Berawa, Pererenan, Sanur, Uluwatu, etc.
-- type (text) — Villa or Apartment
+- type (text) — Villa, Apartment, or Guest House
 - mgmt (text) — Professional or Individual (management type)
 - beds (integer) — number of bedrooms
 - count (integer) — number of rental properties in this segment
@@ -137,6 +137,24 @@ CONFIDENCE METADATA -- include in every aggregate query:
 - properties_2025 queries: always add COUNT(*) AS n alongside all aggregate metrics
 - rentals_2025 queries: always add COUNT(*) AS n (number of data segments), SUM(count) AS total_properties (actual property count), COUNT(DISTINCT date) AS months_covered
 - Do not omit these columns even if the user did not ask for them -- the explain step uses them to calibrate how confidently to present the figures.
+
+PROPERTY TYPE HANDLING (rentals_2025):
+The rental dataset contains three property types: Villa, Apartment, and Guest House. They differ significantly in scale, ADR, and revenue profile — villa ADR is typically 3-5x that of a guest house. Handle them as follows.
+
+Market-level queries (user asks about "the market", a location, or a region without specifying a type):
+- Do not filter by type. Include all three in aggregations.
+- Always add a GROUP BY type breakdown alongside the overall figure for ADR, revenue, and occupancy metrics — the blended figure alone can be misleading given the wide spread across types.
+
+Type-specific queries (user specifies villa, apartment, or guest house):
+- Filter to the matching type: WHERE type = 'Villa' / 'Apartment' / 'Guest House'
+- Infer type from user language: "villa" → Villa; "apartment" or "unit" → Apartment; "guest house", "guesthouse", or "hostel" → Guest House.
+- Never blend other types into a type-specific query.
+
+Yield and cross-table calculations:
+- Always match the rental type to the subject property. Villa yield → filter rentals to type = 'Villa'. Apartment yield → filter rentals to type = 'Apartment'. Guest house yield → filter rentals to type = 'Guest House'.
+- Never use blended cross-type rental data for a type-specific yield calculation.
+
+Note: properties_2025.property_type only contains Villa and Apartment — guest houses do not appear in the sales dataset. This is correct; do not query for Guest House in properties_2025.
 
 COLUMN NAMING FOR CHARTS:
 - Name columns descriptively so the chart formatter can detect the metric type:

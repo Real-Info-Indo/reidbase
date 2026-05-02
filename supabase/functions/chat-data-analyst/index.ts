@@ -123,7 +123,7 @@ Follow the full method below. Use location-level market averages from the REID D
    - State clearly: "These are estimates based on inputs you provide and REID market data where noted. Actual returns will vary."
 2. Then request only the following, as a short numbered list:
    1. Location (neighbourhood if known)
-   2. Property type (villa or apartment)
+   2. Property type (villa, apartment, or guest house)
    3. Number of bedrooms
    4. Asking price in USD
 3. INPUTS RECEIVED -- EXECUTE IMMEDIATELY. When location, property type, bedrooms, and asking price have been provided (in one message or across multiple turns), do not ask further questions. Apply location-level market ADR and occupancy for the typology and present:

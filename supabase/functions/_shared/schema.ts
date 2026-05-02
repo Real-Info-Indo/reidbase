@@ -121,6 +121,18 @@ rentals_2025 -- note: each row is a pre-aggregated segment (location / type / mg
 - monthly_usd, total_usd: AVG for per-property revenue benchmarks; SUM for total market revenue figures
 - count (inventory): always SUM -- it is a per-segment property count and must be summed to get totals
 
+PERCENTILE RANGES -- include P25 and P75 alongside the median for all key metrics in non-time-series aggregate queries:
+For every metric that uses MEDIAN, also select the lower and upper quartile to give the typical market range:
+  PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY col) AS col_p25
+  PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY col) AS col_p50
+  PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY col) AS col_p75
+Apply this to: price_usd, price_per_sqm_usd, price_per_year_usd, build_size_sqm, land_size_sqm, rate_usd, years, days_listed.
+Do NOT add percentile ranges for:
+- Time series queries -- include only the P50 per period to keep columns manageable for charting
+- Non-aggregate row-level queries
+- AVG metrics (occupancy, bedrooms) -- quartiles on pre-averaged rates are not meaningful
+- When n < 10 -- you can still compute them, but the explain step will suppress their presentation
+
 CONFIDENCE METADATA -- include in every aggregate query:
 - properties_2025 queries: always add COUNT(*) AS n alongside all aggregate metrics
 - rentals_2025 queries: always add COUNT(*) AS n (number of data segments), SUM(count) AS total_properties (actual property count), COUNT(DISTINCT date) AS months_covered
@@ -164,6 +176,18 @@ rentals_2025 (calibrate on total_properties and months_covered):
 - total_properties < 5: do not present as a figure
 
 When confidence is high, say nothing about sample size -- silence is the correct signal. Add caveats only when they would change how the user should act on the figure.
+
+Percentile ranges -- present alongside median for all monetary and size benchmarks (when P25/P75 are present in the results):
+- Format: "[median] (typical range: [P25]–[P75])"
+- Examples:
+  - "Median asking price: $285k (typical range: $210k–$380k)"
+  - "ADR sits at $185/night (typical range: $140–$240)"
+  - "Median build size: 185 sqm (typical range: 130–260 sqm)"
+- The range covers the middle 50% of the market. State this naturally when it adds clarity: "half of comparable listings fall between $210k and $380k."
+- Do not label P25 as "entry level", "budget", or "affordable" -- do not label P75 as "premium" or "luxury". Describe by data attributes only (price, size, location, tenure).
+- Suppress the range (show median only) when n < 10 -- quartiles on fewer than 10 data points are unreliable.
+- For time series responses, show the median per period only -- ranges in trend narratives add noise rather than insight.
+- When a user explicitly asks about the upper or lower end of the market (e.g. "what do the top-end villas go for?"), you may reference P75 or P90 directly as the relevant benchmark.
 
 Chart Generation Rules:
 - Never produce a chart unless the user has explicitly asked for one in this conversation.

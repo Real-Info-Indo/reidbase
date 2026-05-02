@@ -5,6 +5,7 @@ import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { trackFeature } from "@/lib/analytics";
 import { wixAuthHeader } from "@/lib/wixToken";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+
+const REQUIRED_FIELDS: { key: string; label: string }[] = [
+  { key: "propertyType", label: "Property Type" },
+  { key: "location", label: "Location" },
+  { key: "ownershipType", label: "Ownership Type" },
+  { key: "landZone", label: "Land Zone" },
+  { key: "leaseTerm", label: "Lease Term" },
+  { key: "landSize", label: "Land Size" },
+  { key: "internalSize", label: "Internal Size" },
+  { key: "propertyStatus", label: "Property Status" },
+  { key: "bedrooms", label: "Bedrooms" },
+];
 
 export default function AppraisalRequest() {
   const { canAccess } = useTier();

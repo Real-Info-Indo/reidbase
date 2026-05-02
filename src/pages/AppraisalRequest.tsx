@@ -334,7 +334,15 @@ export default function AppraisalRequest() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className={labelClass}>Bedrooms <span className="text-destructive">*</span></label>
-                <input type="number" className={inputClass} placeholder="e.g. 3" value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)} />
+                <input
+                  type="number"
+                  required
+                  aria-invalid={isMissing("bedrooms")}
+                  className={fieldClass(inputClass, "bedrooms")}
+                  placeholder="e.g. 3"
+                  value={form.bedrooms}
+                  onChange={(e) => update("bedrooms", e.target.value)}
+                />
               </div>
               <div>
                 <label className={labelClass}>Bathrooms</label>

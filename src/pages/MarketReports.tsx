@@ -3,6 +3,8 @@ import { Search, Download, Loader2 } from "lucide-react";
 import { trackFeature } from "@/lib/analytics";
 import { toast } from "sonner";
 import { useWixAuth } from "@/contexts/WixAuthContext";
+import { useTier } from "@/contexts/TierContext";
+import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import {
   requestReportSignedUrl,
   openSignedDownload,
@@ -35,6 +37,8 @@ export default function MarketReports() {
   const [search, setSearch] = useState("");
   const [downloadingKey, setDownloadingKey] = useState<string | null>(null);
   const { login } = useWixAuth();
+  const { canAccess } = useTier();
+  const hasAccess = canAccess("/market-reports");
   const filtered = reports.filter((r) =>
     r.name.toLowerCase().includes(search.toLowerCase()),
   );

@@ -60,8 +60,8 @@ export function AppLayout() {
         {/* Persistent dashboard iframe (hidden when not on /dashboard, and never rendered for users without access) */}
         {!isMobile && canViewDashboard && <PersistentDashboard ref={dashboardRef} visible={isDashboard} />}
 
-        {/* Normal routed content - hide when dashboard is active on desktop */}
-        <div className="min-w-0 overflow-x-hidden" style={isDashboard && !isMobile ? { visibility: "hidden" } : undefined}>
+        {/* Normal routed content - hide when dashboard iframe is showing on desktop */}
+        <div className="min-w-0 overflow-x-hidden" style={isDashboard && !isMobile && canViewDashboard ? { visibility: "hidden" } : undefined}>
           <Outlet context={{ dashboardRef }} />
         </div>
       </main>

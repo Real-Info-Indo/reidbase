@@ -44,9 +44,7 @@ Columns:
 
 Total rows: ~15,245 monthly rental data records across Bali.
 
-Use PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for medians.
-Use AVG() for averages. Always ROUND() numeric results.
-Always filter out nulls for the columns being analyzed.
+Always ROUND() numeric results. Always filter out nulls for the columns being analyzed.
 When querying rentals, use the rentals_2025 table. When querying property sales/supply, use properties_2025.
 `;
 
@@ -105,6 +103,29 @@ DATE FORMAT REMINDER: Both tables store dates as "Mon/YY" text (e.g. "Oct/25"). 
 
 Always add a comment on the query or an alias column recording the anchor period used (e.g. "-- trailing 12 months to Oct/25") so the explain step can state the exact period in its response.
 
+METRIC AGGREGATION RULES:
+Always use the correct aggregation for each metric. Never substitute AVG for a metric that requires MEDIAN.
+
+properties_2025 -- use MEDIAN (PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)) for:
+- price_usd, price_per_sqm_usd, price_per_year_usd, price_idr -- price distributions are right-skewed by outlier luxury listings; AVG will overstate the typical price
+- land_size_sqm, build_size_sqm -- skewed by large luxury estates; median gives the typical asset size
+- years (lease duration) -- skewed by outlier short or very long leases
+- days_listed -- heavily right-skewed by properties sitting unsold for years
+
+properties_2025 -- use AVG for:
+- bedrooms, bathrooms -- only when aggregated (most queries use these as GROUP BY filters, not aggregates)
+
+rentals_2025 -- note: each row is a pre-aggregated segment (location / type / mgmt / beds / month), so further aggregation is across segments:
+- rate_usd (nightly ADR): MEDIAN -- skewed by high-end villa outliers even within segments
+- occupancy: AVG -- it is already a pre-computed percentage per segment; averaging rates across segments is correct
+- monthly_usd, total_usd: AVG for per-property revenue benchmarks; SUM for total market revenue figures
+- count (inventory): always SUM -- it is a per-segment property count and must be summed to get totals
+
+CONFIDENCE METADATA -- include in every aggregate query:
+- properties_2025 queries: always add COUNT(*) AS n alongside all aggregate metrics
+- rentals_2025 queries: always add COUNT(*) AS n (number of data segments), SUM(count) AS total_properties (actual property count), COUNT(DISTINCT date) AS months_covered
+- Do not omit these columns even if the user did not ask for them -- the explain step uses them to calibrate how confidently to present the figures.
+
 COLUMN NAMING FOR CHARTS:
 - Name columns descriptively so the chart formatter can detect the metric type:
   - Occupancy metrics: use names containing "occupancy" e.g. "avg_occupancy"
@@ -127,6 +148,22 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 - All prices in USD ($), all areas in SQM
 - Add brief market context when relevant
 - Keep it concise but informative
+
+Confidence Scoring -- apply silently. Do not mechanically recite these thresholds or label tiers in the response. Use them only to calibrate your language and decide whether to caveat a figure.
+
+properties_2025 (calibrate on the n column):
+- n >= 30: present figures normally, no caveat needed
+- n = 10-29: note sample size naturally in passing: "based on X listings" or "across X properties in the dataset"
+- n = 5-9: flag it: "this is based on a small sample (X properties) -- treat as indicative rather than a firm benchmark"
+- n < 5: do not present as a figure. Say: "There isn't enough data at this level for a reliable read. I can broaden to [region] level for a more robust figure."
+
+rentals_2025 (calibrate on total_properties and months_covered):
+- total_properties >= 20 and months_covered >= 10: high confidence, present normally
+- total_properties >= 10 or months_covered >= 6: note coverage naturally: "across X properties over Y months of data"
+- total_properties < 10 or months_covered < 6: flag it: "based on limited rental data (X properties, Y months of records) -- treat as directional"
+- total_properties < 5: do not present as a figure
+
+When confidence is high, say nothing about sample size -- silence is the correct signal. Add caveats only when they would change how the user should act on the figure.
 
 Chart Generation Rules:
 - Never produce a chart unless the user has explicitly asked for one in this conversation.

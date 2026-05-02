@@ -342,21 +342,22 @@ async function streamChat({
   const functionName = modeToFunction[searchMode ?? "data-analyst"] ?? "chat-data-analyst";
   const chatUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`;
 
-  // Wix access token for server-side identity verification. Tier-gated chat
-  // modes require it; anonymous data-analyst calls fall back to the Supabase
-  // publishable key as before.
+  // Wix access token for server-side identity verification. Only send it as
+  // the Authorization header when present — passing the Supabase anon key as
+  // a Bearer token would cause the edge function to reject it against the Wix
+  // Members API. Anonymous data-analyst calls proceed with no Authorization
+  // header; the apikey header is sufficient for Supabase routing.
   let wixAccessToken: string | null = null;
   try {
     const raw = localStorage.getItem("wix-tokens");
     if (raw) wixAccessToken = JSON.parse(raw)?.accessToken?.value ?? null;
   } catch {}
-  const authToken = wixAccessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   const resp = await fetch(chatUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}`,
+      ...(wixAccessToken ? { Authorization: `Bearer ${wixAccessToken}` } : {}),
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
     body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })

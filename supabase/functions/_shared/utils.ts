@@ -85,7 +85,7 @@ export function buildPersonalisationBlock(
   if (name) parts.push(`- Address the user as "${name}".`);
 
   // Member and above: include occupation, business, about
-  if (tier && tier !== "freemium") {
+  if (tier && tier !== "free" && tier !== "freemium") {
     if (personalisation?.occupation) parts.push(`- The user's occupation: ${personalisation.occupation}.`);
     if (personalisation?.business) parts.push(`- The user's business: ${personalisation.business}.`);
     if (personalisation?.about) parts.push(`- About the user: ${personalisation.about}.`);
@@ -148,7 +148,7 @@ Chart Generation Rules:
 - Keep data arrays to 24 items max for MoM, 8 for QoQ, 5 for YoY.
 - Only offer a chart at the end of a response where it would genuinely aid understanding: "Would you like to see this as a chart?" Do not offer on every response.
 
-${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
+${tier === "free" || tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
 
 REID 2025 Intelligence Report:

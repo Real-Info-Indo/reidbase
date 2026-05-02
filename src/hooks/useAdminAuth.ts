@@ -2,22 +2,22 @@ import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { wixAuthHeader, getWixAccessToken } from "@/lib/wixToken";
 
-const STORAGE_KEY = "reid_admin_authed";
-
 /**
- * Phase 1B: admin auth is now sourced from the server.
+ * Phase 1B + hardening: admin auth is sourced from the server on every mount.
  *
- * We verify the user's Wix access token against `check-admin`, which in
- * turn calls the SECURITY DEFINER `public.has_admin()` RPC with the
- * service-role key. There is no shared password anymore.
+ * We verify the user's Wix access token against `check-admin`, which calls
+ * the SECURITY DEFINER `public.has_admin()` RPC with the service-role key
+ * and returns `{ isAdmin: true }` only when the verified Wix user id exists
+ * in `public.admin_users`.
  *
- * The result is cached in sessionStorage so admins don't re-verify on every
- * navigation, but `verify()` is called on mount to keep state fresh.
+ * SECURITY: We deliberately do NOT cache `authenticated=true` in
+ * sessionStorage. A stale flag from a previous admin sign-in on the same
+ * device must never let a different (or downgraded) account render admin
+ * content. `authenticated` always starts `false` and only flips to `true`
+ * after a successful server verification in this mount.
  */
 export function useAdminAuth() {
-  const [authenticated, setAuthenticated] = useState<boolean>(() => {
-    try { return sessionStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
-  });
+  const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [checking, setChecking] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +27,6 @@ export function useAdminAuth() {
     const token = getWixAccessToken();
     if (!token) {
       setAuthenticated(false);
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       setError("not_logged_in");
       setChecking(false);
       return false;
@@ -40,16 +39,11 @@ export function useAdminAuth() {
       if (invokeError) throw new Error(invokeError.message);
       const isAdmin = !!(data as { isAdmin?: boolean })?.isAdmin;
       setAuthenticated(isAdmin);
-      try {
-        if (isAdmin) sessionStorage.setItem(STORAGE_KEY, "1");
-        else sessionStorage.removeItem(STORAGE_KEY);
-      } catch { /* ignore */ }
       if (!isAdmin) setError("not_admin");
       setChecking(false);
       return isAdmin;
     } catch (e) {
       setAuthenticated(false);
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       setError((e as Error).message || "verify_failed");
       setChecking(false);
       return false;
@@ -59,7 +53,6 @@ export function useAdminAuth() {
   useEffect(() => { void verify(); }, [verify]);
 
   const signOut = useCallback(() => {
-    try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
     setAuthenticated(false);
   }, []);
 

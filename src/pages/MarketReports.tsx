@@ -91,7 +91,9 @@ export default function MarketReports() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden p-8">
+    <div className="relative w-full overflow-x-hidden p-8">
+      {!hasAccess && <UpgradeOverlay />}
+      <div className={!hasAccess ? "pointer-events-none select-none blur-sm" : ""}>
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Market Reports</h1>
@@ -135,7 +137,7 @@ export default function MarketReports() {
                 <button
                   type="button"
                   onClick={() => handleDownload(report)}
-                  disabled={isLoading}
+                  disabled={isLoading || !hasAccess}
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
                   title={`Download ${report.name}`}
                   aria-label={`Download ${report.name}`}
@@ -150,6 +152,7 @@ export default function MarketReports() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export async function requestReportSignedUrl({
   // If the user is not logged in we have no Wix bearer to send. Bail early
   // with the unauthenticated outcome so the UI can prompt sign-in without a
   // round-trip.
-  const headers = wixAuthHeader();
+  const headers = await wixAuthHeader();
   if (!headers.Authorization) {
     return {
       ok: false,

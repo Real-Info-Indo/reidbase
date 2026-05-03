@@ -167,7 +167,12 @@ function sanitiseInput(
 }
 
 
-function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | null; email: string | null }): string {
+function buildEmailHtml(
+  data: AppraisalData,
+  submitter: { wixUserId: string | null; email: string | null },
+  files: AppraisalFile[],
+  requestId: string,
+): string {
   const row = (label: string, value?: string) =>
     value ? `<tr><td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb;width:40%">${escapeHtml(label)}</td><td style="padding:8px 12px;color:#1f2937;border-bottom:1px solid #e5e7eb">${escapeHtml(value)}</td></tr>` : "";
 
@@ -182,6 +187,21 @@ function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | nu
   const submitterRows = (submitter.wixUserId || submitter.email) ? `
     ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
     ${row("Submitter email", submitter.email ?? "")}
+    ${row("Request ID", requestId)}
+  ` : row("Request ID", requestId);
+
+  const filesSection = files.length > 0 ? `
+    <h2 style="font-size:16px;color:#111827;margin-top:24px;margin-bottom:8px">Attached Files (${files.length})</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e5e7eb;border-radius:8px">
+      ${files.map((f) => `
+        <tr>
+          <td style="padding:8px 12px;color:#1f2937;border-bottom:1px solid #e5e7eb">${escapeHtml(f.name)}</td>
+          <td style="padding:8px 12px;color:#6b7280;border-bottom:1px solid #e5e7eb;width:90px">${escapeHtml(formatBytes(f.size))}</td>
+          <td style="padding:8px 12px;color:#6b7280;border-bottom:1px solid #e5e7eb;font-family:monospace;font-size:11px">${escapeHtml(f.path)}</td>
+        </tr>
+      `).join("")}
+    </table>
+    <p style="color:#6b7280;font-size:12px;margin-top:8px">Files stored in private bucket <code>appraisals</code>. Retrieve via admin tools.</p>
   ` : "";
 
   return `
@@ -209,6 +229,7 @@ function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | nu
         ${row("Years Operating", data.yearsOperating)}
         ${constructionRows}
       </table>
+      ${filesSection}
       <p style="color:#6b7280;font-size:13px;margin-top:20px">View all requests at <a href="https://reidbase.lovable.app/admin/appraisals" style="color:#2563eb">reidbase.lovable.app/admin/appraisals</a></p>
       <p style="color:#9ca3af;font-size:12px;margin-top:16px">This email was sent automatically from the REID platform.</p>
     </div>

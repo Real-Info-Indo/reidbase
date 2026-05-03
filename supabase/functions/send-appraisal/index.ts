@@ -209,21 +209,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const data = parsed.data;
 
-    // Best-effort identify the submitter via Wix bearer token. Anonymous
-    // submissions remain allowed (the page may be embedded), but we never
-    // trust client-supplied wix_user_id / email.
-    let submitterWixId: string | null = null;
-    let submitterEmail: string | null = null;
-    const authHeader = req.headers.get("authorization");
-    if (authHeader) {
-      try {
-        const ident = await verifyWixToken(authHeader);
-        submitterWixId = ident.wixUserId;
-        submitterEmail = ident.email ?? ident.loginEmail ?? null;
-      } catch (_) {
-        // Ignore — treat as anonymous submission.
-      }
-    }
+    // Submitter identity already verified above.
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

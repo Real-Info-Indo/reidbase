@@ -43,7 +43,9 @@ export default function SharedConversation() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isLoggedIn, isLoading: authLoading } = useWixAuth();
-  const { tier: viewerTier } = useTier();
+  const { tier: viewerTier, isRefreshing, refreshTier } = useTier();
+  const tierRefreshTriggered = useRef(false);
+  const [tierRefreshDone, setTierRefreshDone] = useState(false);
 
   const [snapshot, setSnapshot] = useState<SharedConversationRow | null>(null);
   const [loading, setLoading] = useState(true);

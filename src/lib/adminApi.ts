@@ -11,7 +11,7 @@ export async function invokeAdmin<T = unknown>(
 ): Promise<T> {
   const { data, error } = await supabase.functions.invoke(fn, {
     body,
-    headers: wixAuthHeader(),
+    headers: await wixAuthHeader(),
   });
   if (error) throw new Error(error.message);
   if (data && typeof data === "object" && "error" in (data as Record<string, unknown>)) {

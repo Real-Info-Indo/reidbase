@@ -2,7 +2,7 @@ import { useState, useRef, forwardRef, useImperativeHandle } from "react";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const DASHBOARD_URL = "https://lookerstudio.google.com/embed/reporting/582e2a97-85d3-4266-b0de-65029f7f0a94/page/PxYyD";
+const DASHBOARD_URL = "https://lookerstudio.google.com/embed/reporting/582e2a97-85d3-4266-b0de-65029f7f0a94/page/PxYyD?hl=en";
 
 export interface PersistentDashboardHandle {
   getContainerEl: () => HTMLDivElement | null;

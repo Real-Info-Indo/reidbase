@@ -392,15 +392,7 @@ export default function AppraisalRequest() {
             </div>
 
 
-            {/* File upload */}
-            <div>
-              <label className={labelClass}>Property Files</label>
-              <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/40 transition-colors cursor-pointer">
-                <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">Drop files here or click to upload</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG up to 10MB</p>
-              </div>
-            </div>
+
 
             {/* Submit */}
             <button

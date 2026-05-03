@@ -16,7 +16,7 @@ export async function invokeUserData<T = any>(
   action: string,
   payload: Record<string, unknown> = {},
 ): Promise<{ data: T | null; error: UserDataError | null }> {
-  const headers = wixAuthHeader();
+  const headers = await wixAuthHeader();
   if (!headers.Authorization) {
     return { data: null, error: { error: "no_wix_token" } };
   }

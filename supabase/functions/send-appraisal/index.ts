@@ -164,6 +164,38 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Require a valid Wix bearer token. Anonymous submissions are not allowed.
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
+      return new Response(
+        JSON.stringify({ error: "unauthorized", message: "Sign in required" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    let submitterWixId: string;
+    let submitterEmail: string | null;
+    try {
+      const ident = await verifyWixToken(authHeader);
+      submitterWixId = ident.wixUserId;
+      submitterEmail = ident.email ?? ident.loginEmail ?? null;
+    } catch (err) {
+      const status = err instanceof WixAuthError ? err.status : 401;
+      return new Response(
+        JSON.stringify({ error: "unauthorized", message: "Invalid or expired session" }),
+        { status, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    // Server-side entitlement check: only paid tiers may submit.
+    const entitlement = await getEntitlement(submitterWixId);
+    if (!meetsTier(entitlement.tier, "reid_base")) {
+      return new Response(
+        JSON.stringify({ error: "forbidden", message: "Upgrade required to submit appraisal requests" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const rawBody = await req.json().catch(() => null);
     const parsed = sanitiseInput(rawBody);
     if (!parsed.ok) {

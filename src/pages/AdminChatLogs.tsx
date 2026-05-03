@@ -214,9 +214,8 @@ export default function AdminChatLogs() {
             </TableHeader>
             <TableBody>
               {filtered.map((log) => (
-                <>
+                <Fragment key={log.id}>
                    <TableRow
-                     key={log.id}
                      id={`chat-row-${log.id}`}
                      className={`cursor-pointer hover:bg-accent/50 ${targetConvIdRef.current === log.conversation_id ? "ring-2 ring-primary/40" : ""}`}
                      onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}

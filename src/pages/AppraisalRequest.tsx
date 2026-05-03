@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Upload, CheckCircle2, FileText } from "lucide-react";
+import { ArrowRight, CheckCircle2, FileText } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";

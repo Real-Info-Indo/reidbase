@@ -3,7 +3,7 @@ import reidLogo from "@/assets/REID_Base_Black.svg";
 
 export function UpgradeOverlay() {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-lg">
+    <div className="absolute inset-0 z-50 flex items-start justify-center bg-background/60 backdrop-blur-sm rounded-lg pt-12 md:pt-20">
       <div className="w-full max-w-sm text-center space-y-8 bg-card/90 backdrop-blur-md border border-border rounded-2xl p-10 shadow-lg">
         <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer">
           <img src={reidLogo} alt="REID Base" className="h-8 mx-auto" />

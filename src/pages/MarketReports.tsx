@@ -29,6 +29,12 @@ const reports: Report[] = [
     thumbnail: "/reports/thumbnails/Bali_Q3_2025.jpg",
     subtitle: "Q3 2025 Market Report",
   },
+  {
+    name: "Bali Q1 Report",
+    reportKey: "bali_q1_2026",
+    thumbnail: "/reports/thumbnails/Bali_Q1_2026.jpg",
+    subtitle: "Q1 2026 Market Report",
+  },
 ];
 
 export default function MarketReports() {

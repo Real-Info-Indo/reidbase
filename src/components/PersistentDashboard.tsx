@@ -20,7 +20,7 @@ export const PersistentDashboard = forwardRef<PersistentDashboardHandle, { visib
     return (
       <div
         ref={containerRef}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 overflow-hidden"
         style={{ visibility: visible ? "visible" : "hidden", pointerEvents: visible ? "auto" : "none" }}
       >
       {!loaded && visible && (
@@ -48,6 +48,7 @@ export const PersistentDashboard = forwardRef<PersistentDashboardHandle, { visib
           marginLeft: "-20px",
         }}
         allowFullScreen
+        scrolling="no"
         sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
         title="REID Dashboard"
         loading="eager"

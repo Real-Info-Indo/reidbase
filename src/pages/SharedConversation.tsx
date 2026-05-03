@@ -89,16 +89,30 @@ export default function SharedConversation() {
     })();
   }, [id]);
 
+  // Once auth + snapshot are ready, force one tier refresh so we don't gate
+  // a paid viewer using the stale `free` default from TierProvider.
+  useEffect(() => {
+    if (authLoading || loading) return;
+    if (!isLoggedIn) {
+      setTierRefreshDone(true);
+      return;
+    }
+    if (tierRefreshTriggered.current) return;
+    tierRefreshTriggered.current = true;
+    refreshTier().finally(() => setTierRefreshDone(true));
+  }, [authLoading, loading, isLoggedIn, refreshTier]);
+
   const sharerTier = snapshot?.sharer_tier ?? "free";
   const viewerRank = TIER_RANK[viewerTier ?? "free"] ?? 0;
   const sharerRank = TIER_RANK[sharerTier] ?? 0;
+  const tierReady = !isLoggedIn || (tierRefreshDone && !isRefreshing);
   // Three exhaustive states for the CTA:
   //   - loggedOut          -> Sign in
   //   - underTier          -> Upgrade
   //   - canContinue        -> Continue this chat
   const loggedOut = !isLoggedIn;
-  const viewerCanContinue = isLoggedIn && viewerRank >= sharerRank;
-  const viewerNeedsUpgrade = isLoggedIn && viewerRank < sharerRank;
+  const viewerCanContinue = isLoggedIn && tierReady && viewerRank >= sharerRank;
+  const viewerNeedsUpgrade = isLoggedIn && tierReady && viewerRank < sharerRank;
 
   const sharedDate = useMemo(() => {
     if (!snapshot) return "";

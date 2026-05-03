@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Loader2, Lock, Share2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";

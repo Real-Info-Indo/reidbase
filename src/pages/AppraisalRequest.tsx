@@ -26,6 +26,22 @@ const REQUIRED_FIELDS: { key: string; label: string }[] = [
   { key: "bedrooms", label: "Bedrooms" },
 ];
 
+const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png)$/i;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_FILES = 5;
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function sanitizeFilename(name: string): string {
+  const cleaned = name.replace(/[^a-zA-Z0-9._-]+/g, "_").replace(/_+/g, "_");
+  return cleaned.slice(0, 120) || "file";
+}
+
 export default function AppraisalRequest() {
   const { canAccess } = useTier();
   const hasAccess = canAccess("/appraisal-request");
@@ -33,6 +49,9 @@ export default function AppraisalRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form state
   const [form, setForm] = useState({

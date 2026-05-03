@@ -95,19 +95,24 @@ export default function AppraisalRequest() {
         headers: await wixAuthHeader(),
       });
       if (error) {
-        // Try to surface server-side missing fields if returned
         const ctx: any = (error as any).context;
-        let serverMissing: string[] | undefined;
+        const status: number | undefined = ctx?.status;
+        let body: any = undefined;
         try {
-          const body = ctx?.body ? JSON.parse(ctx.body) : undefined;
-          if (body?.error === "missing_required_fields" && Array.isArray(body.missing)) {
-            serverMissing = body.missing;
-          }
+          body = ctx?.body ? JSON.parse(ctx.body) : undefined;
         } catch {}
-        if (serverMissing && serverMissing.length > 0) {
-          setMissingFields(serverMissing);
-          const labels = serverMissing.map(
-            (k) => REQUIRED_FIELDS.find((f) => f.key === k)?.label ?? k,
+
+        if (status === 401 || status === 403 || body?.error === "unauthorized" || body?.error === "forbidden") {
+          toast.error("Sign in required", {
+            description: "Please sign in or upgrade to submit appraisal requests.",
+          });
+          return;
+        }
+
+        if (body?.error === "missing_required_fields" && Array.isArray(body.missing)) {
+          setMissingFields(body.missing);
+          const labels = body.missing.map(
+            (k: string) => REQUIRED_FIELDS.find((f) => f.key === k)?.label ?? k,
           );
           toast.error("Please complete the required fields", {
             description: labels.join(", "),

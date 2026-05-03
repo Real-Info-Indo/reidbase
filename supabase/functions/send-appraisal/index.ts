@@ -63,6 +63,63 @@ const FIELD_LIMITS: Record<keyof AppraisalData, number> = {
   overheads: 40,
 };
 
+interface AppraisalFile {
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+}
+
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+]);
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function validateFiles(
+  raw: unknown,
+  requestId: string,
+):
+  | { ok: true; files: AppraisalFile[] }
+  | { ok: false; error: string; field?: string } {
+  if (raw == null) return { ok: true, files: [] };
+  if (!Array.isArray(raw)) return { ok: false, error: "invalid_files" };
+  if (raw.length > MAX_FILES) return { ok: false, error: "too_many_files" };
+  const expectedPrefix = `appraisal-requests/${requestId}/`;
+  const out: AppraisalFile[] = [];
+  for (const f of raw) {
+    if (!f || typeof f !== "object") return { ok: false, error: "invalid_file_entry" };
+    const name = typeof (f as any).name === "string" ? (f as any).name.trim() : "";
+    const path = typeof (f as any).path === "string" ? (f as any).path.trim() : "";
+    const mimeType = typeof (f as any).mimeType === "string" ? (f as any).mimeType.trim() : "";
+    const size = Number((f as any).size);
+    if (!name || name.length > 255) return { ok: false, error: "invalid_file_name" };
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) return { ok: false, error: "invalid_file_type", field: name };
+    if (!Number.isFinite(size) || size <= 0 || size > MAX_FILE_BYTES) {
+      return { ok: false, error: "invalid_file_size", field: name };
+    }
+    if (!path.startsWith(expectedPrefix) || path.length > 1024) {
+      return { ok: false, error: "invalid_file_path", field: name };
+    }
+    out.push({ name, path, mimeType, size });
+  }
+  return { ok: true, files: out };
+}
+
+function isValidRequestId(id: unknown): id is string {
+  return typeof id === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -110,7 +167,12 @@ function sanitiseInput(
 }
 
 
-function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | null; email: string | null }): string {
+function buildEmailHtml(
+  data: AppraisalData,
+  submitter: { wixUserId: string | null; email: string | null },
+  files: AppraisalFile[],
+  requestId: string,
+): string {
   const row = (label: string, value?: string) =>
     value ? `<tr><td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb;width:40%">${escapeHtml(label)}</td><td style="padding:8px 12px;color:#1f2937;border-bottom:1px solid #e5e7eb">${escapeHtml(value)}</td></tr>` : "";
 
@@ -125,6 +187,21 @@ function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | nu
   const submitterRows = (submitter.wixUserId || submitter.email) ? `
     ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
     ${row("Submitter email", submitter.email ?? "")}
+    ${row("Request ID", requestId)}
+  ` : row("Request ID", requestId);
+
+  const filesSection = files.length > 0 ? `
+    <h2 style="font-size:16px;color:#111827;margin-top:24px;margin-bottom:8px">Attached Files (${files.length})</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e5e7eb;border-radius:8px">
+      ${files.map((f) => `
+        <tr>
+          <td style="padding:8px 12px;color:#1f2937;border-bottom:1px solid #e5e7eb">${escapeHtml(f.name)}</td>
+          <td style="padding:8px 12px;color:#6b7280;border-bottom:1px solid #e5e7eb;width:90px">${escapeHtml(formatBytes(f.size))}</td>
+          <td style="padding:8px 12px;color:#6b7280;border-bottom:1px solid #e5e7eb;font-family:monospace;font-size:11px">${escapeHtml(f.path)}</td>
+        </tr>
+      `).join("")}
+    </table>
+    <p style="color:#6b7280;font-size:12px;margin-top:8px">Files stored in private bucket <code>appraisals</code>. Retrieve via admin tools.</p>
   ` : "";
 
   return `
@@ -152,6 +229,7 @@ function buildEmailHtml(data: AppraisalData, submitter: { wixUserId: string | nu
         ${row("Years Operating", data.yearsOperating)}
         ${constructionRows}
       </table>
+      ${filesSection}
       <p style="color:#6b7280;font-size:13px;margin-top:20px">View all requests at <a href="https://reidbase.lovable.app/admin/appraisals" style="color:#2563eb">reidbase.lovable.app/admin/appraisals</a></p>
       <p style="color:#9ca3af;font-size:12px;margin-top:16px">This email was sent automatically from the REID platform.</p>
     </div>
@@ -209,7 +287,22 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const data = parsed.data;
 
-    // Submitter identity already verified above.
+    // Validate requestId and attached files metadata
+    const requestId = (rawBody as any)?.requestId;
+    if (!isValidRequestId(requestId)) {
+      return new Response(
+        JSON.stringify({ error: "invalid_request_id" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+    const filesResult = validateFiles((rawBody as any)?.files, requestId);
+    if (!filesResult.ok) {
+      return new Response(
+        JSON.stringify({ error: filesResult.error, field: filesResult.field }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+    const files = filesResult.files;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -238,6 +331,7 @@ const handler = async (req: Request): Promise<Response> => {
       ffe_budget: data.ffeBudget ?? null,
       landscaping_budget: data.landscapingBudget ?? null,
       overheads: data.overheads ?? null,
+      files: files,
       status: "new",
     });
 
@@ -253,7 +347,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: "REID Appraisals <appraisals@realinfo.id>",
       to: ["admin@realinfo.id"],
       subject: `New Appraisal Request – ${data.propertyType || "Property"} in ${data.location || "Unknown"}`,
-      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail }),
+      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail }, files, requestId),
     });
 
     console.log("Appraisal email sent for submitter:", submitterWixId ?? "anonymous");

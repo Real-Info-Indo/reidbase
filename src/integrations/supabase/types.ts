@@ -81,6 +81,7 @@ export type Database = {
           currently_operational: string | null
           description: string | null
           ffe_budget: string | null
+          files: Json
           id: string
           internal_size: string | null
           land_size: string | null
@@ -110,6 +111,7 @@ export type Database = {
           currently_operational?: string | null
           description?: string | null
           ffe_budget?: string | null
+          files?: Json
           id?: string
           internal_size?: string | null
           land_size?: string | null
@@ -139,6 +141,7 @@ export type Database = {
           currently_operational?: string | null
           description?: string | null
           ffe_budget?: string | null
+          files?: Json
           id?: string
           internal_size?: string | null
           land_size?: string | null

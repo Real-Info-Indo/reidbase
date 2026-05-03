@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowRight, Upload, CheckCircle2, FileText } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowRight, Upload, CheckCircle2, FileText, X } from "lucide-react";
 import { useTier } from "@/contexts/TierContext";
 import { UpgradeOverlay } from "@/components/UpgradeOverlay";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,22 @@ const REQUIRED_FIELDS: { key: string; label: string }[] = [
   { key: "bedrooms", label: "Bedrooms" },
 ];
 
+const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png)$/i;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_FILES = 5;
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function sanitizeFilename(name: string): string {
+  const cleaned = name.replace(/[^a-zA-Z0-9._-]+/g, "_").replace(/_+/g, "_");
+  return cleaned.slice(0, 120) || "file";
+}
+
 export default function AppraisalRequest() {
   const { canAccess } = useTier();
   const hasAccess = canAccess("/appraisal-request");
@@ -33,6 +49,9 @@ export default function AppraisalRequest() {
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -70,6 +89,35 @@ export default function AppraisalRequest() {
   const fieldClass = (base: string, key: string) =>
     `${base} ${isMissing(key) ? "border-destructive ring-1 ring-destructive/40" : ""}`;
 
+  const addFiles = (incoming: FileList | File[]) => {
+    const arr = Array.from(incoming);
+    const accepted: File[] = [];
+    for (const f of arr) {
+      const typeOk = ALLOWED_MIME.includes(f.type) || ALLOWED_EXT_RE.test(f.name);
+      if (!typeOk) {
+        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG allowed.` });
+        continue;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        toast.error("File too large", { description: `${f.name} exceeds 10MB.` });
+        continue;
+      }
+      accepted.push(f);
+    }
+    setFiles((prev) => {
+      const combined = [...prev, ...accepted];
+      if (combined.length > MAX_FILES) {
+        toast.error("Too many files", { description: `Maximum ${MAX_FILES} files allowed.` });
+        return combined.slice(0, MAX_FILES);
+      }
+      return combined;
+    });
+  };
+
+  const removeFile = (idx: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -90,8 +138,31 @@ export default function AppraisalRequest() {
     setMissingFields([]);
     setSubmitting(true);
     try {
+      const requestId = crypto.randomUUID();
+      const uploadedMeta: { name: string; path: string; mimeType: string; size: number }[] = [];
+
+      // Upload files first
+      for (const f of files) {
+        const safeName = sanitizeFilename(f.name);
+        const path = `appraisal-requests/${requestId}/${Date.now()}_${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("appraisals")
+          .upload(path, f, { contentType: f.type, upsert: false });
+        if (upErr) {
+          toast.error("File upload failed", { description: `${f.name}: ${upErr.message}` });
+          setSubmitting(false);
+          return;
+        }
+        uploadedMeta.push({
+          name: f.name,
+          path,
+          mimeType: f.type || "application/octet-stream",
+          size: f.size,
+        });
+      }
+
       const { data, error } = await supabase.functions.invoke("send-appraisal", {
-        body: payload,
+        body: { ...payload, requestId, files: uploadedMeta },
         headers: await wixAuthHeader(),
       });
       if (error) {
@@ -127,7 +198,17 @@ export default function AppraisalRequest() {
 
       if ((data as any)?.ok === true) {
         setShowConfirmation(true);
-        trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
+        trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location, file_count: uploadedMeta.length });
+        // Reset form
+        setForm({
+          propertyType: "", location: "", description: "", ownershipType: "", landZone: "",
+          leaseTerm: "", landSize: "", internalSize: "", bedrooms: "", bathrooms: "",
+          yearBuilt: "", currentlyOperational: "", propertyWebsite: "", averageDailyRate: "",
+          averageOccupancy: "", yearsOperating: "", constructionBudget: "", consultantBudget: "",
+          ffeBudget: "", landscapingBudget: "", overheads: "",
+        });
+        setPropertyStatus("");
+        setFiles([]);
       } else {
         toast.error("Submission failed", {
           description: (data as any)?.message ?? "Unexpected response from server.",
@@ -395,11 +476,73 @@ export default function AppraisalRequest() {
             {/* File upload */}
             <div>
               <label className={labelClass}>Property Files</label>
-              <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/40 transition-colors cursor-pointer">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+                }}
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
+                  isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                }`}
+              >
                 <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">Drop files here or click to upload</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG up to 10MB</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG up to 10MB (max {MAX_FILES} files)</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.length) addFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
               </div>
+              {files.length > 0 && (
+                <ul className="mt-3 space-y-2">
+                  {files.map((f, idx) => (
+                    <li
+                      key={`${f.name}-${idx}`}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{f.name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{formatBytes(f.size)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(idx)}
+                        disabled={submitting}
+                        aria-label={`Remove ${f.name}`}
+                        className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Submit */}

@@ -89,6 +89,35 @@ export default function AppraisalRequest() {
   const fieldClass = (base: string, key: string) =>
     `${base} ${isMissing(key) ? "border-destructive ring-1 ring-destructive/40" : ""}`;
 
+  const addFiles = (incoming: FileList | File[]) => {
+    const arr = Array.from(incoming);
+    const accepted: File[] = [];
+    for (const f of arr) {
+      const typeOk = ALLOWED_MIME.includes(f.type) || ALLOWED_EXT_RE.test(f.name);
+      if (!typeOk) {
+        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG allowed.` });
+        continue;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        toast.error("File too large", { description: `${f.name} exceeds 10MB.` });
+        continue;
+      }
+      accepted.push(f);
+    }
+    setFiles((prev) => {
+      const combined = [...prev, ...accepted];
+      if (combined.length > MAX_FILES) {
+        toast.error("Too many files", { description: `Maximum ${MAX_FILES} files allowed.` });
+        return combined.slice(0, MAX_FILES);
+      }
+      return combined;
+    });
+  };
+
+  const removeFile = (idx: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -109,8 +138,31 @@ export default function AppraisalRequest() {
     setMissingFields([]);
     setSubmitting(true);
     try {
+      const requestId = crypto.randomUUID();
+      const uploadedMeta: { name: string; path: string; mimeType: string; size: number }[] = [];
+
+      // Upload files first
+      for (const f of files) {
+        const safeName = sanitizeFilename(f.name);
+        const path = `appraisal-requests/${requestId}/${Date.now()}_${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("appraisals")
+          .upload(path, f, { contentType: f.type, upsert: false });
+        if (upErr) {
+          toast.error("File upload failed", { description: `${f.name}: ${upErr.message}` });
+          setSubmitting(false);
+          return;
+        }
+        uploadedMeta.push({
+          name: f.name,
+          path,
+          mimeType: f.type || "application/octet-stream",
+          size: f.size,
+        });
+      }
+
       const { data, error } = await supabase.functions.invoke("send-appraisal", {
-        body: payload,
+        body: { ...payload, requestId, files: uploadedMeta },
         headers: await wixAuthHeader(),
       });
       if (error) {
@@ -146,7 +198,17 @@ export default function AppraisalRequest() {
 
       if ((data as any)?.ok === true) {
         setShowConfirmation(true);
-        trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location });
+        trackFeature("appraisal_submitted", { property_type: form.propertyType, location: form.location, file_count: uploadedMeta.length });
+        // Reset form
+        setForm({
+          propertyType: "", location: "", description: "", ownershipType: "", landZone: "",
+          leaseTerm: "", landSize: "", internalSize: "", bedrooms: "", bathrooms: "",
+          yearBuilt: "", currentlyOperational: "", propertyWebsite: "", averageDailyRate: "",
+          averageOccupancy: "", yearsOperating: "", constructionBudget: "", consultantBudget: "",
+          ffeBudget: "", landscapingBudget: "", overheads: "",
+        });
+        setPropertyStatus("");
+        setFiles([]);
       } else {
         toast.error("Submission failed", {
           description: (data as any)?.message ?? "Unexpected response from server.",

@@ -155,7 +155,7 @@ export default function AppraisalRequest() {
               <p className="text-muted-foreground font-extralight">Discover your property fair market value.</p>
             </div>
             <a
-              href="/downloads/REID_Property_Appraisal_Sample.pdf"
+              href="/downloads/sample-appraisal.html"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackFeature("appraisal_sample_viewed")}

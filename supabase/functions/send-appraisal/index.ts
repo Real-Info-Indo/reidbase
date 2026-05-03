@@ -287,7 +287,22 @@ const handler = async (req: Request): Promise<Response> => {
     }
     const data = parsed.data;
 
-    // Submitter identity already verified above.
+    // Validate requestId and attached files metadata
+    const requestId = (rawBody as any)?.requestId;
+    if (!isValidRequestId(requestId)) {
+      return new Response(
+        JSON.stringify({ error: "invalid_request_id" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+    const filesResult = validateFiles((rawBody as any)?.files, requestId);
+    if (!filesResult.ok) {
+      return new Response(
+        JSON.stringify({ error: filesResult.error, field: filesResult.field }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+    const files = filesResult.files;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -316,6 +331,7 @@ const handler = async (req: Request): Promise<Response> => {
       ffe_budget: data.ffeBudget ?? null,
       landscaping_budget: data.landscapingBudget ?? null,
       overheads: data.overheads ?? null,
+      files: files,
       status: "new",
     });
 
@@ -331,7 +347,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: "REID Appraisals <appraisals@realinfo.id>",
       to: ["admin@realinfo.id"],
       subject: `New Appraisal Request – ${data.propertyType || "Property"} in ${data.location || "Unknown"}`,
-      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail }),
+      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail }, files, requestId),
     });
 
     console.log("Appraisal email sent for submitter:", submitterWixId ?? "anonymous");

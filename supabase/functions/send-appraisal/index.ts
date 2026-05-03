@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { verifyWixToken } from "../_shared/wix-auth.ts";
+import { verifyWixToken, WixAuthError } from "../_shared/wix-auth.ts";
+import { getEntitlement, meetsTier } from "../_shared/entitlements.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 

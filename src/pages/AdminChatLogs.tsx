@@ -352,7 +352,7 @@ export default function AdminChatLogs() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
               {filtered.length === 0 && (
                 <TableRow>

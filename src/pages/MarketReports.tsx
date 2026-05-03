@@ -18,6 +18,12 @@ interface Report {
 
 const reports: Report[] = [
   {
+    name: "Bali Q1 Report",
+    reportKey: "bali_q1_2026",
+    thumbnail: "/reports/thumbnails/Bali_Q1_2026.jpg",
+    subtitle: "Q1 2026 Market Report",
+  },
+  {
     name: "Bali Annual Report",
     reportKey: "bali_annual_2025",
     thumbnail: "/reports/thumbnails/Bali_Annual_2025.jpg",
@@ -28,12 +34,6 @@ const reports: Report[] = [
     reportKey: "bali_q3_2025",
     thumbnail: "/reports/thumbnails/Bali_Q3_2025.jpg",
     subtitle: "Q3 2025 Market Report",
-  },
-  {
-    name: "Bali Q1 Report",
-    reportKey: "bali_q1_2026",
-    thumbnail: "/reports/thumbnails/Bali_Q1_2026.jpg",
-    subtitle: "Q1 2026 Market Report",
   },
 ];
 

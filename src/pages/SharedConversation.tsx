@@ -160,7 +160,7 @@ export default function SharedConversation() {
     navigate("/login");
   };
 
-  if (loading || authLoading) {
+  if (loading || authLoading || (isLoggedIn && (!tierRefreshDone || isRefreshing))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

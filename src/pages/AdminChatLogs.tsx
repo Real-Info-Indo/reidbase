@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, MessageSquare, ChevronDown, ChevronUp, Copy, Trash2, ThumbsUp, ThumbsDown, Download, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -214,9 +214,8 @@ export default function AdminChatLogs() {
             </TableHeader>
             <TableBody>
               {filtered.map((log) => (
-                <>
+                <Fragment key={log.id}>
                    <TableRow
-                     key={log.id}
                      id={`chat-row-${log.id}`}
                      className={`cursor-pointer hover:bg-accent/50 ${targetConvIdRef.current === log.conversation_id ? "ring-2 ring-primary/40" : ""}`}
                      onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
@@ -353,7 +352,7 @@ export default function AdminChatLogs() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
               {filtered.length === 0 && (
                 <TableRow>

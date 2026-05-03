@@ -1,0 +1,1 @@
+TRUNCATE TABLE public.properties_2025;

@@ -92,7 +92,7 @@ export default function AppraisalRequest() {
     try {
       const { data, error } = await supabase.functions.invoke("send-appraisal", {
         body: payload,
-        headers: wixAuthHeader(),
+        headers: await wixAuthHeader(),
       });
       if (error) {
         // Try to surface server-side missing fields if returned

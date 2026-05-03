@@ -98,7 +98,7 @@ export default function ImportData() {
         const chunk = rows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-csv", {
           body: { rows: chunk },
-          headers: wixAuthHeader(),
+          headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
         totalInserted += data.inserted;
@@ -161,7 +161,7 @@ export default function ImportData() {
         const chunk = uniqueRows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-rentals", {
           body: { rows: chunk },
-          headers: wixAuthHeader(),
+          headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
         totalInserted += data.inserted;

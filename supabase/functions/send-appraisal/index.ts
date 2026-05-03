@@ -63,6 +63,63 @@ const FIELD_LIMITS: Record<keyof AppraisalData, number> = {
   overheads: 40,
 };
 
+interface AppraisalFile {
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+}
+
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+]);
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function validateFiles(
+  raw: unknown,
+  requestId: string,
+):
+  | { ok: true; files: AppraisalFile[] }
+  | { ok: false; error: string; field?: string } {
+  if (raw == null) return { ok: true, files: [] };
+  if (!Array.isArray(raw)) return { ok: false, error: "invalid_files" };
+  if (raw.length > MAX_FILES) return { ok: false, error: "too_many_files" };
+  const expectedPrefix = `appraisal-requests/${requestId}/`;
+  const out: AppraisalFile[] = [];
+  for (const f of raw) {
+    if (!f || typeof f !== "object") return { ok: false, error: "invalid_file_entry" };
+    const name = typeof (f as any).name === "string" ? (f as any).name.trim() : "";
+    const path = typeof (f as any).path === "string" ? (f as any).path.trim() : "";
+    const mimeType = typeof (f as any).mimeType === "string" ? (f as any).mimeType.trim() : "";
+    const size = Number((f as any).size);
+    if (!name || name.length > 255) return { ok: false, error: "invalid_file_name" };
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) return { ok: false, error: "invalid_file_type", field: name };
+    if (!Number.isFinite(size) || size <= 0 || size > MAX_FILE_BYTES) {
+      return { ok: false, error: "invalid_file_size", field: name };
+    }
+    if (!path.startsWith(expectedPrefix) || path.length > 1024) {
+      return { ok: false, error: "invalid_file_path", field: name };
+    }
+    out.push({ name, path, mimeType, size });
+  }
+  return { ok: true, files: out };
+}
+
+function isValidRequestId(id: unknown): id is string {
+  return typeof id === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")

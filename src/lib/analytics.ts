@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getFreshWixAccessToken } from "@/lib/wixToken";
 
 const SESSION_KEY = "reid-session-id";
 
@@ -11,22 +12,6 @@ function getSessionId(): string {
   return id;
 }
 
-function getWixUserId(): string | null {
-  try {
-    const raw = localStorage.getItem("wix-member");
-    if (raw) return JSON.parse(raw)?.id ?? null;
-  } catch {}
-  return null;
-}
-
-function getUserTier(): string | null {
-  try {
-    return localStorage.getItem("reid-user-tier");
-  } catch {
-    return null;
-  }
-}
-
 interface TrackOptions {
   eventType: "page_view" | "feature";
   eventName: string;
@@ -36,17 +21,20 @@ interface TrackOptions {
 
 export async function track({ eventType, eventName, pagePath, metadata }: TrackOptions) {
   try {
-    await supabase.from("analytics_events" as any).insert({
-      event_type: eventType,
-      event_name: eventName,
-      page_path: pagePath ?? window.location.pathname,
-      metadata: {
-        user_tier: getUserTier(),
-        ...(metadata ?? {}),
+    const token = await getFreshWixAccessToken().catch(() => null);
+    const headers: Record<string, string> = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    await supabase.functions.invoke("log-analytics", {
+      body: {
+        event_type: eventType,
+        event_name: eventName,
+        page_path: pagePath ?? window.location.pathname,
+        session_id: getSessionId(),
+        metadata: metadata ?? {},
       },
-      wix_user_id: getWixUserId(),
-      session_id: getSessionId(),
-    } as any);
+      headers,
+    });
   } catch (err) {
     console.warn("Analytics track failed:", err);
   }

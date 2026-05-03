@@ -29,11 +29,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             <p className="text-sm text-muted-foreground font-extralight">
               Your home for Bali Real Estate Intelligence
             </p>
+            <p className="text-sm text-foreground font-extralight">
+              Sign in with your existing REID account to access. No new account needed.
+            </p>
             <button
               onClick={login}
               className="w-full rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
             >
-              Sign in to access
+              Sign in to your REID account
             </button>
           </div>
         </div>

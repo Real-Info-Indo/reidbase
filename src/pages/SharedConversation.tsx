@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowRight, Loader2, Lock, Share2, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -43,7 +43,9 @@ export default function SharedConversation() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isLoggedIn, isLoading: authLoading } = useWixAuth();
-  const { tier: viewerTier } = useTier();
+  const { tier: viewerTier, isRefreshing, refreshTier } = useTier();
+  const tierRefreshTriggered = useRef(false);
+  const [tierRefreshDone, setTierRefreshDone] = useState(false);
 
   const [snapshot, setSnapshot] = useState<SharedConversationRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,16 +89,30 @@ export default function SharedConversation() {
     })();
   }, [id]);
 
+  // Once auth + snapshot are ready, force one tier refresh so we don't gate
+  // a paid viewer using the stale `free` default from TierProvider.
+  useEffect(() => {
+    if (authLoading || loading) return;
+    if (!isLoggedIn) {
+      setTierRefreshDone(true);
+      return;
+    }
+    if (tierRefreshTriggered.current) return;
+    tierRefreshTriggered.current = true;
+    refreshTier().finally(() => setTierRefreshDone(true));
+  }, [authLoading, loading, isLoggedIn, refreshTier]);
+
   const sharerTier = snapshot?.sharer_tier ?? "free";
   const viewerRank = TIER_RANK[viewerTier ?? "free"] ?? 0;
   const sharerRank = TIER_RANK[sharerTier] ?? 0;
+  const tierReady = !isLoggedIn || (tierRefreshDone && !isRefreshing);
   // Three exhaustive states for the CTA:
   //   - loggedOut          -> Sign in
   //   - underTier          -> Upgrade
   //   - canContinue        -> Continue this chat
   const loggedOut = !isLoggedIn;
-  const viewerCanContinue = isLoggedIn && viewerRank >= sharerRank;
-  const viewerNeedsUpgrade = isLoggedIn && viewerRank < sharerRank;
+  const viewerCanContinue = isLoggedIn && tierReady && viewerRank >= sharerRank;
+  const viewerNeedsUpgrade = isLoggedIn && tierReady && viewerRank < sharerRank;
 
   const sharedDate = useMemo(() => {
     if (!snapshot) return "";
@@ -144,7 +160,7 @@ export default function SharedConversation() {
     navigate("/login");
   };
 
-  if (loading || authLoading) {
+  if (loading || authLoading || (isLoggedIn && (!tierRefreshDone || isRefreshing))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

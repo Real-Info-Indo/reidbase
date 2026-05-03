@@ -34,7 +34,7 @@ export function useAdminAuth() {
     try {
       const { data, error: invokeError } = await supabase.functions.invoke(
         "check-admin",
-        { headers: wixAuthHeader() },
+        { headers: await wixAuthHeader() },
       );
       if (invokeError) throw new Error(invokeError.message);
       const isAdmin = !!(data as { isAdmin?: boolean })?.isAdmin;

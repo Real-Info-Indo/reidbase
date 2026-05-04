@@ -184,6 +184,8 @@ export default function AppraisalRequest() {
           body = ctx?.body ? JSON.parse(ctx.body) : undefined;
         } catch {}
 
+        await cleanupUploads();
+
         if (status === 401 || status === 403 || body?.error === "unauthorized" || body?.error === "forbidden") {
           toast.error("Sign in required", {
             description: "Please sign in or upgrade to submit appraisal requests.",
@@ -221,12 +223,14 @@ export default function AppraisalRequest() {
         setPropertyStatus("");
         setFiles([]);
       } else {
+        await cleanupUploads();
         toast.error("Submission failed", {
           description: (data as any)?.message ?? "Unexpected response from server.",
         });
       }
     } catch (err: any) {
       console.error("Submission error:", err);
+      await cleanupUploads();
       toast.error("Submission failed", {
         description: err?.message ?? "Network error. Please try again.",
       });

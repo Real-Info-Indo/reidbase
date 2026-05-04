@@ -186,26 +186,67 @@ export default function AppraisalRequest() {
 
         await cleanupUploads();
 
-        if (status === 401 || status === 403 || body?.error === "unauthorized" || body?.error === "forbidden") {
+        const code: string | undefined = body?.error;
+        const field: string | undefined = body?.field;
+
+        if (status === 401 || code === "unauthorized") {
           toast.error("Sign in required", {
-            description: "Please sign in or upgrade to submit appraisal requests.",
+            description: "Please sign in again to submit appraisal requests.",
           });
           return;
         }
 
-        if (body?.error === "missing_required_fields" && Array.isArray(body.missing)) {
-          setMissingFields(body.missing);
-          const labels = body.missing.map(
-            (k: string) => REQUIRED_FIELDS.find((f) => f.key === k)?.label ?? k,
-          );
-          toast.error("Please complete the required fields", {
-            description: labels.join(", "),
+        if (status === 403 || code === "forbidden") {
+          toast.error("Upgrade required", {
+            description: "Your current plan does not include appraisal requests. Please upgrade to continue.",
           });
-        } else {
-          toast.error("Submission failed", {
-            description: error.message ?? "Please try again in a moment.",
-          });
+          return;
         }
+
+        if (status === 400) {
+          if (code === "missing_required_fields" && Array.isArray(body.missing)) {
+            setMissingFields(body.missing);
+            const labels = body.missing.map(
+              (k: string) => REQUIRED_FIELDS.find((f) => f.key === k)?.label ?? k,
+            );
+            toast.error("Please complete the required fields", {
+              description: labels.join(", "),
+            });
+            return;
+          }
+
+          const fileErrorMessages: Record<string, string> = {
+            invalid_files: "File list is invalid.",
+            too_many_files: "Too many files attached. Maximum is 5.",
+            invalid_file_entry: "One of the attached files is invalid.",
+            invalid_file_name: "A file name is invalid or too long.",
+            invalid_file_type: "Unsupported file type. Only PDF, JPG, PNG allowed.",
+            invalid_file_size: "A file exceeds the 10MB limit.",
+            invalid_file_path: "A file path is invalid.",
+            file_not_found: "An attached file could not be verified in storage.",
+            invalid_request_id: "Invalid request. Please try again.",
+            invalid_body: "Invalid submission. Please try again.",
+            invalid_field: "A form field is invalid.",
+            field_too_long: "A form field exceeds the allowed length.",
+          };
+
+          if (code && fileErrorMessages[code]) {
+            toast.error("File validation failed", {
+              description: field ? `${field}: ${fileErrorMessages[code]}` : fileErrorMessages[code],
+            });
+            return;
+          }
+
+          toast.error("Submission failed", {
+            description: body?.message ?? "Please check the form and try again.",
+          });
+          return;
+        }
+
+        // 500-level: storage_verification_failed, db_insert_failed, internal_error, or unknown
+        toast.error("Submission failed", {
+          description: "Please try again or contact support.",
+        });
         return;
       }
 

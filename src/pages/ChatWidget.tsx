@@ -49,9 +49,8 @@ export default function ChatWidget() {
           alignItems: "center",
           width: "100%",
           height: "50px",
-          background: "#ffffff",
+          background: "transparent",
           borderRadius: "5px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
           padding: "0 6px 0 20px",
         }}
       >

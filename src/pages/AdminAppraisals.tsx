@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
-  ArrowLeft, ChevronDown, ChevronUp, Save,
+  ArrowLeft, ChevronDown, ChevronUp, Save, Download, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

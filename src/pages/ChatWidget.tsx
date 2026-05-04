@@ -72,6 +72,8 @@ export default function ChatWidget() {
             placeholder="Real data. Real answers"
             style={{
               flex: 1,
+              minWidth: 0,
+              width: 0,
               border: "none",
               outline: "none",
               background: "transparent",

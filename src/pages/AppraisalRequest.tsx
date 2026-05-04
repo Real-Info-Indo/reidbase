@@ -137,6 +137,15 @@ export default function AppraisalRequest() {
 
     setMissingFields([]);
     setSubmitting(true);
+    const uploadedPaths: string[] = [];
+    const cleanupUploads = async () => {
+      if (uploadedPaths.length === 0) return;
+      try {
+        await supabase.storage.from("appraisals").remove(uploadedPaths);
+      } catch (cleanupErr) {
+        console.warn("Failed to clean up orphaned appraisal uploads:", cleanupErr);
+      }
+    };
     try {
       const requestId = crypto.randomUUID();
       const uploadedMeta: { name: string; path: string; mimeType: string; size: number }[] = [];
@@ -150,9 +159,11 @@ export default function AppraisalRequest() {
           .upload(path, f, { contentType: f.type, upsert: false });
         if (upErr) {
           toast.error("File upload failed", { description: `${f.name}: ${upErr.message}` });
+          await cleanupUploads();
           setSubmitting(false);
           return;
         }
+        uploadedPaths.push(path);
         uploadedMeta.push({
           name: f.name,
           path,

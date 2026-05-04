@@ -34,14 +34,12 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
 
   return (
     <div className="my-4 border border-border rounded-xl overflow-hidden bg-card w-full max-w-[360px]">
-      <div className="aspect-[4/3] bg-muted overflow-hidden">
-        <img
-          src={campaign.report.thumbnail}
-          alt={`${campaign.report.title} cover`}
-          className="w-full h-full object-contain"
-          loading="lazy"
-        />
-      </div>
+      <img
+        src={campaign.report.thumbnail}
+        alt={`${campaign.report.title} cover`}
+        className="block w-full h-auto"
+        loading="lazy"
+      />
       <div className="px-3 py-2 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{campaign.report.title}</h3>

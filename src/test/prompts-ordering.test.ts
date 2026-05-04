@@ -65,8 +65,11 @@ function expectTransactionBeforeRental(block: string, label: string) {
 function extractEntry(source: string, header: string): string {
   const start = source.indexOf(header);
   expect(start, `entry prompt missing: ${header}`).toBeGreaterThan(-1);
-  // Next ENTRY PROMPT or FEW-SHOT marker terminates the block.
-  const rest = source.slice(start + header.length);
+  // Skip past the header line and the Trigger: line (which often quotes
+  // the user's mixed-market question and would otherwise contaminate
+  // ordering checks). The remainder is the response governance body.
+  let rest = source.slice(start + header.length);
+  rest = rest.replace(/^[\s\S]*?\nTrigger:[^\n]*\n/, "");
   const endRel = rest.search(/\n(ENTRY PROMPT|FEW-SHOT EXAMPLES)/);
   return endRel === -1 ? rest : rest.slice(0, endRel);
 }

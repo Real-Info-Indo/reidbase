@@ -260,6 +260,16 @@ serve(async (req) => {
 
     const userMessage = enrichedMessages[enrichedMessages.length - 1]?.content || "";
 
+    // Inject fresh DB context for pre-loaded landing/widget prompts and any
+    // semantically equivalent "current/latest market" question. Free tier
+    // automatically receives Bali-wide + regional aggregates only (no
+    // location-level rows are queried).
+    const { intent: freshIntent, block: freshBlock } = await buildFreshMarketContext(supabase, userMessage, effectiveTier);
+    if (freshIntent !== "none") {
+      console.log(`[chat-data-analyst] fresh-context intent=${freshIntent} tier=${effectiveTier} bytes=${freshBlock.length}`);
+    }
+    const freshPrefix = freshBlock ? freshBlock + "\n\n" : "";
+
     // Enterprise tier: use Pro RAG + analytical (database queries)
     if (effectiveTier === "enterprise") {
       // First try to determine if the question needs a database query

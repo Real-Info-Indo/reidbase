@@ -169,7 +169,7 @@ function sanitiseInput(
 
 function buildEmailHtml(
   data: AppraisalData,
-  submitter: { wixUserId: string | null; email: string | null },
+  submitter: { wixUserId: string | null; email: string | null; name?: string | null },
   files: AppraisalFile[],
   requestId: string,
 ): string {
@@ -184,9 +184,10 @@ function buildEmailHtml(
     ${row("Overheads ($)", data.overheads)}
   ` : "";
 
-  const submitterRows = (submitter.wixUserId || submitter.email) ? `
-    ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
+  const submitterRows = (submitter.wixUserId || submitter.email || submitter.name) ? `
+    ${row("Submitter name", submitter.name ?? "")}
     ${row("Submitter email", submitter.email ?? "")}
+    ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
     ${row("Request ID", requestId)}
   ` : row("Request ID", requestId);
 
@@ -253,10 +254,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     let submitterWixId: string;
     let submitterEmail: string | null;
+    let submitterName: string | null;
     try {
       const ident = await verifyWixToken(authHeader);
       submitterWixId = ident.wixUserId;
       submitterEmail = ident.email ?? ident.loginEmail ?? null;
+      submitterName = ident.displayName ?? null;
     } catch (err) {
       const status = err instanceof WixAuthError ? err.status : 401;
       return new Response(
@@ -358,6 +361,9 @@ const handler = async (req: Request): Promise<Response> => {
       overheads: data.overheads ?? null,
       files: files,
       status: "new",
+      wix_user_id: submitterWixId,
+      wix_user_name: submitterName,
+      wix_user_email: submitterEmail,
     });
 
     if (dbError) {
@@ -372,7 +378,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: "REID Appraisals <appraisals@realinfo.id>",
       to: ["admin@realinfo.id"],
       subject: `New Appraisal Request – ${data.propertyType || "Property"} in ${data.location || "Unknown"}`,
-      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail }, files, requestId),
+      html: buildEmailHtml(data, { wixUserId: submitterWixId, email: submitterEmail, name: submitterName } as any, files, requestId),
     });
 
     console.log("Appraisal email sent for submitter:", submitterWixId ?? "anonymous");

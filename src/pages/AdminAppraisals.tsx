@@ -53,6 +53,9 @@ interface AppraisalRequest {
   reviewed_at: string | null;
   created_at: string;
   files: AppraisalFile[] | null;
+  wix_user_id: string | null;
+  wix_user_name: string | null;
+  wix_user_email: string | null;
 }
 
 function formatBytes(n: number): string {
@@ -157,7 +160,9 @@ export default function AdminAppraisals() {
         r.property_type?.toLowerCase().includes(q) ||
         r.location?.toLowerCase().includes(q) ||
         r.description?.toLowerCase().includes(q) ||
-        r.ownership_type?.toLowerCase().includes(q)
+        r.ownership_type?.toLowerCase().includes(q) ||
+        r.wix_user_name?.toLowerCase().includes(q) ||
+        r.wix_user_email?.toLowerCase().includes(q)
       );
     });
   }, [requests, search, statusFilter]);
@@ -259,6 +264,7 @@ export default function AdminAppraisals() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[180px]">Submitter</TableHead>
                 <TableHead className="w-[120px]">Type</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead className="w-[100px]">Ownership</TableHead>
@@ -277,6 +283,10 @@ export default function AdminAppraisals() {
                     className="cursor-pointer hover:bg-accent/50"
                     onClick={() => setExpandedId(expandedId === req.id ? null : req.id)}
                   >
+                    <TableCell>
+                      <div className="text-sm font-medium">{req.wix_user_name || "Anonymous"}</div>
+                      <div className="text-xs text-muted-foreground truncate max-w-[170px]">{req.wix_user_email || "No email"}</div>
+                    </TableCell>
                     <TableCell className="text-sm font-medium">{req.property_type || "—"}</TableCell>
                     <TableCell className="text-sm">{req.location || "—"}</TableCell>
                     <TableCell className="text-sm">{req.ownership_type || "—"}</TableCell>
@@ -308,8 +318,11 @@ export default function AdminAppraisals() {
                   </TableRow>
                   {expandedId === req.id && (
                     <TableRow key={`${req.id}-detail`}>
-                      <TableCell colSpan={8} className="p-0">
+                      <TableCell colSpan={9} className="p-0">
                         <div className="p-6 bg-muted/30 space-y-1">
+                          {detailRow("Submitter name", req.wix_user_name)}
+                          {detailRow("Submitter email", req.wix_user_email)}
+                          {detailRow("Submitter Wix ID", req.wix_user_id)}
                           {detailRow("Property type", req.property_type)}
                           {detailRow("Location", req.location)}
                           {detailRow("Description", req.description)}

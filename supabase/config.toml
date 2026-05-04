@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.shared-conversation]
 verify_jwt = false
+
+[functions.download-public-report]
+verify_jwt = false

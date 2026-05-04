@@ -308,6 +308,31 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Verify each referenced storage object actually exists in the appraisals bucket
+    // before persisting metadata or sending email. Guards against tampered paths.
+    for (const f of files) {
+      const lastSlash = f.path.lastIndexOf("/");
+      const dir = f.path.slice(0, lastSlash);
+      const filename = f.path.slice(lastSlash + 1);
+      const { data: listed, error: listErr } = await supabase.storage
+        .from("appraisals")
+        .list(dir, { limit: 100, search: filename });
+      if (listErr) {
+        console.error("Storage list error:", listErr);
+        return new Response(
+          JSON.stringify({ error: "storage_verification_failed" }),
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } },
+        );
+      }
+      const found = (listed ?? []).some((o) => o.name === filename);
+      if (!found) {
+        return new Response(
+          JSON.stringify({ error: "file_not_found", field: f.name }),
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+        );
+      }
+    }
+
     const { error: dbError } = await supabase.from("appraisal_requests").insert({
       property_type: data.propertyType ?? null,
       location: data.location ?? null,

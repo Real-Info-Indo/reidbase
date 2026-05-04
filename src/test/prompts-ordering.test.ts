@@ -151,6 +151,13 @@ describe("Mixed market query classification", () => {
     { query: "Compare Canggu and Pererenan overall", lead: "transaction" },
     { query: "How is rental performance in Canggu?", lead: "rental" },
     { query: "What occupancy and ADR should I expect?", lead: "rental" },
+    // Regression: generic "revenue" must not flip a transaction-led query.
+    {
+      query: "Compare transaction volume, pricing, and revenue trends in Bali",
+      lead: "transaction",
+    },
+    // Explicit rental phrasings still flip the lead.
+    { query: "How has rental revenue moved in Uluwatu?", lead: "rental" },
   ];
 
   for (const c of cases) {

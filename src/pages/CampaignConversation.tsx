@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import { Send, Download, Loader2, PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit, User } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Send, PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit, User } from "lucide-react";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { getCampaign } from "@/lib/campaigns";
 import { trackFeature } from "@/lib/analytics";
+import { AssistantMarkdown } from "@/components/AssistantMarkdown";
 import reidLogo from "@/assets/REID_Black.svg";
 import { useIsMobile } from "@/hooks/use-mobile";
 

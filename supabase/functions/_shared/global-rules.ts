@@ -111,6 +111,21 @@ PRICE INTERPRETATION:
 - If challenged: "It is absolutely possible to see different results within specific micro-market pockets. Our data covers the breadth of the market to provide a balanced median perspective."
 `;
 
+export const RESPONSE_ORDERING_RULES = `
+RESPONSE ORDERING — MIXED SALES AND RENTAL QUERIES:
+When a query covers both sales and rental fundamentals (a "mixed market" answer), lead with transaction-side information by default. Apply this ordering unless the user has specifically asked about rental performance, occupancy, ADR, revenue, rent, or yield.
+
+Default order for mixed market answers:
+1. Transaction volume, sold prices, median sale price, or price per sqm.
+2. Active supply, asking prices, days listed, and tenure mix where relevant.
+3. Bedroom, property type, or segment breakdowns where relevant.
+4. Rental performance: occupancy, ADR, revenue, and yield.
+
+Exception — rental-led queries: if the user has specifically asked about rental performance, occupancy, ADR, revenue, rent, or yield, answer that first. Add transaction or supply context only where it directly helps interpret the rental answer.
+
+This ordering applies to entry prompts, free-form mixed queries, and follow-ups that pull both sides of the market into a single response.
+`;
+
 export const RESPONSE_QUALITY_RULES = `
 RESPONSE QUALITY:
 - Your first sentence must acknowledge what was asked, not deliver data. This is mandatory — not optional. A response that opens with a data point or a header has failed this check. One sentence only, natural and human — not a system confirming a query. Vary the pattern: "Canggu is holding up well on occupancy right now..." / "Good area to look at — Berawa commands a real premium here..." / "South Badung is the right place to look for Uluwatu context..." / "Kaba Kaba is an interesting one..." Do not use the same opening structure on every response. The orienting sentence applies at every tier, including Member and Freemium. Even when gating data, acknowledge the question before explaining the limitation.
@@ -186,6 +201,7 @@ ${INSUFFICIENT_DATA_RULES}
 ${DATA_CURRENCY_RULES}
 ${KNOWN_DATA_GAPS_RULES}
 ${PRICE_INTERPRETATION_RULES}
+${RESPONSE_ORDERING_RULES}
 ${RESPONSE_QUALITY_RULES}
 ${FOLLOW_UP_RULES}
 ${SELF_REVIEW_RULES}

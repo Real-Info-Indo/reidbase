@@ -112,6 +112,21 @@ export default function AdminAppraisals() {
     }
   };
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const deleteRequest = async (id: string) => {
+    if (!confirm("Delete this appraisal request? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await invokeAdmin("admin-mutate", { action: "delete_appraisal", id });
+      setRequests((prev) => prev.filter((r) => r.id !== id));
+      if (expandedId === id) setExpandedId(null);
+      toast.success("Appraisal deleted");
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to delete");
+    }
+    setDeletingId(null);
+  };
+
   const [notesValue, setNotesValue] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
 

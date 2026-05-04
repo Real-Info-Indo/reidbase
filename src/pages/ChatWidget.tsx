@@ -49,35 +49,46 @@ export default function ChatWidget() {
           alignItems: "center",
           width: "100%",
           height: "50px",
-          background: "#ffffff",
-          borderRadius: "5px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-          padding: "0 6px 0 20px",
+          background: "transparent",
+          gap: "8px",
         }}
       >
-        <input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Real data. Real answers"
+        <div
           style={{
             flex: 1,
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            fontSize: "14px",
-            color: "#1a1a1a",
-            fontFamily: "Poppins, sans-serif",
-            fontWeight: 200,
+            display: "flex",
+            alignItems: "center",
             height: "100%",
+            background: "#ffffff",
+            borderRadius: "5px",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+            padding: "0 16px",
           }}
-        />
+        >
+          <input
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Real data. Real answers"
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: "14px",
+              color: "#1a1a1a",
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 200,
+              height: "100%",
+            }}
+          />
+        </div>
         <button
           onClick={() => handleSubmit()}
           disabled={!prompt.trim()}
           style={{
             flexShrink: 0,
-            height: "36px",
+            height: "100%",
             borderRadius: "5px",
             background: "hsl(36, 97%, 74%)",
             border: "none",
@@ -86,7 +97,7 @@ export default function ChatWidget() {
             justifyContent: "center",
             cursor: prompt.trim() ? "pointer" : "default",
             transition: "background 0.2s",
-            padding: "0 16px",
+            padding: "0 18px",
             gap: "6px",
             fontFamily: "Poppins, sans-serif",
             fontWeight: 500,

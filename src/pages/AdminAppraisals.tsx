@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
-  ArrowLeft, ChevronDown, ChevronUp, Save,
+  ArrowLeft, ChevronDown, ChevronUp, Save, Download, FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,13 @@ import { AdminGate } from "@/components/AdminGate";
 import { invokeAdmin } from "@/lib/adminApi";
 import { toast } from "sonner";
 
+
+interface AppraisalFile {
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+}
 
 interface AppraisalRequest {
   id: string;
@@ -45,6 +52,14 @@ interface AppraisalRequest {
   status: string;
   reviewed_at: string | null;
   created_at: string;
+  files: AppraisalFile[] | null;
+}
+
+function formatBytes(n: number): string {
+  if (!n && n !== 0) return "—";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -103,6 +118,22 @@ export default function AdminAppraisals() {
       setNotesValue(r?.admin_notes || "");
     }
   }, [expandedId]);
+
+  const [downloadingPath, setDownloadingPath] = useState<string | null>(null);
+
+  const downloadFile = async (file: AppraisalFile) => {
+    setDownloadingPath(file.path);
+    try {
+      const { url } = await invokeAdmin<{ url: string }>("admin-data", {
+        action: "appraisal_file_url",
+        path: file.path,
+      });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to generate download link");
+    }
+    setDownloadingPath(null);
+  };
 
   const saveNotes = async (id: string) => {
     setSavingNotes(true);
@@ -308,6 +339,47 @@ export default function AdminAppraisals() {
                           {req.reviewed_at && detailRow("Reviewed at", new Date(req.reviewed_at).toLocaleDateString("en-GB", {
                             day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
                           }))}
+
+                          {/* Attached files */}
+                          {Array.isArray(req.files) && req.files.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-border">
+                              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                                Attached files ({req.files.length})
+                              </label>
+                              <ul className="space-y-2">
+                                {req.files.map((f, i) => (
+                                  <li
+                                    key={`${f.path}-${i}`}
+                                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="truncate font-medium">{f.name}</div>
+                                        <div className="text-xs text-muted-foreground truncate">
+                                          {f.mimeType} · {formatBytes(f.size)}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground/70 truncate font-mono">
+                                          {f.path}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => { e.stopPropagation(); downloadFile(f); }}
+                                      disabled={downloadingPath === f.path}
+                                      className="h-7 text-xs shrink-0"
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      {downloadingPath === f.path ? "Loading..." : "Download"}
+                                    </Button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
 
                           {/* Admin notes */}
                           <div className="mt-4 pt-4 border-t border-border">

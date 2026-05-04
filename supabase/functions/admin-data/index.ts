@@ -167,6 +167,30 @@ Deno.serve(async (req) => {
         return jsonResponse({ flags: data ?? [] });
       }
 
+      case "appraisal_file_url": {
+        // Create a short-lived signed URL for an admin to download a file
+        // attached to an appraisal request. Restricted to the `appraisals`
+        // bucket and the `appraisal-requests/` prefix, so admins cannot use
+        // this endpoint to read arbitrary storage objects.
+        const path = String((body as { path?: string }).path ?? "");
+        if (!path || path.includes("..") || path.startsWith("/")) {
+          return jsonResponse({ error: "invalid_path" }, 400);
+        }
+        if (!path.startsWith("appraisal-requests/")) {
+          return jsonResponse({ error: "invalid_path" }, 400);
+        }
+        const { data, error } = await supabase.storage
+          .from("appraisals")
+          .createSignedUrl(path, 60); // 60 seconds
+        if (error || !data?.signedUrl) {
+          return jsonResponse(
+            { error: "signed_url_failed", message: error?.message ?? "unknown" },
+            500,
+          );
+        }
+        return jsonResponse({ url: data.signedUrl, expiresIn: 60 });
+      }
+
       default:
         return jsonResponse({ error: "unknown_action", action }, 400);
     }
@@ -174,3 +198,4 @@ Deno.serve(async (req) => {
     return errorResponse(err);
   }
 });
+

@@ -21,6 +21,7 @@ import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConvers
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+import { getCampaign } from "@/lib/campaigns";
 
 /* ── Freemium daily prompt limit ── */
 const DAILY_LIMIT = 10;

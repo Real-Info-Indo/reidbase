@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Campaign } from "@/lib/campaigns";
+import { getCampaign, type Campaign } from "@/lib/campaigns";
 import { trackFeature } from "@/lib/analytics";
 
 /**
@@ -33,7 +33,7 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
   };
 
   return (
-    <div className="my-4 border border-border rounded-xl overflow-hidden bg-card w-full max-w-xs">
+    <div className="my-4 border border-border rounded-xl overflow-hidden bg-card w-full max-w-[260px]">
       <div className="aspect-[4/3] bg-muted overflow-hidden">
         <img
           src={campaign.report.thumbnail}
@@ -70,5 +70,34 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
 }
 
 /** Marker inserted into a campaign's assistant message to indicate where the
- *  report card should be rendered when the message is split for display. */
-export const CAMPAIGN_REPORT_MARKER = "{{CAMPAIGN_REPORT}}";
+ *  report card should be rendered when the message is split for display. The
+ *  slug is embedded so renderers (signed-in and signed-out) can resolve the
+ *  campaign without extra plumbing. */
+export const CAMPAIGN_REPORT_MARKER_RE = /\{\{CAMPAIGN_REPORT:([a-z0-9-]+)\}\}/g;
+
+export function campaignMarker(slug: string): string {
+  return `{{CAMPAIGN_REPORT:${slug}}}`;
+}
+
+/** Split a markdown string at campaign-report markers, returning an array of
+ *  alternating text segments and resolved Campaign references. */
+export function splitOnCampaignMarker(
+  content: string,
+): Array<{ type: "text"; value: string } | { type: "card"; campaign: Campaign }> {
+  const parts: Array<{ type: "text"; value: string } | { type: "card"; campaign: Campaign }> = [];
+  let lastIndex = 0;
+  const re = new RegExp(CAMPAIGN_REPORT_MARKER_RE.source, "g");
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: content.slice(lastIndex, match.index) });
+    }
+    const campaign = getCampaign(match[1]);
+    if (campaign) parts.push({ type: "card", campaign });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < content.length) {
+    parts.push({ type: "text", value: content.slice(lastIndex) });
+  }
+  return parts;
+}

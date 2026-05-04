@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
-import { Send, PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit, User } from "lucide-react";
+import { Send, PlusCircle, BarChart3, FileText, MapPin, ClipboardEdit, User, X } from "lucide-react";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { getCampaign } from "@/lib/campaigns";
 import { trackFeature } from "@/lib/analytics";
 import { AssistantMarkdown } from "@/components/AssistantMarkdown";
 import reidLogo from "@/assets/REID_Black.svg";
+import reidLogoBase from "@/assets/REID_Base_Black.svg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
@@ -35,6 +36,7 @@ export default function CampaignConversation() {
   const isMobile = useIsMobile();
   const campaign = getCampaign(slug);
   const [draft, setDraft] = useState("");
+  const [showSignInOverlay, setShowSignInOverlay] = useState(false);
 
   // Track that the campaign was viewed (anonymous + identified visits both).
   useEffect(() => {
@@ -54,13 +56,25 @@ export default function CampaignConversation() {
   // Stash the post-login destination + draft, then trigger Wix OAuth. The
   // existing WixAuthContext.login() reads `wix-post-login-redirect` to
   // return the user to this exact URL after callback.
-  const requireSignIn = (reason: "send" | "nav") => {
+  const confirmSignIn = (reason: "send" | "nav") => {
     const params = new URLSearchParams({ campaign: campaign.slug });
     if (draft.trim()) params.set("draft", draft.trim());
     const target = `${window.location.origin}/?${params.toString()}`;
     localStorage.setItem("wix-post-login-redirect", target);
     trackFeature("campaign_signin_prompt", { slug: campaign.slug, reason });
     login();
+  };
+
+  // On mobile, surface the same frosted login overlay used by AuthGuard so
+  // users clearly understand they need to access their REID account before
+  // continuing. On desktop, retain the immediate redirect behaviour.
+  const requireSignIn = (reason: "send" | "nav") => {
+    if (isMobile) {
+      trackFeature("campaign_signin_overlay", { slug: campaign.slug, reason });
+      setShowSignInOverlay(true);
+      return;
+    }
+    confirmSignIn(reason);
   };
 
   return (
@@ -161,6 +175,37 @@ export default function CampaignConversation() {
           </div>
         </div>
       </main>
+
+      {/* Mobile sign-in overlay — mirrors AuthGuard styling so users
+          immediately recognise the REID login prompt. */}
+      {showSignInOverlay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-sm text-center space-y-8 bg-card/90 backdrop-blur-md border border-border rounded-2xl p-8 shadow-lg">
+            <button
+              onClick={() => setShowSignInOverlay(false)}
+              aria-label="Close"
+              className="absolute top-3 right-3 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <a href="https://realinfo.id" target="_blank" rel="noopener noreferrer">
+              <img src={reidLogoBase} alt="REID Base" className="h-8 mx-auto" />
+            </a>
+            <p className="text-sm text-muted-foreground font-extralight">
+              Your home for Bali Real Estate Intelligence
+            </p>
+            <p className="text-sm text-foreground font-extralight">
+              Sign in with your existing REID account to continue. No new account needed.
+            </p>
+            <button
+              onClick={() => confirmSignIn("send")}
+              className="w-full rounded-lg bg-primary px-6 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Sign in to your REID account
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

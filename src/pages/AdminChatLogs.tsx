@@ -92,6 +92,29 @@ export default function AdminChatLogs() {
     }
   };
 
+  const handleDeleteSelected = async () => {
+    const selected = filtered.filter((l) => selectedIds.has(l.id));
+    if (selected.length === 0) { toast.error("No conversations selected"); return; }
+    if (!window.confirm(`Delete ${selected.length} conversation${selected.length > 1 ? "s" : ""}? This cannot be undone.`)) return;
+
+    let success = 0;
+    let failed = 0;
+    const selectedSet = new Set(selected.map((s) => s.id));
+    for (const log of selected) {
+      try {
+        await invokeAdmin("admin-mutate", { action: "delete_chat_log", id: log.id });
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+    setLogs((prev) => prev.filter((l) => !selectedSet.has(l.id)));
+    setSelectedIds(new Set());
+    if (expandedId && selectedSet.has(expandedId)) setExpandedId(null);
+    if (failed > 0) toast.error(`Deleted ${success}, ${failed} failed`);
+    else toast.success(`Deleted ${success} conversation${success > 1 ? "s" : ""}`);
+  };
+
   const filtered = logs.filter((log) => {
     const q = search.toLowerCase();
     if (!q) return true;

@@ -119,6 +119,22 @@ export default function AdminAppraisals() {
     }
   }, [expandedId]);
 
+  const [downloadingPath, setDownloadingPath] = useState<string | null>(null);
+
+  const downloadFile = async (file: AppraisalFile) => {
+    setDownloadingPath(file.path);
+    try {
+      const { url } = await invokeAdmin<{ url: string }>("admin-data", {
+        action: "appraisal_file_url",
+        path: file.path,
+      });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to generate download link");
+    }
+    setDownloadingPath(null);
+  };
+
   const saveNotes = async (id: string) => {
     setSavingNotes(true);
     try {

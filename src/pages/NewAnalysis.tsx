@@ -553,7 +553,7 @@ export default function NewAnalysis() {
 
   const handleModeSelect = (modeId: string, isLocked: boolean) => {
     if (isLocked) {
-      window.open("https://www.realinfo.id/pricing", "_blank");
+      window.open("https://www.realinfo.id/pricing-plans/plans-pricing", "_blank");
       return;
     }
 
@@ -1140,7 +1140,7 @@ export default function NewAnalysis() {
                   <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
                   <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
                   <a
-                    href="https://www.realinfo.id/pricing"
+                    href="https://www.realinfo.id/pricing-plans/plans-pricing"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
@@ -1319,7 +1319,7 @@ export default function NewAnalysis() {
                 )}
                 {hasUpgradeCTA && !isLoading && (
                   <a
-                    href="https://www.realinfo.id/pricing"
+                    href="https://www.realinfo.id/pricing-plans/plans-pricing"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -1439,7 +1439,7 @@ export default function NewAnalysis() {
                 <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
                 <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
                 <a
-                  href="https://www.realinfo.id/pricing"
+                  href="https://www.realinfo.id/pricing-plans/plans-pricing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"

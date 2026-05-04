@@ -18,7 +18,7 @@ export function UpgradeOverlay() {
           </p>
         </div>
         <a
-          href="https://www.realinfo.id/pricing"
+          href="https://www.realinfo.id/pricing-plans/plans-pricing"
           target="_blank"
           rel="noopener noreferrer"
           className="block w-full rounded-lg bg-primary px-8 py-3 font-bold text-primary-foreground hover:opacity-90 transition-opacity"

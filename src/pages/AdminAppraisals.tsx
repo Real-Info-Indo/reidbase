@@ -314,16 +314,28 @@ export default function AdminAppraisals() {
                       })}
                     </TableCell>
                     <TableCell>
-                      {req.status === "new" && (
+                      <div className="flex gap-1">
+                        {req.status === "new" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); markReviewed(req.id); }}
+                            className="h-7 text-xs"
+                          >
+                            <Eye className="h-3 w-3 mr-1" /> Review
+                          </Button>
+                        )}
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={(e) => { e.stopPropagation(); markReviewed(req.id); }}
-                          className="h-7 text-xs"
+                          variant="ghost"
+                          onClick={(e) => { e.stopPropagation(); deleteRequest(req.id); }}
+                          disabled={deletingId === req.id}
+                          className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Delete appraisal"
                         >
-                          <Eye className="h-3 w-3 mr-1" /> Review
+                          <Trash2 className="h-3 w-3" />
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {expandedId === req.id

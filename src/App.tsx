@@ -24,6 +24,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminAppraisals from "./pages/AdminAppraisals";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAlerts from "./pages/AdminAlerts";
+import CampaignConversation from "./pages/CampaignConversation";
 import { PageViewTracker } from "@/components/PageViewTracker";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/widget" element={<ChatWidget />} />
                 <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
                 <Route path="/shared/:id" element={<SharedConversation />} />
+                <Route path="/campaign/:slug" element={<CampaignConversation />} />
                 <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
                   <Route path="/" element={<NewAnalysis />} />
                   <Route path="/dashboard" element={<Dashboard />} />

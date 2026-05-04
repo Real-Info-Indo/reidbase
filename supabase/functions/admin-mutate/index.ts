@@ -113,6 +113,16 @@ Deno.serve(async (req) => {
         return jsonResponse({ ok: true });
       }
 
+      case "delete_appraisal": {
+        if (!isUuid(body.id)) return jsonResponse({ error: "invalid_id" }, 400);
+        const { error } = await supabase
+          .from("appraisal_requests")
+          .delete()
+          .eq("id", body.id);
+        if (error) throw error;
+        return jsonResponse({ ok: true });
+      }
+
       case "save_appraisal_notes": {
         if (!isUuid(body.id)) return jsonResponse({ error: "invalid_id" }, 400);
         const notes =

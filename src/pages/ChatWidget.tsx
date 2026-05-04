@@ -88,7 +88,7 @@ export default function ChatWidget() {
             padding: "0 16px",
             gap: "6px",
             fontFamily: "Poppins, sans-serif",
-            fontWeight: 500,
+            fontWeight: 700,
             fontSize: "13px",
             color: "#1a1a1a",
           }}

@@ -14,6 +14,7 @@ import {
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
 import { verifyWixToken, WixAuthError } from "../_shared/wix-auth.ts";
+import { buildFreshMarketContext } from "../_shared/fresh-market-context.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 

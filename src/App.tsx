@@ -24,6 +24,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminAppraisals from "./pages/AdminAppraisals";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAlerts from "./pages/AdminAlerts";
+import CampaignConversation from "./pages/CampaignConversation";
 import { PageViewTracker } from "@/components/PageViewTracker";
 
 const queryClient = new QueryClient();

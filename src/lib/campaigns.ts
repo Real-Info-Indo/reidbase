@@ -64,6 +64,8 @@ export const CAMPAIGNS: Record<string, Campaign> = {
       "",
       "Download the report below to see the full breakdown of Q1 2026.",
       "",
+      "{{CAMPAIGN_REPORT:q1-report}}",
+      "",
       "---",
       "",
       "**Want to explore more?** Ask REID a question to discover any part of the report, or take it further depending on what you are interested in.",

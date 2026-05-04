@@ -97,14 +97,41 @@ describe("buildFreshMarketContext", () => {
     expect(block).toMatch(/neighbourhood-level/i);
   });
 
-  it("Member tier top_markets context omits the Free-tier restriction note", async () => {
-    const { block } = await buildFreshMarketContext(
-      fakeSupabase() as never,
-      "Which locations are showing the strongest market fundamentals across sales and rental performance?",
-      "member",
-    );
-    expect(block).not.toMatch(/caller is Free/i);
-  });
+  it.each(["member", "reid_base"])(
+    "%s tier top_markets context omits the Free-tier restriction note",
+    async (tier) => {
+      const { block } = await buildFreshMarketContext(
+        fakeSupabase() as never,
+        "Which locations are showing the strongest market fundamentals across sales and rental performance?",
+        tier,
+      );
+      expect(block).not.toMatch(/caller is Free/i);
+    },
+  );
+
+  it.each(["reid_base", "reid_base_pro", "enterprise"])(
+    "%s tier off_plan context omits the Free-tier restriction note",
+    async (tier) => {
+      const { block } = await buildFreshMarketContext(
+        fakeSupabase() as never,
+        "What does the data show about Bali's off-plan property market?",
+        tier,
+      );
+      expect(block).not.toMatch(/caller is Free/i);
+    },
+  );
+
+  it.each(["reid_base", "reid_base_pro", "enterprise"])(
+    "%s tier yield_estimator context omits the Free-tier restriction note",
+    async (tier) => {
+      const { block } = await buildFreshMarketContext(
+        fakeSupabase() as never,
+        "What are the current yield figures across Bali locations?",
+        tier,
+      );
+      expect(block).not.toMatch(/caller is Free/i);
+    },
+  );
 
   it("off_plan context queries off-plan supply tables", async () => {
     const sb = fakeSupabase();

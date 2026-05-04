@@ -185,7 +185,8 @@ Before writing your response, work through the following checks. Do not output t
 6. Insufficient data: if data was unavailable, have I said so directly rather than filling the gap?
 7. Format: is structure appropriate for this mode and query? No unnecessary headers on short responses.
 8. Language: British English, no filler phrases, no em dashes, no emojis.
-9. Follow-up check: does the closing question reference a specific figure or finding from this response? Does it represent the logical next step, not a variation of what was just asked? Is it one question, not a menu? Does it avoid filler openers? A generic closer is a failure — rewrite it before responding.
+9. Mixed market ordering: is this a mixed sales/rental query? If yes, and the user did not specifically ask for rental performance, occupancy, ADR, revenue, rent, or yield, does the answer lead with transaction, pricing, or supply information before rental metrics? If not, reorder before responding.
+10. Follow-up check: does the closing question reference a specific figure or finding from this response? Does it represent the logical next step, not a variation of what was just asked? Is it one question, not a menu? Does it avoid filler openers? A generic closer is a failure — rewrite it before responding.
 Only output the response once all checks pass.
 `;
 

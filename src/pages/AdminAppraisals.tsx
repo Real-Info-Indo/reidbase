@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   ClipboardList, RefreshCw, Eye, CheckCircle2, Clock,
-  ArrowLeft, ChevronDown, ChevronUp, Save, Download, FileText,
+  ArrowLeft, ChevronDown, ChevronUp, Save, Download, FileText, Trash2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -110,6 +110,21 @@ export default function AdminAppraisals() {
     } catch (e) {
       toast.error((e as Error).message || "Failed to update");
     }
+  };
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const deleteRequest = async (id: string) => {
+    if (!confirm("Delete this appraisal request? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await invokeAdmin("admin-mutate", { action: "delete_appraisal", id });
+      setRequests((prev) => prev.filter((r) => r.id !== id));
+      if (expandedId === id) setExpandedId(null);
+      toast.success("Appraisal deleted");
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to delete");
+    }
+    setDeletingId(null);
   };
 
   const [notesValue, setNotesValue] = useState("");
@@ -299,16 +314,28 @@ export default function AdminAppraisals() {
                       })}
                     </TableCell>
                     <TableCell>
-                      {req.status === "new" && (
+                      <div className="flex gap-1">
+                        {req.status === "new" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => { e.stopPropagation(); markReviewed(req.id); }}
+                            className="h-7 text-xs"
+                          >
+                            <Eye className="h-3 w-3 mr-1" /> Review
+                          </Button>
+                        )}
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={(e) => { e.stopPropagation(); markReviewed(req.id); }}
-                          className="h-7 text-xs"
+                          variant="ghost"
+                          onClick={(e) => { e.stopPropagation(); deleteRequest(req.id); }}
+                          disabled={deletingId === req.id}
+                          className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Delete appraisal"
                         >
-                          <Eye className="h-3 w-3 mr-1" /> Review
+                          <Trash2 className="h-3 w-3" />
                         </Button>
-                      )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {expandedId === req.id

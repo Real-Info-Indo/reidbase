@@ -118,47 +118,9 @@ export default function CampaignConversation() {
               </div>
             </div>
 
-            {/* Assistant message */}
-            <div className="ai-response prose prose-sm max-w-none prose-p:mb-4 prose-headings:mt-5 prose-headings:mb-2 prose-ul:ml-5 prose-li:mb-1" style={{ lineHeight: 1.6 }}>
-              <ReactMarkdown>{campaign.assistantMessage}</ReactMarkdown>
-            </div>
-
-            {/* Report card */}
-            {campaign.report && (
-              <div className="border border-border rounded-xl overflow-hidden bg-card max-w-md">
-                <div className="aspect-[4/3] bg-muted overflow-hidden">
-                  <img
-                    src={campaign.report.thumbnail}
-                    alt={`${campaign.report.title} cover`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-4 space-y-3">
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">{campaign.report.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{campaign.report.subtitle}</p>
-                  </div>
-                  <button
-                    onClick={handleDownload}
-                    disabled={downloading}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60"
-                  >
-                    {downloading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Preparing download
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4" />
-                        Download report
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Assistant message — uses shared renderer so formatting and the
+                inline campaign report card match the signed-in chat exactly. */}
+            <AssistantMarkdown content={campaign.assistantMessage} />
           </div>
         </div>
 

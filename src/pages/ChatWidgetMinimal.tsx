@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const FULL_APP_URL = "https://reidbase.lovable.app";
+const FULL_APP_URL = "https://ai.realinfo.id";
 
 export default function ChatWidgetMinimal() {
   const [prompt, setPrompt] = useState("");

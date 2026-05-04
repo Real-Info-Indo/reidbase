@@ -125,11 +125,14 @@ describe("Mixed market response ordering — chat (multi-mode) entry prompts", (
  * transaction-led unless the user explicitly names a rental metric.
  */
 
+// Note: generic "revenue" is intentionally excluded — it appears in
+// transaction-side framings too. Only explicit rental phrasings flip the lead.
 const RENTAL_LED_TRIGGERS = [
   /\brental performance\b/i,
+  /\brental revenue\b/i,
+  /\brental income\b/i,
   /\boccupancy\b/i,
   /\bADR\b/,
-  /\brevenue\b/i,
   /\brent\b/i,
   /\byield\b/i,
 ];
@@ -148,6 +151,13 @@ describe("Mixed market query classification", () => {
     { query: "Compare Canggu and Pererenan overall", lead: "transaction" },
     { query: "How is rental performance in Canggu?", lead: "rental" },
     { query: "What occupancy and ADR should I expect?", lead: "rental" },
+    // Regression: generic "revenue" must not flip a transaction-led query.
+    {
+      query: "Compare transaction volume, pricing, and revenue trends in Bali",
+      lead: "transaction",
+    },
+    // Explicit rental phrasings still flip the lead.
+    { query: "How has rental revenue moved in Uluwatu?", lead: "rental" },
   ];
 
   for (const c of cases) {

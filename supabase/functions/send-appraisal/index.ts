@@ -268,14 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Server-side entitlement check: only paid tiers may submit.
-    const entitlement = await getEntitlement(submitterWixId);
-    if (!meetsTier(entitlement.tier, "reid_base")) {
-      return new Response(
-        JSON.stringify({ error: "forbidden", message: "Upgrade required to submit appraisal requests" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } },
-      );
-    }
+    // Appraisal requests are open to any signed-in user (auth already verified above).
 
     const rawBody = await req.json().catch(() => null);
     const parsed = sanitiseInput(rawBody);

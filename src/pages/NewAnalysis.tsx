@@ -22,6 +22,7 @@ import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { getCampaign } from "@/lib/campaigns";
+import { AssistantMarkdown } from "@/components/AssistantMarkdown";
 
 /* ── Freemium daily prompt limit ── */
 const DAILY_LIMIT = 10;

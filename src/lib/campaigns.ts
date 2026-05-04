@@ -75,7 +75,7 @@ export const CAMPAIGNS: Record<string, Campaign> = {
     report: {
       title: "Bali Q1 2026 Market Report",
       subtitle: "Quarterly market intelligence",
-      thumbnail: "/reports/thumbnails/Bali_Q1_2026.jpg",
+      thumbnail: "/reports/thumbnails/Bali_Q1_2026_Campaign.png",
       reportType: "market",
       reportKey: "bali_q1_2026",
     },

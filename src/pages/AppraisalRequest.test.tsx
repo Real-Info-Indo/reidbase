@@ -80,10 +80,9 @@ function fillRequiredFields() {
 }
 
 function makeFile(name: string, type: string, sizeBytes: number): File {
-  const blob = new Blob([new Uint8Array(Math.min(sizeBytes, 1024))], { type });
-  // Override size
-  Object.defineProperty(blob, "size", { value: sizeBytes });
-  return new File([blob], name, { type });
+  const file = new File([new Uint8Array(1)], name, { type });
+  Object.defineProperty(file, "size", { value: sizeBytes, configurable: true });
+  return file;
 }
 
 function getFileInput(): HTMLInputElement {

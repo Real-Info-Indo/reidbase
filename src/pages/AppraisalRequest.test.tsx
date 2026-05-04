@@ -52,15 +52,8 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// crypto.randomUUID polyfill for jsdom
-if (!globalThis.crypto) {
-  // @ts-ignore
-  globalThis.crypto = {};
-}
-if (!globalThis.crypto.randomUUID) {
-  // @ts-ignore
-  globalThis.crypto.randomUUID = () => "test-request-id-1234";
-}
+// Force a stable requestId
+vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue("test-request-id-1234" as any);
 
 function fillRequiredFields() {
   fireEvent.change(screen.getByDisplayValue("Select type"), { target: { value: "Villa" } });

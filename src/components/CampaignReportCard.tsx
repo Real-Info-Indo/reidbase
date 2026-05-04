@@ -33,24 +33,24 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
   };
 
   return (
-    <div className="my-4 border border-border rounded-xl overflow-hidden bg-card w-full max-w-[260px]">
+    <div className="my-4 border border-border rounded-xl overflow-hidden bg-card w-full max-w-[360px]">
       <div className="aspect-[4/3] bg-muted overflow-hidden">
         <img
           src={campaign.report.thumbnail}
           alt={`${campaign.report.title} cover`}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
           loading="lazy"
         />
       </div>
-      <div className="p-3 space-y-2">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground leading-tight">{campaign.report.title}</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">{campaign.report.subtitle}</p>
+      <div className="px-3 py-2 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{campaign.report.title}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{campaign.report.subtitle}</p>
         </div>
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60"
+          className="shrink-0 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60"
         >
           {downloading ? (
             <>

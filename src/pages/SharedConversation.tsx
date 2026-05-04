@@ -290,7 +290,7 @@ export default function SharedConversation() {
                 </button>
               ) : (
                 <a
-                  href="https://www.realinfo.id/pricing"
+                  href="https://www.realinfo.id/pricing-plans/plans-pricing"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:opacity-90 transition-opacity shrink-0"

@@ -473,7 +473,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
               Profile
             </a>
             <a
-              href="https://www.realinfo.id/pricing"
+              href="https://www.realinfo.id/pricing-plans/plans-pricing"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"

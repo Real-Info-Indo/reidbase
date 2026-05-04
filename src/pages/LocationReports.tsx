@@ -75,7 +75,7 @@ export default function LocationReports() {
             action: {
               label: "See plans",
               onClick: () =>
-                window.open("https://www.realinfo.id/pricing", "_blank"),
+                window.open("https://www.realinfo.id/pricing-plans/plans-pricing", "_blank"),
             },
           });
           break;

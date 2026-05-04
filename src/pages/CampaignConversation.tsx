@@ -56,13 +56,25 @@ export default function CampaignConversation() {
   // Stash the post-login destination + draft, then trigger Wix OAuth. The
   // existing WixAuthContext.login() reads `wix-post-login-redirect` to
   // return the user to this exact URL after callback.
-  const requireSignIn = (reason: "send" | "nav") => {
+  const confirmSignIn = (reason: "send" | "nav") => {
     const params = new URLSearchParams({ campaign: campaign.slug });
     if (draft.trim()) params.set("draft", draft.trim());
     const target = `${window.location.origin}/?${params.toString()}`;
     localStorage.setItem("wix-post-login-redirect", target);
     trackFeature("campaign_signin_prompt", { slug: campaign.slug, reason });
     login();
+  };
+
+  // On mobile, surface the same frosted login overlay used by AuthGuard so
+  // users clearly understand they need to access their REID account before
+  // continuing. On desktop, retain the immediate redirect behaviour.
+  const requireSignIn = (reason: "send" | "nav") => {
+    if (isMobile) {
+      trackFeature("campaign_signin_overlay", { slug: campaign.slug, reason });
+      setShowSignInOverlay(true);
+      return;
+    }
+    confirmSignIn(reason);
   };
 
   return (

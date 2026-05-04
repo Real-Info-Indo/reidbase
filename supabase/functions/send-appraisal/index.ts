@@ -169,7 +169,7 @@ function sanitiseInput(
 
 function buildEmailHtml(
   data: AppraisalData,
-  submitter: { wixUserId: string | null; email: string | null },
+  submitter: { wixUserId: string | null; email: string | null; name?: string | null },
   files: AppraisalFile[],
   requestId: string,
 ): string {
@@ -184,9 +184,10 @@ function buildEmailHtml(
     ${row("Overheads ($)", data.overheads)}
   ` : "";
 
-  const submitterRows = (submitter.wixUserId || submitter.email) ? `
-    ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
+  const submitterRows = (submitter.wixUserId || submitter.email || submitter.name) ? `
+    ${row("Submitter name", submitter.name ?? "")}
     ${row("Submitter email", submitter.email ?? "")}
+    ${row("Submitted by (Wix ID)", submitter.wixUserId ?? "")}
     ${row("Request ID", requestId)}
   ` : row("Request ID", requestId);
 

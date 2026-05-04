@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { WixAuthProvider } from "@/contexts/WixAuthContext";
 import { TierProvider } from "@/contexts/TierContext";
@@ -32,6 +33,16 @@ const queryClient = new QueryClient();
 const AppRoutes = () => {
   const location = useLocation();
   const isWidgetRoute = location.pathname === "/widget" || location.pathname === "/widget-minimal";
+
+  useEffect(() => {
+    document.documentElement.style.background = isWidgetRoute ? "transparent" : "";
+    document.body.style.background = isWidgetRoute ? "transparent" : "";
+
+    return () => {
+      document.documentElement.style.background = "";
+      document.body.style.background = "";
+    };
+  }, [isWidgetRoute]);
 
   return (
     <div

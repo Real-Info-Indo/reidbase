@@ -589,6 +589,46 @@ export default function NewAnalysis() {
     }
   }, [paramConvoId, paramFolderId]);
 
+  // Seed a conversation from an email-campaign landing.
+  // Triggered when the user signs in from /campaign/:slug and is redirected
+  // to /?campaign=<slug>&draft=<text>. Creates a real conversation owned by
+  // the user, prefills the input with their draft (if any), and cleans the
+  // URL so a refresh doesn't re-seed.
+  const campaignSeededRef = useRef(false);
+  useEffect(() => {
+    if (campaignSeededRef.current) return;
+    const campaignSlug = searchParams.get("campaign");
+    if (!campaignSlug) return;
+    const campaign = getCampaign(campaignSlug);
+    if (!campaign) return;
+    campaignSeededRef.current = true;
+
+    const draft = searchParams.get("draft") || "";
+    const id = generateId();
+    const seeded: Msg[] = [
+      { role: "user", content: campaign.userPrompt },
+      { role: "assistant", content: campaign.assistantMessage },
+    ];
+    saveConversation({
+      id,
+      title: campaign.title,
+      messages: seeded,
+      updatedAt: Date.now(),
+    });
+    setConversationId(id);
+    setMessages(seeded);
+    setCustomTitle(campaign.title);
+    if (draft) setQuery(draft);
+    trackFeature("campaign_seeded", { slug: campaign.slug });
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("campaign");
+    url.searchParams.delete("draft");
+    url.searchParams.set("c", id);
+    window.history.replaceState({}, "", url.toString());
+    window.dispatchEvent(new Event("conversations-updated"));
+  }, [searchParams]);
+
   useEffect(() => {
     const handler = () => startNew();
     window.addEventListener("new-analysis-reset", handler);

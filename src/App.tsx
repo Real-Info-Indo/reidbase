@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { WixAuthProvider } from "@/contexts/WixAuthContext";
 import { TierProvider } from "@/contexts/TierContext";
 import { AppLayout } from "@/components/AppLayout";
@@ -29,6 +29,42 @@ import { PageViewTracker } from "@/components/PageViewTracker";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  const location = useLocation();
+  const isWidgetRoute = location.pathname === "/widget" || location.pathname === "/widget-minimal";
+
+  return (
+    <div
+      className="w-full overflow-x-hidden"
+      style={{ minHeight: isWidgetRoute ? "auto" : "100vh", background: isWidgetRoute ? "transparent" : "hsl(var(--background))" }}
+    >
+      <PageViewTracker />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/callback" element={<WixCallback />} />
+        <Route path="/widget" element={<ChatWidget />} />
+        <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
+        <Route path="/shared/:id" element={<SharedConversation />} />
+        <Route path="/campaign/:slug" element={<CampaignConversation />} />
+        <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
+          <Route path="/" element={<NewAnalysis />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/market-reports" element={<MarketReports />} />
+          <Route path="/location-reports" element={<LocationReports />} />
+          <Route path="/appraisal-request" element={<AppraisalRequest />} />
+        </Route>
+        <Route path="/import-data" element={<ImportData />} />
+        <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/admin/appraisals" element={<AdminAppraisals />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/alerts" element={<AdminAlerts />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -36,33 +72,9 @@ const App = () => (
         <TierProvider>
           <Toaster />
           <Sonner />
-          <div className="min-h-screen w-full overflow-x-hidden bg-background">
-            <BrowserRouter>
-              <PageViewTracker />
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/callback" element={<WixCallback />} />
-                <Route path="/widget" element={<ChatWidget />} />
-                <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
-                <Route path="/shared/:id" element={<SharedConversation />} />
-                <Route path="/campaign/:slug" element={<CampaignConversation />} />
-                <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
-                  <Route path="/" element={<NewAnalysis />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/market-reports" element={<MarketReports />} />
-                  <Route path="/location-reports" element={<LocationReports />} />
-                  <Route path="/appraisal-request" element={<AppraisalRequest />} />
-                </Route>
-                <Route path="/import-data" element={<ImportData />} />
-                <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
-                <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                <Route path="/admin/appraisals" element={<AdminAppraisals />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/alerts" element={<AdminAlerts />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </div>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
         </TierProvider>
       </WixAuthProvider>
     </TooltipProvider>

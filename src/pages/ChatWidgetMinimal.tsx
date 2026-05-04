@@ -38,30 +38,39 @@ export default function ChatWidgetMinimal() {
           display: "flex",
           alignItems: "center",
           width: "100%",
-          height: "50px",
-          background: "transparent",
-          borderRadius: "5px",
-          border: "1px solid #d4d4d4",
-          padding: "0 6px 0 20px",
+          gap: "8px",
         }}
       >
-        <input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Real data. Real answers"
+        <div
           style={{
             flex: 1,
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            fontSize: "14px",
-            color: "#1a1a1a",
-            fontFamily: "Poppins, sans-serif",
-            fontWeight: 200,
-            height: "100%",
+            height: "50px",
+            background: "#ffffff",
+            borderRadius: "5px",
+            border: "1px solid #d4d4d4",
+            padding: "0 16px",
+            display: "flex",
+            alignItems: "center",
           }}
-        />
+        >
+          <input
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Real data. Real answers"
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: "14px",
+              color: "#1a1a1a",
+              fontFamily: "Poppins, sans-serif",
+              fontWeight: 200,
+              height: "100%",
+            }}
+          />
+        </div>
         <button
           onClick={handleSubmit}
           disabled={!prompt.trim()}

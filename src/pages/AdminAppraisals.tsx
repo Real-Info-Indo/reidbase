@@ -53,6 +53,9 @@ interface AppraisalRequest {
   reviewed_at: string | null;
   created_at: string;
   files: AppraisalFile[] | null;
+  wix_user_id: string | null;
+  wix_user_name: string | null;
+  wix_user_email: string | null;
 }
 
 function formatBytes(n: number): string {

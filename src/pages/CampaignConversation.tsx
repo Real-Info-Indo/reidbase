@@ -35,7 +35,6 @@ export default function CampaignConversation() {
   const isMobile = useIsMobile();
   const campaign = getCampaign(slug);
   const [draft, setDraft] = useState("");
-  const [downloading, setDownloading] = useState(false);
 
   // Track that the campaign was viewed (anonymous + identified visits both).
   useEffect(() => {
@@ -62,24 +61,6 @@ export default function CampaignConversation() {
     localStorage.setItem("wix-post-login-redirect", target);
     trackFeature("campaign_signin_prompt", { slug: campaign.slug, reason });
     login();
-  };
-
-  const handleDownload = async () => {
-    if (!campaign.report || downloading) return;
-    setDownloading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("download-public-report", {
-        body: { slug: campaign.slug },
-      });
-      if (error || !data?.ok || !data?.url) {
-        toast.error("Download unavailable. Please try again later.");
-        return;
-      }
-      window.open(data.url as string, "_blank", "noopener,noreferrer");
-      trackFeature("campaign_report_download", { slug: campaign.slug });
-    } finally {
-      setDownloading(false);
-    }
   };
 
   return (

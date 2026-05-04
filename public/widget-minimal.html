@@ -29,7 +29,7 @@ body{background:transparent;font-family:'Poppins',sans-serif}
   <button id="go" disabled>Ask REID</button>
 </div>
 <script>
-var APP='https://reidbase.lovable.app';
+var APP='https://ai.realinfo.id';
 var p=document.getElementById('p'),go=document.getElementById('go');
 function send(t){t=t.trim();if(!t)return;window.open(APP+'/?prompt='+encodeURIComponent(t),'_blank')}
 p.addEventListener('input',function(){go.disabled=!p.value.trim()});

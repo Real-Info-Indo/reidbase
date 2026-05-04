@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TrendingUp, BarChart3, Calculator } from "lucide-react";
 
-const FULL_APP_URL = "https://reidbase.lovable.app";
+const FULL_APP_URL = "https://ai.realinfo.id";
 
 const quickButtons = [
   { label: "Trends", icon: TrendingUp, prompt: "What are the latest property market trends in Bali?" },
@@ -49,8 +49,9 @@ export default function ChatWidget() {
           alignItems: "center",
           width: "100%",
           height: "50px",
-          background: "transparent",
+          background: "#ffffff",
           borderRadius: "5px",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
           padding: "0 6px 0 20px",
         }}
       >
@@ -88,7 +89,7 @@ export default function ChatWidget() {
             padding: "0 16px",
             gap: "6px",
             fontFamily: "Poppins, sans-serif",
-            fontWeight: 700,
+            fontWeight: 500,
             fontSize: "13px",
             color: "#1a1a1a",
           }}

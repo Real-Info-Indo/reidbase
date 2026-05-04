@@ -36,6 +36,7 @@ export default function CampaignConversation() {
   const isMobile = useIsMobile();
   const campaign = getCampaign(slug);
   const [draft, setDraft] = useState("");
+  const [showSignInOverlay, setShowSignInOverlay] = useState(false);
 
   // Track that the campaign was viewed (anonymous + identified visits both).
   useEffect(() => {

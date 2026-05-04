@@ -56,6 +56,7 @@ export default function ChatWidget() {
         <div
           style={{
             flex: 1,
+            minWidth: 0,
             display: "flex",
             alignItems: "center",
             height: "100%",

@@ -12,12 +12,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:transparent;font-family:'Poppins',sans-serif}
-.bar{display:flex;align-items:center;width:100%;max-width:500px;height:50px;background:transparent;border-radius:5px;border:1px solid #d4d4d4;padding:0 6px 0 14px}
+.bar{display:flex;align-items:center;width:100%;max-width:500px;gap:8px}
+.field{flex:1;display:flex;align-items:center;height:50px;background:#fff;border-radius:5px;border:1px solid #d4d4d4;padding:0 16px}
 .bar input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:14px;color:#1a1a1a;font-family:'Poppins',sans-serif;font-weight:200;height:100%}
 .bar button{flex-shrink:0;height:36px;border-radius:5px;background:hsl(36,97%,74%);border:none;display:flex;align-items:center;justify-content:center;padding:0 16px;gap:6px;font-family:'Poppins',sans-serif;font-weight:500;font-size:13px;color:#1a1a1a;cursor:pointer;transition:background .2s}
 .bar button:disabled{cursor:default}
 @media(max-width:360px){
-.bar{height:44px;padding:0 4px 0 10px}
+.field{height:44px;padding:0 10px}
 .bar input{font-size:13px}
 .bar button{padding:0 10px;font-size:12px}
 }
@@ -25,7 +26,7 @@ body{background:transparent;font-family:'Poppins',sans-serif}
 </head>
 <body>
 <div class="bar">
-  <input id="p" placeholder="Real data. Real answers">
+  <div class="field"><input id="p" placeholder="Real data. Real answers"></div>
   <button id="go" disabled>Ask REID</button>
 </div>
 <script>

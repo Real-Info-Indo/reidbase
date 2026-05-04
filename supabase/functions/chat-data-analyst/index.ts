@@ -14,6 +14,7 @@ import {
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
 import { verifyWixToken, WixAuthError } from "../_shared/wix-auth.ts";
+import { buildFreshMarketContext } from "../_shared/fresh-market-context.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -259,6 +260,16 @@ serve(async (req) => {
 
     const userMessage = enrichedMessages[enrichedMessages.length - 1]?.content || "";
 
+    // Inject fresh DB context for pre-loaded landing/widget prompts and any
+    // semantically equivalent "current/latest market" question. Free tier
+    // automatically receives Bali-wide + regional aggregates only (no
+    // location-level rows are queried).
+    const { intent: freshIntent, block: freshBlock } = await buildFreshMarketContext(supabase, userMessage, effectiveTier);
+    if (freshIntent !== "none") {
+      console.log(`[chat-data-analyst] fresh-context intent=${freshIntent} tier=${effectiveTier} bytes=${freshBlock.length}`);
+    }
+    const freshPrefix = freshBlock ? freshBlock + "\n\n" : "";
+
     // Enterprise tier: use Pro RAG + analytical (database queries)
     if (effectiveTier === "enterprise") {
       // First try to determine if the question needs a database query
@@ -339,7 +350,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG with Pro content
-          const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
+          const ragPrompt = freshPrefix + buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -356,7 +367,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
           body: JSON.stringify({
             model: AI_MODEL,
             messages: [
-              { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation, aiSummary, effectiveTier) + (userMemory || "") },
+              { role: "system", content: freshPrefix + ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation, aiSummary, effectiveTier) + (userMemory || "") },
               ...enrichedMessages.slice(0, -1),
               { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}` },
             ],
@@ -375,7 +386,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory, aiSummary);
+      const ragPrompt = freshPrefix + buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory, aiSummary);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -394,7 +405,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
     // Member/Base and Pro tiers: pure RAG
     const ragContent = RAG_CONTENT;
-    const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, modePrompt, personalisation, userMemory, aiSummary);
+    const systemPrompt = freshPrefix + buildRagSystemPrompt(effectiveTier, ragContent, modePrompt, personalisation, userMemory, aiSummary);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

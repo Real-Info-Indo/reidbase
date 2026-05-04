@@ -125,11 +125,14 @@ describe("Mixed market response ordering — chat (multi-mode) entry prompts", (
  * transaction-led unless the user explicitly names a rental metric.
  */
 
+// Note: generic "revenue" is intentionally excluded — it appears in
+// transaction-side framings too. Only explicit rental phrasings flip the lead.
 const RENTAL_LED_TRIGGERS = [
   /\brental performance\b/i,
+  /\brental revenue\b/i,
+  /\brental income\b/i,
   /\boccupancy\b/i,
   /\bADR\b/,
-  /\brevenue\b/i,
   /\brent\b/i,
   /\byield\b/i,
 ];

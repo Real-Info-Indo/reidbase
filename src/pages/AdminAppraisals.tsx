@@ -318,8 +318,11 @@ export default function AdminAppraisals() {
                   </TableRow>
                   {expandedId === req.id && (
                     <TableRow key={`${req.id}-detail`}>
-                      <TableCell colSpan={8} className="p-0">
+                      <TableCell colSpan={9} className="p-0">
                         <div className="p-6 bg-muted/30 space-y-1">
+                          {detailRow("Submitter name", req.wix_user_name)}
+                          {detailRow("Submitter email", req.wix_user_email)}
+                          {detailRow("Submitter Wix ID", req.wix_user_id)}
                           {detailRow("Property type", req.property_type)}
                           {detailRow("Location", req.location)}
                           {detailRow("Description", req.description)}

@@ -96,6 +96,9 @@ export type Database = {
           property_website: string | null
           reviewed_at: string | null
           status: string
+          wix_user_email: string | null
+          wix_user_id: string | null
+          wix_user_name: string | null
           year_built: string | null
           years_operating: string | null
         }
@@ -126,6 +129,9 @@ export type Database = {
           property_website?: string | null
           reviewed_at?: string | null
           status?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
           year_built?: string | null
           years_operating?: string | null
         }
@@ -156,6 +162,9 @@ export type Database = {
           property_website?: string | null
           reviewed_at?: string | null
           status?: string
+          wix_user_email?: string | null
+          wix_user_id?: string | null
+          wix_user_name?: string | null
           year_built?: string | null
           years_operating?: string | null
         }

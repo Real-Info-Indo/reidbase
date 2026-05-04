@@ -17,6 +17,13 @@ import { invokeAdmin } from "@/lib/adminApi";
 import { toast } from "sonner";
 
 
+interface AppraisalFile {
+  name: string;
+  path: string;
+  mimeType: string;
+  size: number;
+}
+
 interface AppraisalRequest {
   id: string;
   property_type: string | null;
@@ -45,6 +52,14 @@ interface AppraisalRequest {
   status: string;
   reviewed_at: string | null;
   created_at: string;
+  files: AppraisalFile[] | null;
+}
+
+function formatBytes(n: number): string {
+  if (!n && n !== 0) return "—";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function StatusBadge({ status }: { status: string }) {

@@ -75,8 +75,8 @@ function fillRequiredFields() {
   fireEvent.change(screen.getByPlaceholderText("e.g. 300"), { target: { value: "300" } });
   const propStatusSelect = screen.getByText("Property Status").parentElement!.querySelector("select")!;
   fireEvent.change(propStatusSelect, { target: { value: "completed" } });
-  const bedroomsSelect = screen.getByText("Bedrooms").parentElement!.querySelector("select")!;
-  fireEvent.change(bedroomsSelect, { target: { value: "3" } });
+  const bedroomsInput = screen.getByText("Bedrooms").parentElement!.querySelector("input")!;
+  fireEvent.change(bedroomsInput, { target: { value: "3" } });
 }
 
 function makeFile(name: string, type: string, sizeBytes: number): File {

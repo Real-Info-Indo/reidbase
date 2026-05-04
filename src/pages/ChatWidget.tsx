@@ -56,6 +56,7 @@ export default function ChatWidget() {
         <div
           style={{
             flex: 1,
+            minWidth: 0,
             display: "flex",
             alignItems: "center",
             height: "100%",
@@ -72,6 +73,8 @@ export default function ChatWidget() {
             placeholder="Real data. Real answers"
             style={{
               flex: 1,
+              minWidth: 0,
+              width: 0,
               border: "none",
               outline: "none",
               background: "transparent",

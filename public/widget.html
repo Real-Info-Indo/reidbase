@@ -59,13 +59,27 @@ body{background:transparent;font-family:'Poppins',-apple-system,BlinkMacSystemFo
   </div>
 </div>
 <script>
-var APP='https://ai.realinfo.id';
-var p=document.getElementById('p'),go=document.getElementById('go');
-function send(t){t=t.trim();if(!t)return;window.open(APP+'/?prompt='+encodeURIComponent(t),'_blank')}
-p.addEventListener('input',function(){go.disabled=!p.value.trim()});
-p.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(p.value)}});
-go.addEventListener('click',function(){send(p.value)});
-document.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){send(b.dataset.q)})});
+(function(){
+  var qs=new URLSearchParams(location.search);
+  var APP=qs.get('redirectUrl')||'https://ai.realinfo.id';
+  var SOURCE=qs.get('source')||'';
+  var p=document.getElementById('p'),go=document.getElementById('go');
+  var ph=qs.get('placeholder');if(ph)p.setAttribute('placeholder',ph);
+  var sending=false;
+  function send(t){
+    if(sending)return;
+    t=(t||'').trim();if(!t)return;
+    sending=true;go.disabled=true;go.textContent='Opening…';
+    var url=APP.replace(/\/+$/,'')+'/?prompt='+encodeURIComponent(t);
+    if(SOURCE)url+='&source='+encodeURIComponent(SOURCE);
+    try{window.open(url,'_blank','noopener')}catch(e){location.href=url}
+    setTimeout(function(){sending=false;go.disabled=!p.value.trim();go.textContent='Ask REID'},1500);
+  }
+  p.addEventListener('input',function(){if(!sending)go.disabled=!p.value.trim()});
+  p.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(p.value)}});
+  go.addEventListener('click',function(){send(p.value)});
+  document.querySelectorAll('[data-q]').forEach(function(b){b.addEventListener('click',function(){send(b.dataset.q)})});
+})();
 </script>
 </body>
 </html>

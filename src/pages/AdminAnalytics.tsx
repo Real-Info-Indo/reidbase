@@ -74,32 +74,64 @@ const CHART_COLOURS = [
   "hsl(20 70% 55%)",
 ];
 
-function formatDate(d: Date) {
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+// All day/week bucketing is anchored to Asia/Makassar (WITA, UTC+8, no DST).
+// Without this, refresh-time drift around midnight UTC made the page-views
+// chart appear to gain or lose a day's worth of events between refreshes.
+const TZ = "Asia/Makassar";
+const TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const dayLabelFmt = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric", month: "short", timeZone: TZ,
+});
+
+/** YYYY-MM-DD for the given instant, evaluated in WITA. */
+function dayKey(d: Date | string): string {
+  const t = (typeof d === "string" ? new Date(d) : d).getTime();
+  return new Date(t + TZ_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+/** Instant for WITA midnight of the given calendar day. */
+function dayKeyToInstant(key: string): Date {
+  return new Date(`${key}T00:00:00+08:00`);
+}
+
+function startOfDayWita(d: Date): Date {
+  return dayKeyToInstant(dayKey(d));
+}
+
+function endOfDayWita(d: Date): Date {
+  return new Date(`${dayKey(d)}T23:59:59.999+08:00`);
+}
+
+function formatDayKey(key: string): string {
+  return dayLabelFmt.format(dayKeyToInstant(key));
 }
 
 function formatPercent(value: number) {
   return `${value.toFixed(1)}%`;
 }
 
-function startOfWeek(date: Date) {
-  const d = new Date(date);
-  const day = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - day);
-  d.setHours(0, 0, 0, 0);
-  return d;
+/** Monday-anchored week key (YYYY-MM-DD) for the given WITA day key. */
+function startOfWeekKey(key: string): string {
+  const [y, m, d] = key.split("-").map(Number);
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  const dow = (utc.getUTCDay() + 6) % 7;
+  utc.setUTCDate(utc.getUTCDate() - dow);
+  return utc.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(date: Date) {
-  return startOfWeek(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+function formatWeekLabel(key: string): string {
+  return formatDayKey(startOfWeekKey(key));
 }
 
 function daysBetween(from: Date, to: Date): string[] {
   const days: string[] = [];
-  const start = new Date(from); start.setHours(0, 0, 0, 0);
-  const end = new Date(to); end.setHours(0, 0, 0, 0);
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    days.push(d.toISOString().slice(0, 10));
+  let cur = startOfDayWita(from).getTime();
+  const end = startOfDayWita(to).getTime();
+  while (cur <= end) {
+    days.push(dayKey(new Date(cur)));
+    cur += DAY_MS;
   }
   return days;
 }

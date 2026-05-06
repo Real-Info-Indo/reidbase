@@ -118,19 +118,36 @@ Deno.serve(async (req) => {
       }
 
       case "analytics": {
+        // Server-side date range. Defaults to the last 90 days when omitted
+        // so a fresh page load doesn't pull the entire table.
+        const isIso = (v: unknown): v is string =>
+          typeof v === "string" && !Number.isNaN(Date.parse(v));
+        const toIso = isIso(body.to) ? body.to : new Date().toISOString();
+        const fromIso = isIso(body.from)
+          ? body.from
+          : new Date(Date.parse(toIso) - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+        let eventsQuery = supabase
+          .from("analytics_events")
+          .select("*")
+          .gte("created_at", fromIso)
+          .lte("created_at", toIso)
+          .order("created_at", { ascending: false })
+          .limit(50000);
+
+        let logsQuery = supabase
+          .from("chat_logs")
+          .select(
+            "id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at",
+          )
+          .gte("updated_at", fromIso)
+          .lte("updated_at", toIso)
+          .order("updated_at", { ascending: false })
+          .limit(20000);
+
         const [eventsRes, logsRes, appraisalRes] = await Promise.all([
-          supabase
-            .from("analytics_events")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(20000),
-          supabase
-            .from("chat_logs")
-            .select(
-              "id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at",
-            )
-            .order("updated_at", { ascending: false })
-            .limit(5000),
+          eventsQuery,
+          logsQuery,
           supabase
             .from("appraisal_requests")
             .select("id", { count: "exact", head: true })
@@ -144,6 +161,7 @@ Deno.serve(async (req) => {
           events: eventsRes.data ?? [],
           chatLogs: logsRes.data ?? [],
           newAppraisalCount: appraisalRes.count ?? 0,
+          range: { from: fromIso, to: toIso },
         });
       }
 

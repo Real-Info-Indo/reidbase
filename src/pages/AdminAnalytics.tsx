@@ -428,16 +428,16 @@ export default function AdminAnalytics() {
       const hasReturnVisit = sessionStarts.some((time, index) => index > 0 && time - sessionStarts[0] >= 24 * 60 * 60 * 1000);
       if (hasReturnVisit) returningUsers += 1;
 
-      const cohort = formatWeekLabel(new Date(user.firstSeen));
-      if (!cohorts.has(cohort)) cohorts.set(cohort, { cohort, users: 0, retained: 0 });
-      const entry = cohorts.get(cohort)!;
+      const cohortKey = startOfWeekKey(dayKey(new Date(user.firstSeen)));
+      if (!cohorts.has(cohortKey)) cohorts.set(cohortKey, { cohort: cohortKey, users: 0, retained: 0 });
+      const entry = cohorts.get(cohortKey)!;
       entry.users += 1;
       if (hasReturnVisit) entry.retained += 1;
     });
 
     const totalUsers = userMap.size;
     const cohortRows = Array.from(cohorts.values())
-      .sort((a, b) => new Date(b.cohort).getTime() - new Date(a.cohort).getTime())
+      .sort((a, b) => b.cohort.localeCompare(a.cohort))
       .slice(0, 6)
       .map((entry) => ({
         ...entry,

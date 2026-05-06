@@ -301,10 +301,10 @@ export default function AdminAnalytics() {
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     chatLogs.forEach((l) => {
-      const day = l.updated_at.slice(0, 10);
+      const day = dayKey(l.updated_at);
       if (counts[day] !== undefined) counts[day]++;
     });
-    return days.map((d) => ({ date: formatDate(new Date(d)), chats: counts[d] }));
+    return days.map((d) => ({ date: formatDayKey(d), chats: counts[d] }));
   }, [chatLogs, rangeFrom, rangeTo]);
 
   const totalMessages = useMemo(

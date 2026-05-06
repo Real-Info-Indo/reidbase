@@ -570,6 +570,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          free_prompts_date: string | null
+          free_prompts_today: number
           id: string
           last_login: string | null
           nickname: string | null
@@ -584,6 +586,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          free_prompts_date?: string | null
+          free_prompts_today?: number
           id?: string
           last_login?: string | null
           nickname?: string | null
@@ -598,6 +602,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          free_prompts_date?: string | null
+          free_prompts_today?: number
           id?: string
           last_login?: string | null
           nickname?: string | null
@@ -637,6 +643,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_and_increment_free_prompt: {
+        Args: { p_daily_limit?: number; p_wix_user_id: string }
+        Returns: boolean
+      }
       execute_readonly_query: { Args: { query_text: string }; Returns: Json }
       has_admin: { Args: { _wix_user_id: string }; Returns: boolean }
       increment_chat_feedback_counter: {

@@ -225,10 +225,10 @@ export default function AdminAnalytics() {
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     pageViews.forEach((e) => {
-      const day = e.created_at.slice(0, 10);
+      const day = dayKey(e.created_at);
       if (counts[day] !== undefined) counts[day]++;
     });
-    return days.map((d) => ({ date: formatDate(new Date(d)), views: counts[d] }));
+    return days.map((d) => ({ date: formatDayKey(d), views: counts[d] }));
   }, [pageViews, rangeFrom, rangeTo]);
 
   // Top pages

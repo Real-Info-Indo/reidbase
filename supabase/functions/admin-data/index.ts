@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     return errorResponse(err);
   }
 
-  let body: { action?: string } = {};
+  let body: { action?: string; from?: string; to?: string; path?: string } = {};
   try {
     body = await req.json();
   } catch {

@@ -172,6 +172,14 @@ export default function AdminAnalytics() {
     if (authenticated) fetchData();
   }, [authenticated]);
 
+  // Re-fetch when the date range changes so the server can scope the query
+  // and avoid the 20k-event truncation as the table grows.
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchData(rangeFrom.toISOString(), rangeTo.toISOString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom.getTime(), rangeTo.getTime()]);
+
   // ── Date range ──
   const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
     let baseTo = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();

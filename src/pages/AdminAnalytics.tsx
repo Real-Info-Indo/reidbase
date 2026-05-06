@@ -147,14 +147,18 @@ export default function AdminAnalytics() {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (fromIso?: string, toIso?: string) => {
     setLoading(true);
     try {
       const result = await invokeAdmin<{
         events: AnalyticsEvent[];
         chatLogs: ChatLog[];
         newAppraisalCount: number;
-      }>("admin-data", { action: "analytics" });
+      }>("admin-data", {
+        action: "analytics",
+        from: fromIso,
+        to: toIso,
+      });
       setAllEvents(result.events || []);
       setAllChatLogs(result.chatLogs || []);
       setNewAppraisalCount(result.newAppraisalCount ?? 0);

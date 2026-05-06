@@ -170,19 +170,23 @@ export default function AdminAnalytics() {
 
   // ── Date range ──
   const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
-    const to = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
-    let from: Date;
+    const baseTo = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
+    let baseFrom: Date;
     if (rangePreset === "custom" && customFrom) {
-      from = new Date(customFrom);
+      baseFrom = new Date(customFrom);
     } else {
       const days = rangePreset === "custom" ? 30 : parseInt(rangePreset, 10);
-      from = new Date();
-      from.setDate(from.getDate() - (days - 1));
+      // Anchor "today" in WITA so the window doesn't shift around UTC midnight.
+      const anchorKey = dayKey(new Date());
+      baseTo = dayKeyToInstant(anchorKey);
+      baseFrom = new Date(baseTo.getTime() - (days - 1) * DAY_MS);
     }
-    from.setHours(0, 0, 0, 0);
-    const toEnd = new Date(to); toEnd.setHours(23, 59, 59, 999);
-    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-    return { rangeFrom: from, rangeTo: toEnd, rangeLabel: `${fmt(from)} to ${fmt(toEnd)}` };
+    const from = startOfDayWita(baseFrom);
+    const to = endOfDayWita(baseTo);
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric", month: "short", year: "numeric", timeZone: TZ,
+    });
+    return { rangeFrom: from, rangeTo: to, rangeLabel: `${fmt.format(from)} to ${fmt.format(to)}` };
   }, [rangePreset, customFrom, customTo]);
 
   const events = useMemo(() => {

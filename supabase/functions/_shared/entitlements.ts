@@ -50,14 +50,28 @@ export function normaliseTier(value: unknown): Tier {
  * Match logic mirrors src/contexts/TierContext.tsx so the canonical tier
  * resolved server-side stays consistent with prior behaviour.
  */
+/**
+ * Wix plan -> internal tier mapping. Paid tiers REQUIRE "reid base" in the
+ * plan name. The free Wix plan "REID Member" (no "base") must NOT grant any
+ * paid access, so loose substring matching on "member" alone is forbidden.
+ *
+ * Confirmed Wix plans (May 2026):
+ *   "REID Member"           -> free       (Wix free plan)
+ *   "REID Base Member"      -> reid_base  ($99/mo, paid Member)
+ *   "REID Base Team"        -> reid_base_pro ($269/mo, Team / Pro)
+ *   "REID Base Pro"         -> reid_base_pro (legacy alias for Team)
+ *   "REID Base Enterprise"  -> enterprise ($389/mo)
+ */
 export function planNameToTier(planName: string | null | undefined): Tier {
   if (!planName) return "free";
-  const lower = planName.toLowerCase();
+  const lower = planName.toLowerCase().trim();
+
+  // Paid tiers MUST contain "reid base". This excludes the free "REID Member" plan.
+  if (!lower.includes("reid base")) return "free";
+
   if (lower.includes("enterprise")) return "enterprise";
   if (lower.includes("team") || lower.includes("pro")) return "reid_base_pro";
-  if (lower.includes("reid base") || lower.includes("base") || lower === "member") {
-    return "reid_base";
-  }
+  if (lower.includes("member")) return "reid_base";
   return "free";
 }
 

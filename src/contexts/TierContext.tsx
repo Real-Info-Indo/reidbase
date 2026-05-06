@@ -81,7 +81,7 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
       const next = normaliseTier(data?.tier);
       setTier(next);
       localStorage.setItem("reid-user-tier", next);
-      console.log("Canonical tier from server:", next, "plans:", data?.wix_plan_names);
+      if (import.meta.env.DEV) console.log("Canonical tier from server:", next, "plans:", data?.wix_plan_names);
     } catch (err) {
       console.error("Failed to refresh canonical tier:", err);
     } finally {

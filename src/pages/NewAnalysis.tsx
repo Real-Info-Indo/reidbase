@@ -152,7 +152,10 @@ function markdownToHtmlForClipboard(md: string): string {
     t = t.replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "<em>$1</em>");
     t = t.replace(/~~(.+?)~~/g, "<s>$1</s>");
     t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label, href) => {
+      const safe = /^https?:\/\//i.test(href) ? href : "#";
+      return `<a href="${safe}">${label}</a>`;
+    });
     return t;
   };
   const flushTable = () => {
@@ -781,7 +784,7 @@ export default function NewAnalysis() {
     container.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => container.removeEventListener("scroll", handleScroll);
-  });
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

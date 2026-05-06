@@ -36,6 +36,18 @@ Output only the profile summary text. No headings, no labels, no preamble.`;
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Admin-only endpoint — must be called from a cron job or admin tooling.
+  // Verify the shared admin secret so arbitrary callers cannot trigger a
+  // full batch AI profile generation run across all Pro/Enterprise users.
+  const adminSecret = Deno.env.get("ADMIN_SECRET");
+  const presented = req.headers.get("x-admin-secret") ?? "";
+  if (!adminSecret || presented !== adminSecret) {
+    return new Response(JSON.stringify({ error: "forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

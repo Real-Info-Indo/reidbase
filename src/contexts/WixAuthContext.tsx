@@ -94,7 +94,7 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           displayName: memberData.name,
         }));
         trackFeature("login_success", { wix_user_id: memberData.id });
-        console.log("Wix member persisted:", memberData.id, memberData.name, memberData.email);
+        if (import.meta.env.DEV) console.log("Wix member persisted:", memberData.id);
         // Hydrate conversations and folders from Supabase if localStorage is empty
         try {
           await hydrateFromSupabase(memberData.id);

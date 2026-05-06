@@ -762,6 +762,24 @@ serve(async (req) => {
     const effectiveTier = await resolveVerifiedTier(supabase, wixUserId, requestTier);
     console.log("Tier resolution:", { wixUserId, effectiveTier });
 
+    // Server-side daily prompt limit for free-tier users with a known identity.
+    // Anonymous callers (no wixUserId) rely on the client-side counter only.
+    if (effectiveTier === "free" && wixUserId) {
+      const { data: allowed, error: rateErr } = await supabase.rpc(
+        "check_and_increment_free_prompt",
+        { p_wix_user_id: wixUserId },
+      );
+      if (rateErr) {
+        console.warn("Rate-limit check error:", rateErr.message);
+        // Fail open on DB error so a transient fault doesn't block the user.
+      } else if (allowed === false) {
+        return new Response(
+          JSON.stringify({ error: "daily_limit_reached", message: "You have reached your 10 daily prompts. Upgrade to REID Base Member to continue." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // Enforce mode access by tier
     let effectiveSearchMode = searchMode || "data-analyst";
     if (ENTERPRISE_ONLY_MODES.includes(effectiveSearchMode) && effectiveTier !== "enterprise") {

@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
             .eq("wix_user_id", wixUserId)
             .is("deleted_at", null)
             .order("updated_at", { ascending: false })
-            .limit(500),
+            .limit(100),
           supabase
             .from("folders")
             .select("id, name, created_at")

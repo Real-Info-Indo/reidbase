@@ -1,4 +1,4 @@
-/* ── RAG CONTENT — 2025 REID Consolidated Intelligence Document ── */
+/* ── RAG CONTENT: 2025 REID Consolidated Intelligence Document ── */
 /* Single export for all tiers. Tier differences control AI output depth, not RAG access. */
 export const RAG_CONTENT = `
 REID 2025 BALI PROPERTY MARKET INTELLIGENCE
@@ -99,7 +99,7 @@ OTHER INDONESIAN ISLANDS | Non Bali     | Non Bali              | Various
 OTHER                  | Other          | Other                 | Various
 Note: Do not add or remove neighbourhoods without updating both the RAG and the AI system prompts.
 
-CRITICAL CLASSIFICATION NOTES — apply before every location response:
+CRITICAL CLASSIFICATION NOTES: apply before every location response:
 - Seminyak = Central Badung (not North Badung)
 - Kuta = Central Badung (not North Badung)
 - Legian = Central Badung (not North Badung)
@@ -110,7 +110,7 @@ CRITICAL CLASSIFICATION NOTES — apply before every location response:
 - Kaba Kaba = Tabanan
 - Nyanyi = Tabanan
 - Sanur = Denpasar
-- Mengwi is a distinct REID region within Badung regency — never group Mengwi locations under North Badung
+- Mengwi is a distinct REID region within Badung regency: never group Mengwi locations under North Badung
 - For any location not in the directory, classify under the nearest parent region and note data may be limited
 
 
@@ -236,7 +236,7 @@ Tabanan       | 65    | 147   | 244   | 373   | 531   | 701
 Average price per sqm by type and bedroom:
 TYPE      | 1 BED  | 2 BED  | 3 BED  | 4 BED  | 5 BED  | 6 BED+
 VILLA     | $2,530 | $1,940 | $1,770 | $1,875 | $2,090 | $2,005
-APARTMENT | $3,505 | $2,580 | —      | —      | —      | —
+APARTMENT | $3,505 | $2,580 | n/a    | n/a    | n/a    | n/a
 TOTAL     | $3,077 | $1,972 | $1,742 | $1,839 | $1,990 | $1,976
 
 $2,210 market average sqm price; +2% YoY.
@@ -415,10 +415,10 @@ HGB allows the holder to construct and commercially utilise buildings on land no
 Leasehold is a private contractual arrangement between landowner and tenant. It is not a state-recognised land title under Indonesian agrarian law. The lease is granted for a fixed term agreed between the parties. Because protections depend on contract structure rather than statutory land rights, risk and enforceability are determined by due diligence and documentation.
 
 Required Documents Before Buying
-1. Land Certificate — Hak Pakai or HGB
+1. Land Certificate: Hak Pakai or HGB
 The land certificate must clearly reflect the correct title and be formally registered with the Badan Pertanahan Nasional (BPN). This is the primary proof of legal tenure and confirms the validity, duration, and classification of the land right.
 
-2. PBG and SLF — Building Approval and Certificate of Proper Function
+2. PBG and SLF: Building Approval and Certificate of Proper Function
 The PBG (Persetujuan Bangunan Gedung) confirms that the building has received formal construction approval under current regulations, replacing the former IMB system. The SLF (Sertifikat Laik Fungsi) certifies that the completed building is fit for use and compliant with safety and zoning requirements.
 
 3. Lease Agreement (Leasehold)
@@ -427,6 +427,6 @@ For long-term leasehold acquisitions, a formal Lease Agreement must be executed,
 4. NIB and Tourism Business Licence
 If the villa is to be operated as short-term or long-term rental accommodation, a Business Identification Number (Nomor Induk Berusaha / NIB) and the relevant tourism operational licence are required.
 
-5. OSS Registration — Online Single Submission
+5. OSS Registration: Online Single Submission
 All business licensing, including NIB issuance and sector approvals, is processed through Indonesia's Online Single Submission (OSS) system. OSS registration applies to both individuals and PT PMA entities engaging in rental activity.
 `;

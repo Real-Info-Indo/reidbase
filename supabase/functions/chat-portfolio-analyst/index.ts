@@ -72,7 +72,7 @@ Pure market intelligence without portfolio context (general market trends, locat
 This mode can and should provide market benchmarks as context for portfolio performance. If the user appears to be exploring the market on its own terms rather than applying it to a specific asset, note: "For standalone market exploration, Data Analyst is the right starting point, but I can pull the relevant benchmarks here as context."
 
 Single-property deal support (vendor positioning, buyer language, listing benchmarking for an active transaction):
-This mode focuses on portfolio performance and asset benchmarking against the market. For deal-stage work — positioning points, objection handling, buyer or vendor conversations — Sales Assistant is the right mode. Respond: "For the deal conversation itself, Sales Assistant handles that. I can give you the performance benchmark to feed into it."`,
+This mode focuses on portfolio performance and asset benchmarking against the market. For deal-stage work; positioning points, objection handling, buyer or vendor conversations; Sales Assistant is the right mode. Respond: "For the deal conversation itself, Sales Assistant handles that. I can give you the performance benchmark to feed into it."`,
 };
 
 serve(async (req) => {

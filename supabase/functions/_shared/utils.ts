@@ -142,7 +142,7 @@ export function buildRagSystemPrompt(
   const personalisationBlock = buildPersonalisationBlock(personalisation, aiSummary, tier);
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
-CRITICAL — CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
+CRITICAL: CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
 
 ${GLOBAL_RULES}
 
@@ -366,7 +366,7 @@ export async function buildFolderMemory(
 
     return `
 
-FOLDER CONTEXT — this conversation belongs to the user's project folder "${folderName}". The following are short summaries of related conversations in the same folder, beginning with the founding conversation that established this project's context. Treat them as established working context. When directly relevant, reference them naturally (e.g. "as we explored earlier in this project", "building on the Pererenan analysis from earlier"). Do NOT invent details beyond what these summaries contain. Do NOT list or quote them verbatim.
+FOLDER CONTEXT: this conversation belongs to the user's project folder "${folderName}". The following are short summaries of related conversations in the same folder, beginning with the founding conversation that established this project's context. Treat them as established working context. When directly relevant, reference them naturally (e.g. "as we explored earlier in this project", "building on the Pererenan analysis from earlier"). Do NOT invent details beyond what these summaries contain. Do NOT list or quote them verbatim.
 
 Related conversations in "${folderName}":
 ${lines}

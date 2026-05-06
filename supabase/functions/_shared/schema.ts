@@ -4,43 +4,43 @@ export const SCHEMA_DESCRIPTION = `
 Table: properties_2025
 Columns:
 - uqid (integer, PK)
-- id (text) — property listing ID
-- region (text) — e.g. North Badung, South Badung, Gianyar, Mengwi, Denpasar, Tabanan, Central Badung
-- location (text) — e.g. Canggu, Ubud, Seminyak, Berawa, Pererenan, Sanur, Uluwatu, etc.
-- contract_type (text) — Leasehold or Freehold
-- property_type (text) — Villa or Apartment
-- years (numeric) — lease duration in years (null for freehold)
+- id (text): property listing ID
+- region (text): e.g. North Badung, South Badung, Gianyar, Mengwi, Denpasar, Tabanan, Central Badung
+- location (text): e.g. Canggu, Ubud, Seminyak, Berawa, Pererenan, Sanur, Uluwatu, etc.
+- contract_type (text): Leasehold or Freehold
+- property_type (text): Villa or Apartment
+- years (numeric): lease duration in years (null for freehold)
 - bedrooms (numeric)
 - bathrooms (numeric)
 - land_size_sqm (numeric)
 - build_size_sqm (numeric)
-- fsr (text) — floor space ratio as percentage string like "77%"
-- price_idr (numeric) — price in Indonesian Rupiah
-- price_usd (numeric) — price in USD
-- price_per_sqm_usd (numeric) — price per sqm in USD
-- price_per_year_usd (numeric) — price per year in USD (leasehold annualized)
-- availability (text) — Available or Sold
-- sold_date (text) — month/year sold e.g. "Jul/23"
-- scrape_date (text) — month/year scraped e.g. "Dec/25"
+- fsr (text): floor space ratio as percentage string like "77%"
+- price_idr (numeric): price in Indonesian Rupiah
+- price_usd (numeric): price in USD
+- price_per_sqm_usd (numeric): price per sqm in USD
+- price_per_year_usd (numeric): price per year in USD (leasehold annualized)
+- availability (text): Available or Sold
+- sold_date (text): month/year sold e.g. "Jul/23"
+- scrape_date (text): month/year scraped e.g. "Dec/25"
 - days_listed (numeric)
-- off_plan (text) — "Off Plan" or "Available"
+- off_plan (text): "Off Plan" or "Available"
 
 Total rows: ~26,951 properties in Bali real estate market.
 
 Table: rentals_2025
 Columns:
 - id (serial, PK)
-- date (text) — month/year e.g. "Oct/25", "Jan/22"
-- region (text) — e.g. Central Badung, Denpasar, North Badung, South Badung, Gianyar, Mengwi, Tabanan
-- location (text) — e.g. Seminyak, Canggu, Ubud, Berawa, Pererenan, Sanur, Uluwatu, etc.
-- type (text) — Villa, Apartment, or Guest House
-- mgmt (text) — Professional or Individual (management type)
-- beds (integer) — number of bedrooms
-- count (integer) — number of rental properties in this segment
-- occupancy (numeric) — occupancy rate as percentage (e.g. 42.7 means 42.7%)
-- rate_usd (numeric) — nightly rate in USD
-- monthly_usd (numeric) — monthly revenue in USD
-- total_usd (numeric) — total revenue in USD
+- date (text): month/year e.g. "Oct/25", "Jan/22"
+- region (text): e.g. Central Badung, Denpasar, North Badung, South Badung, Gianyar, Mengwi, Tabanan
+- location (text): e.g. Seminyak, Canggu, Ubud, Berawa, Pererenan, Sanur, Uluwatu, etc.
+- type (text): Villa, Apartment, or Guest House
+- mgmt (text): Professional or Individual (management type)
+- beds (integer): number of bedrooms
+- count (integer): number of rental properties in this segment
+- occupancy (numeric): occupancy rate as percentage (e.g. 42.7 means 42.7%)
+- rate_usd (numeric): nightly rate in USD
+- monthly_usd (numeric): monthly revenue in USD
+- total_usd (numeric): total revenue in USD
 
 Total rows: ~15,245 monthly rental data records across Bali.
 
@@ -139,11 +139,11 @@ CONFIDENCE METADATA -- include in every aggregate query:
 - Do not omit these columns even if the user did not ask for them -- the explain step uses them to calibrate how confidently to present the figures.
 
 PROPERTY TYPE HANDLING (rentals_2025):
-The rental dataset contains three property types: Villa, Apartment, and Guest House. They differ significantly in scale, ADR, and revenue profile — villa ADR is typically 3-5x that of a guest house. Handle them as follows.
+The rental dataset contains three property types: Villa, Apartment, and Guest House. They differ significantly in scale, ADR, and revenue profile: villa ADR is typically 3-5x that of a guest house. Handle them as follows.
 
 Market-level queries (user asks about "the market", a location, or a region without specifying a type):
 - Do not filter by type. Include all three in aggregations.
-- Always add a GROUP BY type breakdown alongside the overall figure for ADR, revenue, and occupancy metrics — the blended figure alone can be misleading given the wide spread across types.
+- Always add a GROUP BY type breakdown alongside the overall figure for ADR, revenue, and occupancy metrics: the blended figure alone can be misleading given the wide spread across types.
 
 Type-specific queries (user specifies villa, apartment, or guest house):
 - Filter to the matching type: WHERE type = 'Villa' / 'Apartment' / 'Guest House'
@@ -154,7 +154,7 @@ Yield and cross-table calculations:
 - Always match the rental type to the subject property. Villa yield → filter rentals to type = 'Villa'. Apartment yield → filter rentals to type = 'Apartment'. Guest house yield → filter rentals to type = 'Guest House'.
 - Never use blended cross-type rental data for a type-specific yield calculation.
 
-Note: properties_2025.property_type only contains Villa and Apartment — guest houses do not appear in the sales dataset. This is correct; do not query for Guest House in properties_2025.
+Note: properties_2025.property_type only contains Villa and Apartment: guest houses do not appear in the sales dataset. This is correct; do not query for Guest House in properties_2025.
 
 COLUMN NAMING FOR CHARTS:
 - Name columns descriptively so the chart formatter can detect the metric type:

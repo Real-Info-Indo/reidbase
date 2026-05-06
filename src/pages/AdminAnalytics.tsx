@@ -74,32 +74,64 @@ const CHART_COLOURS = [
   "hsl(20 70% 55%)",
 ];
 
-function formatDate(d: Date) {
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+// All day/week bucketing is anchored to Asia/Makassar (WITA, UTC+8, no DST).
+// Without this, refresh-time drift around midnight UTC made the page-views
+// chart appear to gain or lose a day's worth of events between refreshes.
+const TZ = "Asia/Makassar";
+const TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const dayLabelFmt = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric", month: "short", timeZone: TZ,
+});
+
+/** YYYY-MM-DD for the given instant, evaluated in WITA. */
+function dayKey(d: Date | string): string {
+  const t = (typeof d === "string" ? new Date(d) : d).getTime();
+  return new Date(t + TZ_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+/** Instant for WITA midnight of the given calendar day. */
+function dayKeyToInstant(key: string): Date {
+  return new Date(`${key}T00:00:00+08:00`);
+}
+
+function startOfDayWita(d: Date): Date {
+  return dayKeyToInstant(dayKey(d));
+}
+
+function endOfDayWita(d: Date): Date {
+  return new Date(`${dayKey(d)}T23:59:59.999+08:00`);
+}
+
+function formatDayKey(key: string): string {
+  return dayLabelFmt.format(dayKeyToInstant(key));
 }
 
 function formatPercent(value: number) {
   return `${value.toFixed(1)}%`;
 }
 
-function startOfWeek(date: Date) {
-  const d = new Date(date);
-  const day = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - day);
-  d.setHours(0, 0, 0, 0);
-  return d;
+/** Monday-anchored week key (YYYY-MM-DD) for the given WITA day key. */
+function startOfWeekKey(key: string): string {
+  const [y, m, d] = key.split("-").map(Number);
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  const dow = (utc.getUTCDay() + 6) % 7;
+  utc.setUTCDate(utc.getUTCDate() - dow);
+  return utc.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(date: Date) {
-  return startOfWeek(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+function formatWeekLabel(key: string): string {
+  return formatDayKey(startOfWeekKey(key));
 }
 
 function daysBetween(from: Date, to: Date): string[] {
   const days: string[] = [];
-  const start = new Date(from); start.setHours(0, 0, 0, 0);
-  const end = new Date(to); end.setHours(0, 0, 0, 0);
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    days.push(d.toISOString().slice(0, 10));
+  let cur = startOfDayWita(from).getTime();
+  const end = startOfDayWita(to).getTime();
+  while (cur <= end) {
+    days.push(dayKey(new Date(cur)));
+    cur += DAY_MS;
   }
   return days;
 }
@@ -115,14 +147,18 @@ export default function AdminAnalytics() {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (fromIso?: string, toIso?: string) => {
     setLoading(true);
     try {
       const result = await invokeAdmin<{
         events: AnalyticsEvent[];
         chatLogs: ChatLog[];
         newAppraisalCount: number;
-      }>("admin-data", { action: "analytics" });
+      }>("admin-data", {
+        action: "analytics",
+        from: fromIso,
+        to: toIso,
+      });
       setAllEvents(result.events || []);
       setAllChatLogs(result.chatLogs || []);
       setNewAppraisalCount(result.newAppraisalCount ?? 0);
@@ -132,26 +168,38 @@ export default function AdminAnalytics() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (authenticated) fetchData();
-  }, [authenticated]);
+  // Initial + range-driven fetches happen in a single effect below, after
+  // rangeFrom / rangeTo are computed.
 
   // ── Date range ──
   const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
-    const to = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
-    let from: Date;
+    let baseTo = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
+    let baseFrom: Date;
     if (rangePreset === "custom" && customFrom) {
-      from = new Date(customFrom);
+      baseFrom = new Date(customFrom);
     } else {
       const days = rangePreset === "custom" ? 30 : parseInt(rangePreset, 10);
-      from = new Date();
-      from.setDate(from.getDate() - (days - 1));
+      // Anchor "today" in WITA so the window doesn't shift around UTC midnight.
+      const anchorKey = dayKey(new Date());
+      baseTo = dayKeyToInstant(anchorKey);
+      baseFrom = new Date(baseTo.getTime() - (days - 1) * DAY_MS);
     }
-    from.setHours(0, 0, 0, 0);
-    const toEnd = new Date(to); toEnd.setHours(23, 59, 59, 999);
-    const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-    return { rangeFrom: from, rangeTo: toEnd, rangeLabel: `${fmt(from)} to ${fmt(toEnd)}` };
+    const from = startOfDayWita(baseFrom);
+    const to = endOfDayWita(baseTo);
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric", month: "short", year: "numeric", timeZone: TZ,
+    });
+    return { rangeFrom: from, rangeTo: to, rangeLabel: `${fmt.format(from)} to ${fmt.format(to)}` };
   }, [rangePreset, customFrom, customTo]);
+
+  // Re-fetch whenever the resolved range or auth state changes. Server-side
+  // filtering keeps responses small and avoids the 20k-event truncation as
+  // analytics_events grows.
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchData(rangeFrom.toISOString(), rangeTo.toISOString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, rangeFrom.getTime(), rangeTo.getTime()]);
 
   const events = useMemo(() => {
     const fromMs = rangeFrom.getTime();
@@ -189,10 +237,10 @@ export default function AdminAnalytics() {
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     pageViews.forEach((e) => {
-      const day = e.created_at.slice(0, 10);
+      const day = dayKey(e.created_at);
       if (counts[day] !== undefined) counts[day]++;
     });
-    return days.map((d) => ({ date: formatDate(new Date(d)), views: counts[d] }));
+    return days.map((d) => ({ date: formatDayKey(d), views: counts[d] }));
   }, [pageViews, rangeFrom, rangeTo]);
 
   // Top pages
@@ -265,10 +313,10 @@ export default function AdminAnalytics() {
     const counts: Record<string, number> = {};
     days.forEach((d) => (counts[d] = 0));
     chatLogs.forEach((l) => {
-      const day = l.updated_at.slice(0, 10);
+      const day = dayKey(l.updated_at);
       if (counts[day] !== undefined) counts[day]++;
     });
-    return days.map((d) => ({ date: formatDate(new Date(d)), chats: counts[d] }));
+    return days.map((d) => ({ date: formatDayKey(d), chats: counts[d] }));
   }, [chatLogs, rangeFrom, rangeTo]);
 
   const totalMessages = useMemo(
@@ -392,16 +440,16 @@ export default function AdminAnalytics() {
       const hasReturnVisit = sessionStarts.some((time, index) => index > 0 && time - sessionStarts[0] >= 24 * 60 * 60 * 1000);
       if (hasReturnVisit) returningUsers += 1;
 
-      const cohort = formatWeekLabel(new Date(user.firstSeen));
-      if (!cohorts.has(cohort)) cohorts.set(cohort, { cohort, users: 0, retained: 0 });
-      const entry = cohorts.get(cohort)!;
+      const cohortKey = startOfWeekKey(dayKey(new Date(user.firstSeen)));
+      if (!cohorts.has(cohortKey)) cohorts.set(cohortKey, { cohort: cohortKey, users: 0, retained: 0 });
+      const entry = cohorts.get(cohortKey)!;
       entry.users += 1;
       if (hasReturnVisit) entry.retained += 1;
     });
 
     const totalUsers = userMap.size;
     const cohortRows = Array.from(cohorts.values())
-      .sort((a, b) => new Date(b.cohort).getTime() - new Date(a.cohort).getTime())
+      .sort((a, b) => b.cohort.localeCompare(a.cohort))
       .slice(0, 6)
       .map((entry) => ({
         ...entry,
@@ -502,7 +550,7 @@ export default function AdminAnalytics() {
       rows: [
         ["Cohort week", "Users", "Returned", "Retention (%)"],
         ...retentionMetrics.cohortRows.map((r) => [
-          r.cohort, r.users, r.retained, r.retentionRate.toFixed(1),
+          formatDayKey(r.cohort), r.users, r.retained, r.retentionRate.toFixed(1),
         ]),
       ],
     });
@@ -585,7 +633,7 @@ export default function AdminAnalytics() {
             <Button variant="outline" size="sm" onClick={exportAll}>
               <Download className="h-4 w-4 mr-1.5" /> Export CSV
             </Button>
-            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={() => fetchData(rangeFrom.toISOString(), rangeTo.toISOString())} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Loading" : "Refresh"}
             </Button>
@@ -910,7 +958,7 @@ export default function AdminAnalytics() {
                   <tbody>
                     {retentionMetrics.cohortRows.map((row) => (
                       <tr key={row.cohort} className="border-b border-border last:border-b-0">
-                        <td className="py-3 pr-4 text-foreground">{row.cohort}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatDayKey(row.cohort)}</td>
                         <td className="py-3 pr-4 text-foreground">{row.users}</td>
                         <td className="py-3 pr-4 text-foreground">{row.retained}</td>
                         <td className="py-3 text-foreground">{formatPercent(row.retentionRate)}</td>

@@ -40,11 +40,12 @@ export async function track({ eventType, eventName, pagePath, metadata }: TrackO
   }
 }
 
-export function trackPageView(pagePath?: string) {
+export function trackPageView(pagePath?: string, metadata?: Record<string, unknown>) {
   return track({
     eventType: "page_view",
     eventName: "page_view",
     pagePath: pagePath ?? window.location.pathname,
+    metadata,
   });
 }
 

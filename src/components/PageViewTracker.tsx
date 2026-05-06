@@ -17,7 +17,12 @@ export function PageViewTracker() {
     const fullPath = `${location.pathname}${location.search}`;
     if (lastPath.current === fullPath) return;
     lastPath.current = fullPath;
-    trackPageView(location.pathname);
+
+    // Enrich conversation routes with the conversation id so admins can see
+    // which threads drive traffic without re-parsing page_path strings.
+    const convoMatch = location.pathname.match(/^\/c\/([^/]+)/);
+    const metadata = convoMatch ? { conversation_id: convoMatch[1] } : undefined;
+    trackPageView(location.pathname, metadata);
   }, [location.pathname, location.search]);
 
   return null;

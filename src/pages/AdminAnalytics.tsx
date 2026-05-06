@@ -946,7 +946,7 @@ export default function AdminAnalytics() {
                   <tbody>
                     {retentionMetrics.cohortRows.map((row) => (
                       <tr key={row.cohort} className="border-b border-border last:border-b-0">
-                        <td className="py-3 pr-4 text-foreground">{row.cohort}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatDayKey(row.cohort)}</td>
                         <td className="py-3 pr-4 text-foreground">{row.users}</td>
                         <td className="py-3 pr-4 text-foreground">{row.retained}</td>
                         <td className="py-3 text-foreground">{formatPercent(row.retentionRate)}</td>

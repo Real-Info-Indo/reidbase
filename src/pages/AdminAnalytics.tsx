@@ -170,7 +170,7 @@ export default function AdminAnalytics() {
 
   // ── Date range ──
   const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
-    const baseTo = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
+    let baseTo = rangePreset === "custom" && customTo ? new Date(customTo) : new Date();
     let baseFrom: Date;
     if (rangePreset === "custom" && customFrom) {
       baseFrom = new Date(customFrom);

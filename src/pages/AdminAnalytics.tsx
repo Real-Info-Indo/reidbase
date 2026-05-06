@@ -192,6 +192,15 @@ export default function AdminAnalytics() {
     return { rangeFrom: from, rangeTo: to, rangeLabel: `${fmt.format(from)} to ${fmt.format(to)}` };
   }, [rangePreset, customFrom, customTo]);
 
+  // Re-fetch whenever the resolved range or auth state changes. Server-side
+  // filtering keeps responses small and avoids the 20k-event truncation as
+  // analytics_events grows.
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchData(rangeFrom.toISOString(), rangeTo.toISOString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, rangeFrom.getTime(), rangeTo.getTime()]);
+
   const events = useMemo(() => {
     const fromMs = rangeFrom.getTime();
     const toMs = rangeTo.getTime();

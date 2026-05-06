@@ -538,7 +538,7 @@ export default function AdminAnalytics() {
       rows: [
         ["Cohort week", "Users", "Returned", "Retention (%)"],
         ...retentionMetrics.cohortRows.map((r) => [
-          r.cohort, r.users, r.retained, r.retentionRate.toFixed(1),
+          formatDayKey(r.cohort), r.users, r.retained, r.retentionRate.toFixed(1),
         ]),
       ],
     });

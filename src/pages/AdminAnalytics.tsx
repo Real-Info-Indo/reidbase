@@ -625,7 +625,7 @@ export default function AdminAnalytics() {
             <Button variant="outline" size="sm" onClick={exportAll}>
               <Download className="h-4 w-4 mr-1.5" /> Export CSV
             </Button>
-            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={() => fetchData(rangeFrom.toISOString(), rangeTo.toISOString())} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               {loading ? "Loading" : "Refresh"}
             </Button>

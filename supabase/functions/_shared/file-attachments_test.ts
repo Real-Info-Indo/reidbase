@@ -58,8 +58,8 @@ Deno.test("validateFileContents rejects per-file payload that exceeds size limit
   }
 });
 
-Deno.test("validateFileContents rejects combined payload above 40k chars", () => {
-  const each = "x".repeat(20_001);
+Deno.test("validateFileContents rejects combined payload above the combined cap", () => {
+  const each = "x".repeat(Math.floor(ATTACHMENT_LIMITS.maxCombinedChars / 2) + 10);
   const result = validateFileContents([
     { name: "a.txt", content: each },
     { name: "b.txt", content: each },
@@ -69,6 +69,15 @@ Deno.test("validateFileContents rejects combined payload above 40k chars", () =>
     assertEquals(result.error.status, 413);
     assertEquals(result.error.code, "attachments_too_long");
   }
+});
+
+Deno.test("validateFileContents accepts a realistic ~70KB CSV payload", () => {
+  const headers = Array.from({ length: 25 }, (_, i) => `col_${i}`).join(",");
+  const row = Array.from({ length: 25 }, (_, i) => `value_${i}`).join(",");
+  const csv = [headers, ...Array.from({ length: 156 }, () => row)].join("\n");
+  assert(csv.length > 60_000 && csv.length < 90_000);
+  const result = validateFileContents([{ name: "Sales portfolio.csv", content: csv }]);
+  assert(result.ok);
 });
 
 Deno.test("validateFileContents rejects malformed entries", () => {

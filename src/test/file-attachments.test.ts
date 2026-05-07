@@ -56,8 +56,15 @@ describe("validateSelection", () => {
     expect(rejections.every((r) => r.code === "unsupported_type")).toBe(true);
   });
 
-  it("rejects files larger than 1MB", () => {
-    const tooBig = bigFile("big.txt", ATTACHMENT_LIMITS.maxFileBytes + 10);
+  it("rejects files larger than the per-file byte cap as csv_too_large for CSVs", () => {
+    const tooBig = bigFile("portfolio.csv", ATTACHMENT_LIMITS.maxFileBytes + 1024);
+    const { accepted, rejections } = validateSelection([tooBig], []);
+    expect(accepted).toHaveLength(0);
+    expect(rejections[0].code).toBe("csv_too_large");
+  });
+
+  it("rejects non-CSV files larger than the cap as file_too_large", () => {
+    const tooBig = bigFile("big.txt", ATTACHMENT_LIMITS.maxFileBytes + 1024);
     const { accepted, rejections } = validateSelection([tooBig], []);
     expect(accepted).toHaveLength(0);
     expect(rejections[0].code).toBe("file_too_large");
@@ -73,8 +80,46 @@ describe("validateSelection", () => {
 
 describe("parseAttachments", () => {
   it("reads text content for the happy path", async () => {
-    const out = await parseAttachments([makeFile("a.csv", "x,y\n1,2\n")]);
-    expect(out).toEqual([{ name: "a.csv", content: "x,y\n1,2\n" }]);
+    const out = await parseAttachments([makeFile("a.txt", "hello world")]);
+    expect(out).toEqual([{ name: "a.txt", content: "hello world" }]);
+  });
+
+  it("compacts a realistic ~70KB portfolio CSV instead of rejecting it", async () => {
+    const headers = [
+      "Property ID","Status","Property Type","Region","Neighbourhood",
+      "Bedrooms","Bathrooms","Property Size","Land Size","Ownership Type",
+      "Listed Price","Sold Price","Price per sqm","Date Listed","Date Sold","Days on Market",
+      "Description","Features",
+      "extra_1","extra_2","extra_3","extra_4","extra_5","extra_6","extra_7",
+    ];
+    const rows: string[] = [];
+    for (let i = 0; i < 156; i++) {
+      rows.push([
+        `P-${i}`, "Sold", "Villa", "Canggu", "Berawa",
+        "3", "3", "250", "300", "Leasehold",
+        "500000", "480000", "1920", "2024-01-01", "2024-03-15", "73",
+        "A long verbose description ".repeat(8),
+        "Pool, garden, parking, security, ocean view",
+        "x","y","z","a","b","c","d",
+      ].join(","));
+    }
+    const csv = [headers.join(","), ...rows].join("\n");
+    const file = new File([csv], "Sales portfolio.csv", { type: "text/csv" });
+    expect(file.size).toBeGreaterThan(50_000);
+    const out = await parseAttachments([file]);
+    expect(out).toHaveLength(1);
+    expect(out[0].name).toBe("Sales portfolio.csv");
+    expect(out[0].content).toContain("[CSV: Sales portfolio.csv]");
+    expect(out[0].content).toContain("rows=156");
+    expect(out[0].content).toContain("Property ID");
+    // Verbose columns omitted by default
+    expect(out[0].content).toContain("Columns omitted");
+    expect(out[0].content).toContain("Description");
+  });
+
+  it("throws csv_parse_error on a CSV with no header fields", async () => {
+    const file = new File([""], "broken.csv", { type: "text/csv" });
+    await expect(parseAttachments([file])).rejects.toMatchObject({ code: "csv_parse_error" });
   });
 
   it("throws attachments_too_long when combined text exceeds the cap", async () => {
@@ -89,8 +134,10 @@ describe("parseAttachments", () => {
 describe("attachmentErrorMessage", () => {
   it("maps known codes to user-facing copy", () => {
     expect(attachmentErrorMessage("unsupported_type", "x")).toContain("Unsupported file type");
-    expect(attachmentErrorMessage("file_too_large", "x")).toContain("File too large");
-    expect(attachmentErrorMessage("too_many_files", "x")).toContain("Too many files");
+    expect(attachmentErrorMessage("csv_too_large", "x")).toContain("under 250KB");
+    expect(attachmentErrorMessage("file_too_large", "x")).toContain("under 250KB");
+    expect(attachmentErrorMessage("csv_parse_error", "x")).toContain("could not be parsed");
+    expect(attachmentErrorMessage("too_many_files", "x")).toContain("up to 3 files");
     expect(attachmentErrorMessage("attachments_too_long", "x")).toContain("Attachment text too long");
     expect(attachmentErrorMessage("invalid_attachments", "x")).toContain("Attachment text too long");
   });

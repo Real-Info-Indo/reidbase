@@ -23,6 +23,12 @@ import { trackFeature } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { getCampaign } from "@/lib/campaigns";
 import { AssistantMarkdown } from "@/components/AssistantMarkdown";
+import {
+  ACCEPT_ATTRIBUTE,
+  attachmentErrorMessage,
+  parseAttachments,
+  validateSelection,
+} from "@/lib/fileAttachments";
 
 /* ── Freemium daily prompt limit ── */
 const DAILY_LIMIT = 10;

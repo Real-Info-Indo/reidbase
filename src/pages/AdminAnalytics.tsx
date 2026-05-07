@@ -493,11 +493,14 @@ export default function AdminAnalytics() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MousePointerClick className="h-4 w-4" /> Appraisals
+                <MousePointerClick className="h-4 w-4" /> Appraisal requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{summary.appraisal_submissions.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{summary.appraisal_requests.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">
+                {summary.appraisal_cta_events.toLocaleString()} CTA events
+              </p>
             </CardContent>
           </Card>
         </div>

@@ -77,7 +77,9 @@ export async function parseAttachments(files: File[]): Promise<ParsedAttachment[
   const parsed: ParsedAttachment[] = [];
   let total = 0;
   for (const file of files) {
-    const text = await file.text();
+    const text = typeof (file as any).text === "function"
+      ? await (file as any).text()
+      : new TextDecoder().decode(await file.arrayBuffer());
     total += text.length;
     if (total > ATTACHMENT_LIMITS.maxCombinedChars) {
       const err: Error & { code?: string } = new Error(

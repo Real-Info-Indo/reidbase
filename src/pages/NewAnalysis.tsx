@@ -23,6 +23,12 @@ import { trackFeature } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { getCampaign } from "@/lib/campaigns";
 import { AssistantMarkdown } from "@/components/AssistantMarkdown";
+import {
+  ACCEPT_ATTRIBUTE,
+  attachmentErrorMessage,
+  parseAttachments,
+  validateSelection,
+} from "@/lib/fileAttachments";
 
 /* ── Freemium daily prompt limit ── */
 const DAILY_LIMIT = 10;
@@ -369,11 +375,22 @@ async function streamChat({
   });
 
   if (!resp.ok) {
-    const errorData = await resp.json().catch(() => ({}));
-    const errorMsg = errorData.error || `Request failed (${resp.status})`;
-    if (resp.status === 429) toast.error("Rate limit exceeded. Please wait a moment.");else
-    if (resp.status === 402) toast.error("AI credits exhausted. Please add funds.");else
-    toast.error(errorMsg);
+    const errorData = await resp.json().catch(() => ({} as any));
+    const code = errorData?.error;
+    const fallback = errorData?.message || errorData?.error || `Request failed (${resp.status})`;
+    let errorMsg = fallback;
+    if (resp.status === 429) {
+      errorMsg = "Rate limit exceeded. Please wait a moment.";
+      toast.error(errorMsg);
+    } else if (resp.status === 402) {
+      errorMsg = "AI credits exhausted. Please add funds.";
+      toast.error(errorMsg);
+    } else if (resp.status === 400 || resp.status === 413) {
+      errorMsg = attachmentErrorMessage(code, fallback);
+      toast.error(errorMsg);
+    } else {
+      toast.error(fallback);
+    }
     throw new Error(errorMsg);
   }
 
@@ -838,15 +855,17 @@ export default function NewAnalysis() {
       setDailyPromptCount(newCount);
     }
 
-    // Read attached files as text
-    let parsedFiles: {name: string;content: string;}[] | undefined;
+    // Read attached files as text. Only safe text formats are accepted at
+    // selection time; binary formats (PDF/DOCX/XLSX) are rejected up front.
+    let parsedFiles: { name: string; content: string }[] | undefined;
     if (attachedFiles.length > 0) {
-      parsedFiles = await Promise.all(
-        attachedFiles.map(async (file) => {
-          const text = await file.text();
-          return { name: file.name, content: text.slice(0, 50000) };
-        })
-      );
+      try {
+        parsedFiles = await parseAttachments(attachedFiles);
+      } catch (e: any) {
+        toast.error(attachmentErrorMessage(e?.code, e?.message || "Could not read attachments."));
+        setIsLoading(false);
+        return;
+      }
       setAttachedFiles([]);
     }
 
@@ -930,7 +949,10 @@ export default function NewAnalysis() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setAttachedFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+      const incoming = Array.from(e.target.files);
+      const { accepted, rejections } = validateSelection(incoming, attachedFiles);
+      for (const r of rejections) toast.error(r.message);
+      if (accepted.length) setAttachedFiles((prev) => [...prev, ...accepted]);
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -986,7 +1008,7 @@ export default function NewAnalysis() {
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json" />
+        accept={ACCEPT_ATTRIBUTE} />
 
       {hasConversation &&
       <div className="border-b border-sidebar-border px-4 md:px-8 py-4 flex items-center justify-between gap-4 h-[3.5rem]">

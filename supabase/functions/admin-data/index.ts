@@ -118,7 +118,6 @@ Deno.serve(async (req) => {
       }
 
       case "analytics": {
-        // Server-side date range. Defaults to the last 90 days when omitted.
         const isIso = (v: unknown): v is string =>
           typeof v === "string" && !Number.isNaN(Date.parse(v));
         const toIso = isIso(body.to) ? body.to : new Date().toISOString();
@@ -126,14 +125,26 @@ Deno.serve(async (req) => {
           ? body.from
           : new Date(Date.parse(toIso) - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-        // All grouping/aggregation happens in Postgres via a SECURITY DEFINER
-        // function. The browser only ever sees pre-aggregated rows, so totals
-        // can no longer be silently truncated by 50k/20k SELECT limits.
         const { data, error } = await supabase.rpc("admin_analytics_summary", {
           p_from: fromIso,
           p_to: toIso,
         });
-        if (error) throw error;
+        if (error) {
+          const msg = String(error.message ?? "");
+          const missing = /does not exist|undefined function|could not find/i.test(msg)
+            || (error as { code?: string }).code === "42883";
+          if (missing) {
+            return jsonResponse({
+              error: "analytics_summary_unavailable",
+              message:
+                "admin_analytics_summary RPC is unavailable. The latest migration must be applied.",
+            }, 503);
+          }
+          return jsonResponse({
+            error: "analytics_summary_failed",
+            message: `Analytics SQL function failed: ${msg}`,
+          }, 500);
+        }
 
         const aggregates =
           (data && typeof data === "object" && !Array.isArray(data))
@@ -146,6 +157,27 @@ Deno.serve(async (req) => {
           range: { from: fromIso, to: toIso },
           ...aggregates,
         });
+      }
+
+      case "user_aggregates": {
+        const { data, error } = await supabase.rpc("admin_user_aggregates");
+        if (error) {
+          const msg = String(error.message ?? "");
+          const missing = /does not exist|undefined function|could not find/i.test(msg)
+            || (error as { code?: string }).code === "42883";
+          if (missing) {
+            return jsonResponse({
+              error: "user_aggregates_unavailable",
+              message:
+                "admin_user_aggregates RPC is unavailable. The latest migration must be applied.",
+            }, 503);
+          }
+          return jsonResponse({
+            error: "user_aggregates_failed",
+            message: msg,
+          }, 500);
+        }
+        return jsonResponse({ aggregates: data ?? {} });
       }
 
       case "appraisals": {

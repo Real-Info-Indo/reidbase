@@ -57,67 +57,39 @@ export default function AdminUsers() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await invokeAdmin<{
-        profiles: UserProfile[];
-        events: Array<{ wix_user_id: string | null; event_type: string; event_name: string; page_path: string | null; metadata: Record<string, unknown> }>;
-        chatLogs: Array<{ wix_user_id: string | null }>;
-      }>("admin-data", { action: "users" });
+      // Profiles still come from the users action (it's a small table, no
+      // aggregation needed). Engagement counts now come from a dedicated
+      // server-side RPC so they no longer depend on raw 50k/20k row scans.
+      const [usersRes, aggRes] = await Promise.all([
+        invokeAdmin<{ profiles: UserProfile[] }>("admin-data", { action: "users" }),
+        invokeAdmin<{ aggregates: Record<string, {
+          pageViews?: number;
+          downloads?: number;
+          chatCount?: number;
+          appraisalCount?: number;
+          pages?: Record<string, number>;
+          downloadItems?: string[];
+        }> }>("admin-data", { action: "user_aggregates" }),
+      ]);
 
-      const users = result.profiles || [];
-      setProfiles(users);
-
-      const events = result.events || [];
-
-      // Fetch chat log counts
-      const chatLogs = result.chatLogs || [];
-
-      // Fetch appraisal counts per user from analytics feature events
-      // (appraisal_submitted events are tracked in analytics_events)
+      setProfiles(usersRes.profiles || []);
 
       const stats: Record<string, UserStats> = {};
-
-      const ensureStats = (uid: string) => {
-        if (!stats[uid])
-          stats[uid] = {
-            pageViews: 0,
-            downloads: 0,
-            chatCount: 0,
-            appraisalCount: 0,
-            pages: {},
-            downloadItems: [],
-          };
-      };
-
-      (events || []).forEach((e: any) => {
-        if (!e.wix_user_id) return;
-        ensureStats(e.wix_user_id);
-        const s = stats[e.wix_user_id];
-        if (e.event_type === "page_view") {
-          s.pageViews++;
-          const path = e.page_path || "unknown";
-          s.pages[path] = (s.pages[path] || 0) + 1;
-        }
-        if (e.event_name === "report_download") {
-          s.downloads++;
-          const meta = e.metadata as any;
-          const label = meta?.report || meta?.name || e.page_path || "Report";
-          s.downloadItems.push(String(label));
-        }
-        if (e.event_name === "appraisal_submitted") {
-          s.appraisalCount++;
-        }
-      });
-
-      (chatLogs || []).forEach((c: any) => {
-        if (!c.wix_user_id) return;
-        ensureStats(c.wix_user_id);
-        stats[c.wix_user_id].chatCount++;
-      });
-
+      const agg = aggRes.aggregates || {};
+      for (const [uid, v] of Object.entries(agg)) {
+        stats[uid] = {
+          pageViews: v.pageViews ?? 0,
+          downloads: v.downloads ?? 0,
+          chatCount: v.chatCount ?? 0,
+          appraisalCount: v.appraisalCount ?? 0,
+          pages: v.pages ?? {},
+          downloadItems: v.downloadItems ?? [],
+        };
+      }
       setStatsMap(stats);
     } catch (err) {
       console.error("Failed to fetch user data:", err);
-      toast.error("Failed to load user data");
+      toast.error(err instanceof Error ? err.message : "Failed to load user data");
     }
     setLoading(false);
   };

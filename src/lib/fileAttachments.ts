@@ -73,13 +73,24 @@ export function validateSelection(
  * list with validateSelection. Throws an AttachmentRejection-shaped error
  * if combined text exceeds the global cap.
  */
+async function readFileText(file: File): Promise<string> {
+  if (typeof (file as any).text === "function") return await (file as any).text();
+  if (typeof (file as any).arrayBuffer === "function") {
+    return new TextDecoder().decode(await (file as any).arrayBuffer());
+  }
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error || new Error("FileReader failed"));
+    reader.readAsText(file);
+  });
+}
+
 export async function parseAttachments(files: File[]): Promise<ParsedAttachment[]> {
   const parsed: ParsedAttachment[] = [];
   let total = 0;
   for (const file of files) {
-    const text = typeof (file as any).text === "function"
-      ? await (file as any).text()
-      : new TextDecoder().decode(await file.arrayBuffer());
+    const text = await readFileText(file);
     total += text.length;
     if (total > ATTACHMENT_LIMITS.maxCombinedChars) {
       const err: Error & { code?: string } = new Error(

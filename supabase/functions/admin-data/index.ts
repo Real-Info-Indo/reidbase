@@ -118,8 +118,7 @@ Deno.serve(async (req) => {
       }
 
       case "analytics": {
-        // Server-side date range. Defaults to the last 90 days when omitted
-        // so a fresh page load doesn't pull the entire table.
+        // Server-side date range. Defaults to the last 90 days when omitted.
         const isIso = (v: unknown): v is string =>
           typeof v === "string" && !Number.isNaN(Date.parse(v));
         const toIso = isIso(body.to) ? body.to : new Date().toISOString();
@@ -127,41 +126,25 @@ Deno.serve(async (req) => {
           ? body.from
           : new Date(Date.parse(toIso) - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-        let eventsQuery = supabase
-          .from("analytics_events")
-          .select("*")
-          .gte("created_at", fromIso)
-          .lte("created_at", toIso)
-          .order("created_at", { ascending: false })
-          .limit(50000);
+        // All grouping/aggregation happens in Postgres via a SECURITY DEFINER
+        // function. The browser only ever sees pre-aggregated rows, so totals
+        // can no longer be silently truncated by 50k/20k SELECT limits.
+        const { data, error } = await supabase.rpc("admin_analytics_summary", {
+          p_from: fromIso,
+          p_to: toIso,
+        });
+        if (error) throw error;
 
-        let logsQuery = supabase
-          .from("chat_logs")
-          .select(
-            "id,conversation_id,wix_user_id,wix_user_name,message_count,search_mode,created_at,updated_at",
-          )
-          .gte("updated_at", fromIso)
-          .lte("updated_at", toIso)
-          .order("updated_at", { ascending: false })
-          .limit(20000);
-
-        const [eventsRes, logsRes, appraisalRes] = await Promise.all([
-          eventsQuery,
-          logsQuery,
-          supabase
-            .from("appraisal_requests")
-            .select("id", { count: "exact", head: true })
-            .eq("status", "new"),
-        ]);
-        if (eventsRes.error) throw eventsRes.error;
-        if (logsRes.error) throw logsRes.error;
-        if (appraisalRes.error) throw appraisalRes.error;
+        const aggregates =
+          (data && typeof data === "object" && !Array.isArray(data))
+            ? (data as Record<string, unknown>)
+            : {};
 
         return jsonResponse({
-          events: eventsRes.data ?? [],
-          chatLogs: logsRes.data ?? [],
-          newAppraisalCount: appraisalRes.count ?? 0,
+          source: "server_aggregated",
+          truncated: false,
           range: { from: fromIso, to: toIso },
+          ...aggregates,
         });
       }
 

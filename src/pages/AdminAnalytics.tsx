@@ -702,6 +702,67 @@ export default function AdminAnalytics() {
           </Card>
         </div>
 
+        {/* Retention (full-history, ignores selected date range) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Retention snapshot</CardTitle>
+              <p className="text-xs text-muted-foreground">All-time, independent of date range</p>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              {!retention ? (
+                <p className="text-muted-foreground">No retention data.</p>
+              ) : (
+                <>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Total known users</span><span className="font-medium text-foreground">{retention.total_known_users.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Active (7d)</span><span className="font-medium text-foreground">{retention.active_users_7d.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Active (30d)</span><span className="font-medium text-foreground">{retention.active_users_30d.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">New users (30d)</span><span className="font-medium text-foreground">{retention.new_users_30d.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Returning users</span><span className="font-medium text-foreground">{retention.returning_users.toLocaleString()}</span></div>
+                  <div className="flex justify-between border-t border-border pt-2"><span className="text-muted-foreground">Repeat rate</span><span className="font-semibold text-foreground">{formatPercent(retention.repeat_rate * 100)}</span></div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Weekly retention cohorts</CardTitle>
+              <p className="text-xs text-muted-foreground">By first-seen week, retained if returned after 24h</p>
+            </CardHeader>
+            <CardContent>
+              {cohorts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No cohort data.</p>
+              ) : (
+                <div className="overflow-x-auto max-h-72">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-muted-foreground">
+                        <th className="py-2 pr-4 font-medium">Cohort week</th>
+                        <th className="py-2 pr-4 font-medium">Start</th>
+                        <th className="py-2 pr-4 font-medium">Size</th>
+                        <th className="py-2 pr-4 font-medium">Retained</th>
+                        <th className="py-2 font-medium">Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cohorts.slice(0, 16).map((c) => (
+                        <tr key={c.cohort_week} className="border-b border-border last:border-b-0">
+                          <td className="py-2 pr-4 text-foreground">{c.cohort_week}</td>
+                          <td className="py-2 pr-4 text-muted-foreground">{c.cohort_start}</td>
+                          <td className="py-2 pr-4 text-foreground">{c.cohort_size}</td>
+                          <td className="py-2 pr-4 text-foreground">{c.retained_users}</td>
+                          <td className="py-2 text-foreground">{formatPercent(c.retention_rate * 100)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Funnel + mode performance */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>

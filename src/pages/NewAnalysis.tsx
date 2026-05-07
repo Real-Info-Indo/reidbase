@@ -1008,7 +1008,7 @@ export default function NewAnalysis() {
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept=".pdf,.csv,.xlsx,.xls,.doc,.docx,.txt,.json" />
+        accept={ACCEPT_ATTRIBUTE} />
 
       {hasConversation &&
       <div className="border-b border-sidebar-border px-4 md:px-8 py-4 flex items-center justify-between gap-4 h-[3.5rem]">

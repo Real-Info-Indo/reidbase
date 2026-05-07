@@ -210,6 +210,14 @@ export default function AdminAnalytics() {
     }));
   }, [data, rangeFrom, rangeTo]);
 
+  const appraisalsChart = useMemo(() => {
+    if (!data) return [];
+    const lookup = new Map((data.appraisals_by_day ?? []).map((r) => [r.day_key, r.requests]));
+    return daysBetween(rangeFrom, rangeTo).map((d) => ({
+      date: formatDayKey(d), requests: lookup.get(d) ?? 0,
+    }));
+  }, [data, rangeFrom, rangeTo]);
+
   const topPagesChart = useMemo(
     () => (data?.top_pages ?? []).slice(0, 8).map((r) => ({ page: r.page, count: r.count })),
     [data],

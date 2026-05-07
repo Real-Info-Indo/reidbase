@@ -326,10 +326,14 @@ Deno.serve(async (req) => {
       }
     }
   } else {
-    // No auth provided. Feature events must be tied to an identity.
-    if (eventType === "feature") {
+    // No auth provided. A small allowlist of pre-auth feature events is
+    // accepted as untrusted (e.g. login_started fires before a Wix token
+    // exists). Everything else still requires authentication.
+    const PRE_AUTH_FEATURE_ALLOWLIST = new Set(["login_started"]);
+    if (eventType === "feature" && !PRE_AUTH_FEATURE_ALLOWLIST.has(eventName)) {
       return jsonError("auth_required", "Feature events require authentication", 401);
     }
+    // trusted stays false; wixUserId stays null.
   }
 
   const supabase = createClient(

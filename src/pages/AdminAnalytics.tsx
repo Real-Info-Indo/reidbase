@@ -383,6 +383,34 @@ export default function AdminAnalytics() {
       ],
     });
 
+    if (retention) {
+      sections.push({
+        name: "retention_snapshot_all_time",
+        rows: [
+          ["Metric", "Value"],
+          ["Total known users (all-time)", retention.total_known_users],
+          ["Active users (7d)", retention.active_users_7d],
+          ["Active users (30d)", retention.active_users_30d],
+          ["New users (30d)", retention.new_users_30d],
+          ["Returning users", retention.returning_users],
+          ["Repeat rate (%)", (retention.repeat_rate * 100).toFixed(1)],
+          ["Computed at", retention.computed_at],
+        ],
+      });
+    }
+    if (cohorts.length) {
+      sections.push({
+        name: "weekly_retention_cohorts",
+        rows: [
+          ["Cohort week", "Cohort start", "Cohort size", "Retained users", "Retention rate (%)"],
+          ...cohorts.map((c) => [
+            c.cohort_week, c.cohort_start, c.cohort_size, c.retained_users,
+            (c.retention_rate * 100).toFixed(1),
+          ]),
+        ],
+      });
+    }
+
     const combined: (string | number)[][] = [];
     sections.forEach((sec, i) => {
       if (i > 0) combined.push([]);

@@ -279,6 +279,7 @@ export default function AdminAnalytics() {
   const summary = data?.summary ?? {
     page_views: 0, feature_events: 0, unique_users: 0, unique_sessions: 0,
     conversations: 0, total_messages: 0, appraisal_submissions: 0,
+    appraisal_requests: 0, appraisal_cta_events: 0,
   };
   const newAppraisalCount = data?.new_appraisal_count ?? 0;
 

@@ -961,6 +961,68 @@ export default function AdminAnalytics() {
           </Card>
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Top referrers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topReferrers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No external referrers in this range.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Referrer</th>
+                      <th className="py-2 font-medium">Views</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topReferrers.map((r) => (
+                      <tr key={r.referrer} className="border-b border-border last:border-b-0">
+                        <td className="py-2 pr-4 text-foreground">{r.referrer}</td>
+                        <td className="py-2 text-foreground">{r.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Top campaigns</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topCampaigns.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No tagged UTM traffic in this range.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Source</th>
+                      <th className="py-2 pr-4 font-medium">Medium</th>
+                      <th className="py-2 pr-4 font-medium">Campaign</th>
+                      <th className="py-2 font-medium">Views</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topCampaigns.map((r, i) => (
+                      <tr key={`${r.source}-${r.medium}-${r.campaign}-${i}`} className="border-b border-border last:border-b-0">
+                        <td className="py-2 pr-4 text-foreground">{r.source || "n/a"}</td>
+                        <td className="py-2 pr-4 text-foreground">{r.medium || "n/a"}</td>
+                        <td className="py-2 pr-4 text-foreground">{r.campaign || "n/a"}</td>
+                        <td className="py-2 text-foreground">{r.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>

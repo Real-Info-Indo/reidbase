@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { moderateMessage } from "../_shared/moderation.ts";
 import { resolveVerifiedTier, buildFolderMemory } from "../_shared/utils.ts";
+import { validateFileContents, buildAttachmentBlock } from "../_shared/file-attachments.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 

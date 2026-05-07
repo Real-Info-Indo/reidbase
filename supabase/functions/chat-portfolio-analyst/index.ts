@@ -13,6 +13,7 @@ import {
   buildFolderMemory,
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
+import { validateFileContents, buildAttachmentBlock } from "../_shared/file-attachments.ts";
 import { verifyWixToken, wixAuthErrorResponse } from "../_shared/wix-auth.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";

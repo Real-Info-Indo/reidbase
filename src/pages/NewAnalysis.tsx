@@ -375,11 +375,22 @@ async function streamChat({
   });
 
   if (!resp.ok) {
-    const errorData = await resp.json().catch(() => ({}));
-    const errorMsg = errorData.error || `Request failed (${resp.status})`;
-    if (resp.status === 429) toast.error("Rate limit exceeded. Please wait a moment.");else
-    if (resp.status === 402) toast.error("AI credits exhausted. Please add funds.");else
-    toast.error(errorMsg);
+    const errorData = await resp.json().catch(() => ({} as any));
+    const code = errorData?.error;
+    const fallback = errorData?.message || errorData?.error || `Request failed (${resp.status})`;
+    let errorMsg = fallback;
+    if (resp.status === 429) {
+      errorMsg = "Rate limit exceeded. Please wait a moment.";
+      toast.error(errorMsg);
+    } else if (resp.status === 402) {
+      errorMsg = "AI credits exhausted. Please add funds.";
+      toast.error(errorMsg);
+    } else if (resp.status === 400 || resp.status === 413) {
+      errorMsg = attachmentErrorMessage(code, fallback);
+      toast.error(errorMsg);
+    } else {
+      toast.error(fallback);
+    }
     throw new Error(errorMsg);
   }
 

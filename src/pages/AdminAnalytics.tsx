@@ -546,6 +546,17 @@ export default function AdminAnalytics() {
       rows: [["Page", "Views"], ...topPages.map((r) => [r.page, r.count])],
     });
     sections.push({
+      name: "top_referrers",
+      rows: [["Referrer", "Views"], ...topReferrers.map((r) => [r.referrer, r.count])],
+    });
+    sections.push({
+      name: "top_campaigns",
+      rows: [
+        ["Source", "Medium", "Campaign", "Views"],
+        ...topCampaigns.map((r) => [r.source, r.medium, r.campaign, r.count]),
+      ],
+    });
+    sections.push({
       name: "feature_usage",
       rows: [["Feature", "Count"], ...featureCounts.map((r) => [r.name, r.count])],
     });

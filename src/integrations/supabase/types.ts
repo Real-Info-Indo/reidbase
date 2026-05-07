@@ -643,6 +643,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_analytics_summary: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       check_and_increment_free_prompt: {
         Args: { p_daily_limit?: number; p_wix_user_id: string }
         Returns: boolean

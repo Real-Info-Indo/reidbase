@@ -949,7 +949,10 @@ export default function NewAnalysis() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setAttachedFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
+      const incoming = Array.from(e.target.files);
+      const { accepted, rejections } = validateSelection(incoming, attachedFiles);
+      for (const r of rejections) toast.error(r.message);
+      if (accepted.length) setAttachedFiles((prev) => [...prev, ...accepted]);
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };

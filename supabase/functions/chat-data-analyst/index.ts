@@ -13,6 +13,7 @@ import {
   buildFolderMemory,
   resolveVerifiedTier,
 } from "../_shared/utils.ts";
+import { validateFileContents, buildAttachmentBlock } from "../_shared/file-attachments.ts";
 import { verifyWixToken, WixAuthError } from "../_shared/wix-auth.ts";
 import { buildFreshMarketContext } from "../_shared/fresh-market-context.ts";
 

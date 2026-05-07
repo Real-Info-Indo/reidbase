@@ -172,3 +172,65 @@ Deno.test("silently strips dangerous keys (wix_user_id, email, token)", async ()
   // Server still records the event, but trust flag stays false.
   assertEquals(json.trusted, false);
 });
+
+Deno.test("accepts /?prompt=abc with full_path and search in metadata", async () => {
+  const res = await callFn({
+    body: {
+      event_type: "page_view",
+      event_name: "page_view",
+      page_path: "/",
+      session_id: crypto.randomUUID(),
+      metadata: {
+        full_path: "/?prompt=abc",
+        search: "?prompt=abc",
+        referrer: "https://www.google.com/",
+      },
+    },
+  });
+  const json = await res.json();
+  assertEquals(res.status, 200, JSON.stringify(json));
+  assertEquals(json.ok, true);
+});
+
+Deno.test("accepts /campaign/example?utm_source=x with campaign fields", async () => {
+  const res = await callFn({
+    body: {
+      event_type: "page_view",
+      event_name: "page_view",
+      page_path: "/campaign/example",
+      session_id: crypto.randomUUID(),
+      metadata: {
+        full_path: "/campaign/example?utm_source=x&utm_medium=email&utm_campaign=spring",
+        search: "?utm_source=x&utm_medium=email&utm_campaign=spring",
+        utm_source: "x",
+        utm_medium: "email",
+        utm_campaign: "spring",
+      },
+    },
+  });
+  const json = await res.json();
+  assertEquals(res.status, 200, JSON.stringify(json));
+  assertEquals(json.ok, true);
+});
+
+Deno.test("page_path remains normalized (no query string)", async () => {
+  // The server stores whatever page_path the client sends. The PageViewTracker
+  // is responsible for stripping the search; this test asserts that a
+  // normalized path passes through and is accepted unchanged.
+  const res = await callFn({
+    body: {
+      event_type: "page_view",
+      event_name: "page_view",
+      page_path: "/c/abc123",
+      session_id: crypto.randomUUID(),
+      metadata: {
+        full_path: "/c/abc123?ref=share",
+        search: "?ref=share",
+        conversation_id: "abc123",
+      },
+    },
+  });
+  const json = await res.json();
+  assertEquals(res.status, 200, JSON.stringify(json));
+  assertEquals(json.ok, true);
+});

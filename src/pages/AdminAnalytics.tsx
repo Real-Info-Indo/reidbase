@@ -256,6 +256,45 @@ export default function AdminAnalytics() {
       .map(([page, count]) => ({ page, count }));
   }, [pageViews]);
 
+  // Top referrers — group external referrers by hostname; ignore same-origin.
+  const topReferrers = useMemo(() => {
+    const map: Record<string, number> = {};
+    const ownHost = typeof window !== "undefined" ? window.location.hostname : "";
+    pageViews.forEach((e) => {
+      const ref = (e.metadata as { referrer?: unknown })?.referrer;
+      if (typeof ref !== "string" || !ref) return;
+      let host: string;
+      try {
+        host = new URL(ref).hostname.toLowerCase();
+      } catch {
+        return;
+      }
+      if (!host || host === ownHost) return;
+      map[host] = (map[host] || 0) + 1;
+    });
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([referrer, count]) => ({ referrer, count }));
+  }, [pageViews]);
+
+  // Top campaigns — group by utm_source / utm_medium / utm_campaign tuple.
+  const topCampaigns = useMemo(() => {
+    const map = new Map<string, { source: string; medium: string; campaign: string; count: number }>();
+    pageViews.forEach((e) => {
+      const m = (e.metadata ?? {}) as Record<string, unknown>;
+      const source = typeof m.utm_source === "string" ? m.utm_source : "";
+      const medium = typeof m.utm_medium === "string" ? m.utm_medium : "";
+      const campaign = typeof m.utm_campaign === "string" ? m.utm_campaign : "";
+      if (!source && !medium && !campaign) return;
+      const key = `${source}||${medium}||${campaign}`;
+      const existing = map.get(key);
+      if (existing) existing.count += 1;
+      else map.set(key, { source, medium, campaign, count: 1 });
+    });
+    return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [pageViews]);
+
   // Feature usage
   const featureCounts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -505,6 +544,17 @@ export default function AdminAnalytics() {
     sections.push({
       name: "top_pages",
       rows: [["Page", "Views"], ...topPages.map((r) => [r.page, r.count])],
+    });
+    sections.push({
+      name: "top_referrers",
+      rows: [["Referrer", "Views"], ...topReferrers.map((r) => [r.referrer, r.count])],
+    });
+    sections.push({
+      name: "top_campaigns",
+      rows: [
+        ["Source", "Medium", "Campaign", "Views"],
+        ...topCampaigns.map((r) => [r.source, r.medium, r.campaign, r.count]),
+      ],
     });
     sections.push({
       name: "feature_usage",
@@ -907,6 +957,68 @@ export default function AdminAnalytics() {
                   </tbody>
                 </table>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Top referrers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topReferrers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No external referrers in this range.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Referrer</th>
+                      <th className="py-2 font-medium">Views</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topReferrers.map((r) => (
+                      <tr key={r.referrer} className="border-b border-border last:border-b-0">
+                        <td className="py-2 pr-4 text-foreground">{r.referrer}</td>
+                        <td className="py-2 text-foreground">{r.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Top campaigns</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {topCampaigns.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No tagged UTM traffic in this range.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-muted-foreground">
+                      <th className="py-2 pr-4 font-medium">Source</th>
+                      <th className="py-2 pr-4 font-medium">Medium</th>
+                      <th className="py-2 pr-4 font-medium">Campaign</th>
+                      <th className="py-2 font-medium">Views</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topCampaigns.map((r, i) => (
+                      <tr key={`${r.source}-${r.medium}-${r.campaign}-${i}`} className="border-b border-border last:border-b-0">
+                        <td className="py-2 pr-4 text-foreground">{r.source || "n/a"}</td>
+                        <td className="py-2 pr-4 text-foreground">{r.medium || "n/a"}</td>
+                        <td className="py-2 pr-4 text-foreground">{r.campaign || "n/a"}</td>
+                        <td className="py-2 text-foreground">{r.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </CardContent>
           </Card>
         </div>

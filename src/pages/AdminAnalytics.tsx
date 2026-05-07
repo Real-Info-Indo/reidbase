@@ -256,6 +256,45 @@ export default function AdminAnalytics() {
       .map(([page, count]) => ({ page, count }));
   }, [pageViews]);
 
+  // Top referrers — group external referrers by hostname; ignore same-origin.
+  const topReferrers = useMemo(() => {
+    const map: Record<string, number> = {};
+    const ownHost = typeof window !== "undefined" ? window.location.hostname : "";
+    pageViews.forEach((e) => {
+      const ref = (e.metadata as { referrer?: unknown })?.referrer;
+      if (typeof ref !== "string" || !ref) return;
+      let host: string;
+      try {
+        host = new URL(ref).hostname.toLowerCase();
+      } catch {
+        return;
+      }
+      if (!host || host === ownHost) return;
+      map[host] = (map[host] || 0) + 1;
+    });
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([referrer, count]) => ({ referrer, count }));
+  }, [pageViews]);
+
+  // Top campaigns — group by utm_source / utm_medium / utm_campaign tuple.
+  const topCampaigns = useMemo(() => {
+    const map = new Map<string, { source: string; medium: string; campaign: string; count: number }>();
+    pageViews.forEach((e) => {
+      const m = (e.metadata ?? {}) as Record<string, unknown>;
+      const source = typeof m.utm_source === "string" ? m.utm_source : "";
+      const medium = typeof m.utm_medium === "string" ? m.utm_medium : "";
+      const campaign = typeof m.utm_campaign === "string" ? m.utm_campaign : "";
+      if (!source && !medium && !campaign) return;
+      const key = `${source}||${medium}||${campaign}`;
+      const existing = map.get(key);
+      if (existing) existing.count += 1;
+      else map.set(key, { source, medium, campaign, count: 1 });
+    });
+    return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [pageViews]);
+
   // Feature usage
   const featureCounts = useMemo(() => {
     const map: Record<string, number> = {};

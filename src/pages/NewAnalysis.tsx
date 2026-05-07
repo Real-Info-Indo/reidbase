@@ -855,15 +855,17 @@ export default function NewAnalysis() {
       setDailyPromptCount(newCount);
     }
 
-    // Read attached files as text
-    let parsedFiles: {name: string;content: string;}[] | undefined;
+    // Read attached files as text. Only safe text formats are accepted at
+    // selection time; binary formats (PDF/DOCX/XLSX) are rejected up front.
+    let parsedFiles: { name: string; content: string }[] | undefined;
     if (attachedFiles.length > 0) {
-      parsedFiles = await Promise.all(
-        attachedFiles.map(async (file) => {
-          const text = await file.text();
-          return { name: file.name, content: text.slice(0, 50000) };
-        })
-      );
+      try {
+        parsedFiles = await parseAttachments(attachedFiles);
+      } catch (e: any) {
+        toast.error(attachmentErrorMessage(e?.code, e?.message || "Could not read attachments."));
+        setIsLoading(false);
+        return;
+      }
       setAttachedFiles([]);
     }
 

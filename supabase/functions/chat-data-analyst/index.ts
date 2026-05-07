@@ -252,36 +252,46 @@ serve(async (req) => {
 
     const modePrompt = MODE_PROMPTS["data-analyst"];
 
-    // If files are attached, prepend their contents to the last user message
-    let enrichedMessages = [...messages];
-    if (fileContents && Array.isArray(fileContents) && fileContents.length > 0) {
-      const fileContext = fileContents
-        .map((f: { name: string; content: string }) => `--- Attached File: ${f.name} ---\n${f.content}\n--- End of ${f.name} ---`)
-        .join("\n\n");
-      const lastIdx = enrichedMessages.length - 1;
-      if (lastIdx >= 0 && enrichedMessages[lastIdx].role === "user") {
-        enrichedMessages[lastIdx] = {
-          ...enrichedMessages[lastIdx],
-          content: `${enrichedMessages[lastIdx].content}\n\n[USER ATTACHED FILES - Analyze these alongside the database]\n${fileContext}`,
-        };
-      }
+    // Validate any attached files BEFORE doing any expensive work.
+    const attachmentResult = validateFileContents(fileContents);
+    if (!attachmentResult.ok) {
+      return new Response(
+        JSON.stringify({ error: attachmentResult.error.code, message: attachmentResult.error.message }),
+        { status: attachmentResult.error.status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
+    const attachmentBlock = buildAttachmentBlock(attachmentResult.files);
 
-    // Scrape any URLs found in the latest user message
-    const lastUserMsg = enrichedMessages[enrichedMessages.length - 1];
-    if (lastUserMsg?.role === "user") {
-      const scrapedContent = await scrapeUrlsFromMessage(lastUserMsg.content);
+    // Capture the typed user prompt BEFORE injecting any attachment text.
+    // URL scraping, classifier and SQL generation all run against this typed
+    // prompt only, so attached file contents can never trigger an outbound
+    // fetch or skew the analytical/RAG routing decision.
+    const typedPrompt: string = messages?.[messages.length - 1]?.content || "";
+
+    // Scrape URLs found in the typed prompt only (never from attachments).
+    let scrapedSuffix = "";
+    if (typedPrompt) {
+      const scrapedContent = await scrapeUrlsFromMessage(typedPrompt);
       if (scrapedContent) {
-        const lastIdx = enrichedMessages.length - 1;
-        enrichedMessages[lastIdx] = {
-          ...enrichedMessages[lastIdx],
-          content: `${enrichedMessages[lastIdx].content}\n\n[WEBSITE CONTENT FROM LINKS - Use this information to compare against REID market data]\n${scrapedContent}`,
-        };
+        scrapedSuffix = `\n\n[WEBSITE CONTENT FROM LINKS - Use this information to compare against REID market data]\n${scrapedContent}`;
         console.log("Scraped URL content injected into context");
       }
     }
 
-    const userMessage = enrichedMessages[enrichedMessages.length - 1]?.content || "";
+    // `userMessage` drives the analytical/SQL classifier and the SQL
+    // generator. It must NOT include attached file contents.
+    const userMessage = typedPrompt + scrapedSuffix;
+
+    // `enrichedMessages` is the full message list shown to the final
+    // RAG/explain LLM. Attachments are injected here only.
+    const enrichedMessages = [...messages];
+    const lastIdx = enrichedMessages.length - 1;
+    if (lastIdx >= 0 && enrichedMessages[lastIdx]?.role === "user") {
+      enrichedMessages[lastIdx] = {
+        ...enrichedMessages[lastIdx],
+        content: `${typedPrompt}${scrapedSuffix}${attachmentBlock}`,
+      };
+    }
 
     // Inject fresh DB context for pre-loaded landing/widget prompts and any
     // semantically equivalent "current/latest market" question. Free tier

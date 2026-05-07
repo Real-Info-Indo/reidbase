@@ -52,10 +52,14 @@ interface AggregatePayload {
     unique_sessions: number;
     conversations: number;
     total_messages: number;
+    /** @deprecated alias of appraisal_requests; kept for back-compat */
     appraisal_submissions: number;
+    appraisal_requests: number;
+    appraisal_cta_events: number;
   };
   page_views_by_day: { day_key: string; views: number }[];
   chats_by_day: { day_key: string; chats: number }[];
+  appraisals_by_day: { day_key: string; requests: number }[];
   top_pages: { page: string; count: number }[];
   feature_usage: { event_name: string; count: number }[];
   conversations_by_mode: { mode: string; value: number }[];
@@ -66,6 +70,7 @@ interface AggregatePayload {
     first_prompt: number;
     report_view: number;
     appraisal_submitted: number;
+    appraisal_cta_events: number;
   };
   mode_performance: {
     mode: string;

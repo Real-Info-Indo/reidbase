@@ -271,17 +271,22 @@ Deno.serve(async (req) => {
       ? (body.metadata as Record<string, unknown>)
       : {};
 
-  // Strip any client-supplied identity / trust fields from metadata.
-  const {
-    user_tier: _ut,
-    wix_user_id: _wid,
-    trusted: _tr,
-    ...safeMeta
-  } = clientMeta;
+  // Enforce raw metadata size cap BEFORE sanitization so spammy payloads
+  // (even with unknown keys that would be dropped) still get rejected.
+  const rawMetaJson = JSON.stringify(clientMeta);
+  if (rawMetaJson.length > MAX_METADATA_BYTES) {
+    return jsonError("metadata_too_large", "metadata exceeds size limit", 413);
+  }
 
-  // Cap metadata size to prevent storage spam.
-  let metaJson = JSON.stringify(safeMeta);
-  if (metaJson.length > MAX_METADATA_BYTES) {
+  // Sanitize: strip dangerous keys, drop unknown keys, reject nested objects.
+  const sanitized = sanitizeMetadata(clientMeta, eventType, eventName);
+  if (!sanitized.ok) {
+    return jsonError(sanitized.code, sanitized.message, 400);
+  }
+  const safeMeta = sanitized.value;
+
+  // Recheck post-sanitize size as a defensive guard.
+  if (JSON.stringify(safeMeta).length > MAX_METADATA_BYTES) {
     return jsonError("metadata_too_large", "metadata exceeds size limit", 413);
   }
 

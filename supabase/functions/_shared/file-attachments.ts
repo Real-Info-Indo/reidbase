@@ -3,8 +3,12 @@
 
 export const ATTACHMENT_LIMITS = {
   maxFiles: 3,
-  maxPerFileChars: 200_000,    // ~1MB of text safety net
-  maxCombinedChars: 40_000,    // hard cap injected into the prompt
+  // Per-file character cap. The client compacts CSVs before sending so the
+  // prompt-side text usually stays well under this; we still need headroom for
+  // a fully expanded ~250KB CSV that the client chose not to compact.
+  maxPerFileChars: 300_000,
+  // Hard cap on combined attachment text injected into the final prompt.
+  maxCombinedChars: 150_000,
 } as const;
 
 export interface AttachmentFile {

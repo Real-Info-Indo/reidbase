@@ -83,6 +83,23 @@ interface AggregatePayload {
   top_referrers: { referrer: string; count: number }[];
   top_campaigns: { source: string; medium: string; campaign: string; count: number }[];
   new_appraisal_count: number;
+  retention_snapshot?: {
+    total_known_users: number;
+    active_users_7d: number;
+    active_users_30d: number;
+    new_users_30d: number;
+    returning_users: number;
+    repeat_rate: number;
+    computed_at: string;
+    window: string;
+  };
+  weekly_retention_cohorts?: {
+    cohort_week: string;
+    cohort_start: string;
+    cohort_size: number;
+    retained_users: number;
+    retention_rate: number;
+  }[];
 }
 
 const CHART_COLOURS = [

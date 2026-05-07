@@ -287,6 +287,8 @@ export default function AdminAnalytics() {
 
   const topReferrers = data?.top_referrers ?? [];
   const topCampaigns = data?.top_campaigns ?? [];
+  const retention = data?.retention_snapshot;
+  const cohorts = data?.weekly_retention_cohorts ?? [];
 
   // ── Auth gate ──
   if (!authenticated) {

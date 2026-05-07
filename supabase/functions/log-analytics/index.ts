@@ -315,7 +315,8 @@ Deno.serve(async (req) => {
         // Feature events with a bad token must NOT silently pose as anonymous
         // traffic — that would let attackers manufacture untrusted "feature"
         // signals. Page views remain accepted as anonymous/untrusted.
-        if (eventType === "feature") {
+        const PRE_AUTH_FEATURE_ALLOWLIST = new Set(["login_started"]);
+        if (eventType === "feature" && !PRE_AUTH_FEATURE_ALLOWLIST.has(eventName)) {
           return jsonError("invalid_token", "Auth required for feature events", 401);
         }
         wixUserId = null;

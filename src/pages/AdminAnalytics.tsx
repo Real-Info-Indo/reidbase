@@ -3,7 +3,6 @@ import {
   BarChart3, Users, FileText, MessageSquare, MousePointerClick,
   RefreshCw, ClipboardList, Shield, Download, LogOut,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,7 +14,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -41,26 +40,44 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
   URL.revokeObjectURL(url);
 }
 
-interface AnalyticsEvent {
-  id: string;
-  event_type: string;
-  event_name: string;
-  page_path: string | null;
-  metadata: Record<string, unknown>;
-  wix_user_id: string | null;
-  session_id: string | null;
-  created_at: string;
-}
-
-interface ChatLog {
-  id: string;
-  conversation_id: string;
-  wix_user_id: string | null;
-  wix_user_name: string | null;
-  message_count: number;
-  search_mode: string | null;
-  created_at: string;
-  updated_at: string;
+// ---- Server aggregate payload shape (admin-data, action: "analytics") ----
+interface AggregatePayload {
+  source: "server_aggregated";
+  truncated: boolean;
+  range: { from: string; to: string };
+  summary: {
+    page_views: number;
+    feature_events: number;
+    unique_users: number;
+    unique_sessions: number;
+    conversations: number;
+    total_messages: number;
+    appraisal_submissions: number;
+  };
+  page_views_by_day: { day_key: string; views: number }[];
+  chats_by_day: { day_key: string; chats: number }[];
+  top_pages: { page: string; count: number }[];
+  feature_usage: { event_name: string; count: number }[];
+  conversations_by_mode: { mode: string; value: number }[];
+  funnel: {
+    landing_views: number;
+    login_started: number;
+    login_success: number;
+    first_prompt: number;
+    report_view: number;
+    appraisal_submitted: number;
+  };
+  mode_performance: {
+    mode: string;
+    conversations: number;
+    total_messages: number;
+    prompts: number;
+    completed: number;
+    unique_users: number;
+  }[];
+  top_referrers: { referrer: string; count: number }[];
+  top_campaigns: { source: string; medium: string; campaign: string; count: number }[];
+  new_appraisal_count: number;
 }
 
 const CHART_COLOURS = [
@@ -74,9 +91,8 @@ const CHART_COLOURS = [
   "hsl(20 70% 55%)",
 ];
 
-// All day/week bucketing is anchored to Asia/Makassar (WITA, UTC+8, no DST).
-// Without this, refresh-time drift around midnight UTC made the page-views
-// chart appear to gain or lose a day's worth of events between refreshes.
+// All day bucketing is anchored to Asia/Makassar (WITA, UTC+8, no DST) so
+// midnight-UTC drift never reshuffles the chart.
 const TZ = "Asia/Makassar";
 const TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -85,13 +101,11 @@ const dayLabelFmt = new Intl.DateTimeFormat("en-GB", {
   day: "numeric", month: "short", timeZone: TZ,
 });
 
-/** YYYY-MM-DD for the given instant, evaluated in WITA. */
 function dayKey(d: Date | string): string {
   const t = (typeof d === "string" ? new Date(d) : d).getTime();
   return new Date(t + TZ_OFFSET_MS).toISOString().slice(0, 10);
 }
 
-/** Instant for WITA midnight of the given calendar day. */
 function dayKeyToInstant(key: string): Date {
   return new Date(`${key}T00:00:00+08:00`);
 }
@@ -112,19 +126,6 @@ function formatPercent(value: number) {
   return `${value.toFixed(1)}%`;
 }
 
-/** Monday-anchored week key (YYYY-MM-DD) for the given WITA day key. */
-function startOfWeekKey(key: string): string {
-  const [y, m, d] = key.split("-").map(Number);
-  const utc = new Date(Date.UTC(y, m - 1, d));
-  const dow = (utc.getUTCDay() + 6) % 7;
-  utc.setUTCDate(utc.getUTCDate() - dow);
-  return utc.toISOString().slice(0, 10);
-}
-
-function formatWeekLabel(key: string): string {
-  return formatDayKey(startOfWeekKey(key));
-}
-
 function daysBetween(from: Date, to: Date): string[] {
   const days: string[] = [];
   let cur = startOfDayWita(from).getTime();
@@ -138,38 +139,12 @@ function daysBetween(from: Date, to: Date): string[] {
 
 export default function AdminAnalytics() {
   const { authenticated, checking, error, signOut } = useAdminAuth();
-  const [allEvents, setAllEvents] = useState<AnalyticsEvent[]>([]);
-  const [allChatLogs, setAllChatLogs] = useState<ChatLog[]>([]);
+  const [data, setData] = useState<AggregatePayload | null>(null);
   const [loading, setLoading] = useState(false);
-  const [newAppraisalCount, setNewAppraisalCount] = useState(0);
   const [rangePreset, setRangePreset] = useState<RangePreset>("30");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const navigate = useNavigate();
-
-  const fetchData = async (fromIso?: string, toIso?: string) => {
-    setLoading(true);
-    try {
-      const result = await invokeAdmin<{
-        events: AnalyticsEvent[];
-        chatLogs: ChatLog[];
-        newAppraisalCount: number;
-      }>("admin-data", {
-        action: "analytics",
-        from: fromIso,
-        to: toIso,
-      });
-      setAllEvents(result.events || []);
-      setAllChatLogs(result.chatLogs || []);
-      setNewAppraisalCount(result.newAppraisalCount ?? 0);
-    } catch (e) {
-      toast.error((e as Error).message || "Failed to load analytics");
-    }
-    setLoading(false);
-  };
-
-  // Initial + range-driven fetches happen in a single effect below, after
-  // rangeFrom / rangeTo are computed.
 
   // ── Date range ──
   const { rangeFrom, rangeTo, rangeLabel } = useMemo(() => {
@@ -179,7 +154,6 @@ export default function AdminAnalytics() {
       baseFrom = new Date(customFrom);
     } else {
       const days = rangePreset === "custom" ? 30 : parseInt(rangePreset, 10);
-      // Anchor "today" in WITA so the window doesn't shift around UTC midnight.
       const anchorKey = dayKey(new Date());
       baseTo = dayKeyToInstant(anchorKey);
       baseFrom = new Date(baseTo.getTime() - (days - 1) * DAY_MS);
@@ -192,330 +166,115 @@ export default function AdminAnalytics() {
     return { rangeFrom: from, rangeTo: to, rangeLabel: `${fmt.format(from)} to ${fmt.format(to)}` };
   }, [rangePreset, customFrom, customTo]);
 
-  // Re-fetch whenever the resolved range or auth state changes. Server-side
-  // filtering keeps responses small and avoids the 20k-event truncation as
-  // analytics_events grows.
+  const fetchData = async (fromIso: string, toIso: string) => {
+    setLoading(true);
+    try {
+      const result = await invokeAdmin<AggregatePayload>("admin-data", {
+        action: "analytics",
+        from: fromIso,
+        to: toIso,
+      });
+      setData(result);
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to load analytics");
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!authenticated) return;
     fetchData(rangeFrom.toISOString(), rangeTo.toISOString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, rangeFrom.getTime(), rangeTo.getTime()]);
 
-  const events = useMemo(() => {
-    const fromMs = rangeFrom.getTime();
-    const toMs = rangeTo.getTime();
-    return allEvents.filter((e) => {
-      const t = new Date(e.created_at).getTime();
-      return t >= fromMs && t <= toMs;
-    });
-  }, [allEvents, rangeFrom, rangeTo]);
-
-  const chatLogs = useMemo(() => {
-    const fromMs = rangeFrom.getTime();
-    const toMs = rangeTo.getTime();
-    return allChatLogs.filter((l) => {
-      const t = new Date(l.updated_at).getTime();
-      return t >= fromMs && t <= toMs;
-    });
-  }, [allChatLogs, rangeFrom, rangeTo]);
-
-
-  // ── Derived metrics ──
-
-  const pageViews = useMemo(
-    () => events.filter((e) => e.event_type === "page_view"),
-    [events],
-  );
-  const featureEvents = useMemo(
-    () => events.filter((e) => e.event_type === "feature"),
-    [events],
-  );
-
-  // Page views over time (selected range)
-  const pageViewsByDay = useMemo(() => {
-    const days = daysBetween(rangeFrom, rangeTo);
-    const counts: Record<string, number> = {};
-    days.forEach((d) => (counts[d] = 0));
-    pageViews.forEach((e) => {
-      const day = dayKey(e.created_at);
-      if (counts[day] !== undefined) counts[day]++;
-    });
-    return days.map((d) => ({ date: formatDayKey(d), views: counts[d] }));
-  }, [pageViews, rangeFrom, rangeTo]);
-
-  // Top pages
-  const topPages = useMemo(() => {
-    const map: Record<string, number> = {};
-    pageViews.forEach((e) => {
-      const p = e.page_path || "/";
-      map[p] = (map[p] || 0) + 1;
-    });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([page, count]) => ({ page, count }));
-  }, [pageViews]);
-
-  // Top referrers — group external referrers by hostname; ignore same-origin.
-  const topReferrers = useMemo(() => {
-    const map: Record<string, number> = {};
-    const ownHost = typeof window !== "undefined" ? window.location.hostname : "";
-    pageViews.forEach((e) => {
-      const ref = (e.metadata as { referrer?: unknown })?.referrer;
-      if (typeof ref !== "string" || !ref) return;
-      let host: string;
-      try {
-        host = new URL(ref).hostname.toLowerCase();
-      } catch {
-        return;
-      }
-      if (!host || host === ownHost) return;
-      map[host] = (map[host] || 0) + 1;
-    });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([referrer, count]) => ({ referrer, count }));
-  }, [pageViews]);
-
-  // Top campaigns — group by utm_source / utm_medium / utm_campaign tuple.
-  const topCampaigns = useMemo(() => {
-    const map = new Map<string, { source: string; medium: string; campaign: string; count: number }>();
-    pageViews.forEach((e) => {
-      const m = (e.metadata ?? {}) as Record<string, unknown>;
-      const source = typeof m.utm_source === "string" ? m.utm_source : "";
-      const medium = typeof m.utm_medium === "string" ? m.utm_medium : "";
-      const campaign = typeof m.utm_campaign === "string" ? m.utm_campaign : "";
-      if (!source && !medium && !campaign) return;
-      const key = `${source}||${medium}||${campaign}`;
-      const existing = map.get(key);
-      if (existing) existing.count += 1;
-      else map.set(key, { source, medium, campaign, count: 1 });
-    });
-    return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 8);
-  }, [pageViews]);
-
-  // Feature usage
-  const featureCounts = useMemo(() => {
-    const map: Record<string, number> = {};
-    featureEvents.forEach((e) => {
-      map[e.event_name] = (map[e.event_name] || 0) + 1;
-    });
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name: name.replace(/_/g, " "), count }));
-  }, [featureEvents]);
-
-  const featureCountByName = useMemo(() => {
-    const map: Record<string, number> = {};
-    featureEvents.forEach((event) => {
-      map[event.event_name] = (map[event.event_name] || 0) + 1;
-    });
-    return map;
-  }, [featureEvents]);
-
-  // Unique users & sessions
-  const uniqueUsers = useMemo(() => {
-    const set = new Set<string>();
-    events.forEach((e) => { if (e.wix_user_id) set.add(e.wix_user_id); });
-    return set.size;
-  }, [events]);
-
-  const uniqueSessions = useMemo(() => {
-    const set = new Set<string>();
-    events.forEach((e) => { if (e.session_id) set.add(e.session_id); });
-    return set.size;
-  }, [events]);
-
-  // Appraisal submissions
-  const appraisalCount = useMemo(
-    () => featureEvents.filter((e) => e.event_name === "appraisal_submitted").length,
-    [featureEvents],
-  );
-
-  // Chat logs by search mode (pie)
-  const chatByMode = useMemo(() => {
-    const map: Record<string, number> = {};
-    chatLogs.forEach((l) => {
-      const mode = l.search_mode || "data-analyst";
-      map[mode] = (map[mode] || 0) + 1;
-    });
-    return Object.entries(map).map(([name, value]) => ({
-      name: name.replace(/-/g, " "),
-      value,
+  // ── Chart data: fill missing days with zeros so the area chart renders a
+  // continuous baseline even when traffic is sparse. ──
+  const pageViewsChart = useMemo(() => {
+    if (!data) return [];
+    const lookup = new Map(data.page_views_by_day.map((r) => [r.day_key, r.views]));
+    return daysBetween(rangeFrom, rangeTo).map((d) => ({
+      date: formatDayKey(d), views: lookup.get(d) ?? 0,
     }));
-  }, [chatLogs]);
+  }, [data, rangeFrom, rangeTo]);
 
-  // Chat activity over time
-  const chatsByDay = useMemo(() => {
-    const days = daysBetween(rangeFrom, rangeTo);
-    const counts: Record<string, number> = {};
-    days.forEach((d) => (counts[d] = 0));
-    chatLogs.forEach((l) => {
-      const day = dayKey(l.updated_at);
-      if (counts[day] !== undefined) counts[day]++;
-    });
-    return days.map((d) => ({ date: formatDayKey(d), chats: counts[d] }));
-  }, [chatLogs, rangeFrom, rangeTo]);
+  const chatsChart = useMemo(() => {
+    if (!data) return [];
+    const lookup = new Map(data.chats_by_day.map((r) => [r.day_key, r.chats]));
+    return daysBetween(rangeFrom, rangeTo).map((d) => ({
+      date: formatDayKey(d), chats: lookup.get(d) ?? 0,
+    }));
+  }, [data, rangeFrom, rangeTo]);
 
-  const totalMessages = useMemo(
-    () => chatLogs.reduce((sum, l) => sum + l.message_count, 0),
-    [chatLogs],
+  const topPagesChart = useMemo(
+    () => (data?.top_pages ?? []).slice(0, 8).map((r) => ({ page: r.page, count: r.count })),
+    [data],
+  );
+
+  const featureUsageChart = useMemo(
+    () => (data?.feature_usage ?? []).map((r) => ({
+      name: r.event_name.replace(/_/g, " "), count: r.count,
+    })),
+    [data],
+  );
+
+  const chatByModeChart = useMemo(
+    () => (data?.conversations_by_mode ?? []).map((r) => ({
+      name: r.mode.replace(/-/g, " "), value: r.value,
+    })),
+    [data],
   );
 
   const funnelSteps = useMemo(() => {
-    const baseSteps = [
-      { label: "Landing views", value: pageViews.filter((e) => (e.page_path || "/") === "/").length },
-      { label: "Login starts", value: featureCountByName.login_started ?? 0 },
-      { label: "Logins", value: featureCountByName.login_success ?? 0 },
-      { label: "First prompts", value: featureCountByName.funnel_first_prompt ?? 0 },
-      { label: "Report views", value: featureCountByName.funnel_report_view ?? 0 },
-      { label: "Appraisal requests", value: featureCountByName.appraisal_submitted ?? 0 },
+    if (!data) return [];
+    const f = data.funnel;
+    const base = [
+      { label: "Landing views",       value: f.landing_views },
+      { label: "Login starts",        value: f.login_started },
+      { label: "Logins",              value: f.login_success },
+      { label: "First prompts",       value: f.first_prompt },
+      { label: "Report views",        value: f.report_view },
+      { label: "Appraisal requests", value: f.appraisal_submitted },
     ];
-
-    return baseSteps.map((step, index) => ({
+    return base.map((step, i) => ({
       ...step,
       rateFromPrevious:
-        index === 0 || baseSteps[index - 1].value === 0
+        i === 0 || base[i - 1].value === 0
           ? null
-          : (step.value / baseSteps[index - 1].value) * 100,
+          : (step.value / base[i - 1].value) * 100,
     }));
-  }, [pageViews, featureCountByName]);
+  }, [data]);
 
   const modePerformance = useMemo(() => {
-    const stats = new Map<string, {
-      mode: string;
-      conversations: number;
-      totalMessages: number;
-      prompts: number;
-      completedResponses: number;
-      users: Set<string>;
-    }>();
+    return (data?.mode_performance ?? []).map((r) => ({
+      mode: r.mode,
+      conversations: r.conversations,
+      prompts: r.prompts,
+      avgMessagesPerConversation: r.conversations ? r.total_messages / r.conversations : 0,
+      completionRate: r.prompts ? (r.completed / r.prompts) * 100 : 0,
+      uniqueUsers: r.unique_users,
+    }));
+  }, [data]);
 
-    const ensureMode = (modeKey: string) => {
-      if (!stats.has(modeKey)) {
-        stats.set(modeKey, {
-          mode: modeKey,
-          conversations: 0,
-          totalMessages: 0,
-          prompts: 0,
-          completedResponses: 0,
-          users: new Set<string>(),
-        });
-      }
-      return stats.get(modeKey)!;
-    };
-
-    chatLogs.forEach((log) => {
-      const modeKey = log.search_mode || "data-analyst";
-      const entry = ensureMode(modeKey);
-      entry.conversations += 1;
-      entry.totalMessages += log.message_count;
-      if (log.wix_user_id) entry.users.add(log.wix_user_id);
-    });
-
-    featureEvents.forEach((event) => {
-      const modeKey = typeof event.metadata?.search_mode === "string"
-        ? event.metadata.search_mode
-        : "data-analyst";
-      const entry = ensureMode(modeKey);
-      if (event.event_name === "chat_message_sent") entry.prompts += 1;
-      if (event.event_name === "chat_response_completed") entry.completedResponses += 1;
-      if (event.wix_user_id) entry.users.add(event.wix_user_id);
-    });
-
-    return Array.from(stats.values())
-      .map((entry) => ({
-        ...entry,
-        avgMessagesPerConversation: entry.conversations ? entry.totalMessages / entry.conversations : 0,
-        completionRate: entry.prompts ? (entry.completedResponses / entry.prompts) * 100 : 0,
-        uniqueUsers: entry.users.size,
-      }))
-      .sort((a, b) => b.conversations - a.conversations);
-  }, [chatLogs, featureEvents]);
-
-  const retentionMetrics = useMemo(() => {
-    const userMap = new Map<string, {
-      firstSeen: number;
-      lastSeen: number;
-      sessions: Map<string, number>;
-    }>();
-
-    events.forEach((event) => {
-      if (!event.wix_user_id) return;
-      const timestamp = new Date(event.created_at).getTime();
-      if (!userMap.has(event.wix_user_id)) {
-        userMap.set(event.wix_user_id, {
-          firstSeen: timestamp,
-          lastSeen: timestamp,
-          sessions: new Map<string, number>(),
-        });
-      }
-
-      const user = userMap.get(event.wix_user_id)!;
-      user.firstSeen = Math.min(user.firstSeen, timestamp);
-      user.lastSeen = Math.max(user.lastSeen, timestamp);
-      if (event.session_id) {
-        const existing = user.sessions.get(event.session_id);
-        user.sessions.set(event.session_id, existing ? Math.min(existing, timestamp) : timestamp);
-      }
-    });
-
-    const now = Date.now();
-    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-    let returningUsers = 0;
-    let activeUsers7d = 0;
-    let activeUsers30d = 0;
-    let newUsers30d = 0;
-    const cohorts = new Map<string, { cohort: string; users: number; retained: number }>();
-
-    userMap.forEach((user) => {
-      if (user.lastSeen >= sevenDaysAgo) activeUsers7d += 1;
-      if (user.lastSeen >= thirtyDaysAgo) activeUsers30d += 1;
-      if (user.firstSeen >= thirtyDaysAgo) newUsers30d += 1;
-
-      const sessionStarts = Array.from(user.sessions.values()).sort((a, b) => a - b);
-      const hasReturnVisit = sessionStarts.some((time, index) => index > 0 && time - sessionStarts[0] >= 24 * 60 * 60 * 1000);
-      if (hasReturnVisit) returningUsers += 1;
-
-      const cohortKey = startOfWeekKey(dayKey(new Date(user.firstSeen)));
-      if (!cohorts.has(cohortKey)) cohorts.set(cohortKey, { cohort: cohortKey, users: 0, retained: 0 });
-      const entry = cohorts.get(cohortKey)!;
-      entry.users += 1;
-      if (hasReturnVisit) entry.retained += 1;
-    });
-
-    const totalUsers = userMap.size;
-    const cohortRows = Array.from(cohorts.values())
-      .sort((a, b) => b.cohort.localeCompare(a.cohort))
-      .slice(0, 6)
-      .map((entry) => ({
-        ...entry,
-        retentionRate: entry.users ? (entry.retained / entry.users) * 100 : 0,
-      }));
-
-    return {
-      activeUsers7d,
-      activeUsers30d,
-      newUsers30d,
-      returningUsers,
-      avgSessionsPerUser: totalUsers
-        ? Array.from(userMap.values()).reduce((sum, user) => sum + user.sessions.size, 0) / totalUsers
-        : 0,
-      repeatRate: totalUsers ? (returningUsers / totalUsers) * 100 : 0,
-      cohortRows,
-    };
-  }, [events]);
+  const topReferrers = data?.top_referrers ?? [];
+  const topCampaigns = data?.top_campaigns ?? [];
 
   // ── Auth gate ──
-
   if (!authenticated) {
     return <AdminGate checking={checking} error={error} />;
   }
 
+  const summary = data?.summary ?? {
+    page_views: 0, feature_events: 0, unique_users: 0, unique_sessions: 0,
+    conversations: 0, total_messages: 0, appraisal_submissions: 0,
+  };
+  const newAppraisalCount = data?.new_appraisal_count ?? 0;
+
   // ── CSV exports ──
   const exportAll = () => {
+    if (!data) {
+      toast.error("Nothing to export yet");
+      return;
+    }
     const stamp = new Date().toISOString().slice(0, 10);
     const sections: { name: string; rows: (string | number)[][] }[] = [];
 
@@ -524,26 +283,35 @@ export default function AdminAnalytics() {
       rows: [
         ["Metric", "Value"],
         ["Date range", rangeLabel],
-        ["Page views", pageViews.length],
-        ["Unique users", uniqueUsers],
-        ["Unique sessions", uniqueSessions],
-        ["Conversations", chatLogs.length],
-        ["Total messages", totalMessages],
-        ["Appraisal submissions", appraisalCount],
+        ["Source", data.source],
+        ["Truncated", String(data.truncated)],
+        ["Page views", summary.page_views],
+        ["Unique users", summary.unique_users],
+        ["Unique sessions", summary.unique_sessions],
+        ["Conversations", summary.conversations],
+        ["Total messages", summary.total_messages],
+        ["Appraisal submissions", summary.appraisal_submissions],
       ],
     });
-
     sections.push({
       name: "page_views_by_day",
-      rows: [["Date", "Views"], ...pageViewsByDay.map((r) => [r.date, r.views])],
+      rows: [["Date", "Views"], ...pageViewsChart.map((r) => [r.date, r.views])],
     });
     sections.push({
       name: "chats_by_day",
-      rows: [["Date", "Chats"], ...chatsByDay.map((r) => [r.date, r.chats])],
+      rows: [["Date", "Chats"], ...chatsChart.map((r) => [r.date, r.chats])],
     });
     sections.push({
       name: "top_pages",
-      rows: [["Page", "Views"], ...topPages.map((r) => [r.page, r.count])],
+      rows: [["Page", "Views"], ...(data.top_pages ?? []).map((r) => [r.page, r.count])],
+    });
+    sections.push({
+      name: "feature_usage",
+      rows: [["Feature", "Count"], ...(data.feature_usage ?? []).map((r) => [r.event_name, r.count])],
+    });
+    sections.push({
+      name: "conversations_by_mode",
+      rows: [["Mode", "Conversations"], ...(data.conversations_by_mode ?? []).map((r) => [r.mode, r.value])],
     });
     sections.push({
       name: "top_referrers",
@@ -555,14 +323,6 @@ export default function AdminAnalytics() {
         ["Source", "Medium", "Campaign", "Views"],
         ...topCampaigns.map((r) => [r.source, r.medium, r.campaign, r.count]),
       ],
-    });
-    sections.push({
-      name: "feature_usage",
-      rows: [["Feature", "Count"], ...featureCounts.map((r) => [r.name, r.count])],
-    });
-    sections.push({
-      name: "conversations_by_mode",
-      rows: [["Mode", "Conversations"], ...chatByMode.map((r) => [r.name, r.value])],
     });
     sections.push({
       name: "conversion_funnel",
@@ -584,26 +344,6 @@ export default function AdminAnalytics() {
         ]),
       ],
     });
-    sections.push({
-      name: "retention_snapshot",
-      rows: [
-        ["Metric", "Value"],
-        ["Active users 7d", retentionMetrics.activeUsers7d],
-        ["Active users 30d", retentionMetrics.activeUsers30d],
-        ["New users 30d", retentionMetrics.newUsers30d],
-        ["Repeat user rate (%)", retentionMetrics.repeatRate.toFixed(1)],
-        ["Avg sessions per user", retentionMetrics.avgSessionsPerUser.toFixed(2)],
-      ],
-    });
-    sections.push({
-      name: "weekly_retention_cohorts",
-      rows: [
-        ["Cohort week", "Users", "Returned", "Retention (%)"],
-        ...retentionMetrics.cohortRows.map((r) => [
-          formatDayKey(r.cohort), r.users, r.retained, r.retentionRate.toFixed(1),
-        ]),
-      ],
-    });
 
     const combined: (string | number)[][] = [];
     sections.forEach((sec, i) => {
@@ -615,7 +355,6 @@ export default function AdminAnalytics() {
   };
 
   // ── Dashboard ──
-
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -625,6 +364,11 @@ export default function AdminAnalytics() {
             <BarChart3 className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">Analytics</h1>
             <span className="text-xs text-muted-foreground hidden md:inline">{rangeLabel}</span>
+            {data?.truncated && (
+              <span className="text-[10px] uppercase tracking-wide rounded bg-destructive/10 text-destructive px-2 py-0.5">
+                Truncated
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={rangePreset} onValueChange={(v) => setRangePreset(v as RangePreset)}>
@@ -702,7 +446,7 @@ export default function AdminAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{pageViews.length.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{summary.page_views.toLocaleString()}</p>
             </CardContent>
           </Card>
           <Card>
@@ -712,8 +456,8 @@ export default function AdminAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{uniqueUsers}</p>
-              <p className="text-xs text-muted-foreground">{uniqueSessions} sessions</p>
+              <p className="text-2xl font-bold">{summary.unique_users.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">{summary.unique_sessions.toLocaleString()} sessions</p>
             </CardContent>
           </Card>
           <Card>
@@ -723,8 +467,8 @@ export default function AdminAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{chatLogs.length}</p>
-              <p className="text-xs text-muted-foreground">{totalMessages.toLocaleString()} messages</p>
+              <p className="text-2xl font-bold">{summary.conversations.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">{summary.total_messages.toLocaleString()} messages</p>
             </CardContent>
           </Card>
           <Card>
@@ -734,70 +478,38 @@ export default function AdminAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{appraisalCount}</p>
+              <p className="text-2xl font-bold">{summary.appraisal_submissions.toLocaleString()}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Charts row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Page views over time */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Page views</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Page views</CardTitle></CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={pageViewsByDay}>
+                <AreaChart data={pageViewsChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="views"
-                    stroke="hsl(var(--primary))"
-                    fill="hsl(var(--primary) / 0.15)"
-                    strokeWidth={2}
-                  />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <Area type="monotone" dataKey="views" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* Chat activity over time */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Chat activity</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Chat activity</CardTitle></CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chatsByDay}>
+                <AreaChart data={chatsChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="chats"
-                    stroke="hsl(210 70% 55%)"
-                    fill="hsl(210 70% 55% / 0.15)"
-                    strokeWidth={2}
-                  />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <Area type="monotone" dataKey="chats" stroke="hsl(210 70% 55%)" fill="hsl(210 70% 55% / 0.15)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
@@ -806,166 +518,66 @@ export default function AdminAnalytics() {
 
         {/* Charts row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Top pages */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Top pages</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Top pages</CardTitle></CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topPages} layout="vertical">
+                <BarChart data={topPagesChart} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis
-                    dataKey="page"
-                    type="category"
-                    width={100}
-                    tick={{ fontSize: 11 }}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
+                  <YAxis dataKey="page" type="category" width={100} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
                   <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* Feature usage */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Feature usage</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Feature usage</CardTitle></CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={featureCounts} layout="vertical">
+                <BarChart data={featureUsageChart} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    width={120}
-                    tick={{ fontSize: 11 }}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
+                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
                   <Bar dataKey="count" fill="hsl(340 65% 55%)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* Chat modes pie */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Conversations by mode</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Conversations by mode</CardTitle></CardHeader>
             <CardContent className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={chatByMode}
+                    data={chatByModeChart}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label={({ name, percent }) =>
-                      `${name} (${(percent * 100).toFixed(0)}%)`
-                    }
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                     labelLine={{ stroke: "hsl(var(--muted-foreground))" }}
                   >
-                    {chatByMode.map((_, i) => (
+                    {chatByModeChart.map((_, i) => (
                       <Cell key={i} fill={CHART_COLOURS[i % CHART_COLOURS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Conversion funnel</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {funnelSteps.map((step, index) => (
-                <div key={step.label} className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-b-0 last:pb-0">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{index + 1}. {step.label}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {step.rateFromPrevious === null ? "Baseline" : `${formatPercent(step.rateFromPrevious)} from previous step`}
-                    </p>
-                  </div>
-                  <p className="text-lg font-semibold text-foreground">{step.value.toLocaleString()}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Mode performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Mode</th>
-                      <th className="py-2 pr-4 font-medium">Conversations</th>
-                      <th className="py-2 pr-4 font-medium">Prompts</th>
-                      <th className="py-2 pr-4 font-medium">Avg messages</th>
-                      <th className="py-2 pr-4 font-medium">Completion</th>
-                      <th className="py-2 font-medium">Users</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modePerformance.map((row) => (
-                      <tr key={row.mode} className="border-b border-border last:border-b-0">
-                        <td className="py-3 pr-4 text-foreground">{row.mode.replace(/-/g, " ")}</td>
-                        <td className="py-3 pr-4 text-foreground">{row.conversations}</td>
-                        <td className="py-3 pr-4 text-foreground">{row.prompts}</td>
-                        <td className="py-3 pr-4 text-foreground">{row.avgMessagesPerConversation.toFixed(1)}</td>
-                        <td className="py-3 pr-4 text-foreground">{formatPercent(row.completionRate)}</td>
-                        <td className="py-3 text-foreground">{row.uniqueUsers}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+        {/* Acquisition row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Top referrers</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Top referrers</CardTitle></CardHeader>
             <CardContent>
               {topReferrers.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No external referrers in this range.</p>
@@ -991,9 +603,7 @@ export default function AdminAnalytics() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Top campaigns</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Top campaigns</CardTitle></CardHeader>
             <CardContent>
               {topCampaigns.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No tagged UTM traffic in this range.</p>
@@ -1023,57 +633,49 @@ export default function AdminAnalytics() {
           </Card>
         </div>
 
+        {/* Funnel + mode performance */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Retention snapshot</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Active users, 7 days</p>
-                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers7d}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Active users, 30 days</p>
-                <p className="text-xl font-semibold text-foreground">{retentionMetrics.activeUsers30d}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">New users, 30 days</p>
-                <p className="text-xl font-semibold text-foreground">{retentionMetrics.newUsers30d}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Repeat user rate</p>
-                <p className="text-xl font-semibold text-foreground">{formatPercent(retentionMetrics.repeatRate)}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-xs text-muted-foreground">Average sessions per user</p>
-                <p className="text-xl font-semibold text-foreground">{retentionMetrics.avgSessionsPerUser.toFixed(1)}</p>
-              </div>
+            <CardHeader><CardTitle className="text-sm font-medium">Conversion funnel</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              {funnelSteps.map((step, index) => (
+                <div key={step.label} className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-b-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{index + 1}. {step.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {step.rateFromPrevious === null ? "Baseline" : `${formatPercent(step.rateFromPrevious)} from previous step`}
+                    </p>
+                  </div>
+                  <p className="text-lg font-semibold text-foreground">{step.value.toLocaleString()}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
           <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Weekly retention cohorts</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium">Mode performance</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Cohort week</th>
-                      <th className="py-2 pr-4 font-medium">Users</th>
-                      <th className="py-2 pr-4 font-medium">Returned</th>
-                      <th className="py-2 font-medium">Retention</th>
+                      <th className="py-2 pr-4 font-medium">Mode</th>
+                      <th className="py-2 pr-4 font-medium">Conversations</th>
+                      <th className="py-2 pr-4 font-medium">Prompts</th>
+                      <th className="py-2 pr-4 font-medium">Avg messages</th>
+                      <th className="py-2 pr-4 font-medium">Completion</th>
+                      <th className="py-2 font-medium">Users</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {retentionMetrics.cohortRows.map((row) => (
-                      <tr key={row.cohort} className="border-b border-border last:border-b-0">
-                        <td className="py-3 pr-4 text-foreground">{formatDayKey(row.cohort)}</td>
-                        <td className="py-3 pr-4 text-foreground">{row.users}</td>
-                        <td className="py-3 pr-4 text-foreground">{row.retained}</td>
-                        <td className="py-3 text-foreground">{formatPercent(row.retentionRate)}</td>
+                    {modePerformance.map((row) => (
+                      <tr key={row.mode} className="border-b border-border last:border-b-0">
+                        <td className="py-3 pr-4 text-foreground">{row.mode.replace(/-/g, " ")}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.conversations}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.prompts}</td>
+                        <td className="py-3 pr-4 text-foreground">{row.avgMessagesPerConversation.toFixed(1)}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatPercent(row.completionRate)}</td>
+                        <td className="py-3 text-foreground">{row.uniqueUsers}</td>
                       </tr>
                     ))}
                   </tbody>

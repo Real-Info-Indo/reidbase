@@ -304,7 +304,8 @@ export default function AdminAnalytics() {
         ["Unique sessions", summary.unique_sessions],
         ["Conversations", summary.conversations],
         ["Total messages", summary.total_messages],
-        ["Appraisal submissions", summary.appraisal_submissions],
+        ["Appraisal requests (database rows)", summary.appraisal_requests],
+        ["Appraisal CTA events (analytics)", summary.appraisal_cta_events],
       ],
     });
     sections.push({
@@ -314,6 +315,10 @@ export default function AdminAnalytics() {
     sections.push({
       name: "chats_by_day",
       rows: [["Date", "Chats"], ...chatsChart.map((r) => [r.date, r.chats])],
+    });
+    sections.push({
+      name: "appraisal_requests_by_day",
+      rows: [["Date", "Requests"], ...appraisalsChart.map((r) => [r.date, r.requests])],
     });
     sections.push({
       name: "top_pages",

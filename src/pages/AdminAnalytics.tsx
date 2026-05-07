@@ -52,10 +52,14 @@ interface AggregatePayload {
     unique_sessions: number;
     conversations: number;
     total_messages: number;
+    /** @deprecated alias of appraisal_requests; kept for back-compat */
     appraisal_submissions: number;
+    appraisal_requests: number;
+    appraisal_cta_events: number;
   };
   page_views_by_day: { day_key: string; views: number }[];
   chats_by_day: { day_key: string; chats: number }[];
+  appraisals_by_day: { day_key: string; requests: number }[];
   top_pages: { page: string; count: number }[];
   feature_usage: { event_name: string; count: number }[];
   conversations_by_mode: { mode: string; value: number }[];
@@ -66,6 +70,7 @@ interface AggregatePayload {
     first_prompt: number;
     report_view: number;
     appraisal_submitted: number;
+    appraisal_cta_events: number;
   };
   mode_performance: {
     mode: string;
@@ -205,6 +210,14 @@ export default function AdminAnalytics() {
     }));
   }, [data, rangeFrom, rangeTo]);
 
+  const appraisalsChart = useMemo(() => {
+    if (!data) return [];
+    const lookup = new Map((data.appraisals_by_day ?? []).map((r) => [r.day_key, r.requests]));
+    return daysBetween(rangeFrom, rangeTo).map((d) => ({
+      date: formatDayKey(d), requests: lookup.get(d) ?? 0,
+    }));
+  }, [data, rangeFrom, rangeTo]);
+
   const topPagesChart = useMemo(
     () => (data?.top_pages ?? []).slice(0, 8).map((r) => ({ page: r.page, count: r.count })),
     [data],
@@ -266,6 +279,7 @@ export default function AdminAnalytics() {
   const summary = data?.summary ?? {
     page_views: 0, feature_events: 0, unique_users: 0, unique_sessions: 0,
     conversations: 0, total_messages: 0, appraisal_submissions: 0,
+    appraisal_requests: 0, appraisal_cta_events: 0,
   };
   const newAppraisalCount = data?.new_appraisal_count ?? 0;
 
@@ -290,7 +304,8 @@ export default function AdminAnalytics() {
         ["Unique sessions", summary.unique_sessions],
         ["Conversations", summary.conversations],
         ["Total messages", summary.total_messages],
-        ["Appraisal submissions", summary.appraisal_submissions],
+        ["Appraisal requests (database rows)", summary.appraisal_requests],
+        ["Appraisal CTA events (analytics)", summary.appraisal_cta_events],
       ],
     });
     sections.push({
@@ -300,6 +315,10 @@ export default function AdminAnalytics() {
     sections.push({
       name: "chats_by_day",
       rows: [["Date", "Chats"], ...chatsChart.map((r) => [r.date, r.chats])],
+    });
+    sections.push({
+      name: "appraisal_requests_by_day",
+      rows: [["Date", "Requests"], ...appraisalsChart.map((r) => [r.date, r.requests])],
     });
     sections.push({
       name: "top_pages",
@@ -474,11 +493,14 @@ export default function AdminAnalytics() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MousePointerClick className="h-4 w-4" /> Appraisals
+                <MousePointerClick className="h-4 w-4" /> Appraisal requests
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{summary.appraisal_submissions.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{summary.appraisal_requests.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">
+                {summary.appraisal_cta_events.toLocaleString()} CTA events
+              </p>
             </CardContent>
           </Card>
         </div>

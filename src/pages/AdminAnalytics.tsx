@@ -485,17 +485,6 @@ export default function AdminAnalytics() {
       entry.users += 1;
       if (hasReturnVisit) entry.retained += 1;
     });
-    sections.push({
-      name: "top_referrers",
-      rows: [["Referrer", "Views"], ...topReferrers.map((r) => [r.referrer, r.count])],
-    });
-    sections.push({
-      name: "top_campaigns",
-      rows: [
-        ["Source", "Medium", "Campaign", "Views"],
-        ...topCampaigns.map((r) => [r.source, r.medium, r.campaign, r.count]),
-      ],
-    });
 
     const totalUsers = userMap.size;
     const cohortRows = Array.from(cohorts.values())

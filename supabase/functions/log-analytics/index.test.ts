@@ -136,3 +136,39 @@ Deno.test("rejects invalid JSON body", async () => {
   assertEquals(res.status, 400);
   assertEquals(json.error, "invalid_json");
 });
+
+Deno.test("rejects nested metadata as invalid_metadata", async () => {
+  const res = await callFn({
+    body: {
+      event_type: "page_view",
+      event_name: "page_view",
+      session_id: crypto.randomUUID(),
+      metadata: { utm_source: { nested: "no" } },
+    },
+  });
+  const json = await res.json();
+  assertEquals(res.status, 400);
+  assertEquals(json.error, "invalid_metadata");
+});
+
+Deno.test("silently strips dangerous keys (wix_user_id, email, token)", async () => {
+  const res = await callFn({
+    body: {
+      event_type: "page_view",
+      event_name: "page_view",
+      session_id: crypto.randomUUID(),
+      metadata: {
+        wix_user_id: "attacker",
+        user_tier: "enterprise",
+        email: "x@y.z",
+        access_token: "eyJsecret",
+        utm_source: "google",
+      },
+    },
+  });
+  const json = await res.json();
+  assertEquals(res.status, 200, JSON.stringify(json));
+  assertEquals(json.ok, true);
+  // Server still records the event, but trust flag stays false.
+  assertEquals(json.trusted, false);
+});

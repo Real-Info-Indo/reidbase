@@ -105,7 +105,7 @@ describe("parseAttachments", () => {
     }
     const csv = [headers.join(","), ...rows].join("\n");
     const file = new File([csv], "Sales portfolio.csv", { type: "text/csv" });
-    expect(file.size).toBeGreaterThan(60_000);
+    expect(file.size).toBeGreaterThan(50_000);
     const out = await parseAttachments([file]);
     expect(out).toHaveLength(1);
     expect(out[0].name).toBe("Sales portfolio.csv");

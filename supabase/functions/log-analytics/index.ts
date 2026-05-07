@@ -23,6 +23,119 @@ const MAX_PAGE_PATH = 512;
 const MAX_SESSION_ID = 128;
 const MAX_METADATA_BYTES = 4_000;
 const MAX_BODY_BYTES = 8_000;
+const MAX_STRING_VALUE = 1_000;
+
+// Keys that must NEVER appear in stored metadata, regardless of source.
+// Server derives identity/trust separately; anything matching these (case-insensitive,
+// substring match for token-like names) is silently stripped before insert.
+const DANGEROUS_KEY_PATTERNS = [
+  "wix_user_id",
+  "user_tier",
+  "tier",
+  "email",
+  "password",
+  "token",          // matches access_token, auth_token, session_token, jwt_token, id_token
+  "authorization",
+  "api_key",
+  "apikey",
+  "secret",
+  "jwt",
+  "session",        // session ids handled by top-level field
+  "trusted",
+];
+
+// Per-event-type metadata allowlists. Unknown keys are dropped silently.
+// Feature events branch by event_name prefix.
+const PAGE_VIEW_KEYS = new Set([
+  "referrer",
+  "full_path",
+  "search",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "conversation_id", // PageViewTracker enriches /c/<id> views
+]);
+const CHAT_EVENT_KEYS = new Set([
+  "search_mode",
+  "conversation_id",
+  "response_ms",
+  "error_code",
+  "mode",
+  "tier",            // dropped by dangerous filter; kept here only for clarity
+]);
+const APPRAISAL_EVENT_KEYS = new Set([
+  "property_type",
+  "location",
+  "file_count",
+  "status",
+  "error_code",
+]);
+// Generic feature-event fallback (funnel_*, report_view, etc.)
+const GENERIC_FEATURE_KEYS = new Set([
+  "conversation_id",
+  "report_id",
+  "report_type",
+  "region",
+  "mode",
+  "search_mode",
+  "error_code",
+  "source",
+]);
+
+function isDangerousKey(key: string): boolean {
+  const k = key.toLowerCase();
+  return DANGEROUS_KEY_PATTERNS.some((p) => k.includes(p));
+}
+
+function allowedKeysFor(eventType: string, eventName: string): Set<string> {
+  if (eventType === "page_view") return PAGE_VIEW_KEYS;
+  const n = eventName.toLowerCase();
+  if (n.startsWith("chat_")) return CHAT_EVENT_KEYS;
+  if (n.startsWith("appraisal_")) return APPRAISAL_EVENT_KEYS;
+  return GENERIC_FEATURE_KEYS;
+}
+
+type SanitizeResult =
+  | { ok: true; value: Record<string, unknown> }
+  | { ok: false; code: string; message: string };
+
+function sanitizeMetadata(
+  raw: Record<string, unknown>,
+  eventType: string,
+  eventName: string,
+): SanitizeResult {
+  const allowed = allowedKeysFor(eventType, eventName);
+  const out: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(raw)) {
+    if (typeof key !== "string" || !key) continue;
+    if (isDangerousKey(key)) continue;          // strip silently
+    if (!allowed.has(key)) continue;            // drop unknown keys
+    if (val === null || val === undefined) continue;
+    // Reject nested structures up-front; metadata must be flat primitives.
+    if (typeof val === "object") {
+      return {
+        ok: false,
+        code: "invalid_metadata",
+        message: `metadata.${key} must be a primitive (string|number|boolean)`,
+      };
+    }
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      if (!trimmed) continue;
+      out[key] = trimmed.slice(0, MAX_STRING_VALUE);
+    } else if (typeof val === "number" && Number.isFinite(val)) {
+      out[key] = val;
+    } else if (typeof val === "boolean") {
+      out[key] = val;
+    } else {
+      // Functions, symbols, bigints, etc. — drop.
+      continue;
+    }
+  }
+  return { ok: true, value: out };
+}
 
 // Rate limit: per (session_id|ip) sliding window.
 const RATE_WINDOW_MS = 10_000;

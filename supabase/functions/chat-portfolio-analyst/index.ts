@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { GLOBAL_RULES } from "../_shared/global-rules.ts";
 import { moderateMessage } from "../_shared/moderation.ts";
 import { RAG_CONTENT } from "../_shared/rag-content.ts";
-import { ANALYTICAL_SQL_PROMPT, ANALYTICAL_EXPLAIN_PROMPT } from "../_shared/schema.ts";
+import { ANALYTICAL_SQL_PROMPT, ANALYTICAL_EXPLAIN_PROMPT, CLASSIFIER_PROMPT, SQL_ERROR_FALLBACK_INSTRUCTION } from "../_shared/schema.ts";
 import {
   corsHeaders,
   scrapeUrlsFromMessage,
@@ -166,21 +166,18 @@ serve(async (req) => {
       body: JSON.stringify({
         model: AI_MODEL,
         messages: [
-          { role: "system", content: `You classify user questions about Bali real estate.
-If the question requires specific data lookups, custom filtering, or calculations that need raw database access, respond with exactly "ANALYTICAL".
-If the question can be answered from general market knowledge, trends, or the intelligence report, respond with exactly "RAG".
-Respond with only one word: ANALYTICAL or RAG.` },
+          { role: "system", content: CLASSIFIER_PROMPT },
           { role: "user", content: userMessage },
         ],
       }),
     });
 
-    let classification = "RAG";
+    let classification = "ANALYTICAL";
     if (!classifyResponse.ok) {
-      console.error("Classification failed, falling back to RAG:", classifyResponse.status);
+      console.error("Classification failed, defaulting to ANALYTICAL:", classifyResponse.status);
     } else {
       const classifyData = await classifyResponse.json();
-      classification = (classifyData.choices?.[0]?.message?.content?.trim() || "RAG").toUpperCase();
+      classification = (classifyData.choices?.[0]?.message?.content?.trim() || "ANALYTICAL").toUpperCase();
     }
 
     if (classification === "ANALYTICAL") {
@@ -233,8 +230,8 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
       if (queryError) {
         console.error("Query error:", queryError);
-        // Fall back to RAG with Pro content
-        const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
+        // Fall back to RAG but instruct the AI not to fabricate location-specific figures
+        const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },

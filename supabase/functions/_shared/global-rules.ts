@@ -188,6 +188,7 @@ Before writing your response, work through the following checks. Do not output t
 8. Language: British English, no filler phrases, no emojis, and absolutely no em dashes anywhere in any output. Use commas, colons, semicolons, parentheses, or rewrite instead.
 9. Mixed market ordering: is this a mixed sales/rental query? If yes, and the user did not specifically ask for rental performance, occupancy, ADR, revenue, rent, or yield, does the answer lead with transaction, pricing, or supply information before rental metrics? If not, reorder before responding.
 10. Follow-up check: does the closing question reference a specific figure or finding from this response? Does it represent the logical next step, not a variation of what was just asked? Is it one question, not a menu? Does it avoid filler openers? A generic closer is a failure , rewrite it before responding.
+11. Data source check: for every specific figure cited in this response (price, growth rate, occupancy, ADR, transaction count, yield), did it come from SQL query results provided in this message, or from the market intelligence document? The intelligence document contains regional-level aggregates only. If I have cited a location-specific figure (for a named neighbourhood such as Canggu, Umalas, Pererenan, Sanur, Ubud, etc.) that was not in the SQL results provided, I have fabricated it. Stop, remove it, and either state that a database query is needed or provide the broader regional figure with a clear label.
 Only output the response once all checks pass.
 `;
 

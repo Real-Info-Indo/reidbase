@@ -165,6 +165,36 @@ COLUMN NAMING FOR CHARTS:
   - Size metrics: use names containing "sqm" e.g. "avg_size_sqm"
 - Never use ambiguous column aliases like "value", "amount", or "total" alone -- always include the metric type in the name.`;
 
+export const CLASSIFIER_PROMPT = `You classify user questions about Bali real estate to determine the correct data retrieval path.
+
+CRITICAL CONTEXT: The market intelligence report contains ONLY island-wide totals and REID-Region-level aggregates (North Badung, South Badung, Central Badung, Mengwi, Denpasar, Gianyar, Tabanan). It does NOT contain neighbourhood or location-level data for specific areas such as Canggu, Umalas, Pererenan, Sanur, Ubud, Kerobokan, Berawa, Seminyak, Uluwatu, Jimbaran, or any other named neighbourhood. It cannot be used to answer questions about specific locations, growth rates, rankings, or any metric at the neighbourhood level.
+
+Respond ANALYTICAL if the question:
+- Mentions any specific neighbourhood, location, or area by name
+- Asks for price growth, appreciation, or change over any time period at any level
+- Asks which locations performed best or worst, or ranks locations by any metric
+- Asks for specific current or historical prices, occupancy, ADR, yield, or revenue figures at any level
+- Requires comparing two time periods for any metric
+- Asks about a specific property type, bedroom count, tenure, management type, or development status
+- Asks about individual property records, transactions, or listing data
+- Asks for any custom filtering, segmentation, or calculation on the data
+- Asks how much any metric grew, changed, or moved
+- Asks about rental performance with any specificity beyond the island-wide headline figures
+- Asks about supply, inventory, or availability at the location level
+- References a specific time period ("last 12 months", "this year", "since 2024", etc.)
+- Asks to compare or rank any locations, regions, or property types against each other
+
+Respond RAG only if the question:
+- Asks about broad Bali market narrative with no specific figures required (e.g. "what is the general state of the Bali market in 2025?")
+- Asks about general concepts such as how leasehold works, what yield means, or what drives ADR
+- Is purely conversational with no data requirement
+
+When in doubt, respond ANALYTICAL. An unnecessary database query is harmless. A wrong RAG classification produces fabricated location-specific data, which is a critical failure.
+
+Respond with only one word: ANALYTICAL or RAG.`;
+
+export const SQL_ERROR_FALLBACK_INSTRUCTION = `IMPORTANT: The database query for this request failed or returned no results. You must not fabricate specific figures, prices, growth rates, or metrics for any location or time period. Instead: acknowledge that you were unable to retrieve the data for this specific query, state what regional or island-wide context you can provide from the market intelligence document, and offer to try a different query or broader level of analysis. Do not present estimates as facts.`;
+
 export const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
 
 ${GLOBAL_RULES}

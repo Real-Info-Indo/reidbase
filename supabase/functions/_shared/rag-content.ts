@@ -1,9 +1,9 @@
-/* ── RAG CONTENT: 2025 REID Consolidated Intelligence Document ── */
+/* -- RAG CONTENT: 2025-Q1 2026 REID Consolidated Intelligence Document -- */
 /* Single export for all tiers. Tier differences control AI output depth, not RAG access. */
 export const RAG_CONTENT = `
-REID 2025 BALI PROPERTY MARKET INTELLIGENCE
+REID 2025-Q1 2026 BALI PROPERTY MARKET INTELLIGENCE
 All prices in USD. All sizes in SQM. Leasehold represents approximately 80% of transactional volume.
-Data currency: updated quarterly. This reflects 2025 annual data as of the most recent quarterly update.
+Data currency: updated quarterly. This reflects 2025 annual data with Q1 2026 updates as of the most recent quarterly revision.
 
 NEIGHBOURHOOD DIRECTORY
 Use this table to correctly classify any location a user mentions before responding.
@@ -32,7 +32,7 @@ LEGIAN                 | Central Badung | Other                 | Badung
 BABAKAN                | North Badung   | Other                 | Badung
 BERAWA                 | North Badung   | Key Market            | Badung
 CANGGU                 | North Badung   | Key Market            | Badung
-KEROBOKAN              | North Badung   | Key Market            | Badung
+KEROBOKAN              | North Badung   | Other                 | Badung
 BUMBAK                 | North Badung   | Other                 | Badung
 PADONAN                | North Badung   | Emerging Market       | Badung
 UMALAS                 | North Badung   | Key Market            | Badung
@@ -112,6 +112,57 @@ CRITICAL CLASSIFICATION NOTES: apply before every location response:
 - Sanur = Denpasar
 - Mengwi is a distinct REID region within Badung regency: never group Mengwi locations under North Badung
 - For any location not in the directory, classify under the nearest parent region and note data may be limited
+
+
+2026 Q1 BALI REAL ESTATE KEY INSIGHTS
+
+1. The market has entered a phase of controlled consolidation, with supply growth stabilising
+Development activity in Q1 2026 remains measured, with available stock accounting for 67% of listings and off-plan supply contained at 33%. This reflects a continuation of the 2025 pipeline contraction, where developers shifted from expansion toward inventory absorption. The stabilisation of apartment share at 13% further reinforces this transition, indicating that diversification has paused following rapid growth across 2024-2025.
+
+2. Apartment pipeline expansion introduces forward absorption and rental risk
+While apartments remain a small share of total supply, 79% of inventory is off-plan, highlighting continued developer focus on scaling this segment. However, the concentration of uncompleted projects creates a forward-loaded supply pipeline. As these developments reach completion, the market may face increased competition, impacting both sales absorption and rental performance, particularly if demand growth moderates.
+
+3. Compact assets continue to dominate demand, but supply expansion has slowed
+One- and two-bedroom properties remain the primary drivers of transaction activity, accounting for the majority of sales and reinforcing the structural shift toward yield-oriented, accessible assets first established in 2025. However, supply growth within these segments has begun to moderate as developer pipelines tighten, signalling a transition from rapid expansion to consolidation.
+
+4. Sales volume has softened amid regulatory scrutiny and global instability
+Transaction activity in Q1 2026 reflects a slowdown in overall sales volume, as buyer sentiment becomes more cautious. Increased focus on regulatory compliance, including zoning (RDTR), building approvals (PBG), and certificates of function (SLF), combined with broader global economic uncertainty, has contributed to longer decision timelines and reduced transaction velocity. This indicates a shift toward a more deliberate and risk-aware buyer profile.
+
+5. Pricing remains resilient, with stability driven by composition rather than growth
+Median pricing increased modestly by +0.7% year-on-year despite slower sales activity, reinforcing the market's underlying stability. As in 2025, price movements remain largely compositional, driven by the continued dominance of compact asset transactions rather than systemic value change. This highlights sustained price integrity across categories.
+
+6. A persistent pricing gap reinforces preference for completed, income-ready assets
+The price differential between available and off-plan properties remains above 20%, indicating a stable risk-adjusted pricing structure. Completed apartments attract a ~10% premium, while villas command a ~15% premium, reflecting strong buyer preference for operational readiness, immediate rental yield, and reduced delivery risk.
+
+7. Price per square metre shows early signs of competitive pressure
+Average price per sqm has softened slightly from the 2025 benchmark of $2,210, suggesting mild pricing compression at the efficiency level. This trend reflects increased competition, particularly within compact segments where supply expanded significantly in prior periods, leading to a gradual normalisation of pricing premiums.
+
+8. Rental market performance remains bifurcated, with occupancy growth offset by revenue decline
+Rental occupancy increased by 3.4% year-on-year, demonstrating continued demand resilience and the market's ability to absorb expanding supply. However, total revenue declined by approximately 7%, reflecting ongoing pressure on daily rates as competition intensifies. This divergence reinforces a volume-driven rental environment.
+
+9. Regional divergence is increasing across both sales and rental markets
+Performance across regions is becoming more uneven, with some areas benefiting from shifting demand patterns while others face increased competition. South Badung recorded a 10% increase in occupancy, while Central Badung declined by 7%, highlighting changing demand distribution and the growing importance of location-specific performance.
+
+10. Tourism recovery has reached a new structural phase, led by international demand
+Total tourist arrivals reached their highest level since 2019, marking a full recovery in travel demand. Foreign arrivals accounted for 42% of total visitors for the first time, indicating a structural shift toward international tourism. This change is likely to influence rental demand patterns, asset performance, and location-specific absorption across the market.
+
+11. The market is increasingly defined by discipline, compliance, and operational execution
+Q1 2026 reinforces Bali's transition into a more regulated and performance-driven environment. Regulatory compliance around zoning (RDTR), building approvals (PBG), and certificates of function (SLF) is becoming central to both development feasibility and investment decision-making. As a result, market performance is increasingly determined by product alignment, legal clarity, and operational execution rather than broad-based growth.
+
+
+2025 TO Q1 2026: CONTINUING THEMES
+
+The structural forces that defined 2025 have carried directly into Q1 2026, confirming that the market's current phase is not a single-year correction but a multi-year recalibration now entering its consolidation stage.
+
+1. Compact asset dominance is sustained. The structural shift toward 1 and 2 bedroom properties, which reached 53% of sales volume in 2025 after growing from under 35% in 2023, has continued into Q1 2026. Supply growth within these segments has moderated as developer pipelines tighten, but compact formats remain the primary driver of both transaction activity and market composition.
+
+2. The occupancy-revenue divergence is deepening. In 2025, occupancy improved approximately 2 percentage points while total rental revenue fell 15%, as rate compression outweighed volume gains. Q1 2026 extends this pattern: occupancy rose a further 3.4% year-on-year while revenue declined approximately 7%. The consistent direction across both periods confirms this is a structural feature of the current market, not a short-term anomaly. Operators are increasingly managing for volume stability over rate recovery.
+
+3. Supply contraction is continuing. Off-plan inventory fell 9% in 2025, and total new build area declined 34% year-on-year to 160,000 sqm. Q1 2026 reflects the downstream effect of this pipeline reduction, with available stock stabilising and off-plan supply contained at 33% of listings. Developer appetite remains measured, with the focus on absorbing existing inventory rather than launching new volume.
+
+4. Pricing softening remains compositional, not systemic. The 2025 median price decline of 2% was driven by the growing weight of compact, lower-value transactions rather than underlying asset depreciation. Q1 2026 reflects the same dynamic, with a modest 0.7% year-on-year increase in median pricing suggesting that per-category values are holding despite continued compositional pressure. Price per sqm has softened slightly from the 2025 benchmark of $2,210, indicating mild efficiency-level compression rather than broad value decline.
+
+5. Regulatory tightening is becoming a structural market condition. The 2025 shift toward a more scrutinised development and investment environment, driven by enforcement of zoning (RDTR), building approvals (PBG), and certificates of function (SLF), has intensified in Q1 2026. Compliance requirements are now a primary driver of buyer decision timelines and developer feasibility assessments, reinforcing a longer-term transition from a relationship-based market to one defined by formal legal and operational standards.
 
 
 2025 BALI REAL ESTATE KEY INSIGHTS
@@ -313,82 +364,82 @@ Despite the broad reduction, premium configurations particularly in North and So
 BALI KEY MARKETS
 
 BERAWA
-Berawa continues to function as one of Bali's core lifestyle investment corridors. Its relatively large supply base and strong pricing trajectory indicate a mature yet resilient market. The area attracts investors seeking established infrastructure, walkability, and consistent rental performance. Mid-to-upper pricing tiers and steady transaction activity position Berawa as a balanced, high-liquidity coastal market rather than a speculative growth play.
-Supply: 940+ (9% of market) | Median Price: $321k (+15%) | 2025 Sales: 250+ (6% of market)
-Largest category: 3 bed | Avg size: 225 sqm (+2%) | Avg $/sqm: $2,565 (+18%) | Avg lease term: 26 yrs (-3%)
+Berawa continues to function as one of Bali's core lifestyle investment corridors. Its relatively large supply base and strong pricing trajectory indicate a mature yet resilient market. The area attracts investors seeking established infrastructure, walkability, and consistent rental performance. With mid-to-upper pricing tiers and steady transaction activity, Berawa positions itself as a balanced, high-liquidity coastal market rather than a speculative growth play.
+Supply: 840+ | Median Price: $394k (+0.5%) | 2025 Sales: 250+ (-20%)
+Largest category: 3 bed | Avg size: 265 sqm (+1.5%) | Avg $/sqm: $2,210 (0%) | Avg lease term: 25 yrs (0%)
 
 BINGIN
 Bingin represents a boutique coastal enclave characterised by tighter supply and focused product composition. The prevalence of smaller format villas aligns with its positioning as a lifestyle-driven market appealing to shorter-stay rental demand and individual investors. Price appreciation without excessive supply expansion reinforces its reputation as a niche but desirable southern peninsula location.
-Supply: 200+ (2% of market) | Median Price: $298k (+6%) | 2025 Sales: 230+ (5% of market)
-Largest category: 2 bed | Avg size: 185 sqm (-16%) | Avg $/sqm: $2,395 (+10%) | Avg lease term: 28 yrs (+4%)
+Supply: 160+ | Median Price: $306k (-0.9%) | 2025 Sales: 230+ (+5%)
+Largest category: 2 bed | Avg size: 190 sqm (+1%) | Avg $/sqm: $2,330 (+1.5%) | Avg lease term: 28 yrs (0%)
 
 CANGGU
 Canggu remains the structural centre of Bali's villa market. As the island's largest market by supply and sales volume, it anchors investor activity and sets pricing benchmarks for surrounding areas. Its broad stock profile and sustained absorption reflect both end-user demand and rental-led acquisition. Canggu operates as the liquidity engine of Bali's west coast, with scale supporting pricing stability.
-Supply: 1,240+ (12% of market) | Median Price: $296k (+6%) | 2025 Sales: 480+ (12% of market)
-Largest category: 3 bed | Avg size: 230 sqm (+6%) | Avg $/sqm: $2,170 (0%) | Avg lease term: 26 yrs (-4%)
+Supply: 1,300+ | Median Price: $350k (+2.5%) | 2025 Sales: 490+ (-2%)
+Largest category: 3 bed | Avg size: 255 sqm (+3%) | Avg $/sqm: $2,070 (+1%) | Avg lease term: 26 yrs (0%)
 
 PERERENAN
 Pererenan has transitioned from an extension of Canggu into a premium submarket in its own right. Larger villa formats and stronger median pricing growth indicate movement toward higher-end residential positioning. The area attracts buyers seeking proximity to Canggu's amenities while favouring lower density and more residential character. Its performance profile suggests consolidation into Bali's upper-tier coastal bracket.
-Supply: 890+ (9% of market) | Median Price: $328k (+17%) | 2025 Sales: 370+ (9% of market)
-Largest category: 3 bed | Avg size: 245 sqm (+12%) | Avg $/sqm: $2,355 (+8%) | Avg lease term: 27 yrs (0%)
+Supply: 870+ | Median Price: $399k (-1.4%) | 2025 Sales: 390+ (-9%)
+Largest category: 3 bed | Avg size: 285 sqm (-2%) | Avg $/sqm: $2,215 (+9%) | Avg lease term: 27 yrs (0%)
 
 SANUR
 Sanur operates as a more traditional, family-oriented coastal market on the island's east side. Pricing growth alongside softer per-square-metre movement suggests larger residential-style villas rather than compact rental stock. Compared to west coast hubs, Sanur reflects a steadier, end-user driven environment with moderate turnover and less speculative supply expansion.
-Supply: 360+ (4% of market) | Median Price: $327k (+17%) | 2025 Sales: 110+ (3% of market)
-Largest category: 3 bed | Avg size: 235 sqm (+8%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 27 yrs (0%)
+Supply: 390+ | Median Price: $386k (+4.3%) | 2025 Sales: 110+ (-8%)
+Largest category: 3 bed | Avg size: 285 sqm (-1%) | Avg $/sqm: $2,060 (+8%) | Avg lease term: 27 yrs (+1%)
 
 SEMINYAK
 Seminyak represents one of Bali's original prime villa markets. While pricing remains elevated, relative moderation in per-square-metre growth and shorter lease terms suggest a mature cycle phase. The area continues to command recognition and infrastructure advantage, but its profile reflects consolidation rather than acceleration. It functions as an established premium address with stable but measured activity.
-Supply: 690+ (7% of market) | Median Price: $297k (+6%) | 2025 Sales: 230+ (5% of market)
-Largest category: 3 bed | Avg size: 250 sqm (+14%) | Avg $/sqm: $2,110 (-3%) | Avg lease term: 23 yrs (-13%)
+Supply: 730+ | Median Price: $357k (-0.5%) | 2025 Sales: 230+ (+5%)
+Largest category: 3 bed | Avg size: 200 sqm (-2.5%) | Avg $/sqm: $1,975 (+2%) | Avg lease term: 23 yrs (+2%)
 
 UBUD
 Ubud occupies a distinct inland niche centred on wellness, retreat, and longer-stay residency. Market behaviour reflects steady demand rather than rapid growth, with larger villas and moderate pricing positioning. Unlike coastal tourism hubs, Ubud's appeal lies in lifestyle differentiation, drawing buyers seeking tranquillity and natural surroundings. Its performance profile suggests stability over volatility.
-Supply: 760+ (7% of market) | Median Price: $293k (+5%) | 2025 Sales: 220+ (5% of market)
-Largest category: 3 bed | Avg size: 230 sqm (+6%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 26 yrs (-3%)
+Supply: 890+ | Median Price: $313k (+1.7%) | 2025 Sales: 270+ (+1%)
+Largest category: 3 bed | Avg size: 265 sqm (-5%) | Avg $/sqm: $1,930 (+7%) | Avg lease term: 26 yrs (0%)
 
 ULUWATU
 Uluwatu stands out for structural repositioning. The shift toward smaller villas combined with elevated per-square-metre pricing indicates densification of premium cliffside and ocean-view product. Despite softer median values, the area demonstrates strong absorption, reflecting continued demand for compact, high-yield formats. Uluwatu increasingly caters to design-led, view-oriented developments rather than expansive residential compounds.
-Supply: 680+ (7% of market) | Median Price: $238k (-15%) | 2025 Sales: 430+ (10% of market)
-Largest category: 2 bed | Avg size: 145 sqm (-33%) | Avg $/sqm: $2,725 (+25%) | Avg lease term: 32 yrs (+18%)
+Supply: 735+ | Median Price: $287k (-5.6%) | 2025 Sales: 400+ (+2%)
+Largest category: 2 bed | Avg size: 210 sqm (-10%) | Avg $/sqm: $2,225 (-2%) | Avg lease term: 31 yrs (-7%)
 
 UMALAS
 Umalas reflects one of the clearest moves toward upper-tier residential positioning. Larger average villa sizes and strong median pricing growth signal buyer appetite for expansive properties within proximity to Canggu and Seminyak. Rather than functioning as a short-term rental hotspot, Umalas aligns more closely with private residential and long-stay investors, supporting its premium orientation.
-Supply: 860+ (8% of market) | Median Price: $350k (+25%) | 2025 Sales: 250+ (6% of market)
-Largest category: 3 bed | Avg size: 285 sqm (+29%) | Avg $/sqm: $1,925 (-12%) | Avg lease term: 26 yrs (-4%)
+Supply: 830+ (-10% YoY) | Median Price: $391k (+6%) | 2025 Sales: 300+ (+6%)
+Largest category: 3 bed | Avg size: 300 sqm (+0.5%) | Avg $/sqm: $1,860 (+2.6%) | Avg lease term: 26 yrs (0%)
 
 UNGASAN
 Ungasan represents a more price-accessible southern market relative to Uluwatu. Softer pricing metrics and smaller average formats indicate repositioning toward entry-level and mid-market buyers. While sales activity remains active, its overall scale and price correction suggest an adjustment phase rather than premium consolidation.
-Supply: 230+ (2% of market) | Median Price: $237k (-15%) | 2025 Sales: 180+ (4% of market)
-Largest category: 2 bed | Avg size: 175 sqm (-20%) | Avg $/sqm: $1,870 (-14%) | Avg lease term: 28 yrs (+4%)
+Supply: 275+ | Median Price: $260k (-4%) | 2025 Sales: 220+ (+0.5%)
+Largest category: 3 bed | Avg size: 220 sqm (-10%) | Avg $/sqm: $1,775 (-1.2%) | Avg lease term: 20 yrs (0%)
 
 
 BALI EMERGING MARKETS
 
 BALANGAN
 Balangan operates as a secondary southern enclave with limited supply and measured demand. Pricing moderation and compact villa formats suggest early-stage development activity. The area appeals to buyers seeking exposure to the Bukit Peninsula at lower entry points compared to Uluwatu, though liquidity remains comparatively modest.
-Supply: 120+ (1% of market) | Median Price: $253k (-10%) | 2025 Sales: 80+ (2% of market)
-Largest category: 2 bed | Avg size: 170 sqm (-21%) | Avg $/sqm: $2,035 (-7%) | Avg lease term: 29 yrs (+8%)
+Supply: 120+ | Median Price: $274k (+5.9%) | 2025 Sales: 90+ (+12%)
+Largest category: 3 bed | Avg size: 195 sqm (+0.7%) | Avg $/sqm: $2,165 (+1.1%) | Avg lease term: 29 yrs (-6%)
 
 KABA KABA
 Kaba Kaba reflects a nascent inland market with minimal supply and low transaction depth. Its pricing recalibration and moderate villa sizing indicate a developmental phase rather than established demand concentration. The area's growth trajectory will likely depend on infrastructure expansion and spillover from western coastal hubs.
-Supply: 80+ (1% of market) | Median Price: $235k (-16%) | 2025 Sales: 40+ (1% of market)
-Largest category: 3 bed | Avg size: 195 sqm (-10%) | Avg $/sqm: $1,995 (-8%) | Avg lease term: 28 yrs (+5%)
+Supply: 75+ | Median Price: $279k (+2%) | 2025 Sales: 55+ (-7%)
+Largest category: 3 bed | Avg size: 310 sqm (-2.4%) | Avg $/sqm: $1,665 (+6.4%) | Avg lease term: 28 yrs (-3%)
 
 NYANYI
 Nyanyi presents a contrasting profile among emerging areas. Despite limited transaction volume, pricing indicators suggest premium aspirations, supported by proximity to high-end resort and master-planned developments. It occupies a strategic position between Canggu expansion zones and lower-density coastal land, positioning it as a potential high-value niche rather than a mass-market location.
-Supply: 125+ (1% of market) | Median Price: $299k (+7%) | 2025 Sales: 30+ (1% of market)
-Largest category: 2 bed | Avg size: 200 sqm (-9%) | Avg $/sqm: $2,540 (+17%) | Avg lease term: 28 yrs (+5%)
+Supply: 145+ | Median Price: $600k (+0.3%) | 2025 Sales: 60+ (-3.2%)
+Largest category: 2 bed | Avg size: 280 sqm (-10%) | Avg $/sqm: $2,530 (+8.9%) | Avg lease term: 29 yrs (-2.3%)
 
 PADONAN
 Padonan functions as an affordability-driven extension of Canggu. Price compression and mid-sized villas suggest repositioning toward accessible entry points for investors priced out of core areas. While demand remains moderate, its identity is closely tied to spillover activity rather than independent destination appeal.
-Supply: 160+ (2% of market) | Median Price: $250k (-11%) | 2025 Sales: 60+ (2% of market)
-Largest category: 3 bed | Avg size: 195 sqm (-11%) | Avg $/sqm: $1,740 (-20%) | Avg lease term: 26 yrs (-5%)
+Supply: 160+ | Median Price: $258k (+0.1%) | 2025 Sales: 70+ (-12%)
+Largest category: 3 bed | Avg size: 200 sqm (-2.9%) | Avg $/sqm: $1,690 (+1%) | Avg lease term: 25 yrs (+0.5%)
 
 SESEH
 Seseh reflects an emerging coastal residential enclave with relatively larger villas and premium ambitions. However, recent pricing adjustments suggest recalibration following earlier growth phases. Its appeal lies in low-density beachfront positioning, though absorption remains measured relative to more central west coast locations.
-Supply: 190+ (2% of market) | Median Price: $337k (-11%) | 2025 Sales: 90+ (2% of market)
-Largest category: 3 bed | Avg size: 250 sqm (-11%) | Avg $/sqm: $2,015 (-20%) | Avg lease term: 25 yrs (-5%)
+Supply: 180+ (-11% YoY) | Median Price: $375k (+2.1%) | 2025 Sales: 80+ (-2%)
+Largest category: 3 bed | Avg size: 310 sqm (-2%) | Avg $/sqm: $1,670 (+6.4%) | Avg lease term: 29 yrs (-3%)
 
 
 BALI REGULATORY LANDSCAPE

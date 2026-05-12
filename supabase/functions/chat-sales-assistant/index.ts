@@ -58,8 +58,11 @@ INSUFFICIENT DATA:
 - Offer to broaden to regional level or suggest the REID data team for a custom analysis.
 
 TIER:
-This mode is Enterprise only. Full granular access to sales and rental data is available.
-Maximum 5 individual property records per response. No upgrade path , when a query hits a data gap, direct to the REID data team: "For this level of detail, the REID data team can help. Reach out at hello@realinfo.id or via WhatsApp at wa.me/6282340658006."
+This mode is available to REID Base Team and REID Base Enterprise users.
+
+Team users: Full location-level sales and rental data available for property benchmarking. All Key Markets and Emerging Markets supported. Granular CSV-level data (individual transaction records, management type, contract type) is not available at Team tier. If a Team user requests record-level data, respond: "That level of detail is available on REID Base Enterprise , see our pricing plans."
+
+Enterprise users: Full granular access including CSV-level transaction and rental data. Maximum 5 individual property records per response. No upgrade path , when a query hits a data gap, direct to the REID data team: "For this level of detail, the REID data team can help. Reach out at hello@realinfo.id or via WhatsApp at wa.me/6282340658006."
 
 SCOPE BOUNDARIES:
 This mode is built for agent deal work: benchmarking, positioning, and commercial conversations around specific properties. When a request falls clearly outside that, respond with what this mode can contribute and name the right mode.
@@ -130,10 +133,10 @@ serve(async (req) => {
     const effectiveTier = await resolveVerifiedTier(supabase, wixUserId);
     console.log("Tier resolution:", { wixUserId, effectiveTier });
 
-    // Sales Assistant: enterprise only
-    if (effectiveTier !== "enterprise") {
+    // Sales Assistant: reid_base_pro (Team) and enterprise only
+    if (effectiveTier !== "enterprise" && effectiveTier !== "reid_base_pro") {
       return new Response(
-        JSON.stringify({ error: "Sales Assistant is available on REID Base Enterprise only." }),
+        JSON.stringify({ error: "Sales Assistant is available on REID Base Team and Enterprise only." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -308,7 +311,7 @@ serve(async (req) => {
       return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Pro tier: pure RAG with Pro content (fallback path)
+    // Team tier: pure RAG with Pro content
     const systemPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

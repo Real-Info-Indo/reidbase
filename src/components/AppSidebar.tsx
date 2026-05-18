@@ -38,7 +38,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [convoSearch, setConvoSearch] = useState("");
   const { tier, userName } = useTier();
-  const { logout, member } = useWixAuth();
+  const { logout, login, member } = useWixAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -435,6 +435,23 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
 
       {/* User profile */}
       <div className="border-t border-sidebar-border p-3">
+        {!member ? (
+          <button
+            onClick={() => { void login(); }}
+            className="flex items-center gap-3 w-full rounded-lg p-1.5 hover:bg-sidebar-accent transition-colors text-left"
+            title="Sign in to your REID account"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent">
+              <User className="h-4 w-4 text-sidebar-primary" />
+            </div>
+            {!collapsed && (
+              <div className="min-w-0">
+                <p className="text-sm font-extralight truncate">Sign in</p>
+                <span className="text-[10px] text-sidebar-muted">Access your REID account</span>
+              </div>
+            )}
+          </button>
+        ) : (
         <Popover>
           <PopoverTrigger asChild>
             <button className="flex items-center gap-3 w-full rounded-lg p-1.5 hover:bg-sidebar-accent transition-colors text-left">
@@ -500,6 +517,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             </button>
           </PopoverContent>
         </Popover>
+        )}
       </div>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

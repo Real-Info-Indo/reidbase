@@ -517,6 +517,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
             </button>
           </PopoverContent>
         </Popover>
+        )}
       </div>
 
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />

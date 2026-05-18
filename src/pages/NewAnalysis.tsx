@@ -1103,9 +1103,11 @@ export default function NewAnalysis() {
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain px-3 md:px-8 py-12 bg-background relative">
         {!hasConversation ?
         <div className="max-w-3xl mx-auto">
-             <p className="text-base md:text-xl text-muted-foreground font-light mb-1">
-               Hi {greetingName},
-             </p>
+             {isLoggedIn && (
+               <p className="text-base md:text-xl text-muted-foreground font-light mb-1">
+                 Hi {greetingName},
+               </p>
+             )}
              <h1 className="text-2xl md:text-4xl font-extralight mb-8">What would you like to discover?</h1>
             {folderContext && (
               <div className="mb-2 flex justify-start">

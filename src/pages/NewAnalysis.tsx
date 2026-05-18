@@ -547,6 +547,7 @@ export default function NewAnalysis() {
   const paramFolderId = searchParams.get("folder");
   const pendingFolderIdRef = useRef<string | null>(null);
   const { tier, userName } = useTier();
+  const { isLoggedIn, login } = useWixAuth();
   // Free tier ("free" canonical, legacy "member" treated as free).
   const isFreemium = tier === "free" || tier === "member";
   const limitReached = isFreemium && dailyPromptCount >= DAILY_LIMIT;

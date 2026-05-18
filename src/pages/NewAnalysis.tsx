@@ -16,6 +16,7 @@ import {
   getFolders, moveToFolder, type Folder } from
 "@/lib/conversations";
 import { useTier } from "@/contexts/TierContext";
+import { useWixAuth } from "@/contexts/WixAuthContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
 import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, refreshConversationSummary } from "@/lib/chatLogger";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
@@ -909,6 +910,13 @@ export default function NewAnalysis() {
 
   const send = async (input: string) => {
     if (!input.trim() || isLoading) return;
+    // Unauthenticated users can browse the platform, but sending a prompt
+    // requires a REID account. Trigger the Wix OAuth login flow instead.
+    if (!isLoggedIn) {
+      toast.info("Sign in to your REID account to start a conversation.");
+      void login();
+      return;
+    }
     // Check if we need tenure clarification
     if (needsTenureClarification(input, clarifiedLocations)) {
       // Add user message so the conversation view activates and the tenure popup is visible

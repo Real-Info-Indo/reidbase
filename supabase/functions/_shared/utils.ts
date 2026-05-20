@@ -130,6 +130,16 @@ export function buildPersonalisationBlock(
   return `\nUSER PROFILE (use this to personalise your responses and build on prior context):\n${parts.join("\n")}\n`;
 }
 
+/**
+ * Strip location-specific sections (BALI KEY MARKETS and BALI EMERGING MARKETS)
+ * from the RAG content for free tier users. This prevents the AI from accessing
+ * neighbourhood-level figures that are gated behind REID Base Member.
+ */
+function buildFreeRagContent(ragContent: string): string {
+  const cutIndex = ragContent.indexOf('\nBALI KEY MARKETS\n');
+  return cutIndex === -1 ? ragContent : ragContent.substring(0, cutIndex).trimEnd();
+}
+
 export function buildRagSystemPrompt(
   tier: string,
   ragContent: string,
@@ -140,6 +150,7 @@ export function buildRagSystemPrompt(
 ): string {
   const tierLabel = tier === "enterprise" ? "Enterprise" : tier === "reid_base_pro" ? "Team" : tier === "reid_base" ? "Member" : "Freemium";
   const personalisationBlock = buildPersonalisationBlock(personalisation, aiSummary, tier);
+  const effectiveRagContent = tier === "free" ? buildFreeRagContent(ragContent) : ragContent;
   return `You are REID, an expert Bali real estate market analyst for ${tierLabel} tier users.
 
 CRITICAL: CURRENT USER TIER: This user is on the ${tierLabel} tier. Apply ONLY the ${tierLabel} tier rules from TIER HANDLING below. Do not apply rules from any other tier. Do not refer to the user as being on any other tier. Do not show upgrade prompts meant for lower tiers.
@@ -178,11 +189,18 @@ Chart Generation Rules:
 - Keep data arrays to 24 items max for MoM, 8 for QoQ, 5 for YoY.
 - Only offer a chart at the end of a response where it would genuinely aid understanding: "Would you like to see this as a chart?" Do not offer on every response.
 
-${tier === "free" || tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Pro or Enterprise tier upgrade." : ""}
-${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
+${tier === "free" ? `FREE TIER DATA RESTRICTION (ABSOLUTE):
+The intelligence report below contains only island-wide and regional data -- location-specific figures have been withheld. Do not attempt to surface, estimate, or infer neighbourhood-level data. When this user asks about a specific location, apply the four-step structure from TIER HANDLING exactly:
+1. One orienting sentence acknowledging the location and its regional context.
+2. A bolded "Data Availability" heading, then state the limitation, the upgrade prompt ("Detailed data for [location] is available on REID Base Member, or explore it now in your dashboard"), and that regional benchmarks follow.
+3. Regional figures only -- attributed to the REID region (e.g. North Badung), never to the specific location. Do not mention the neighbourhood name in any figure or data point.
+4. Natural follow-up referencing the regional data.
+The Data Availability notice and upgrade prompt must appear before any figures. This is not optional.` : ""}
+${tier === "reid_base" ? "- This user is on REID Base Member. They have island-wide and regional data in the AI chat. Location-level data (neighbourhood-specific figures) is available in their REID Base dashboard for self-serve discovery. When a Member query hits a location data limit, remind them to check their dashboard and point to REID Base Team for AI-level analysis." : ""}
+${tier === "reid_base_pro" ? "- This user has access to macro-market and neighbourhood-level data for Key and Emerging Markets. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
 
 REID 2025 Intelligence Report:
-${ragContent}`;
+${effectiveRagContent}`;
 }
 
 /**

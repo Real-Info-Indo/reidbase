@@ -281,7 +281,7 @@ export function AppSidebar({ onNavigate, isMobile }: {onNavigate?: () => void; i
       </nav>
 
       {/* Scrollable recent conversations */}
-      {!collapsed && conversations.length > 0 &&
+      {member && !collapsed && conversations.length > 0 &&
         <div className="flex-1 min-h-0 overflow-y-auto px-2">
           <div className="px-3">
             {(tier === "reid_base_pro" || tier === "enterprise") && (

@@ -38,7 +38,7 @@ serve(async (req) => {
 
   // Admin-only endpoint — must be called from a cron job or admin tooling.
   // Verify the shared admin secret so arbitrary callers cannot trigger a
-  // full batch AI profile generation run across all Pro/Enterprise users.
+  // full batch AI profile generation run across all Team/Enterprise users.
   const adminSecret = Deno.env.get("ADMIN_SECRET");
   const presented = req.headers.get("x-admin-secret") ?? "";
   if (!adminSecret || presented !== adminSecret) {
@@ -58,7 +58,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Find users with recent chat activity but stale or missing ai_summary
-    // Only process users on Pro or Enterprise tiers -- Member gets conversation
+    // Only process users on Team or Enterprise tiers -- Member gets conversation
     // history only, no AI summary generation needed
     const { data: usersToProcess, error: usersError } = await supabase
       .from("user_profiles")

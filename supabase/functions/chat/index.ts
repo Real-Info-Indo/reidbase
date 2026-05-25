@@ -631,7 +631,7 @@ function buildPersonalisationBlock(
     if (personalisation?.about) parts.push(`- About the user: ${personalisation.about}.`);
   }
 
-  // Pro and Enterprise: include AI-generated summary
+  // Team and Enterprise: include AI-generated summary
   if (aiSummary && tier && (tier === "reid_base_pro" || tier === "enterprise")) {
     parts.push(`- User profile summary: ${aiSummary}`);
   }
@@ -789,7 +789,7 @@ serve(async (req) => {
       effectiveSearchMode = "data-analyst";
     }
 
-    // Build cross-conversation memory for Pro/Enterprise users
+    // Build cross-conversation memory for Team/Enterprise users
     const { memory: rawUserMemory, aiSummary } = await buildUserMemory(supabase, wixUserId, effectiveTier);
     // Build folder memory: sibling-conversation summaries from the same folder (paid tiers)
     const folderMemory = await buildFolderMemory(supabase, wixUserId, conversationId, effectiveTier);
@@ -829,7 +829,7 @@ serve(async (req) => {
       };
     }
 
-    // Enterprise tier: use Pro RAG + analytical (database queries)
+    // Enterprise tier: full RAG + analytical (database queries)
     if (effectiveTier === "enterprise") {
       // First try to determine if the question needs a database query
       const classifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -908,7 +908,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
         if (queryError) {
           console.error("Query error:", queryError);
-          // Fall back to RAG with Pro content
+          // Fall back to RAG content
           const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary);
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
@@ -938,7 +938,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         return new Response(explainResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
       }
 
-      // Enterprise RAG fallback (uses Pro content + dynamic DB stats)
+      // Enterprise RAG fallback (uses full RAG content + dynamic DB stats)
       const contextParts: string[] = [];
       const { data: stats } = await supabase.rpc("execute_readonly_query", {
         query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM properties_2025`
@@ -962,7 +962,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Member/Base and Pro tiers: pure RAG
+    // Member, Team tiers: pure RAG
     const ragContent = RAG_CONTENT;
     const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation, userMemory, aiSummary);
 

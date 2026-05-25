@@ -146,7 +146,7 @@ serve(async (req) => {
       };
     }
 
-    // Enterprise: use Pro RAG + analytical (database queries)
+    // Enterprise: full RAG + analytical (database queries)
     // First try to determine if the question needs a database query
     const classifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -224,7 +224,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
       if (queryError) {
         console.error("Query error:", queryError);
-        // Fall back to RAG with Pro content
+        // Fall back to RAG content
         const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -254,7 +254,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       return new Response(explainResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Enterprise RAG fallback (uses Pro content + dynamic DB stats)
+    // Enterprise RAG fallback (uses full RAG content + dynamic DB stats)
     const contextParts: string[] = [];
     const { data: stats } = await supabase.rpc("execute_readonly_query", {
       query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM properties_2025`

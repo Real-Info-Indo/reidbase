@@ -121,7 +121,7 @@ export function buildPersonalisationBlock(
     if (personalisation?.about) parts.push(`- About the user: ${personalisation.about}.`);
   }
 
-  // Pro and Enterprise: include AI-generated summary
+  // Team and Enterprise: include AI-generated summary
   if (aiSummary && tier && (tier === "reid_base_pro" || tier === "enterprise")) {
     parts.push(`- User profile summary: ${aiSummary}`);
   }

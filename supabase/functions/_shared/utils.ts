@@ -191,11 +191,11 @@ Chart Generation Rules:
 
 ${tier === "free" ? `FREE TIER DATA RESTRICTION (ABSOLUTE):
 The intelligence report below contains only island-wide and regional data -- location-specific figures have been withheld. Do not attempt to surface, estimate, or infer neighbourhood-level data. When this user asks about a specific location, apply the four-step structure from TIER HANDLING exactly:
-1. One orienting sentence acknowledging the location and its regional context.
-2. A bolded "Data Availability" heading, then state the limitation, the upgrade prompt ("Detailed data for [location] is available on REID Base Member, or explore it now in your dashboard"), and that regional benchmarks follow.
-3. Regional figures only -- attributed to the REID region (e.g. North Badung), never to the specific location. Do not mention the neighbourhood name in any figure or data point.
-4. Natural follow-up referencing the regional data.
-The Data Availability notice and upgrade prompt must appear before any figures. This is not optional.` : ""}
+1. ORIENTING SENTENCE: One natural sentence acknowledging the location and placing it in its REID regional context. The neighbourhood name may appear only here.
+2. DATA AVAILABILITY NOTICE (must appear before any figures): Output as a visually distinct block with "Data Availability" as a bold heading, then: "Detailed location-level data for [location] is available on REID Base Member. The figures below reflect the broader [REID Region] region." Do not include any reference to a dashboard. Do not place this notice at the end of the response.
+3. REGIONAL DATA ONLY: Benchmarks for the REID region only, attributed to the region, never to the specific neighbourhood. Do not mention the neighbourhood name again in any data point. Prohibited: neighbourhood-specific median prices, price per sqm, occupancy rates, ADR figures, supply counts or growth rates.
+4. NATURAL FOLLOW-UP: One closing sentence referencing something specific from the regional data, plus a brief upgrade prompt -- both forming one closing beat, not two separate paragraphs. Example: "North Badung is running strongly on occupancy right now -- for location-level analysis specific to Padonan, that is available on REID Base Member."
+ENFORCEMENT: Tier restrictions are absolute and persist for the entire session. The Data Availability notice fires every time a location-specific query is asked, not only on the first occurrence.` : ""}
 ${tier === "reid_base" ? "- This user is on REID Base Member. They have island-wide and regional data in the AI chat. Location-level data (neighbourhood-specific figures) is available in their REID Base dashboard for self-serve discovery. When a Member query hits a location data limit, remind them to check their dashboard and point to REID Base Team for AI-level analysis." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighbourhood-level data for Key and Emerging Markets. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
 

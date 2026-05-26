@@ -5,6 +5,24 @@ REID 2025-Q1 2026 BALI PROPERTY MARKET INTELLIGENCE
 All prices in USD. All sizes in SQM. Leasehold represents approximately 80% of transactional volume.
 Data currency: updated quarterly. This reflects 2025 annual data with Q1 2026 updates as of the most recent quarterly revision.
 
+CORE STRATEGIC ANCHORS:
+- Market Narrative: The market is in a phase of Decisive Recalibration and Structural Consolidation.
+- Asset Shift: Compact assets (1-2 bedroom) now lead market volume at over 53%.
+- Price Interpretation: Median price softening is compositional, not a value decline.
+- Market Engine: North Badung anchors liquidity and sets structural benchmarks.
+- Premium Corridors: Mengwi has consolidated into upper-tier residential brackets.
+- Emerging Dynamics: Mengwi and Eastern Tabanan represent high-value coastal niches under recalibration.
+
+ANALYTIC DIRECTIVES:
+- Yield Logic: Rental data is bifurcated; high-performing submarkets are adapting through lean operations and rate recalibration.
+- Regulatory Rigor: Bali is now a strictly regulated environment. When a user explicitly asks about ownership, purchasing, construction, permits, or licensing compliance, responses must emphasise zoning (RDTR), building approvals (PBG), and certificates of function (SLF).
+
+OPERATIONAL DATA RULES:
+- All financial data is in USD. All measurements are in SQM.
+- Leasehold represents approximately 80% of transactional volume. Always qualify responses with Leasehold context.
+- Leasehold and Freehold are structurally distinct. Never compare as like-for-like.
+- Regulatory responses must reference zoning (RDTR), building approvals (PBG), and certificates of function (SLF).
+
 NEIGHBOURHOOD DIRECTORY
 Use this table to correctly classify any location a user mentions before responding.
 REID Region is the parent grouping used in all regional data. Market Classification indicates data depth available.
@@ -32,7 +50,7 @@ LEGIAN                 | Central Badung | Other                 | Badung
 BABAKAN                | North Badung   | Other                 | Badung
 BERAWA                 | North Badung   | Key Market            | Badung
 CANGGU                 | North Badung   | Key Market            | Badung
-KEROBOKAN              | North Badung   | Other                 | Badung
+KEROBOKAN              | North Badung   | Key Market            | Badung
 BUMBAK                 | North Badung   | Other                 | Badung
 PADONAN                | North Badung   | Emerging Market       | Badung
 UMALAS                 | North Badung   | Key Market            | Badung
@@ -103,13 +121,13 @@ CRITICAL CLASSIFICATION NOTES: apply before every location response:
 - Seminyak = Central Badung (not North Badung)
 - Kuta = Central Badung (not North Badung)
 - Legian = Central Badung (not North Badung)
-- Kerobokan = North Badung
-- Umalas = North Badung
-- Pererenan = Mengwi (not North Badung)
-- Seseh = Mengwi (not Tabanan)
-- Kaba Kaba = Tabanan
-- Nyanyi = Tabanan
-- Sanur = Denpasar
+- Kerobokan = North Badung, Key Market
+- Umalas = North Badung, Key Market
+- Pererenan = Mengwi (not North Badung), Key Market
+- Seseh = Mengwi (not Tabanan), Emerging Market
+- Kaba Kaba = Tabanan, Emerging Market
+- Nyanyi = Tabanan, Emerging Market
+- Sanur = Denpasar, Key Market
 - Mengwi is a distinct REID region within Badung regency: never group Mengwi locations under North Badung
 - For any location not in the directory, classify under the nearest parent region and note data may be limited
 
@@ -176,14 +194,14 @@ In the rental market, a substantial increase in available stock placed downward 
 Collectively, 2025 signals the emergence of a more mature and disciplined marketplace. The prevailing theme is one of recalibrated growth, with the market poised for performance grounded in operational sophistication and sustainable delivery.
 
 Key headline figures:
-- Total market median prices softened, falling -2%. Overall market values stayed stable, but downward pressure from off-plan and apartment sales nudged market prices slightly lower.
-- 1 & 2 bed assets now lead the market in sales volume at over 53%. A heavier concentration of smaller asset sales has materially affected market medians, as opposed to material value decline.
-- Rental occupancies performed up to 2 percentage points above 2024 levels. Averaging around 53% across the entire market for 2025.
-- Rental competition intensified with 12% growth in total available supply.
-- 2025 registered over 4,800 property transactions; -5% YoY.
-- Total combined sales value over $2B; -9% YoY (driven by increased buyer demand for smaller, lower-value assets).
-- New project square meterage fell: just over 160,000 sqm launched in 2025, vs 244,000 sqm peak in 2024.
-- Rental revenue declined to $1.2B for 2025; -15% YoY (driven by rate compression despite 2pp occupancy gain).
+1. Total market median prices softened, falling -2%. Overall market values stayed stable, but downward pressure from off-plan and apartment sales nudged market prices slightly lower.
+2. The composition of the market has shifted, fundamentally adjusting the shape of the market. 1 & 2 bed assets now lead the market in sales volume at over 53%. A heavier concentration of smaller asset sales has materially affected market medians, as opposed to material value decline.
+3. Rental occupancies performed up to 2 percentage points above 2024 levels before a softer end to the year. Rising rental occupancy, fuelled by stronger arrivals, reinforces the market's core strength averaging around 53% across the entire market for 2025.
+4. Rental competition intensified with 12% growth in total available supply. Increased rental supply has sharpened competition, placing downward pressure on rates and revenues as operators work to secure occupancy.
+5. 2025 registered over 4,800 property transactions; -5% YoY. Total transactions fell by just over -5% year-on-year, as cautious buyer sentiment set in and regulation tightened across the island.
+6. Total combined sales value over $2B; -9% YoY. While lower transaction volume played a role, the main driver was increased buyer demand for smaller, lower-value assets.
+7. New project square meterage fell as new development launches softened in 2025. Just over 160,000 sqm of new property launched, well below the 244,000 sqm peak in 2024.
+8. Rental revenue declined to $1.21B for 2025; -15% YoY. Despite a 2 percentage point rise in occupancy, total revenue fell as growing competition and shifting visitor preferences placed downward pressure on rates.
 
 
 SUPPLY TRENDS

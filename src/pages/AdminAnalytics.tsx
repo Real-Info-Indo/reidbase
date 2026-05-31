@@ -23,7 +23,7 @@ import { invokeAdmin } from "@/lib/adminApi";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-type RangePreset = "30" | "90" | "180" | "365" | "custom";
+type RangePreset = "7" | "30" | "90" | "180" | "365" | "custom";
 
 function downloadCsv(filename: string, rows: (string | number)[][]) {
   const esc = (v: string | number) => {

@@ -23,7 +23,7 @@ import { invokeAdmin } from "@/lib/adminApi";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-type RangePreset = "30" | "90" | "180" | "365" | "custom";
+type RangePreset = "7" | "30" | "90" | "180" | "365" | "custom";
 
 function downloadCsv(filename: string, rows: (string | number)[][]) {
   const esc = (v: string | number) => {
@@ -442,6 +442,7 @@ export default function AdminAnalytics() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
                 <SelectItem value="30">Last 30 days</SelectItem>
                 <SelectItem value="90">Last 90 days</SelectItem>
                 <SelectItem value="180">Last 180 days</SelectItem>

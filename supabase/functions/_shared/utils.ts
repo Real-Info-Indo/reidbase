@@ -200,7 +200,7 @@ ${tier === "reid_base" ? "- This user is on REID Base Member with full location-
 ${tier === "reid_base_pro" ? "- This user is on REID Base Team with full location-level data access. All REID database figures are available in this session. When a Team query references a mode not available on their tier (Marketing Assistant, Portfolio Analyst), fire the upgrade prompt." : ""}
 ${tier === "free" ? "- ADDITIONAL FREE TIER RULE: If no verified regional REID data exists in the current context for the region being asked about, do not produce any figures at all. Apply the four-step structure and state that data for this region is limited in the current update cycle. Never substitute figures from training knowledge." : ""}
 
-REID 2025 Intelligence Report:
+REID Intelligence Report:
 ${effectiveRagContent}`;
 }
 

@@ -1,6 +1,8 @@
 import { GLOBAL_RULES } from "./global-rules.ts";
 
 export const SCHEMA_DESCRIPTION = `
+DATA CURRENCY: The REID database is updated on an ongoing basis and contains data current to the most recent import. Do not infer data recency from table names or prompt language. Always use the most recent data available in the tables.
+
 Table: reid_properties
 Columns:
 - uqid (integer, PK)
@@ -48,7 +50,7 @@ Always ROUND() numeric results. Always filter out nulls for the columns being an
 When querying rentals, use the reid_rentals table. When querying property sales/supply, use reid_properties.
 `;
 
-export const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the reid_properties table.
+export const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the REID property database (reid_properties for sales/supply data, reid_rentals for rental data).
 
 ${SCHEMA_DESCRIPTION}
 
@@ -65,8 +67,8 @@ Rules:
 
 TIME SERIES QUERIES:
 - For MoM (month-on-month) queries, group by the date column and order chronologically. Format date labels as "Mon YY" (e.g. "Jan 25", "Feb 25") using string manipulation on the date column.
-- For QoQ (quarter-on-quarter) queries, derive the quarter from the date column. Label as "Q1 2025", "Q2 2025" etc.
-- For YoY (year-on-year) queries, extract the year from the date column. Label as "2023", "2024", "2025".
+- For QoQ (quarter-on-quarter) queries, derive the quarter from the date column. Label as "Q1 2025", "Q2 2025", "Q1 2026", etc. — always generate a bucket for every quarter present in the data.
+- For YoY (year-on-year) queries, extract the year from the date column. Label as "2022", "2023", "2024", "2025", "2026" — always generate a bucket for every year present in the data, including 2026 if records exist.
 - Always ORDER BY date ascending for time series queries so charts render chronologically left to right.
 - When querying reid_rentals for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
 - Limit time series results to 24 months max for MoM, 8 quarters for QoQ, and 5 years for YoY.
@@ -195,7 +197,7 @@ Respond with only one word: ANALYTICAL or RAG.`;
 
 export const SQL_ERROR_FALLBACK_INSTRUCTION = `IMPORTANT: The database query for this request failed or returned no results. You must not fabricate specific figures, prices, growth rates, or metrics for any location or time period. Do not substitute figures from training knowledge. Instead: acknowledge that you were unable to retrieve the data for this specific query, state what regional or island-wide context you can provide from the market intelligence document, and offer to try a different query or broader level of analysis. Do not present estimates as facts.`;
 
-export const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
+export const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID property database and received results.
 
 ${GLOBAL_RULES}
 

@@ -527,6 +527,8 @@ TIER:
 
 
 const SCHEMA_DESCRIPTION = `
+DATA CURRENCY: The REID database is updated on an ongoing basis and contains data current to the most recent import. Do not infer data recency from table names or prompt language. Always use the most recent data available in the tables.
+
 Table: reid_properties
 Columns:
 - uqid (integer, PK)
@@ -576,7 +578,7 @@ Always filter out nulls for the columns being analyzed.
 When querying rentals, use the reid_rentals table. When querying property sales/supply, use reid_properties.
 `;
 
-const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the reid_properties table.
+const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the REID property database (reid_properties for sales/supply data, reid_rentals for rental data).
 
 ${SCHEMA_DESCRIPTION}
 
@@ -591,7 +593,7 @@ Rules:
 - Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
 - Only SELECT queries are allowed`;
 
-const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
+const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID property database and received results.
 
 ${GLOBAL_RULES}
 
@@ -680,7 +682,7 @@ Chart Generation Rules:
 ${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Team or Enterprise tier upgrade." : ""}
 ${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
 
-REID 2025 Intelligence Report:
+REID Intelligence Report:
 ${ragContent}`;
 }
 

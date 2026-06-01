@@ -193,11 +193,13 @@ When in doubt, respond ANALYTICAL. An unnecessary database query is harmless. A 
 
 Respond with only one word: ANALYTICAL or RAG.`;
 
-export const SQL_ERROR_FALLBACK_INSTRUCTION = `IMPORTANT: The database query for this request failed or returned no results. You must not fabricate specific figures, prices, growth rates, or metrics for any location or time period. Instead: acknowledge that you were unable to retrieve the data for this specific query, state what regional or island-wide context you can provide from the market intelligence document, and offer to try a different query or broader level of analysis. Do not present estimates as facts.`;
+export const SQL_ERROR_FALLBACK_INSTRUCTION = `IMPORTANT: The database query for this request failed or returned no results. You must not fabricate specific figures, prices, growth rates, or metrics for any location or time period. Do not substitute figures from training knowledge. Instead: acknowledge that you were unable to retrieve the data for this specific query, state what regional or island-wide context you can provide from the market intelligence document, and offer to try a different query or broader level of analysis. Do not present estimates as facts.`;
 
 export const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID 2025 property database and received results.
 
 ${GLOBAL_RULES}
+
+DATA SOURCE RULE: All figures, prices, occupancy rates, ADR values, supply counts, and market statistics in your response must come exclusively from the [REID VERIFIED DATA] block in the user message. Never add, supplement, or substitute figures from training knowledge. If the query results do not contain data for a specific location, bedroom type, or time period, state that the data is not available rather than producing an estimate.
 
 Formatting Rules (CRITICAL - you must follow these exactly):
 - ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph

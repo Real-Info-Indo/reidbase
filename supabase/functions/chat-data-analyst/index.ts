@@ -60,9 +60,9 @@ TIER HANDLING:
 
 - Freemium: regional data only in the AI chat. No location-specific figures under any circumstances. When a Freemium user references a specific neighbourhood, location, or Emerging Market, apply the following four steps in this exact order: (1) ORIENTING SENTENCE: One natural sentence acknowledging the location and placing it in its REID regional context. This is the only point in the response where the neighbourhood name may appear. Example: "Padonan sits within North Badung — one of the strongest performing regions on the island." (2) DATA AVAILABILITY NOTICE (must appear before any figures): Output as a visually distinct block with "Data Availability" as a bold heading, then: "Detailed location-level data for [location] is available on REID Base Member. The figures below reflect the broader [REID Region] region." Do not include any reference to a dashboard. Do not place this notice at the end of the response. (3) REGIONAL DATA ONLY: Benchmarks for the REID region only (e.g. North Badung, South Badung, Tabanan). All figures attributed to the region, never to the specific neighbourhood. Do not reference the neighbourhood name again in any data point. Prohibited under any framing: neighbourhood-specific median prices, price per sqm, occupancy rates, ADR figures, supply counts or growth rates. (4) NATURAL FOLLOW-UP: One closing sentence referencing something specific from the regional data, plus a brief upgrade prompt -- both forming one closing beat, not two separate paragraphs. Example: "North Badung is running strongly on occupancy right now -- that context is useful. For location-level analysis specific to Padonan, including pricing, supply, and rental performance, that is available on REID Base Member." ENFORCEMENT: Tier restrictions are absolute and persist for the entire session. The Data Availability notice fires every time a location-specific query is asked, not only on the first occurrence.
 
-- Member: island-wide and market-level data only. Bali-wide averages for occupancy, ADR, pricing, and yield. Can name Key and Emerging Markets but cannot provide data for them. No neighbourhood-level data of any kind. When a Member user asks for location-specific data, provide the relevant island-wide figure and remind them: "Your REID Base dashboard gives you location-level data for this -- head there for the detail. To get this data analysed in the chat by the AI, that is available on REID Base Team -- see our pricing plans." Never refer to a Member user as Freemium. Sales Assistant, Marketing Assistant, and Portfolio Analyst modes are not available on Member. When a Member user attempts to use a gated mode, fire the upgrade prompt: "To benchmark a specific property, Sales Assistant is available on REID Base Team -- see our pricing plans."
+- Member: full location-level access. All REID market data is available in the AI chat, including neighbourhood-specific prices, supply, sales figures, and granular breakdowns for any location in the database. Members also have dashboard access for self-serve data discovery. Never refer to a Member user as Freemium. Sales Assistant, Marketing Assistant, and Portfolio Analyst modes are not available on Member. When a Member user attempts to use a gated mode, fire the upgrade prompt: "For property benchmarking and positioning, Sales Assistant is available on REID Base Team -- see our pricing plans."
 
-- Team: neighbourhood-level data for the 10 confirmed Key Markets (Canggu, Seminyak, Ubud, Uluwatu, Kerobokan, Berawa, Pererenan, Bingin, Sanur, Umalas) and the 5 Emerging Markets (Balangan, Kaba Kaba, Nyanyi, Padonan, Seseh). Bedroom-level, tenure-level, and segment-level breakdowns within those locations. For all other locations, provide regional data only. Marketing Assistant and Portfolio Analyst modes are not available. When a Team user requests a gated mode: "For portfolio benchmarking and content creation, those tools are available on REID Base Enterprise , see our pricing plans." When a Team query hits a data limit, remind them of the dashboard: "Your REID Base Team dashboard has the latest monthly data on this , head there for the most current figures. To get deeper CSV-level analysis in the chat, that is available on REID Base Enterprise."
+- Team: full location-level access. All REID market data is available in the AI chat, including neighbourhood-specific prices, supply, sales figures, and bedroom-level, tenure-level, and segment-level breakdowns for any location in the database. Marketing Assistant and Portfolio Analyst modes are not available on Team. When a Team user requests a gated mode, fire the upgrade prompt: "For portfolio benchmarking and content creation, those tools are available on REID Base Enterprise -- see our pricing plans."
 
 - Enterprise: All four modes available. Full granular access including CSV-level data by location, bedroom count, contract type, management type, and time period. No upgrade path , never fire a pricing plans prompt. When an Enterprise query hits a data gap, direct to the REID data team: "For this level of detail, the REID data team can help. Reach out at hello@realinfo.id or via WhatsApp at wa.me/6282340658006." Never return more than 5 individual property records in a single response.
 
@@ -305,8 +305,8 @@ serve(async (req) => {
     }
     const freshPrefix = freshBlock ? freshBlock + "\n\n" : "";
 
-    // Enterprise tier: full RAG + analytical (database queries)
-    if (effectiveTier === "enterprise") {
+    // Member, Team, Enterprise: RAG + analytical SQL path (full location access for all three)
+    if (effectiveTier === "enterprise" || effectiveTier === "reid_base_pro" || effectiveTier === "reid_base") {
       // First try to determine if the question needs a database query
       const classifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -382,7 +382,7 @@ serve(async (req) => {
         if (queryError) {
           console.error("Query error:", queryError);
           // Fall back to RAG but instruct the AI not to fabricate location-specific figures
-          const ragPrompt = freshPrefix + buildRagSystemPrompt("enterprise", RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
+          const ragPrompt = freshPrefix + buildRagSystemPrompt(effectiveTier, RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -401,7 +401,7 @@ serve(async (req) => {
             messages: [
               { role: "system", content: freshPrefix + ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + modePrompt + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation, aiSummary, effectiveTier) + (userMemory || "") },
               ...enrichedMessages.slice(0, -1),
-              { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
+              { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[REID VERIFIED DATA -- source: live REID database query. All figures in your response must be drawn from this block only]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
             ],
             stream: true,
           }),
@@ -411,14 +411,14 @@ serve(async (req) => {
         return new Response(explainResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
       }
 
-      // Enterprise RAG fallback (uses full RAG content + dynamic DB stats)
+      // RAG fallback for paid tiers (uses full RAG content + dynamic DB stats)
       const contextParts: string[] = [];
       const { data: stats } = await supabase.rpc("execute_readonly_query", {
         query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM properties_2025`
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = freshPrefix + buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory, aiSummary);
+      const ragPrompt = freshPrefix + buildRagSystemPrompt(effectiveTier, RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), modePrompt, personalisation, userMemory, aiSummary);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -435,9 +435,8 @@ serve(async (req) => {
       return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Member, Team tiers: pure RAG
-    const ragContent = RAG_CONTENT;
-    const systemPrompt = freshPrefix + buildRagSystemPrompt(effectiveTier, ragContent, modePrompt, personalisation, userMemory, aiSummary);
+    // Free tier: RAG only (regional data, no SQL generation)
+    const systemPrompt = freshPrefix + buildRagSystemPrompt(effectiveTier, RAG_CONTENT, modePrompt, personalisation, userMemory, aiSummary);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

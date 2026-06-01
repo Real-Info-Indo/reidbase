@@ -527,7 +527,7 @@ TIER:
 
 
 const SCHEMA_DESCRIPTION = `
-Table: properties_2025
+Table: reid_properties
 Columns:
 - uqid (integer, PK)
 - id (text) , property listing ID
@@ -553,7 +553,7 @@ Columns:
 
 Total rows: ~26,951 properties in Bali real estate market.
 
-Table: rentals_2025
+Table: reid_rentals
 Columns:
 - id (serial, PK)
 - date (text) , month/year e.g. "Oct/25", "Jan/22"
@@ -573,10 +573,10 @@ Total rows: ~15,245 monthly rental data records across Bali.
 Use PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for medians.
 Use AVG() for averages. Always ROUND() numeric results.
 Always filter out nulls for the columns being analyzed.
-When querying rentals, use the rentals_2025 table. When querying property sales/supply, use properties_2025.
+When querying rentals, use the reid_rentals table. When querying property sales/supply, use reid_properties.
 `;
 
-const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.
+const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the reid_properties table.
 
 ${SCHEMA_DESCRIPTION}
 
@@ -941,7 +941,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       // Enterprise RAG fallback (uses full RAG content + dynamic DB stats)
       const contextParts: string[] = [];
       const { data: stats } = await supabase.rpc("execute_readonly_query", {
-        query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM properties_2025`
+        query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM reid_properties`
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 

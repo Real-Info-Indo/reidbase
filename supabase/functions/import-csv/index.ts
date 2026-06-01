@@ -54,7 +54,7 @@ serve(async (req) => {
 
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
-      const { error } = await supabase.from("properties_2025").upsert(batch, { onConflict: "uqid" });
+      const { error } = await supabase.from("reid_properties").upsert(batch, { onConflict: "uqid" });
       if (error) {
         console.error(`Batch error at ${i}:`, error);
         return new Response(JSON.stringify({ error: error.message, inserted }), {

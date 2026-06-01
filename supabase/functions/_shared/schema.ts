@@ -1,7 +1,7 @@
 import { GLOBAL_RULES } from "./global-rules.ts";
 
 export const SCHEMA_DESCRIPTION = `
-Table: properties_2025
+Table: reid_properties
 Columns:
 - uqid (integer, PK)
 - id (text): property listing ID
@@ -27,7 +27,7 @@ Columns:
 
 Total rows: ~26,951 properties in Bali real estate market.
 
-Table: rentals_2025
+Table: reid_rentals
 Columns:
 - id (serial, PK)
 - date (text): month/year e.g. "Oct/25", "Jan/22"
@@ -45,10 +45,10 @@ Columns:
 Total rows: ~15,245 monthly rental data records across Bali.
 
 Always ROUND() numeric results. Always filter out nulls for the columns being analyzed.
-When querying rentals, use the rentals_2025 table. When querying property sales/supply, use properties_2025.
+When querying rentals, use the reid_rentals table. When querying property sales/supply, use reid_properties.
 `;
 
-export const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the properties_2025 table.
+export const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the reid_properties table.
 
 ${SCHEMA_DESCRIPTION}
 
@@ -68,34 +68,34 @@ TIME SERIES QUERIES:
 - For QoQ (quarter-on-quarter) queries, derive the quarter from the date column. Label as "Q1 2025", "Q2 2025" etc.
 - For YoY (year-on-year) queries, extract the year from the date column. Label as "2023", "2024", "2025".
 - Always ORDER BY date ascending for time series queries so charts render chronologically left to right.
-- When querying rentals_2025 for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
+- When querying reid_rentals for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
 - Limit time series results to 24 months max for MoM, 8 quarters for QoQ, and 5 years for YoY.
 
 DATA RECENCY -- DEFAULT DATE RANGES:
 When a user asks about "current", "latest", "recent", "now", or "the market" without specifying a time period, apply these defaults. Never aggregate across all historical records -- always anchor to the most recent data in the table.
 
-RENTAL DATA (rentals_2025):
+RENTAL DATA (reid_rentals):
 - Default to trailing 12 months (T12) anchored to the most recent date present in the dataset -- not CURRENT_DATE, as the data may lag several months behind today.
 - T12 pattern (apply any location/type filters inside the subquery too):
   WHERE TO_DATE(date, 'Mon/YY') >= (
     SELECT MAX(TO_DATE(date, 'Mon/YY')) - INTERVAL '11 months'
-    FROM rentals_2025
+    FROM reid_rentals
     WHERE location ILIKE '%...'  -- mirror outer filters here
   )
-- For "most recent month only" (e.g. "latest occupancy"): use WHERE TO_DATE(date, 'Mon/YY') = (SELECT MAX(TO_DATE(date, 'Mon/YY')) FROM rentals_2025).
+- For "most recent month only" (e.g. "latest occupancy"): use WHERE TO_DATE(date, 'Mon/YY') = (SELECT MAX(TO_DATE(date, 'Mon/YY')) FROM reid_rentals).
 
-SALES & SUPPLY DATA (properties_2025):
+SALES & SUPPLY DATA (reid_properties):
 - For current supply / active listings / median asking price: filter to properties scraped in the most recent 6 months.
   WHERE TO_DATE(scrape_date, 'Mon/YY') >= (
     SELECT MAX(TO_DATE(scrape_date, 'Mon/YY')) - INTERVAL '5 months'
-    FROM properties_2025
+    FROM reid_properties
   )
 - For sold price / transaction data: filter to properties sold in the most recent 12 months.
   WHERE availability = 'Sold'
     AND sold_date IS NOT NULL
     AND TO_DATE(sold_date, 'Mon/YY') >= (
       SELECT MAX(TO_DATE(sold_date, 'Mon/YY')) - INTERVAL '11 months'
-      FROM properties_2025
+      FROM reid_properties
       WHERE availability = 'Sold' AND sold_date IS NOT NULL
     )
 
@@ -106,16 +106,16 @@ Always add a comment on the query or an alias column recording the anchor period
 METRIC AGGREGATION RULES:
 Always use the correct aggregation for each metric. Never substitute AVG for a metric that requires MEDIAN.
 
-properties_2025 -- use MEDIAN (PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)) for:
+reid_properties -- use MEDIAN (PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)) for:
 - price_usd, price_per_sqm_usd, price_per_year_usd, price_idr -- price distributions are right-skewed by outlier luxury listings; AVG will overstate the typical price
 - land_size_sqm, build_size_sqm -- skewed by large luxury estates; median gives the typical asset size
 - years (lease duration) -- skewed by outlier short or very long leases
 - days_listed -- heavily right-skewed by properties sitting unsold for years
 
-properties_2025 -- use AVG for:
+reid_properties -- use AVG for:
 - bedrooms, bathrooms -- only when aggregated (most queries use these as GROUP BY filters, not aggregates)
 
-rentals_2025 -- note: each row is a pre-aggregated segment (location / type / mgmt / beds / month), so further aggregation is across segments:
+reid_rentals -- note: each row is a pre-aggregated segment (location / type / mgmt / beds / month), so further aggregation is across segments:
 - rate_usd (nightly ADR): MEDIAN -- skewed by high-end villa outliers even within segments
 - occupancy: AVG -- it is already a pre-computed percentage per segment; averaging rates across segments is correct
 - monthly_usd, total_usd: AVG for per-property revenue benchmarks; SUM for total market revenue figures
@@ -134,11 +134,11 @@ Do NOT add percentile ranges for:
 - When n < 10 -- you can still compute them, but the explain step will suppress their presentation
 
 CONFIDENCE METADATA -- include in every aggregate query:
-- properties_2025 queries: always add COUNT(*) AS n alongside all aggregate metrics
-- rentals_2025 queries: always add COUNT(*) AS n (number of data segments), SUM(count) AS total_properties (actual property count), COUNT(DISTINCT date) AS months_covered
+- reid_properties queries: always add COUNT(*) AS n alongside all aggregate metrics
+- reid_rentals queries: always add COUNT(*) AS n (number of data segments), SUM(count) AS total_properties (actual property count), COUNT(DISTINCT date) AS months_covered
 - Do not omit these columns even if the user did not ask for them -- the explain step uses them to calibrate how confidently to present the figures.
 
-PROPERTY TYPE HANDLING (rentals_2025):
+PROPERTY TYPE HANDLING (reid_rentals):
 The rental dataset contains three property types: Villa, Apartment, and Guest House. They differ significantly in scale, ADR, and revenue profile: villa ADR is typically 3-5x that of a guest house. Handle them as follows.
 
 Market-level queries (user asks about "the market", a location, or a region without specifying a type):
@@ -154,7 +154,7 @@ Yield and cross-table calculations:
 - Always match the rental type to the subject property. Villa yield → filter rentals to type = 'Villa'. Apartment yield → filter rentals to type = 'Apartment'. Guest house yield → filter rentals to type = 'Guest House'.
 - Never use blended cross-type rental data for a type-specific yield calculation.
 
-Note: properties_2025.property_type only contains Villa and Apartment: guest houses do not appear in the sales dataset. This is correct; do not query for Guest House in properties_2025.
+Note: reid_properties.property_type only contains Villa and Apartment: guest houses do not appear in the sales dataset. This is correct; do not query for Guest House in reid_properties.
 
 COLUMN NAMING FOR CHARTS:
 - Name columns descriptively so the chart formatter can detect the metric type:
@@ -213,13 +213,13 @@ Formatting Rules (CRITICAL - you must follow these exactly):
 
 Confidence Scoring -- apply silently. Do not mechanically recite these thresholds or label tiers in the response. Use them only to calibrate your language and decide whether to caveat a figure.
 
-properties_2025 (calibrate on the n column):
+reid_properties (calibrate on the n column):
 - n >= 30: present figures normally, no caveat needed
 - n = 10-29: note sample size naturally in passing: "based on X listings" or "across X properties in the dataset"
 - n = 5-9: flag it: "this is based on a small sample (X properties) -- treat as indicative rather than a firm benchmark"
 - n < 5: do not present as a figure. Say: "There isn't enough data at this level for a reliable read. I can broaden to [region] level for a more robust figure."
 
-rentals_2025 (calibrate on total_properties and months_covered):
+reid_rentals (calibrate on total_properties and months_covered):
 - total_properties >= 20 and months_covered >= 10: high confidence, present normally
 - total_properties >= 10 or months_covered >= 6: note coverage naturally: "across X properties over Y months of data"
 - total_properties < 10 or months_covered < 6: flag it: "based on limited rental data (X properties, Y months of records) -- treat as directional"

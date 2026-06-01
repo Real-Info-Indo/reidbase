@@ -109,9 +109,9 @@ const fmt = (rows: unknown[] | null) => (rows && rows.length ? JSON.stringify(ro
 
 const Q_LATEST_PERIODS = `
 SELECT
-  (SELECT TO_CHAR(MAX(TO_DATE(scrape_date, 'Mon/YY')), 'Mon YYYY') FROM properties_2025 WHERE scrape_date IS NOT NULL) AS latest_scrape,
-  (SELECT TO_CHAR(MAX(TO_DATE(sold_date, 'Mon/YY')), 'Mon YYYY')   FROM properties_2025 WHERE availability='Sold' AND sold_date IS NOT NULL) AS latest_sold,
-  (SELECT TO_CHAR(MAX(TO_DATE(date, 'Mon/YY')), 'Mon YYYY')        FROM rentals_2025) AS latest_rental
+  (SELECT TO_CHAR(MAX(TO_DATE(scrape_date, 'Mon/YY')), 'Mon YYYY') FROM reid_properties WHERE scrape_date IS NOT NULL) AS latest_scrape,
+  (SELECT TO_CHAR(MAX(TO_DATE(sold_date, 'Mon/YY')), 'Mon YYYY')   FROM reid_properties WHERE availability='Sold' AND sold_date IS NOT NULL) AS latest_sold,
+  (SELECT TO_CHAR(MAX(TO_DATE(date, 'Mon/YY')), 'Mon YYYY')        FROM reid_rentals) AS latest_rental
 `;
 
 const Q_BALI_TXN = `
@@ -119,9 +119,9 @@ SELECT
   COUNT(*) AS sold_count_t12,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd))::int AS median_sold_price_usd,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqm_usd))::int AS median_price_per_sqm_usd
-FROM properties_2025
+FROM reid_properties
 WHERE availability='Sold' AND sold_date IS NOT NULL AND price_usd IS NOT NULL
-  AND TO_DATE(sold_date,'Mon/YY') >= (SELECT MAX(TO_DATE(sold_date,'Mon/YY')) FROM properties_2025 WHERE availability='Sold' AND sold_date IS NOT NULL) - INTERVAL '11 months'
+  AND TO_DATE(sold_date,'Mon/YY') >= (SELECT MAX(TO_DATE(sold_date,'Mon/YY')) FROM reid_properties WHERE availability='Sold' AND sold_date IS NOT NULL) - INTERVAL '11 months'
 `;
 
 const Q_BALI_SUPPLY = `
@@ -129,17 +129,17 @@ SELECT
   COUNT(*) AS active_supply,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd))::int AS median_asking_price_usd,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqm_usd))::int AS median_asking_per_sqm_usd
-FROM properties_2025
+FROM reid_properties
 WHERE availability='Available' AND price_usd IS NOT NULL
-  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 `;
 
 const Q_BALI_OFFPLAN = `
 SELECT
   COUNT(*) FILTER (WHERE off_plan ILIKE 'Off Plan') AS off_plan_count,
   COUNT(*) FILTER (WHERE off_plan ILIKE 'Available' OR off_plan IS NULL) AS available_count
-FROM properties_2025
-WHERE TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+FROM reid_properties
+WHERE TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 `;
 
 const Q_BALI_RENTAL = `
@@ -147,8 +147,8 @@ SELECT
   ROUND(AVG(occupancy)::numeric, 1) AS avg_occupancy_pct,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY rate_usd))::int AS median_adr_usd,
   ROUND(AVG(monthly_usd))::int AS avg_monthly_revenue_usd
-FROM rentals_2025
-WHERE TO_DATE(date,'Mon/YY') >= (SELECT MAX(TO_DATE(date,'Mon/YY')) FROM rentals_2025) - INTERVAL '11 months'
+FROM reid_rentals
+WHERE TO_DATE(date,'Mon/YY') >= (SELECT MAX(TO_DATE(date,'Mon/YY')) FROM reid_rentals) - INTERVAL '11 months'
 `;
 
 const Q_REGIONAL_TXN = `
@@ -156,9 +156,9 @@ SELECT region,
   COUNT(*) AS sold_count_t12,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd))::int AS median_sold_price_usd,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqm_usd))::int AS median_price_per_sqm_usd
-FROM properties_2025
+FROM reid_properties
 WHERE availability='Sold' AND sold_date IS NOT NULL AND price_usd IS NOT NULL AND region IS NOT NULL
-  AND TO_DATE(sold_date,'Mon/YY') >= (SELECT MAX(TO_DATE(sold_date,'Mon/YY')) FROM properties_2025 WHERE availability='Sold' AND sold_date IS NOT NULL) - INTERVAL '11 months'
+  AND TO_DATE(sold_date,'Mon/YY') >= (SELECT MAX(TO_DATE(sold_date,'Mon/YY')) FROM reid_properties WHERE availability='Sold' AND sold_date IS NOT NULL) - INTERVAL '11 months'
 GROUP BY region
 HAVING COUNT(*) >= 5
 ORDER BY sold_count_t12 DESC
@@ -169,9 +169,9 @@ const Q_REGIONAL_SUPPLY = `
 SELECT region,
   COUNT(*) AS active_supply,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd))::int AS median_asking_price_usd
-FROM properties_2025
+FROM reid_properties
 WHERE availability='Available' AND region IS NOT NULL AND price_usd IS NOT NULL
-  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 GROUP BY region
 ORDER BY active_supply DESC
 LIMIT 12
@@ -182,9 +182,9 @@ SELECT region,
   ROUND(AVG(occupancy)::numeric, 1) AS avg_occupancy_pct,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY rate_usd))::int AS median_adr_usd,
   ROUND(AVG(monthly_usd))::int AS avg_monthly_revenue_usd
-FROM rentals_2025
+FROM reid_rentals
 WHERE region IS NOT NULL
-  AND TO_DATE(date,'Mon/YY') >= (SELECT MAX(TO_DATE(date,'Mon/YY')) FROM rentals_2025) - INTERVAL '11 months'
+  AND TO_DATE(date,'Mon/YY') >= (SELECT MAX(TO_DATE(date,'Mon/YY')) FROM reid_rentals) - INTERVAL '11 months'
 GROUP BY region
 ORDER BY avg_monthly_revenue_usd DESC NULLS LAST
 LIMIT 12
@@ -196,18 +196,18 @@ SELECT property_type,
   COUNT(*) FILTER (WHERE off_plan ILIKE 'Available' OR off_plan IS NULL) AS available_count,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE off_plan ILIKE 'Off Plan'))::int AS median_offplan_price_usd,
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_sqm_usd) FILTER (WHERE off_plan ILIKE 'Off Plan'))::int AS median_offplan_per_sqm_usd
-FROM properties_2025
+FROM reid_properties
 WHERE property_type IS NOT NULL
-  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 GROUP BY property_type
 `;
 
 const Q_OFFPLAN_BY_REGION = `
 SELECT region,
   COUNT(*) FILTER (WHERE off_plan ILIKE 'Off Plan') AS off_plan_count
-FROM properties_2025
+FROM reid_properties
 WHERE region IS NOT NULL
-  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 GROUP BY region
 ORDER BY off_plan_count DESC
 LIMIT 8
@@ -216,9 +216,9 @@ LIMIT 8
 const Q_YIELD_LEASEHOLD = `
 SELECT
   ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd))::int AS median_leasehold_price_usd
-FROM properties_2025
+FROM reid_properties
 WHERE contract_type='Leasehold' AND availability='Available' AND price_usd IS NOT NULL
-  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM properties_2025) - INTERVAL '5 months'
+  AND TO_DATE(scrape_date,'Mon/YY') >= (SELECT MAX(TO_DATE(scrape_date,'Mon/YY')) FROM reid_properties) - INTERVAL '5 months'
 `;
 
 export async function buildFreshMarketContext(

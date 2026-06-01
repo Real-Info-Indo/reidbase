@@ -231,7 +231,10 @@ serve(async (req) => {
 
         const sqlData = await sqlResponse.json();
         let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
-        sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").replace(/;\s*$/, "").trim();
+        sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").trim();
+        while (/(;|--[^\n]*)\s*$/.test(sql)) {
+          sql = sql.replace(/;\s*$/, "").replace(/--[^\n]*\s*$/, "").trim();
+        }
 
         console.log("Generated SQL:", sql);
 

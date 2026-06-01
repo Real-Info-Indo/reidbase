@@ -347,7 +347,7 @@ export type Database = {
         }
         Relationships: []
       }
-      properties_2025: {
+      reid_properties: {
         Row: {
           availability: string | null
           bathrooms: number | null
@@ -419,7 +419,7 @@ export type Database = {
         }
         Relationships: []
       }
-      rentals_2025: {
+      reid_rentals: {
         Row: {
           beds: number | null
           count: number | null

@@ -301,6 +301,24 @@ const modeToFunction: Record<string, string> = {
 
 const PERSONALISATION_KEY = "reid-personalisation";
 
+type ChatErrorKind =
+  | "rate_limited"
+  | "credits_exhausted"
+  | "payload_too_large"
+  | "invalid_query"
+  | "bad_request"
+  | "unauthorised"
+  | "timeout"
+  | "server_error"
+  | "network"
+  | "stream_interrupted"
+  | "unknown";
+
+interface ChatError extends Error {
+  kind?: ChatErrorKind;
+  status?: number;
+}
+
 async function streamChat({
   messages,
   tier,
@@ -365,34 +383,59 @@ async function streamChat({
     if (raw) wixAccessToken = JSON.parse(raw)?.accessToken?.value ?? null;
   } catch {}
 
-  const resp = await fetch(chatUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(wixAccessToken ? { Authorization: `Bearer ${wixAccessToken}` } : {}),
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })
-  });
+  let resp: Response;
+  try {
+    resp = await fetch(chatUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(wixAccessToken ? { Authorization: `Bearer ${wixAccessToken}` } : {}),
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })
+    });
+  } catch (e) {
+    const err = new Error("Network error. Please check your connection and try again.") as ChatError;
+    err.kind = "network";
+    throw err;
+  }
 
   if (!resp.ok) {
     const errorData = await resp.json().catch(() => ({} as any));
     const code = errorData?.error;
     const fallback = errorData?.message || errorData?.error || `Request failed (${resp.status})`;
+    let kind: ChatErrorKind = "unknown";
     let errorMsg = fallback;
     if (resp.status === 429) {
-      errorMsg = "Rate limit exceeded. Please wait a moment.";
-      toast.error(errorMsg);
+      kind = "rate_limited";
+      errorMsg = "You're sending prompts too quickly. Please wait a few seconds and try again.";
     } else if (resp.status === 402) {
-      errorMsg = "AI credits exhausted. Please add funds.";
-      toast.error(errorMsg);
-    } else if (resp.status === 400 || resp.status === 413) {
+      kind = "credits_exhausted";
+      errorMsg = "The AI service has run out of credits. Please contact the REID team.";
+    } else if (resp.status === 413 || code === "attachment_too_large" || code === "payload_too_large") {
+      kind = "payload_too_large";
       errorMsg = attachmentErrorMessage(code, fallback);
-      toast.error(errorMsg);
-    } else {
-      toast.error(fallback);
+    } else if (resp.status === 400 && /invalid query/i.test(String(code) + " " + fallback)) {
+      kind = "invalid_query";
+      errorMsg = "I couldn't build a valid data query for that request. Try rephrasing or being more specific (e.g. include a location and property type).";
+    } else if (resp.status === 400) {
+      kind = "bad_request";
+      errorMsg = attachmentErrorMessage(code, fallback);
+    } else if (resp.status === 401 || resp.status === 403) {
+      kind = "unauthorised";
+      errorMsg = "Your session has expired. Please sign in again.";
+    } else if (resp.status === 504 || resp.status === 408) {
+      kind = "timeout";
+      errorMsg = "That request took too long. Try a shorter prompt or splitting it into smaller questions.";
+    } else if (resp.status >= 500) {
+      kind = "server_error";
+      errorMsg = "The AI service is temporarily unavailable. Please try again in a moment.";
     }
-    throw new Error(errorMsg);
+    toast.error(errorMsg);
+    const err = new Error(errorMsg) as ChatError;
+    err.kind = kind;
+    err.status = resp.status;
+    throw err;
   }
 
   if (!resp.body) throw new Error("No response body");
@@ -402,29 +445,35 @@ async function streamChat({
   let textBuffer = "";
   let streamDone = false;
 
-  while (!streamDone) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    textBuffer += decoder.decode(value, { stream: true });
+  try {
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
 
-    let newlineIndex: number;
-    while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-      let line = textBuffer.slice(0, newlineIndex);
-      textBuffer = textBuffer.slice(newlineIndex + 1);
-      if (line.endsWith("\r")) line = line.slice(0, -1);
-      if (line.startsWith(":") || line.trim() === "") continue;
-      if (!line.startsWith("data: ")) continue;
-      const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") {streamDone = true;break;}
-      try {
-        const parsed = JSON.parse(jsonStr);
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) onDelta(content);
-      } catch {
-        textBuffer = line + "\n" + textBuffer;
-        break;
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") {streamDone = true;break;}
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
       }
     }
+  } catch (e) {
+    const err = new Error("The connection was interrupted before the answer finished.") as ChatError;
+    err.kind = "stream_interrupted";
+    throw err;
   }
 
   if (textBuffer.trim()) {
@@ -901,10 +950,42 @@ export default function NewAnalysis() {
       });
     } catch (e) {
       console.error(e);
-      trackFeature("chat_response_failed", { search_mode: searchMode });
+      const err = e as ChatError;
+      const kind: ChatErrorKind = err?.kind ?? "unknown";
+      trackFeature("chat_response_failed", { search_mode: searchMode, error_kind: kind });
       setIsLoading(false);
-      if (!assistantSoFar) {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again.", mode: searchMode }]);
+      const bubble = (() => {
+        switch (kind) {
+          case "rate_limited":
+            return "You're sending prompts too quickly. Please wait a few seconds and try again.";
+          case "credits_exhausted":
+            return "The AI service has run out of credits. Please contact the REID team so we can top them up.";
+          case "payload_too_large":
+            return "That request (including any attachments) is too large. Try removing a file or shortening the prompt.";
+          case "invalid_query":
+            return "I couldn't build a valid data query for that request. Try rephrasing, or include a specific location and property type.";
+          case "unauthorised":
+            return "Your session has expired. Please sign in again to continue.";
+          case "timeout":
+            return "That request took too long to answer. Try a shorter prompt, or break a complex question into smaller ones.";
+          case "server_error":
+            return "The AI service is temporarily unavailable. Please try again in a moment.";
+          case "network":
+            return "I couldn't reach the AI service. Please check your connection and try again.";
+          case "stream_interrupted":
+            return assistantSoFar
+              ? "\n\n*The connection was interrupted before this answer finished. Please ask again or request a continuation.*"
+              : "The connection was interrupted before the answer started. Please try again.";
+          default:
+            return err?.message || "Sorry, I encountered an error. Please try again.";
+        }
+      })();
+
+      if (kind === "stream_interrupted" && assistantSoFar) {
+        // Append to the partial answer so the user keeps what was generated.
+        upsertAssistant(bubble);
+      } else if (!assistantSoFar) {
+        setMessages((prev) => [...prev, { role: "assistant", content: bubble, mode: searchMode }]);
       }
     }
   };

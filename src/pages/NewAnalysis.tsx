@@ -379,20 +379,38 @@ async function streamChat({
     const errorData = await resp.json().catch(() => ({} as any));
     const code = errorData?.error;
     const fallback = errorData?.message || errorData?.error || `Request failed (${resp.status})`;
+    let kind: ChatErrorKind = "unknown";
     let errorMsg = fallback;
     if (resp.status === 429) {
-      errorMsg = "Rate limit exceeded. Please wait a moment.";
-      toast.error(errorMsg);
+      kind = "rate_limited";
+      errorMsg = "You're sending prompts too quickly. Please wait a few seconds and try again.";
     } else if (resp.status === 402) {
-      errorMsg = "AI credits exhausted. Please add funds.";
-      toast.error(errorMsg);
-    } else if (resp.status === 400 || resp.status === 413) {
+      kind = "credits_exhausted";
+      errorMsg = "The AI service has run out of credits. Please contact the REID team.";
+    } else if (resp.status === 413 || code === "attachment_too_large" || code === "payload_too_large") {
+      kind = "payload_too_large";
       errorMsg = attachmentErrorMessage(code, fallback);
-      toast.error(errorMsg);
-    } else {
-      toast.error(fallback);
+    } else if (resp.status === 400 && /invalid query/i.test(String(code) + " " + fallback)) {
+      kind = "invalid_query";
+      errorMsg = "I couldn't build a valid data query for that request. Try rephrasing or being more specific (e.g. include a location and property type).";
+    } else if (resp.status === 400) {
+      kind = "bad_request";
+      errorMsg = attachmentErrorMessage(code, fallback);
+    } else if (resp.status === 401 || resp.status === 403) {
+      kind = "unauthorised";
+      errorMsg = "Your session has expired. Please sign in again.";
+    } else if (resp.status === 504 || resp.status === 408) {
+      kind = "timeout";
+      errorMsg = "That request took too long. Try a shorter prompt or splitting it into smaller questions.";
+    } else if (resp.status >= 500) {
+      kind = "server_error";
+      errorMsg = "The AI service is temporarily unavailable. Please try again in a moment.";
     }
-    throw new Error(errorMsg);
+    toast.error(errorMsg);
+    const err = new Error(errorMsg) as ChatError;
+    err.kind = kind;
+    err.status = resp.status;
+    throw err;
   }
 
   if (!resp.body) throw new Error("No response body");

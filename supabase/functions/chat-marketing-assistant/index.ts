@@ -217,7 +217,16 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
       console.log("Generated SQL:", sql);
 
-      const upperSql = sql.toUpperCase().trim();
+      let executableSql = sql.trim();
+      while (true) {
+        const stripped = executableSql
+          .replace(/^\/\*[\s\S]*?\*\/\s*/, "")
+          .replace(/^--[^\n]*(?:\n\s*|$)/, "")
+          .trimStart();
+        if (stripped === executableSql) break;
+        executableSql = stripped;
+      }
+      const upperSql = executableSql.toUpperCase().trim();
       if (!upperSql.startsWith("SELECT")) {
         return new Response(JSON.stringify({ error: "Invalid query generated." }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },

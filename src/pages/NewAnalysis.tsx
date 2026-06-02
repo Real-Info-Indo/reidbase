@@ -950,10 +950,42 @@ export default function NewAnalysis() {
       });
     } catch (e) {
       console.error(e);
-      trackFeature("chat_response_failed", { search_mode: searchMode });
+      const err = e as ChatError;
+      const kind: ChatErrorKind = err?.kind ?? "unknown";
+      trackFeature("chat_response_failed", { search_mode: searchMode, error_kind: kind });
       setIsLoading(false);
-      if (!assistantSoFar) {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I encountered an error. Please try again.", mode: searchMode }]);
+      const bubble = (() => {
+        switch (kind) {
+          case "rate_limited":
+            return "You're sending prompts too quickly. Please wait a few seconds and try again.";
+          case "credits_exhausted":
+            return "The AI service has run out of credits. Please contact the REID team so we can top them up.";
+          case "payload_too_large":
+            return "That request (including any attachments) is too large. Try removing a file or shortening the prompt.";
+          case "invalid_query":
+            return "I couldn't build a valid data query for that request. Try rephrasing, or include a specific location and property type.";
+          case "unauthorised":
+            return "Your session has expired. Please sign in again to continue.";
+          case "timeout":
+            return "That request took too long to answer. Try a shorter prompt, or break a complex question into smaller ones.";
+          case "server_error":
+            return "The AI service is temporarily unavailable. Please try again in a moment.";
+          case "network":
+            return "I couldn't reach the AI service. Please check your connection and try again.";
+          case "stream_interrupted":
+            return assistantSoFar
+              ? "\n\n*The connection was interrupted before this answer finished. Please ask again or request a continuation.*"
+              : "The connection was interrupted before the answer started. Please try again.";
+          default:
+            return err?.message || "Sorry, I encountered an error. Please try again.";
+        }
+      })();
+
+      if (kind === "stream_interrupted" && assistantSoFar) {
+        // Append to the partial answer so the user keeps what was generated.
+        upsertAssistant(bubble);
+      } else if (!assistantSoFar) {
+        setMessages((prev) => [...prev, { role: "assistant", content: bubble, mode: searchMode }]);
       }
     }
   };

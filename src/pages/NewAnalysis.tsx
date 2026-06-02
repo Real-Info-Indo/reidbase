@@ -383,15 +383,22 @@ async function streamChat({
     if (raw) wixAccessToken = JSON.parse(raw)?.accessToken?.value ?? null;
   } catch {}
 
-  const resp = await fetch(chatUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(wixAccessToken ? { Authorization: `Bearer ${wixAccessToken}` } : {}),
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-    body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })
-  });
+  let resp: Response;
+  try {
+    resp = await fetch(chatUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(wixAccessToken ? { Authorization: `Bearer ${wixAccessToken}` } : {}),
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ messages, tier, fileContents, searchMode, personalisation, wixUserId, conversationId })
+    });
+  } catch (e) {
+    const err = new Error("Network error. Please check your connection and try again.") as ChatError;
+    err.kind = "network";
+    throw err;
+  }
 
   if (!resp.ok) {
     const errorData = await resp.json().catch(() => ({} as any));

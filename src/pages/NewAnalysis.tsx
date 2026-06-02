@@ -301,6 +301,24 @@ const modeToFunction: Record<string, string> = {
 
 const PERSONALISATION_KEY = "reid-personalisation";
 
+type ChatErrorKind =
+  | "rate_limited"
+  | "credits_exhausted"
+  | "payload_too_large"
+  | "invalid_query"
+  | "bad_request"
+  | "unauthorised"
+  | "timeout"
+  | "server_error"
+  | "network"
+  | "stream_interrupted"
+  | "unknown";
+
+interface ChatError extends Error {
+  kind?: ChatErrorKind;
+  status?: number;
+}
+
 async function streamChat({
   messages,
   tier,

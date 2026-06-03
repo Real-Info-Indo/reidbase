@@ -105,7 +105,7 @@ export default function AppraisalRequest() {
     for (const f of arr) {
       const typeOk = ALLOWED_MIME.includes(f.type) || ALLOWED_EXT_RE.test(f.name);
       if (!typeOk) {
-        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG allowed.` });
+        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG, CSV, XLS, XLSX, ODS allowed.` });
         continue;
       }
       if (f.size > MAX_FILE_BYTES) {

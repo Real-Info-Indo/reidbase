@@ -26,8 +26,18 @@ const REQUIRED_FIELDS: { key: string; label: string }[] = [
   { key: "bedrooms", label: "Bedrooms" },
 ];
 
-const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png)$/i;
+const ALLOWED_MIME = [
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.oasis.opendocument.spreadsheet",
+];
+const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png|csv|xlsx?|ods)$/i;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_FILES = 5;
 
@@ -95,7 +105,7 @@ export default function AppraisalRequest() {
     for (const f of arr) {
       const typeOk = ALLOWED_MIME.includes(f.type) || ALLOWED_EXT_RE.test(f.name);
       if (!typeOk) {
-        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG allowed.` });
+        toast.error("Unsupported file type", { description: `${f.name} – only PDF, JPG, PNG, CSV, XLS, XLSX, ODS allowed.` });
         continue;
       }
       if (f.size > MAX_FILE_BYTES) {
@@ -220,7 +230,7 @@ export default function AppraisalRequest() {
             too_many_files: "Too many files attached. Maximum is 5.",
             invalid_file_entry: "One of the attached files is invalid.",
             invalid_file_name: "A file name is invalid or too long.",
-            invalid_file_type: "Unsupported file type. Only PDF, JPG, PNG allowed.",
+            invalid_file_type: "Unsupported file type. Only PDF, JPG, PNG, CSV, XLS, XLSX, ODS allowed.",
             invalid_file_size: "A file exceeds the 10MB limit.",
             invalid_file_path: "A file path is invalid.",
             file_not_found: "An attached file could not be verified in storage.",
@@ -561,12 +571,12 @@ export default function AppraisalRequest() {
               >
                 <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">Drop files here or click to upload</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG up to 10MB (max {MAX_FILES} files)</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG, CSV, XLS, XLSX, ODS up to 10MB (max {MAX_FILES} files)</p>
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  accept=".pdf,.jpg,.jpeg,.png,.csv,.xls,.xlsx,.ods,application/pdf,image/jpeg,image/png,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet"
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files?.length) addFiles(e.target.files);

@@ -571,12 +571,12 @@ export default function AppraisalRequest() {
               >
                 <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">Drop files here or click to upload</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG up to 10MB (max {MAX_FILES} files)</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">PDF, JPG, PNG, CSV, XLS, XLSX, ODS up to 10MB (max {MAX_FILES} files)</p>
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  accept=".pdf,.jpg,.jpeg,.png,.csv,.xls,.xlsx,.ods,application/pdf,image/jpeg,image/png,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet"
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files?.length) addFiles(e.target.files);

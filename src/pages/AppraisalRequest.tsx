@@ -26,8 +26,18 @@ const REQUIRED_FIELDS: { key: string; label: string }[] = [
   { key: "bedrooms", label: "Bedrooms" },
 ];
 
-const ALLOWED_MIME = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png)$/i;
+const ALLOWED_MIME = [
+  "application/pdf",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.oasis.opendocument.spreadsheet",
+];
+const ALLOWED_EXT_RE = /\.(pdf|jpe?g|png|csv|xlsx?|ods)$/i;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_FILES = 5;
 

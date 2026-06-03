@@ -230,7 +230,7 @@ export default function AppraisalRequest() {
             too_many_files: "Too many files attached. Maximum is 5.",
             invalid_file_entry: "One of the attached files is invalid.",
             invalid_file_name: "A file name is invalid or too long.",
-            invalid_file_type: "Unsupported file type. Only PDF, JPG, PNG allowed.",
+            invalid_file_type: "Unsupported file type. Only PDF, JPG, PNG, CSV, XLS, XLSX, ODS allowed.",
             invalid_file_size: "A file exceeds the 10MB limit.",
             invalid_file_path: "A file path is invalid.",
             file_not_found: "An attached file could not be verified in storage.",

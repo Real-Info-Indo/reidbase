@@ -11,7 +11,21 @@ interface LogPayload {
   folderId?: string;
 }
 
-export async function logConversation(payload: LogPayload) {
+// Per-conversation serialized writer with coalescing.
+// During streaming, `logConversation` is invoked on every token tick. Without
+// serialisation, parallel HTTP upserts can land out of order and a stale
+// (shorter) payload can overwrite the final complete one — making admin chat
+// logs appear truncated. We:
+//   1. queue writes per conversationId so they are sent strictly in order;
+//   2. coalesce queued writes — only the latest payload per conversation is
+//      actually sent once the in-flight request resolves.
+const writeChains = new Map<string, Promise<void>>();
+const pendingPayloads = new Map<string, LogPayload>();
+
+async function flushOne(conversationId: string): Promise<void> {
+  const payload = pendingPayloads.get(conversationId);
+  if (!payload) return;
+  pendingPayloads.delete(conversationId);
   const { error } = await invokeUserData("upsert_chat_log", {
     conversation: {
       conversation_id: payload.conversationId,
@@ -24,6 +38,23 @@ export async function logConversation(payload: LogPayload) {
     },
   });
   if (error) console.warn("Chat log upsert failed:", error.error, error.message);
+}
+
+export function logConversation(payload: LogPayload): Promise<void> {
+  const key = payload.conversationId;
+  pendingPayloads.set(key, payload);
+  const prev = writeChains.get(key) ?? Promise.resolve();
+  const next = prev.then(() => flushOne(key)).catch((e) => {
+    console.warn("Chat log chain error:", e);
+  });
+  writeChains.set(key, next);
+  return next;
+}
+
+/** Await all in-flight log writes for a conversation. Call before navigation
+ *  or after a stream completes to guarantee the latest payload is persisted. */
+export function flushConversationLog(conversationId: string): Promise<void> {
+  return writeChains.get(conversationId) ?? Promise.resolve();
 }
 
 export async function logFolder(folder: { id: string; name: string }, _wixUserId?: string): Promise<void> {

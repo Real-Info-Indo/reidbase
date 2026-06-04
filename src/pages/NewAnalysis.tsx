@@ -946,6 +946,11 @@ export default function NewAnalysis() {
             search_mode: searchMode,
             response_chars: assistantSoFar.length,
           });
+          // Guarantee the completed assistant message is persisted in the
+          // backend chat log, even if the latest debounced write is still
+          // queued. Prevents truncated log records.
+          const cid = persistRef.current;
+          if (cid) flushConversationLog(cid).catch(() => {});
         }
       });
     } catch (e) {

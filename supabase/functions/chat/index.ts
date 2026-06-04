@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { moderateMessage } from "../_shared/moderation.ts";
 import { resolveVerifiedTier, buildFolderMemory } from "../_shared/utils.ts";
 import { validateFileContents, buildAttachmentBlock } from "../_shared/file-attachments.ts";
+import { CLASSIFIER_PROMPT, ANALYTICAL_SQL_PROMPT, ANALYTICAL_EXPLAIN_PROMPT, SQL_ERROR_FALLBACK_INSTRUCTION } from "../_shared/schema.ts";
 
 const AI_MODEL = "google/gemini-3-flash-preview";
 
@@ -526,94 +527,8 @@ TIER:
 };
 
 
-const SCHEMA_DESCRIPTION = `
-DATA CURRENCY: The REID database is updated on an ongoing basis and contains data current to the most recent import. Do not infer data recency from table names or prompt language. Always use the most recent data available in the tables.
-
-Table: reid_properties
-Columns:
-- uqid (integer, PK)
-- id (text) , property listing ID
-- region (text) , e.g. North Badung, South Badung, Gianyar, Mengwi, Denpasar, Tabanan, Central Badung
-- location (text) , e.g. Canggu, Ubud, Seminyak, Berawa, Pererenan, Sanur, Uluwatu, etc.
-- contract_type (text) , Leasehold or Freehold
-- property_type (text) , Villa or Apartment
-- years (numeric) , lease duration in years (null for freehold)
-- bedrooms (numeric)
-- bathrooms (numeric)
-- land_size_sqm (numeric)
-- build_size_sqm (numeric)
-- fsr (text) , floor space ratio as percentage string like "77%"
-- price_idr (numeric) , price in Indonesian Rupiah
-- price_usd (numeric) , price in USD
-- price_per_sqm_usd (numeric) , price per sqm in USD
-- price_per_year_usd (numeric) , price per year in USD (leasehold annualized)
-- availability (text) , Available or Sold
-- sold_date (text) , month/year sold e.g. "Jul/23"
-- scrape_date (text) , month/year scraped e.g. "Dec/25"
-- days_listed (numeric)
-- off_plan (text) , "Off Plan" or "Available"
-
-Total rows: ~26,951 properties in Bali real estate market.
-
-Table: reid_rentals
-Columns:
-- id (serial, PK)
-- date (text) , month/year e.g. "Oct/25", "Jan/22"
-- region (text) , e.g. Central Badung, Denpasar, North Badung, South Badung, Gianyar, Mengwi, Tabanan
-- location (text) , e.g. Seminyak, Canggu, Ubud, Berawa, Pererenan, Sanur, Uluwatu, etc.
-- type (text) , Villa, Apartment, or Guest House
-- mgmt (text) , Professional or Individual (management type)
-- beds (integer) , number of bedrooms
-- count (integer) , number of rental properties in this segment
-- occupancy (numeric) , occupancy rate as percentage (e.g. 42.7 means 42.7%)
-- rate_usd (numeric) , nightly rate in USD
-- monthly_usd (numeric) , monthly revenue in USD
-- total_usd (numeric) , total revenue in USD
-
-Total rows: ~15,245 monthly rental data records across Bali.
-
-Use PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for medians.
-Use AVG() for averages. Always ROUND() numeric results.
-Always filter out nulls for the columns being analyzed.
-When querying rentals, use the reid_rentals table. When querying property sales/supply, use reid_properties.
-`;
-
-const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user question about Bali real estate, generate a PostgreSQL query against the REID property database (reid_properties for sales/supply data, reid_rentals for rental data).
-
-${SCHEMA_DESCRIPTION}
-
-Rules:
-- Return ONLY a valid SQL SELECT query, nothing else
-- No markdown, no explanation, just the raw SQL
-- Always use proper aggregation functions
-- Limit results to 50 rows max for non-aggregate queries
-- Use ILIKE for text matching
-- Handle nulls properly with WHERE col IS NOT NULL
-- For median calculations use: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)
-- Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
-- Only SELECT queries are allowed`;
-
-const ANALYTICAL_EXPLAIN_PROMPT = `You are REID, an expert Bali real estate analyst. You've just run a SQL query against the REID property database and received results.
-
-${GLOBAL_RULES}
-
-Formatting Rules (CRITICAL - you must follow these exactly):
-- ALWAYS use proper markdown formatting with double newlines (\\n\\n) between every paragraph
-- Use markdown headings (## or ###) for section titles and subheadings
-- Only use **bold** for headings/subheadings, never for inline emphasis within body text
-- Use markdown bullet lists (- item) for data points, and indent sub-points with two spaces (  - sub-point)
-- Never write wall-of-text responses; every distinct idea must be its own paragraph separated by a blank line
-- All prices in USD ($), all areas in SQM
-- Add brief market context when relevant
-- Keep it concise but informative
-
-Chart Generation Rules:
-- Never produce a chart unless the user has explicitly asked for one in this conversation.
-- If the user has explicitly requested a chart, output it as a fenced code block with language "chart" containing valid JSON.
-- Format: \`\`\`chart\\n{"type":"bar","title":"Chart Title","data":[{"name":"Label","value":123}],"xKey":"name","dataKeys":["value"]}\\n\`\`\`
-- Use "bar" for comparisons across categories, "line" for trends over time, "pie" for market share/proportions.
-- Keep data arrays to 10 items max for readability.
-- The chart JSON must be valid and complete on a single line after the opening fence.`;
+// ANALYTICAL_SQL_PROMPT, ANALYTICAL_EXPLAIN_PROMPT, CLASSIFIER_PROMPT, and SQL_ERROR_FALLBACK_INSTRUCTION
+// are imported from _shared/schema.ts above -- do not define local copies.
 
 function buildPersonalisationBlock(
   personalisation?: { nickname?: string; occupation?: string; business?: string; about?: string; display_name?: string },
@@ -679,8 +594,8 @@ Chart Generation Rules:
 - Keep data arrays to 10 items max for readability.
 - The chart JSON must be valid and complete on a single line after the opening fence.
 
-${tier === "member" || tier === "reid_base" ? "- This user has access to macro-market summaries only. If they ask about specific neighborhoods or granular data, let them know this requires a Team or Enterprise tier upgrade." : ""}
-${tier === "reid_base_pro" ? "- This user has access to macro-market and neighborhood-level data. If they ask about raw database queries or custom analytics, let them know this requires an Enterprise tier upgrade." : ""}
+${tier === "reid_base" ? "- This user is on REID Base Member with full location-level data access. All REID database figures are available in this session. When a Member query references a mode not available on their tier (Sales Assistant, Marketing Assistant, Portfolio Analyst), fire the appropriate upgrade prompt." : ""}
+${tier === "reid_base_pro" ? "- This user is on REID Base Team with full location-level data access. All REID database figures are available in this session. When a Team query references a mode not available on their tier (Marketing Assistant, Portfolio Analyst), fire the upgrade prompt." : ""}
 
 REID Intelligence Report:
 ${ragContent}`;
@@ -831,9 +746,9 @@ serve(async (req) => {
       };
     }
 
-    // Enterprise tier: full RAG + analytical (database queries)
-    if (effectiveTier === "enterprise") {
-      // First try to determine if the question needs a database query
+    // Member, Team, Enterprise: full RAG + analytical SQL path
+    if (effectiveTier === "enterprise" || effectiveTier === "reid_base_pro" || effectiveTier === "reid_base") {
+      // Classify query as ANALYTICAL or RAG using the full shared classifier prompt
       const classifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -843,10 +758,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: AI_MODEL,
           messages: [
-            { role: "system", content: `You classify user questions about Bali real estate. 
-If the question requires specific data lookups, custom filtering, or calculations that need raw database access, respond with exactly "ANALYTICAL".
-If the question can be answered from general market knowledge, trends, or the intelligence report, respond with exactly "RAG".
-Respond with only one word: ANALYTICAL or RAG.` },
+            { role: "system", content: CLASSIFIER_PROMPT },
             { role: "user", content: userMessage },
           ],
         }),
@@ -922,8 +834,8 @@ Respond with only one word: ANALYTICAL or RAG.` },
 
         if (queryError) {
           console.error("Query error:", queryError);
-          // Fall back to RAG content
-          const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary);
+          // SQL error: fall back to RAG with fallback instruction
+          const ragPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -942,7 +854,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
             messages: [
               { role: "system", content: ANALYTICAL_EXPLAIN_PROMPT + "\n\n" + (MODE_PROMPTS[effectiveSearchMode] || MODE_PROMPTS["data-analyst"]) + "\n\n" + GLOBAL_RULES + buildPersonalisationBlock(personalisation, aiSummary, effectiveTier) + (userMemory || "") },
               ...enrichedMessages.slice(0, -1),
-              { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
+              { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[REID VERIFIED DATA -- source: live REID database query. All figures in your response must be drawn from this block only]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
             ],
             stream: true,
           }),
@@ -952,14 +864,14 @@ Respond with only one word: ANALYTICAL or RAG.` },
         return new Response(explainResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
       }
 
-      // Enterprise RAG fallback (uses full RAG content + dynamic DB stats)
+      // RAG fallback for paid tiers (classified as RAG; includes live DB stats for context)
       const contextParts: string[] = [];
       const { data: stats } = await supabase.rpc("execute_readonly_query", {
         query_text: `SELECT count(*) as total_properties, count(*) FILTER (WHERE availability = 'Available') as available, count(*) FILTER (WHERE availability = 'Sold') as sold, ROUND(AVG(price_usd) FILTER (WHERE price_usd IS NOT NULL)) as avg_price_usd, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_usd) FILTER (WHERE price_usd IS NOT NULL)) as median_price_usd FROM reid_properties`
       });
       if (stats) contextParts.push(`Live Database Overview: ${JSON.stringify(stats)}`);
 
-      const ragPrompt = buildRagSystemPrompt("enterprise", RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation, userMemory, aiSummary);
+      const ragPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT + "\n\nLIVE DATABASE CONTEXT:\n" + contextParts.join("\n"), effectiveSearchMode, personalisation, userMemory, aiSummary);
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -976,7 +888,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
       return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
     }
 
-    // Member, Team tiers: pure RAG
+    // Free tier: RAG only (no SQL generation)
     const ragContent = RAG_CONTENT;
     const systemPrompt = buildRagSystemPrompt(effectiveTier, ragContent, effectiveSearchMode, personalisation, userMemory, aiSummary);
 

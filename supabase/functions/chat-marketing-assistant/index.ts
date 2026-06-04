@@ -251,7 +251,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+          body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
         });
         if (!response.ok) throw new Error(`AI error: ${response.status}`);
         return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
@@ -268,7 +268,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
               ...enrichedMessages.slice(0, -1),
               { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[Query results]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
             ],
-          stream: true,
+          stream: true, max_tokens: 8192,
         }),
       });
 
@@ -287,7 +287,7 @@ Respond with only one word: ANALYTICAL or RAG.` },
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+      body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
     });
 
     if (!response.ok) {

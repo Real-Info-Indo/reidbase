@@ -839,7 +839,7 @@ serve(async (req) => {
           const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+            body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
           });
           if (!response.ok) throw new Error(`AI error: ${response.status}`);
           return new Response(response.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
@@ -856,7 +856,7 @@ serve(async (req) => {
               ...enrichedMessages.slice(0, -1),
               { role: "user", content: `${userMessage}\n\n[SQL query executed]:\n${sql}\n\n[REID VERIFIED DATA -- source: live REID database query. All figures in your response must be drawn from this block only]:\n${JSON.stringify(queryResult, null, 2)}${attachmentBlock}` },
             ],
-            stream: true,
+            stream: true, max_tokens: 8192,
           }),
         });
 
@@ -875,7 +875,7 @@ serve(async (req) => {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true }),
+        body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
       });
 
       if (!response.ok) {
@@ -904,7 +904,7 @@ serve(async (req) => {
           { role: "system", content: systemPrompt },
           ...enrichedMessages,
         ],
-        stream: true,
+        stream: true, max_tokens: 8192,
       }),
     });
 

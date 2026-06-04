@@ -18,7 +18,7 @@ import {
 import { useTier } from "@/contexts/TierContext";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { WhatsAppPopup } from "@/components/WhatsAppPopup";
-import { logConversation, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, refreshConversationSummary } from "@/lib/chatLogger";
+import { logConversation, flushConversationLog, logFeedback, submitFeedbackComment, cloudRenameConversation, cloudTogglePin, cloudMoveToFolder, refreshConversationSummary } from "@/lib/chatLogger";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { trackFeature } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";

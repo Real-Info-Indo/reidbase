@@ -375,7 +375,7 @@ serve(async (req) => {
           executableSql = stripped;
         }
         const upperSql = executableSql.toUpperCase().trim();
-        if (!upperSql.startsWith("SELECT")) {
+        if (!upperSql.startsWith("SELECT") && !upperSql.startsWith("WITH")) {
           return new Response(JSON.stringify({ error: "Invalid query generated." }), {
             status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });

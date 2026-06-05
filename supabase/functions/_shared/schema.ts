@@ -55,20 +55,20 @@ export const ANALYTICAL_SQL_PROMPT = `You are REID's SQL analyst. Given a user q
 ${SCHEMA_DESCRIPTION}
 
 Rules:
-- Return ONLY a valid SQL SELECT query, nothing else
-- No markdown, no explanation, just the raw SQL
+- Return ONLY a single valid SQL SELECT query -- the first word must be SELECT. No markdown, no explanation, just the raw SQL.
+- NEVER use CTE (WITH ... AS ...) syntax. CTEs are not supported by the query executor and will be rejected. Use subqueries instead. To apply window functions (e.g. LAG) on top of a GROUP BY, nest the aggregation as a subquery: SELECT year, median_adr, LAG(median_adr) OVER (ORDER BY year) AS prev_year_adr FROM (SELECT '20' || RIGHT(date, 2) AS year, ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY rate_usd)) AS median_adr FROM reid_rentals WHERE location ILIKE '%Uluwatu%' GROUP BY year) adr_by_year ORDER BY year ASC
+- Generate EXACTLY ONE query. If the question covers multiple data sources (e.g. rental ADR AND property prices), focus on the primary analytical question (the first metric asked). The explain step will address secondary data gaps using the market intelligence document.
 - Always use proper aggregation functions
 - Limit results to 50 rows max for non-aggregate queries
 - Use ILIKE for text matching
 - Handle nulls properly with WHERE col IS NOT NULL
 - For median calculations use: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)
 - Never use DELETE, UPDATE, INSERT, DROP, ALTER, CREATE or any DDL/DML statements
-- Only SELECT queries are allowed
 
 TIME SERIES QUERIES:
 - For MoM (month-on-month) queries, group by the date column and order chronologically. Format date labels as "Mon YY" (e.g. "Jan 25", "Feb 25") using string manipulation on the date column.
 - For QoQ (quarter-on-quarter) queries, derive the quarter from the date column. Label as "Q1 2025", "Q2 2025", "Q1 2026", etc. — always generate a bucket for every quarter present in the data.
-- For YoY (year-on-year) queries, extract the year from the date column. Label as "2022", "2023", "2024", "2025", "2026" — always generate a bucket for every year present in the data, including 2026 if records exist.
+- For YoY (year-on-year) queries, extract the year from the date column. Label as "2022", "2023", "2024", "2025", "2026" — always generate a bucket for every year present in the data, including 2026 if records exist. Do NOT apply the T12 default date filter for YoY queries -- retrieve all available calendar years from the dataset so each year has a full picture.
 - Always ORDER BY date ascending for time series queries so charts render chronologically left to right.
 - When querying reid_rentals for time series, the date column format is "Mon/YY" (e.g. "Oct/25"). Use string operations to sort chronologically -- do not rely on alphabetical sort.
 - Limit time series results to 24 months max for MoM, 8 quarters for QoQ, and 5 years for YoY.

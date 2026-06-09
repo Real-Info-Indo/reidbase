@@ -38,6 +38,15 @@ function toCurrency(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
+// Strip any currency prefix/symbol (Rp, $, IDR, USD, commas, spaces) before parsing.
+function toMoney(v: string): number | null {
+  if (!v || v.trim() === "") return null;
+  const cleaned = v.replace(/[^0-9.\-]/g, "");
+  if (cleaned === "" || cleaned === "-" || cleaned === ".") return null;
+  const n = Number(cleaned);
+  return isNaN(n) ? null : n;
+}
+
 function toPercent(v: string): number | null {
   if (!v || v.trim() === "") return null;
   const n = Number(v.replace(/%/g, ""));
@@ -96,10 +105,10 @@ export default function ImportData() {
           land_size_sqm: toNum(cols[9]),
           build_size_sqm: toNum(cols[10]),
           fsr: cols[11] || null,
-          price_idr: toNum(cols[12]),
-          price_usd: toNum(cols[13]),
-          price_per_sqm_usd: toNum(cols[14]),
-          price_per_year_usd: toNum(cols[15]),
+          price_idr: toMoney(cols[12]),
+          price_usd: toMoney(cols[13]),
+          price_per_sqm_usd: toMoney(cols[14]),
+          price_per_year_usd: toMoney(cols[15]),
           availability: cols[16] || null,
           sold_date: cols[17] || null,
           scrape_date: cols[18] || null,

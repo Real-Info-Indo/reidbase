@@ -189,6 +189,7 @@ Respond ANALYTICAL if the question:
 Respond RAG only if the question:
 - Asks about broad Bali market narrative with no specific figures required (e.g. "what is the general state of the Bali market in 2025?")
 - Asks about general concepts such as how leasehold works, what yield means, or what drives ADR
+- Specifically asks about land prices, land values, or land availability -- this is a known data gap, no SQL query will improve the answer
 - Is purely conversational with no data requirement
 
 When in doubt, respond ANALYTICAL. An unnecessary database query is harmless. A wrong RAG classification produces fabricated location-specific data, which is a critical failure.

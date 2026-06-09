@@ -38,13 +38,27 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { rows } = await req.json();
+    const { rows, truncate } = await req.json();
 
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
       return new Response(JSON.stringify({ error: "No rows provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (truncate === true) {
+      const { error: delErr } = await supabase
+        .from("reid_rentals")
+        .delete()
+        .gte("id", -2147483648);
+      if (delErr) {
+        console.error("Truncate error:", delErr);
+        return new Response(JSON.stringify({ error: `truncate_failed: ${delErr.message}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const batchSize = 500;

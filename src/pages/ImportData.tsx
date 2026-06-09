@@ -51,7 +51,8 @@ export default function ImportData() {
   const [isImporting, setIsImporting] = useState(false);
   const [isImportingRentals, setIsImportingRentals] = useState(false);
 
-  const handleImport = async () => {
+  const handleImport = async (replace = false) => {
+    if (replace && !confirm("This will DELETE all existing property rows, then import the CSV. Continue?")) return;
     setIsImporting(true);
     setStatus("Loading CSV file...");
 
@@ -97,7 +98,7 @@ export default function ImportData() {
       for (let i = 0; i < rows.length; i += chunkSize) {
         const chunk = rows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-csv", {
-          body: { rows: chunk },
+          body: { rows: chunk, truncate: replace && i === 0 },
           headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
@@ -116,7 +117,8 @@ export default function ImportData() {
     }
   };
 
-  const handleImportRentals = async () => {
+  const handleImportRentals = async (replace = false) => {
+    if (replace && !confirm("This will DELETE all existing rental rows, then import the CSV. Continue?")) return;
     setIsImportingRentals(true);
     setRentalStatus("Loading rental CSV file...");
 
@@ -160,7 +162,7 @@ export default function ImportData() {
       for (let i = 0; i < uniqueRows.length; i += chunkSize) {
         const chunk = uniqueRows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-rentals", {
-          body: { rows: chunk },
+          body: { rows: chunk, truncate: replace && i === 0 },
           headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);
@@ -187,22 +189,32 @@ export default function ImportData() {
     <div className="min-h-screen w-full overflow-x-hidden bg-background p-8 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Import Property Data</h1>
       <p className="text-muted-foreground font-extralight mb-6">
-        This will import the REID property CSV data into the database.
+        Append upserts on uqid (existing rows updated, new rows added). Replace wipes the table first, then imports.
       </p>
-      <Button onClick={handleImport} disabled={isImporting} size="lg">
-        {isImporting ? "Importing..." : "Start Import"}
-      </Button>
+      <div className="flex gap-3 flex-wrap">
+        <Button onClick={() => handleImport(false)} disabled={isImporting} size="lg">
+          {isImporting ? "Importing..." : "Append / Update"}
+        </Button>
+        <Button onClick={() => handleImport(true)} disabled={isImporting} size="lg" variant="destructive">
+          Replace All Data
+        </Button>
+      </div>
       {status && <p className="mt-4 text-sm font-mono">{status}</p>}
 
       <hr className="my-8 border-border" />
 
       <h1 className="text-2xl font-bold mb-4">Import Rental Data</h1>
       <p className="text-muted-foreground font-extralight mb-6">
-        This will import the REID rental CSV data into the database.
+        Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
       </p>
-      <Button onClick={handleImportRentals} disabled={isImportingRentals} size="lg">
-        {isImportingRentals ? "Importing..." : "Start Rental Import"}
-      </Button>
+      <div className="flex gap-3 flex-wrap">
+        <Button onClick={() => handleImportRentals(false)} disabled={isImportingRentals} size="lg">
+          {isImportingRentals ? "Importing..." : "Append / Update"}
+        </Button>
+        <Button onClick={() => handleImportRentals(true)} disabled={isImportingRentals} size="lg" variant="destructive">
+          Replace All Data
+        </Button>
+      </div>
       {rentalStatus && <p className="mt-4 text-sm font-mono">{rentalStatus}</p>}
     </div>
   );

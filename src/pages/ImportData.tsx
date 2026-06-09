@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -44,23 +44,39 @@ function toPercent(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
+async function readFileText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+}
+
 export default function ImportData() {
   const { authenticated, checking, error } = useAdminAuth();
   const [status, setStatus] = useState("");
   const [rentalStatus, setRentalStatus] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [isImportingRentals, setIsImportingRentals] = useState(false);
+  const [propertyFile, setPropertyFile] = useState<File | null>(null);
+  const [rentalFile, setRentalFile] = useState<File | null>(null);
+  const propertyInputRef = useRef<HTMLInputElement>(null);
+  const rentalInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async (replace = false) => {
-    if (replace && !confirm("This will DELETE all existing property rows, then import the CSV. Continue?")) return;
+    if (!propertyFile) {
+      toast.error("Choose a CSV file first");
+      return;
+    }
+    if (replace && !confirm("This will DELETE all existing property rows, then import the selected CSV. Continue?")) return;
     setIsImporting(true);
-    setStatus("Loading CSV file...");
+    setStatus(`Reading ${propertyFile.name}...`);
 
     try {
-      const resp = await fetch("/data/2025_REID_Database_CSV.csv");
-      const text = await resp.text();
+      const text = await readFileText(propertyFile);
       const lines = text.split("\n").filter(l => l.trim());
-      
+
       setStatus(`Parsing ${lines.length - 1} rows...`);
 
       const rows = [];
@@ -106,11 +122,11 @@ export default function ImportData() {
         setStatus(`Uploaded ${totalInserted} / ${rows.length} rows...`);
       }
 
-      setStatus(`✅ Done! Imported ${totalInserted} rows.`);
+      setStatus(`Done. Imported ${totalInserted} rows.`);
       toast.success(`Successfully imported ${totalInserted} properties`);
     } catch (err: any) {
       console.error(err);
-      setStatus(`❌ Error: ${err.message}`);
+      setStatus(`Error: ${err.message}`);
       toast.error("Import failed: " + err.message);
     } finally {
       setIsImporting(false);
@@ -118,13 +134,16 @@ export default function ImportData() {
   };
 
   const handleImportRentals = async (replace = false) => {
-    if (replace && !confirm("This will DELETE all existing rental rows, then import the CSV. Continue?")) return;
+    if (!rentalFile) {
+      toast.error("Choose a CSV file first");
+      return;
+    }
+    if (replace && !confirm("This will DELETE all existing rental rows, then import the selected CSV. Continue?")) return;
     setIsImportingRentals(true);
-    setRentalStatus("Loading rental CSV file...");
+    setRentalStatus(`Reading ${rentalFile.name}...`);
 
     try {
-      const resp = await fetch("/data/2025_REID_Rental_Database_CSV-2.csv");
-      const text = await resp.text();
+      const text = await readFileText(rentalFile);
       const lines = text.split("\n").filter(l => l.trim());
 
       setRentalStatus(`Parsing ${lines.length - 1} rows...`);
@@ -148,7 +167,6 @@ export default function ImportData() {
         });
       }
 
-      // Deduplicate: keep last occurrence for each unique key
       const deduped = new Map<string, typeof rows[0]>();
       for (const row of rows) {
         const key = `${row.date}|${row.region}|${row.location}|${row.type}|${row.mgmt}|${row.beds}`;
@@ -170,11 +188,11 @@ export default function ImportData() {
         setRentalStatus(`Uploaded ${totalInserted} / ${uniqueRows.length} rows...`);
       }
 
-      setRentalStatus(`✅ Done! Imported ${totalInserted} rows.`);
+      setRentalStatus(`Done. Imported ${totalInserted} rows.`);
       toast.success(`Successfully imported ${totalInserted} rental records`);
     } catch (err: any) {
       console.error(err);
-      setRentalStatus(`❌ Error: ${err.message}`);
+      setRentalStatus(`Error: ${err.message}`);
       toast.error("Rental import failed: " + err.message);
     } finally {
       setIsImportingRentals(false);
@@ -188,14 +206,28 @@ export default function ImportData() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-background p-8 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Import Property Data</h1>
-      <p className="text-muted-foreground font-extralight mb-6">
-        Append upserts on uqid (existing rows updated, new rows added). Replace wipes the table first, then imports.
+      <p className="text-muted-foreground font-extralight mb-4">
+        Select a CSV file. Append upserts on uqid (existing rows updated, new rows added). Replace wipes the table first, then imports.
       </p>
+      <div className="mb-4 space-y-2">
+        <input
+          ref={propertyInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(e) => setPropertyFile(e.target.files?.[0] ?? null)}
+          className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:bg-primary file:text-primary-foreground hover:file:opacity-90"
+        />
+        {propertyFile && (
+          <p className="text-xs text-muted-foreground">
+            Selected: {propertyFile.name} ({(propertyFile.size / 1024).toFixed(1)} KB)
+          </p>
+        )}
+      </div>
       <div className="flex gap-3 flex-wrap">
-        <Button onClick={() => handleImport(false)} disabled={isImporting} size="lg">
+        <Button onClick={() => handleImport(false)} disabled={isImporting || !propertyFile} size="lg">
           {isImporting ? "Importing..." : "Append / Update"}
         </Button>
-        <Button onClick={() => handleImport(true)} disabled={isImporting} size="lg" variant="destructive">
+        <Button onClick={() => handleImport(true)} disabled={isImporting || !propertyFile} size="lg" variant="destructive">
           Replace All Data
         </Button>
       </div>
@@ -204,14 +236,28 @@ export default function ImportData() {
       <hr className="my-8 border-border" />
 
       <h1 className="text-2xl font-bold mb-4">Import Rental Data</h1>
-      <p className="text-muted-foreground font-extralight mb-6">
-        Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
+      <p className="text-muted-foreground font-extralight mb-4">
+        Select a CSV file. Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
       </p>
+      <div className="mb-4 space-y-2">
+        <input
+          ref={rentalInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          onChange={(e) => setRentalFile(e.target.files?.[0] ?? null)}
+          className="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:bg-primary file:text-primary-foreground hover:file:opacity-90"
+        />
+        {rentalFile && (
+          <p className="text-xs text-muted-foreground">
+            Selected: {rentalFile.name} ({(rentalFile.size / 1024).toFixed(1)} KB)
+          </p>
+        )}
+      </div>
       <div className="flex gap-3 flex-wrap">
-        <Button onClick={() => handleImportRentals(false)} disabled={isImportingRentals} size="lg">
+        <Button onClick={() => handleImportRentals(false)} disabled={isImportingRentals || !rentalFile} size="lg">
           {isImportingRentals ? "Importing..." : "Append / Update"}
         </Button>
-        <Button onClick={() => handleImportRentals(true)} disabled={isImportingRentals} size="lg" variant="destructive">
+        <Button onClick={() => handleImportRentals(true)} disabled={isImportingRentals || !rentalFile} size="lg" variant="destructive">
           Replace All Data
         </Button>
       </div>

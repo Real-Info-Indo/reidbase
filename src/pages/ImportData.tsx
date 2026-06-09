@@ -117,7 +117,8 @@ export default function ImportData() {
     }
   };
 
-  const handleImportRentals = async () => {
+  const handleImportRentals = async (replace = false) => {
+    if (replace && !confirm("This will DELETE all existing rental rows, then import the CSV. Continue?")) return;
     setIsImportingRentals(true);
     setRentalStatus("Loading rental CSV file...");
 

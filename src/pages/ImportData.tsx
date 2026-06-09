@@ -98,7 +98,7 @@ export default function ImportData() {
       for (let i = 0; i < rows.length; i += chunkSize) {
         const chunk = rows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-csv", {
-          body: { rows: chunk },
+          body: { rows: chunk, truncate: replace && i === 0 },
           headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);

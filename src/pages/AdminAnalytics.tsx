@@ -491,6 +491,9 @@ export default function AdminAnalytics() {
                 </span>
               )}
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/import-data")}>
+              <Database className="h-4 w-4 mr-1.5" /> Import data
+            </Button>
             <Button variant="outline" size="sm" onClick={exportAll}>
               <Download className="h-4 w-4 mr-1.5" /> Export CSV
             </Button>

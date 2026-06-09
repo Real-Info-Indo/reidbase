@@ -38,6 +38,15 @@ function toCurrency(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
+// Strip any currency prefix/symbol (Rp, $, IDR, USD, commas, spaces) before parsing.
+function toMoney(v: string): number | null {
+  if (!v || v.trim() === "") return null;
+  const cleaned = v.replace(/[^0-9.\-]/g, "");
+  if (cleaned === "" || cleaned === "-" || cleaned === ".") return null;
+  const n = Number(cleaned);
+  return isNaN(n) ? null : n;
+}
+
 function toPercent(v: string): number | null {
   if (!v || v.trim() === "") return null;
   const n = Number(v.replace(/%/g, ""));

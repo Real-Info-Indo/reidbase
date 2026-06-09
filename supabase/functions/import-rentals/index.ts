@@ -51,7 +51,7 @@ serve(async (req) => {
       const { error: delErr } = await supabase
         .from("reid_rentals")
         .delete()
-        .not("date", "is", null);
+        .gte("id", -2147483648);
       if (delErr) {
         console.error("Truncate error:", delErr);
         return new Response(JSON.stringify({ error: `truncate_failed: ${delErr.message}` }), {

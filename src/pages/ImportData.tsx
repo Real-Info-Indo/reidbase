@@ -162,7 +162,7 @@ export default function ImportData() {
       for (let i = 0; i < uniqueRows.length; i += chunkSize) {
         const chunk = uniqueRows.slice(i, i + chunkSize);
         const { data, error } = await supabase.functions.invoke("import-rentals", {
-          body: { rows: chunk },
+          body: { rows: chunk, truncate: replace && i === 0 },
           headers: await wixAuthHeader(),
         });
         if (error) throw new Error(error.message);

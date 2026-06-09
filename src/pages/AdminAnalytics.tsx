@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   BarChart3, Users, FileText, MessageSquare, MousePointerClick,
-  RefreshCw, ClipboardList, Shield, Download, LogOut,
+  RefreshCw, ClipboardList, Shield, Download, LogOut, Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

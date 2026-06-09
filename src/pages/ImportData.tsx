@@ -51,7 +51,8 @@ export default function ImportData() {
   const [isImporting, setIsImporting] = useState(false);
   const [isImportingRentals, setIsImportingRentals] = useState(false);
 
-  const handleImport = async () => {
+  const handleImport = async (replace = false) => {
+    if (replace && !confirm("This will DELETE all existing property rows, then import the CSV. Continue?")) return;
     setIsImporting(true);
     setStatus("Loading CSV file...");
 

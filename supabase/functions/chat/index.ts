@@ -694,17 +694,29 @@ serve(async (req) => {
         }
         const upperSql = executableSql.toUpperCase().trim();
         if (!upperSql.startsWith("SELECT") && !upperSql.startsWith("WITH")) {
-          return new Response(JSON.stringify({ error: "Invalid query generated." }), {
-            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          console.warn("Invalid SQL generated (not SELECT/WITH), falling back to RAG");
+          const ragFallbackPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
+          const ragFallbackResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragFallbackPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
           });
+          if (!ragFallbackResponse.ok) throw new Error(`AI error: ${ragFallbackResponse.status}`);
+          return new Response(ragFallbackResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
         }
 
         const forbidden = ["DELETE", "DROP", "INSERT", "UPDATE", "ALTER", "CREATE", "TRUNCATE", "GRANT", "REVOKE"];
         for (const kw of forbidden) {
           if (upperSql.includes(kw)) {
-            return new Response(JSON.stringify({ error: `Forbidden SQL keyword: ${kw}` }), {
-              status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            console.warn("Forbidden SQL keyword detected, falling back to RAG:", kw);
+            const ragFallbackPrompt = buildRagSystemPrompt(effectiveTier, RAG_CONTENT, effectiveSearchMode, personalisation, userMemory, aiSummary) + "\n\n" + SQL_ERROR_FALLBACK_INSTRUCTION;
+            const ragFallbackResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ model: AI_MODEL, messages: [{ role: "system", content: ragFallbackPrompt }, ...enrichedMessages], stream: true, max_tokens: 8192 }),
             });
+            if (!ragFallbackResponse.ok) throw new Error(`AI error: ${ragFallbackResponse.status}`);
+            return new Response(ragFallbackResponse.body, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
           }
         }
 

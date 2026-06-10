@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Appraisal uploads are insertable" ON storage.objects;

@@ -676,7 +676,16 @@ serve(async (req) => {
 
         const sqlData = await sqlResponse.json();
         let sql = sqlData.choices?.[0]?.message?.content?.trim() || "";
-        sql = sql.replace(/^```sql\n?/i, "").replace(/\n?```$/i, "").trim();
+        // Extract SQL from a markdown code block anywhere in the response (model sometimes
+        // prefixes the block with an explanation sentence before the opening fence)
+        const codeBlockMatch = sql.match(/```(?:sql)?\s*\n?([\s\S]*?)\n?```/i);
+        if (codeBlockMatch) {
+          sql = codeBlockMatch[1].trim();
+        } else {
+          // No code block — strip any leading prose by finding the first SELECT or WITH keyword
+          const firstKeyword = sql.search(/\b(?:SELECT|WITH)\b/i);
+          if (firstKeyword > 0) sql = sql.slice(firstKeyword).trim();
+        }
         while (/(;|--[^\n]*)\s*$/.test(sql)) {
           sql = sql.replace(/;\s*$/, "").replace(/--[^\n]*\s*$/, "").trim();
         }

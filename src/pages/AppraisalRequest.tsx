@@ -148,35 +148,38 @@ export default function AppraisalRequest() {
     setMissingFields([]);
     setSubmitting(true);
     const uploadedPaths: string[] = [];
+    // Orphan uploads (when validation later fails) are reaped by the
+    // cleanup-appraisal-uploads cron — the client no longer has DELETE
+    // access to the private bucket.
     const cleanupUploads = async () => {
-      if (uploadedPaths.length === 0) return;
-      try {
-        await supabase.storage.from("appraisals").remove(uploadedPaths);
-      } catch (cleanupErr) {
-        console.warn("Failed to clean up orphaned appraisal uploads:", cleanupErr);
-      }
+      /* no-op: server-side cron handles orphans */
     };
     try {
       const requestId = crypto.randomUUID();
       const uploadedMeta: { name: string; path: string; mimeType: string; size: number }[] = [];
 
-      // Upload files first
+      // Upload files via the server-side upload endpoint. The function
+      // validates MIME/size and writes with the service role, so the
+      // client no longer needs direct write access to the bucket.
       for (const f of files) {
-        const safeName = sanitizeFilename(f.name);
-        const path = `appraisal-requests/${requestId}/${Date.now()}_${safeName}`;
-        const { error: upErr } = await supabase.storage
-          .from("appraisals")
-          .upload(path, f, { contentType: f.type, upsert: false });
-        if (upErr) {
-          toast.error("File upload failed", { description: `${f.name}: ${upErr.message}` });
-          await cleanupUploads();
+        const fd = new FormData();
+        fd.append("requestId", requestId);
+        fd.append("file", f, f.name);
+        const { data: upData, error: upErr } = await supabase.functions.invoke(
+          "upload-appraisal-file",
+          { body: fd },
+        );
+        if (upErr || !upData?.path) {
+          const msg =
+            (upData as any)?.message || upErr?.message || "Upload failed";
+          toast.error("File upload failed", { description: `${f.name}: ${msg}` });
           setSubmitting(false);
           return;
         }
-        uploadedPaths.push(path);
+        uploadedPaths.push(upData.path);
         uploadedMeta.push({
           name: f.name,
-          path,
+          path: upData.path,
           mimeType: f.type || "application/octet-stream",
           size: f.size,
         });

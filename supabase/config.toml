@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.download-public-report]
 verify_jwt = false
+
+[functions.upload-appraisal-file]
+verify_jwt = false

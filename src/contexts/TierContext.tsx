@@ -3,6 +3,7 @@ import { useWixAuth } from "@/contexts/WixAuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { invokeUserData } from "@/lib/userDataApi";
 import { getFreshWixAccessToken } from "@/lib/wixToken";
+import { getVisitorId } from "@/hooks/useAffiliateTracking";
 
 // Canonical internal tier codes. Note: legacy "member" meant unpaid free and
 // is no longer a valid value going forward. The paid Member plan is
@@ -71,7 +72,7 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
       // truth for all gated server logic). We only mirror the result here
       // for UI presentation.
         const { data, error } = await supabase.functions.invoke("refresh-entitlements", {
-          body: {},
+          body: { visitor_id: getVisitorId() },
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 

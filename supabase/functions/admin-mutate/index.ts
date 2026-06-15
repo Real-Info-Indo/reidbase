@@ -137,6 +137,54 @@ Deno.serve(async (req) => {
         return jsonResponse({ ok: true });
       }
 
+      case "upsert_affiliate": {
+        const id = typeof body.id === "string" && isUuid(body.id) ? body.id : null;
+        const slugRaw = typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
+        const slug = slugRaw.replace(/[^a-z0-9_-]/g, "").slice(0, 80);
+        const name = typeof body.name === "string" ? body.name.trim().slice(0, 200) : "";
+        if (!slug || !name) return jsonResponse({ error: "missing_slug_or_name" }, 400);
+
+        const email = typeof body.email === "string" ? body.email.trim().slice(0, 200) : null;
+        const coupon = typeof body.wix_coupon_code === "string"
+          ? body.wix_coupon_code.trim().slice(0, 100) || null
+          : null;
+        const notes = typeof body.notes === "string" ? body.notes.slice(0, 2000) : null;
+        const active = typeof body.active === "boolean" ? body.active : true;
+        const rateNum = Number(body.commission_rate);
+        const commission_rate = Number.isFinite(rateNum) && rateNum >= 0 && rateNum <= 1
+          ? rateNum
+          : 0.15;
+
+        const row = { slug, name, email, wix_coupon_code: coupon, notes, active, commission_rate };
+        const query = id
+          ? supabase.from("affiliates").update(row).eq("id", id).select().single()
+          : supabase.from("affiliates").insert(row).select().single();
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return jsonResponse({ ok: true, affiliate: data });
+      }
+
+      case "delete_affiliate": {
+        if (!isUuid(body.id)) return jsonResponse({ error: "invalid_id" }, 400);
+        // Refuse delete if attributions exist (FK is RESTRICT). Deactivate instead.
+        const { count } = await supabase
+          .from("affiliate_attributions")
+          .select("wix_user_id", { count: "exact", head: true })
+          .eq("affiliate_id", body.id);
+        if ((count ?? 0) > 0) {
+          const { error } = await supabase
+            .from("affiliates")
+            .update({ active: false })
+            .eq("id", body.id);
+          if (error) throw error;
+          return jsonResponse({ ok: true, deactivated: true });
+        }
+        const { error } = await supabase.from("affiliates").delete().eq("id", body.id);
+        if (error) throw error;
+        return jsonResponse({ ok: true, deleted: true });
+      }
+
       default:
         return jsonResponse({ error: "unknown_action", action }, 400);
     }

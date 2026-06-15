@@ -26,13 +26,16 @@ import AdminAppraisals from "./pages/AdminAppraisals";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAlerts from "./pages/AdminAlerts";
 import CampaignConversation from "./pages/CampaignConversation";
+import AdminAffiliates from "./pages/AdminAffiliates";
 import { PageViewTracker } from "@/components/PageViewTracker";
+import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const location = useLocation();
   const isWidgetRoute = location.pathname === "/widget" || location.pathname === "/widget-minimal";
+  useAffiliateTracking();
 
   useEffect(() => {
     document.documentElement.style.background = isWidgetRoute ? "transparent" : "";
@@ -70,6 +73,7 @@ const AppRoutes = () => {
         <Route path="/admin/appraisals" element={<AdminAppraisals />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/alerts" element={<AdminAlerts />} />
+        <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

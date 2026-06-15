@@ -25,7 +25,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { verifyWixToken, wixAuthErrorResponse } from "../_shared/wix-auth.ts";
-import { getServiceClient } from "../_shared/entitlements.ts";
+import { getEntitlement, getServiceClient } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
     switch (action) {
       // ── HYDRATE ──────────────────────────────────────────
       case "hydrate": {
-        const [{ data: chatLogs }, { data: folders }, { data: profile }] = await Promise.all([
+        const [{ data: chatLogs }, { data: folders }, { data: profile }, entitlement] = await Promise.all([
           supabase
             .from("chat_logs")
             .select(
@@ -101,11 +101,19 @@ Deno.serve(async (req) => {
             .select("nickname, occupation, business, about, display_name, email")
             .eq("wix_user_id", wixUserId)
             .maybeSingle(),
+          getEntitlement(wixUserId),
         ]);
         return jsonResponse({
           conversations: chatLogs ?? [],
           folders: folders ?? [],
           profile: profile ?? null,
+          entitlement: {
+            tier: entitlement.tier,
+            source: entitlement.source,
+            wix_plan_names: entitlement.wixPlanNames,
+            refreshed_at: entitlement.refreshedAt,
+            expires_at: entitlement.expiresAt,
+          },
           identity: {
             wix_user_id: wixUserId,
             display_name: identity.displayName,
@@ -118,6 +126,7 @@ Deno.serve(async (req) => {
       case "upsert_chat_log": {
         const c = body.conversation;
         if (!c || !isString(c.conversation_id)) return badRequest("missing_conversation");
+        const entitlement = await getEntitlement(wixUserId);
 
         // Owner check: if a row already exists for this conversation_id and
         // it belongs to a different Wix user, refuse. Service role bypasses
@@ -147,7 +156,7 @@ Deno.serve(async (req) => {
           title: isString(c.title) ? c.title : "New conversation",
           messages: Array.isArray(c.messages) ? c.messages : [],
           search_mode: isString(c.search_mode) ? c.search_mode : "data-analyst",
-          user_tier: isString(c.user_tier) ? c.user_tier : null,
+          user_tier: entitlement.tier,
           message_count: Array.isArray(c.messages) ? c.messages.length : 0,
           updated_at: new Date().toISOString(),
           pinned: !!c.pinned,
@@ -295,6 +304,17 @@ Deno.serve(async (req) => {
           .eq("wix_user_id", wixUserId)
           .eq("folder_id", folderId);
         return jsonResponse({ ok: true });
+      }
+
+      case "get_entitlement": {
+        const entitlement = await getEntitlement(wixUserId);
+        return jsonResponse({
+          tier: entitlement.tier,
+          source: entitlement.source,
+          wix_plan_names: entitlement.wixPlanNames,
+          refreshed_at: entitlement.refreshedAt,
+          expires_at: entitlement.expiresAt,
+        });
       }
 
       // ── PROFILE ──────────────────────────────────────────

@@ -1,18 +1,20 @@
 // refresh-entitlements
 //
-// POST (no body required).
+// POST.
 // Headers: Authorization: Bearer <wix-headless-access-token>
+// Body: { visitor_id?: string }  -- optional, used for affiliate attribution
 //
 // Resolves the caller's Wix identity, asks Wix for their ACTIVE pricing
 // plan orders, maps them to our internal tier model, and upserts the
 // canonical tier into `public.user_entitlements`. Returns the resulting
 // entitlement so the frontend can update its UI.
 //
-// This is the ONLY place the canonical tier is written from a Wix lookup.
-// All other Edge Functions should READ from `user_entitlements` via
-// getEntitlement() and never trust client-supplied tier values.
+// As a side effect, when the resolved tier is paid (anything above free),
+// records an affiliate attribution if the visitor came from a tracked
+// affiliate click within the attribution window.
 
 import { verifyWixToken, wixAuthErrorResponse, WixAuthError } from "../_shared/wix-auth.ts";
+import { getServiceClient } from "../_shared/entitlements.ts";
 import {
   getEntitlement,
   highestTier,

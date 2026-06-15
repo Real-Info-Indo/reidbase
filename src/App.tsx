@@ -73,6 +73,7 @@ const AppRoutes = () => {
         <Route path="/admin/appraisals" element={<AdminAppraisals />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/alerts" element={<AdminAlerts />} />
+        <Route path="/admin/affiliates" element={<AdminAffiliates />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

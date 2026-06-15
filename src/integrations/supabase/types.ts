@@ -35,6 +35,145 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_attributions: {
+        Row: {
+          affiliate_id: string
+          attributed_at: string
+          created_at: string
+          first_paid_at: string | null
+          first_paid_tier: string | null
+          locked_until: string
+          notes: string | null
+          source: string
+          updated_at: string
+          wix_plan_names: string[]
+          wix_user_id: string
+        }
+        Insert: {
+          affiliate_id: string
+          attributed_at?: string
+          created_at?: string
+          first_paid_at?: string | null
+          first_paid_tier?: string | null
+          locked_until?: string
+          notes?: string | null
+          source: string
+          updated_at?: string
+          wix_plan_names?: string[]
+          wix_user_id: string
+        }
+        Update: {
+          affiliate_id?: string
+          attributed_at?: string
+          created_at?: string
+          first_paid_at?: string | null
+          first_paid_tier?: string | null
+          locked_until?: string
+          notes?: string | null
+          source?: string
+          updated_at?: string
+          wix_plan_names?: string[]
+          wix_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_attributions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_clicks: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          id: string
+          landing_path: string | null
+          referrer: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          visitor_id: string | null
+          wix_user_id: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          landing_path?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_id?: string | null
+          wix_user_id?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          landing_path?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visitor_id?: string | null
+          wix_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          active: boolean
+          commission_rate: number
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          slug: string
+          updated_at: string
+          wix_coupon_code: string | null
+        }
+        Insert: {
+          active?: boolean
+          commission_rate?: number
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          slug: string
+          updated_at?: string
+          wix_coupon_code?: string | null
+        }
+        Update: {
+          active?: boolean
+          commission_rate?: number
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          slug?: string
+          updated_at?: string
+          wix_coupon_code?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string

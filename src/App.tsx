@@ -35,6 +35,7 @@ const queryClient = new QueryClient();
 const AppRoutes = () => {
   const location = useLocation();
   const isWidgetRoute = location.pathname === "/widget" || location.pathname === "/widget-minimal";
+  useAffiliateTracking();
 
   useEffect(() => {
     document.documentElement.style.background = isWidgetRoute ? "transparent" : "";

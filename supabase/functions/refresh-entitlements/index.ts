@@ -14,14 +14,96 @@
 // affiliate click within the attribution window.
 
 import { verifyWixToken, wixAuthErrorResponse, WixAuthError } from "../_shared/wix-auth.ts";
-import { getServiceClient } from "../_shared/entitlements.ts";
 import {
   getEntitlement,
+  getServiceClient,
   highestTier,
   planNameToTier,
   upsertEntitlement,
   type Tier,
 } from "../_shared/entitlements.ts";
+
+const AFFILIATE_WINDOW_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+
+async function recordAffiliateAttribution(params: {
+  wixUserId: string;
+  visitorId: string | null;
+  tier: Tier;
+  planNames: string[];
+}) {
+  if (params.tier === "free") return;
+  const supabase = getServiceClient();
+
+  // Already attributed? Don't overwrite.
+  const { data: existing } = await supabase
+    .from("affiliate_attributions")
+    .select("wix_user_id, first_paid_at")
+    .eq("wix_user_id", params.wixUserId)
+    .maybeSingle();
+
+  if (existing) {
+    if (!existing.first_paid_at) {
+      await supabase
+        .from("affiliate_attributions")
+        .update({
+          first_paid_at: new Date().toISOString(),
+          first_paid_tier: params.tier,
+          wix_plan_names: params.planNames,
+        })
+        .eq("wix_user_id", params.wixUserId);
+    }
+    return;
+  }
+
+  // Find an affiliate click: prefer one already linked to this wix_user_id,
+  // else fall back to one bound to the same visitor_id.
+  const since = new Date(Date.now() - AFFILIATE_WINDOW_MS).toISOString();
+
+  let clickRow: { id: string; affiliate_id: string } | null = null;
+
+  {
+    const { data } = await supabase
+      .from("affiliate_clicks")
+      .select("id, affiliate_id")
+      .eq("wix_user_id", params.wixUserId)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (data && data.length) clickRow = data[0];
+  }
+
+  if (!clickRow && params.visitorId) {
+    const { data } = await supabase
+      .from("affiliate_clicks")
+      .select("id, affiliate_id")
+      .eq("visitor_id", params.visitorId)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (data && data.length) clickRow = data[0];
+
+    // Backfill the wix_user_id on all clicks for this visitor.
+    await supabase
+      .from("affiliate_clicks")
+      .update({ wix_user_id: params.wixUserId })
+      .eq("visitor_id", params.visitorId)
+      .is("wix_user_id", null);
+  }
+
+  if (!clickRow) return;
+
+  const now = new Date().toISOString();
+  await supabase.from("affiliate_attributions").insert({
+    wix_user_id: params.wixUserId,
+    affiliate_id: clickRow.affiliate_id,
+    source: "click",
+    attributed_at: now,
+    locked_until: new Date(Date.now() + AFFILIATE_WINDOW_MS).toISOString(),
+    first_paid_at: now,
+    first_paid_tier: params.tier,
+    wix_plan_names: params.planNames,
+  });
+}
 
 // If the Wix orders lookup fails, we fall back to the cached entitlement
 // instead of downgrading paying users to free. The cache is considered

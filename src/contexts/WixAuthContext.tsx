@@ -42,6 +42,7 @@ function clearTokens() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(OAUTH_DATA_KEY);
   localStorage.removeItem("wix-member");
+  localStorage.removeItem("reid-user-tier");
 }
 
 export function WixAuthProvider({ children }: { children: React.ReactNode }) {
@@ -86,6 +87,8 @@ export function WixAuthProvider({ children }: { children: React.ReactNode }) {
           profilePhoto: photoUrl,
         };
         setMember(memberData);
+        localStorage.removeItem("reid-user-tier");
+        window.dispatchEvent(new Event("tier-updated"));
         // Persist for chat logger and analytics
         localStorage.setItem("wix-member", JSON.stringify({
           id: memberData.id,

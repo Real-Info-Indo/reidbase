@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useWixAuth } from "@/contexts/WixAuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { invokeUserData } from "@/lib/userDataApi";
+import { getFreshWixAccessToken } from "@/lib/wixToken";
 
 // Canonical internal tier codes. Note: legacy "member" meant unpaid free and
 // is no longer a valid value going forward. The paid Member plan is
@@ -46,44 +48,57 @@ const TierContext = createContext<TierContextType | undefined>(undefined);
 
 export function TierProvider({ children }: { children: React.ReactNode }) {
   const { member, isLoggedIn } = useWixAuth();
-  const [tier, setTier] = useState<UserTier>("free");
+  const [tier, setTier] = useState<UserTier>(() => {
+    if (typeof window === "undefined") return "free";
+    return normaliseTier(localStorage.getItem("reid-user-tier"));
+  });
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refreshTier = async () => {
+    const cached = normaliseTier(localStorage.getItem("reid-user-tier"));
+
     try {
-      const raw = localStorage.getItem("wix-tokens");
-      if (!raw) {
-        setTier("free");
-        return;
-      }
-      const parsed = JSON.parse(raw);
-      const accessToken = parsed?.accessToken?.value;
-      if (!accessToken) {
-        setTier("free");
-        return;
+      setIsRefreshing(true);
+      if (cached !== "free") {
+        setTier(cached);
       }
 
-      setIsRefreshing(true);
+      const accessToken = await getFreshWixAccessToken();
+
+      if (accessToken) {
       // Ask the server for the canonical tier. The server reads Wix orders
       // and writes the result to public.user_entitlements (the source of
       // truth for all gated server logic). We only mirror the result here
       // for UI presentation.
-      const { data, error } = await supabase.functions.invoke("refresh-entitlements", {
-        body: {},
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+        const { data, error } = await supabase.functions.invoke("refresh-entitlements", {
+          body: {},
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
-      if (error) {
+        if (!error) {
+          const next = normaliseTier(data?.tier);
+          setTier(next);
+          localStorage.setItem("reid-user-tier", next);
+          if (import.meta.env.DEV) console.log("Canonical tier from server:", next, "plans:", data?.wix_plan_names);
+          return;
+        }
+
         console.error("refresh-entitlements failed:", error);
+      }
+
+      const { data, error } = await invokeUserData<{ tier?: unknown }>("get_entitlement");
+      if (error) {
+        console.error("get_entitlement failed:", error);
+        setTier(cached);
         return;
       }
 
-      const next = normaliseTier(data?.tier);
+      const next = normaliseTier(data?.tier ?? cached);
       setTier(next);
       localStorage.setItem("reid-user-tier", next);
-      if (import.meta.env.DEV) console.log("Canonical tier from server:", next, "plans:", data?.wix_plan_names);
     } catch (err) {
       console.error("Failed to refresh canonical tier:", err);
+      setTier(cached);
     } finally {
       setIsRefreshing(false);
     }
@@ -97,6 +112,15 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
     refreshTier();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, member?.id]);
+
+  useEffect(() => {
+    const syncFromStorage = () => {
+      setTier(normaliseTier(localStorage.getItem("reid-user-tier")));
+    };
+
+    window.addEventListener("tier-updated", syncFromStorage);
+    return () => window.removeEventListener("tier-updated", syncFromStorage);
+  }, []);
 
   const userName = member?.name ?? "Guest";
   const canAccess = (page: string) => {

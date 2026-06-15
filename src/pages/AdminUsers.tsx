@@ -24,6 +24,8 @@ interface UserProfile {
   occupation: string | null;
   about: string | null;
   tier: string | null;
+  wix_plan_names?: string[] | null;
+  entitlement_refreshed_at?: string | null;
   last_login: string | null;
 }
 
@@ -291,6 +293,8 @@ export default function AdminUsers() {
                                 <p><span className="font-medium text-foreground">Occupation:</span> {p.occupation || "—"}</p>
                                 <p><span className="font-medium text-foreground">Business:</span> {p.business || "—"}</p>
                                 <p><span className="font-medium text-foreground">About:</span> {p.about || "—"}</p>
+                                <p><span className="font-medium text-foreground">Plan:</span> {p.wix_plan_names?.join(", ") || "—"}</p>
+                                <p><span className="font-medium text-foreground">Entitlement refresh:</span> {p.entitlement_refreshed_at ? new Date(p.entitlement_refreshed_at).toLocaleString("en-GB") : "—"}</p>
                               </div>
                             </div>
 

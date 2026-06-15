@@ -188,6 +188,16 @@ Deno.serve(async (req) => {
     const identity = await verifyWixToken(authHeader);
     const token = extractBearer(authHeader)!;
 
+    let visitorId: string | null = null;
+    try {
+      const body = await req.json();
+      if (body && typeof body.visitor_id === "string" && body.visitor_id.length > 0) {
+        visitorId = body.visitor_id.slice(0, 80);
+      }
+    } catch {
+      // body is optional
+    }
+
     let orders: WixOrder[] | null = null;
     let ordersError: string | null = null;
     try {

@@ -242,6 +242,69 @@ Deno.serve(async (req) => {
         return jsonResponse({ url: data.signedUrl, expiresIn: 60 });
       }
 
+      case "affiliates": {
+        const { data: affiliates, error: affErr } = await supabase
+          .from("affiliates")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (affErr) throw affErr;
+
+        const ids = (affiliates ?? []).map((a) => a.id);
+        let clickAgg: Record<string, number> = {};
+        let attrRows: Array<{
+          wix_user_id: string;
+          affiliate_id: string;
+          source: string;
+          attributed_at: string;
+          first_paid_at: string | null;
+          first_paid_tier: string | null;
+          wix_plan_names: string[];
+        }> = [];
+
+        if (ids.length) {
+          const [{ data: clicks }, { data: attrs }] = await Promise.all([
+            supabase
+              .from("affiliate_clicks")
+              .select("affiliate_id")
+              .in("affiliate_id", ids),
+            supabase
+              .from("affiliate_attributions")
+              .select("wix_user_id, affiliate_id, source, attributed_at, first_paid_at, first_paid_tier, wix_plan_names")
+              .in("affiliate_id", ids)
+              .order("attributed_at", { ascending: false }),
+          ]);
+          for (const c of clicks ?? []) {
+            clickAgg[c.affiliate_id] = (clickAgg[c.affiliate_id] ?? 0) + 1;
+          }
+          attrRows = attrs ?? [];
+        }
+
+        // Enrich attributions with user email/name
+        const userIds = Array.from(new Set(attrRows.map((r) => r.wix_user_id)));
+        const profileMap: Record<string, { email: string | null; display_name: string | null }> = {};
+        if (userIds.length) {
+          const { data: profiles } = await supabase
+            .from("user_profiles")
+            .select("wix_user_id, email, display_name")
+            .in("wix_user_id", userIds);
+          for (const p of profiles ?? []) {
+            profileMap[p.wix_user_id] = { email: p.email, display_name: p.display_name };
+          }
+        }
+
+        const enrichedAttrs = attrRows.map((r) => ({
+          ...r,
+          email: profileMap[r.wix_user_id]?.email ?? null,
+          display_name: profileMap[r.wix_user_id]?.display_name ?? null,
+        }));
+
+        return jsonResponse({
+          affiliates: affiliates ?? [],
+          click_counts: clickAgg,
+          attributions: enrichedAttrs,
+        });
+      }
+
       default:
         return jsonResponse({ error: "unknown_action", action }, 400);
     }

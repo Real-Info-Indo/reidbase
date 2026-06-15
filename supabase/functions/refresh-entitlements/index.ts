@@ -274,6 +274,19 @@ Deno.serve(async (req) => {
       expiresAt,
     });
 
+    // Best-effort affiliate attribution. Failures here must not break the
+    // entitlement response, so swallow errors after logging.
+    try {
+      await recordAffiliateAttribution({
+        wixUserId: identity.wixUserId,
+        visitorId,
+        tier: ent.tier,
+        planNames: ent.wixPlanNames,
+      });
+    } catch (err) {
+      console.error("[refresh-entitlements] attribution failed:", (err as Error).message);
+    }
+
     return new Response(
       JSON.stringify({
         ok: true,

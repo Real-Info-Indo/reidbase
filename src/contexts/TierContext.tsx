@@ -113,6 +113,15 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, member?.id]);
 
+  useEffect(() => {
+    const syncFromStorage = () => {
+      setTier(normaliseTier(localStorage.getItem("reid-user-tier")));
+    };
+
+    window.addEventListener("tier-updated", syncFromStorage);
+    return () => window.removeEventListener("tier-updated", syncFromStorage);
+  }, []);
+
   const userName = member?.name ?? "Guest";
   const canAccess = (page: string) => {
     const t = normaliseTier(tier);

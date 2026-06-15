@@ -72,7 +72,7 @@ export function TierProvider({ children }: { children: React.ReactNode }) {
       // truth for all gated server logic). We only mirror the result here
       // for UI presentation.
         const { data, error } = await supabase.functions.invoke("refresh-entitlements", {
-          body: {},
+          body: { visitor_id: getVisitorId() },
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 

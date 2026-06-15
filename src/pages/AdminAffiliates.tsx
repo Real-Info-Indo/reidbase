@@ -334,8 +334,8 @@ function AffiliatesInner() {
 }
 
 export default function AdminAffiliates() {
-  const { authenticated, checking } = useAdminAuth();
+  const { authenticated, checking, error } = useAdminAuth();
   if (checking) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Checking access…</div>;
-  if (!authenticated) return <AdminGate />;
+  if (!authenticated) return <AdminGate checking={checking} error={error} />;
   return <AffiliatesInner />;
 }

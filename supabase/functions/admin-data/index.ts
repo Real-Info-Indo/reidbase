@@ -81,12 +81,15 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case "users": {
-        const [profilesRes, eventsRes, chatLogsRes] = await Promise.all([
+        const [profilesRes, entitlementsRes, eventsRes, chatLogsRes] = await Promise.all([
           supabase
             .from("user_profiles")
             .select("*")
             .order("last_login", { ascending: false })
             .limit(2000),
+          supabase
+            .from("user_entitlements")
+            .select("wix_user_id, tier, wix_plan_names, refreshed_at"),
           supabase
             .from("analytics_events")
             .select("wix_user_id, event_type, event_name, page_path, metadata")
@@ -97,11 +100,26 @@ Deno.serve(async (req) => {
             .limit(20000),
         ]);
         if (profilesRes.error) throw profilesRes.error;
+        if (entitlementsRes.error) throw entitlementsRes.error;
         if (eventsRes.error) throw eventsRes.error;
         if (chatLogsRes.error) throw chatLogsRes.error;
 
+        const entitlementByUserId = new Map(
+          (entitlementsRes.data ?? []).map((row) => [row.wix_user_id, row]),
+        );
+
+        const profiles = (profilesRes.data ?? []).map((profile) => {
+          const entitlement = entitlementByUserId.get(profile.wix_user_id);
+          return {
+            ...profile,
+            tier: entitlement?.tier ?? profile.tier ?? null,
+            wix_plan_names: entitlement?.wix_plan_names ?? [],
+            entitlement_refreshed_at: entitlement?.refreshed_at ?? null,
+          };
+        });
+
         return jsonResponse({
-          profiles: profilesRes.data ?? [],
+          profiles,
           events: eventsRes.data ?? [],
           chatLogs: chatLogsRes.data ?? [],
         });

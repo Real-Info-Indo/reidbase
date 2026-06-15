@@ -20,6 +20,9 @@ export async function hydrateFromSupabase(_wixUserId?: string): Promise<HydrateR
       conversations: any[];
       folders: any[];
       profile: any;
+      entitlement?: {
+        tier?: string | null;
+      };
     }>("hydrate");
 
     if (error || !data) {
@@ -63,6 +66,12 @@ export async function hydrateFromSupabase(_wixUserId?: string): Promise<HydrateR
         );
         window.dispatchEvent(new Event("personalisation-updated"));
       }
+    }
+
+    const hydratedTier = data.entitlement?.tier;
+    if (typeof hydratedTier === "string" && hydratedTier.trim()) {
+      localStorage.setItem("reid-user-tier", hydratedTier);
+      window.dispatchEvent(new Event("tier-updated"));
     }
 
     window.dispatchEvent(new Event("conversations-updated"));

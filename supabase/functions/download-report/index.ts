@@ -39,7 +39,7 @@ type ReportType = "market" | "location";
 
 const REQUIRED_TIER: Record<ReportType, Tier> = {
   market: "free",
-  location: "reid_base_pro",
+  location: "reid_base",
 };
 
 function isValidReportKey(key: unknown): key is string {

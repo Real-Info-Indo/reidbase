@@ -18,6 +18,12 @@ interface Report {
 
 const reports: Report[] = [
   {
+    name: "Bali H1 Report",
+    reportKey: "bali_h1_2026",
+    thumbnail: "/reports/thumbnails/Bali_H1_2026.jpg",
+    subtitle: "H1 2026 Market Report",
+  },
+  {
     name: "Bali Q1 Report",
     reportKey: "bali_q1_2026",
     thumbnail: "/reports/thumbnails/Bali_Q1_2026.jpg",

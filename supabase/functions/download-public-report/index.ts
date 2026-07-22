@@ -26,6 +26,10 @@ const CAMPAIGN_REPORTS: Record<string, { path: string; downloadAs: string }> = {
     path: "market/bali_q1_2026.pdf",
     downloadAs: "Bali_Q1_2026_Market_Report.pdf",
   },
+  "h1-report": {
+    path: "market/bali_h1_2026.pdf",
+    downloadAs: "Bali_H1_2026_Market_Report.pdf",
+  },
 };
 
 function jsonResponse(status: number, body: unknown): Response {

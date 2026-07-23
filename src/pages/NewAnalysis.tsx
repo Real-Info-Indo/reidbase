@@ -1032,6 +1032,24 @@ export default function NewAnalysis() {
       void login();
       return;
     }
+    // Hard-coded reply for the "Market trends" suggestion card. Uses the
+    // H1 2026 headline numbers directly rather than a live DB query, so the
+    // landing card always shows the same launch narrative. Follow-up
+    // prompts continue through the AI as normal.
+    if (input.trim() === MARKET_TRENDS_PROMPT) {
+      trackFeature("chat_message_sent", {
+        search_mode: searchMode,
+        message_index: messages.filter((m) => m.role === "user").length + 1,
+        has_attachments: false,
+      });
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: input },
+        { role: "assistant", content: MARKET_TRENDS_CANNED_REPLY, mode: searchMode },
+      ]);
+      setQuery("");
+      return;
+    }
     // Check if we need tenure clarification
     if (needsTenureClarification(input, clarifiedLocations)) {
       // Add user message so the conversation view activates and the tenure popup is visible

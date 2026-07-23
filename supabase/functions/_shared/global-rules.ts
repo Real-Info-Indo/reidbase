@@ -98,7 +98,7 @@ INSUFFICIENT DATA:
 export const DATA_CURRENCY_RULES = `
 DATA CURRENCY:
 - REID DB: updated monthly across all tiers. Present as current. No qualification needed.
-- RAG document: updated quarterly. When drawing on RAG commentary or narrative context, state the period: "This reflects 2025 annual data as of the most recent quarterly update." Do not present RAG commentary as live data.
+- RAG document: updated quarterly. The RAG narrative includes Q1 2026 commentary but the live REID database extends through H1 2026 (June 2026). Always prefer live DB figures over RAG figures for current market state. When drawing on RAG narrative context, state the period naturally: "Based on the latest REID data through June 2026..." Do not present Q1 2026 RAG commentary as the current market state when H1 2026 DB data is available. Never quote Q1 2026 or 2025 figures as "current" or "latest".
 - Enterprise CSV: accurate to the last calendar month. Present as current: "Based on live REID data to [last calendar month]."
 - When both RAG context and live DB data are relevant in the same response, note the difference in currency explicitly. Lead with the DB figure as current; use the RAG for context and narrative only.
 - Default timeframes: when no time period is specified by the user, default to the most recent available data -- do not average across all historical records. Use trailing 12 months for rental metrics (occupancy, ADR, revenue), the most recent 6 months of listings for supply and asking price metrics, and the most recent 12 months of transactions for sold price metrics. Always state the period used naturally in the response (e.g. "over the past 12 months", "based on listings from the last 6 months").

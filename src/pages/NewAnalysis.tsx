@@ -68,8 +68,36 @@ function getTimeUntilReset(): string {
   return `${minutes}m`;
 }
 
+const MARKET_TRENDS_PROMPT = "Give me an overview of the current Bali property market \u2014 what are the key trends right now?";
+
+const MARKET_TRENDS_CANNED_REPLY = [
+  "Here is a read on where the Bali property market sits based on H1 2026 data.",
+  "",
+  "At a headline level, pricing has firmed, with median sale prices up 3.1% year-on-year. That gain is not broad-based growth. It reflects a shift in what is actually selling: fewer small, off-plan and apartment transactions, and a heavier weighting toward larger, completed villas.",
+  "",
+  "## Sales market",
+  "",
+  "- Transaction volume is down 21.0% year-on-year, with buyers becoming more selective",
+  "- 2 to 3 bedroom properties now account for over 58% of transactions, while 1-bedroom and off-plan share has contracted",
+  "- Off-plan supply has fallen to around 20% of new stock, as developers prioritise absorbing existing inventory over new speculative launches",
+  "",
+  "## Rental market",
+  "",
+  "- Rental supply has grown 5.0% year-on-year, so the regulatory-driven slowdown some anticipated has not shown up in the data so far in 2026",
+  "- Occupancy has improved, supported by continued tourism demand",
+  "- Average daily rate and rental revenue have both declined, pointing to growing competition rather than weaker demand: more supply is entering the market, and operators are adjusting pricing to hold occupancy",
+  "",
+  "## What this means",
+  "",
+  "The market is stable at the top line but more selective underneath. Capital is rotating toward established, larger-format villas, while operators on the rental side are absorbing pricing pressure to maintain bookings.",
+  "",
+  "You can view the full breakdown in the Bali H1 2026 Market Report on the Market Reports page.",
+  "",
+  "Want to go deeper? You could ask about the locations with the highest occupancy so far in 2026, the markets with the most sales activity in H1 2026, or how yields are behaving in a specific micro-location.",
+].join("\n");
+
 const suggestions = [
-{ title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: "Give me an overview of the current Bali property market \u2014 what are the key trends right now?", icon: TrendingUp },
+{ title: "Market trends", shortDesc: "Overview of current market dynamics across Bali", desc: MARKET_TRENDS_PROMPT, icon: TrendingUp },
 { title: "Top markets", shortDesc: "Locations with the strongest sales and rental fundamentals", desc: "Which locations are showing the strongest market fundamentals across sales and rental performance?", icon: BarChart3 },
 { title: "Off-Plan Market", shortDesc: "Explore new development trends and off-plan supply across Bali", desc: "What does the data show about Bali's off-plan property market?", icon: Building2 },
 { title: "Yield estimator", shortDesc: "Estimate gross and net yield on a specific property", desc: "I'd like to estimate the yield on a property I'm looking at \u2014 how does this work?", icon: Calculator }];

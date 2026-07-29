@@ -32,7 +32,7 @@ import {
 } from "@/lib/fileAttachments";
 
 /* ── Freemium daily prompt limit ── */
-const DAILY_LIMIT = 10;
+const DAILY_LIMIT = 5;
 const PROMPT_COUNTER_KEY = "reid-daily-prompts";
 
 function getDailyPromptData(): { count: number; resetAt: number } {
@@ -1305,7 +1305,7 @@ export default function NewAnalysis() {
               </div>
               {limitReached && (
                 <div className="absolute inset-0 rounded-xl bg-card/95 flex flex-col items-center justify-center p-6 text-center">
-                  <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
+                  <p className="text-sm font-medium text-foreground mb-2">You've reached your 5-prompt limit for today.</p>
                   <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
                   <a
                     href="https://www.realinfo.id/pricing-plans/plans-pricing"
@@ -1604,7 +1604,7 @@ export default function NewAnalysis() {
             )}
             {limitReached ? (
               <div className="rounded-xl border border-border bg-card p-5 text-center">
-                <p className="text-sm font-medium text-foreground mb-2">You've reached your 10-prompt limit for today.</p>
+                <p className="text-sm font-medium text-foreground mb-2">You've reached your 5-prompt limit for today.</p>
                 <p className="text-xs text-muted-foreground mb-3">Your access resets in 24 hours. For unlimited queries and full market data access, upgrade to a REID membership.</p>
                 <a
                   href="https://www.realinfo.id/pricing-plans/plans-pricing"

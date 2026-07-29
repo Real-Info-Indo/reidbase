@@ -563,14 +563,14 @@ serve(async (req) => {
     if (effectiveTier === "free" && wixUserId) {
       const { data: allowed, error: rateErr } = await supabase.rpc(
         "check_and_increment_free_prompt",
-        { p_wix_user_id: wixUserId },
+        { p_wix_user_id: wixUserId, p_daily_limit: 5 },
       );
       if (rateErr) {
         console.warn("Rate-limit check error:", rateErr.message);
         // Fail open on DB error so a transient fault doesn't block the user.
       } else if (allowed === false) {
         return new Response(
-          JSON.stringify({ error: "daily_limit_reached", message: "You have reached your 10 daily prompts. Upgrade to REID Base Member to continue." }),
+          JSON.stringify({ error: "daily_limit_reached", message: "You have reached your 5 daily prompts. Upgrade to REID Base Member to continue." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }

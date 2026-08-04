@@ -32,11 +32,13 @@ function toNum(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function toCurrency(v: string): number | null {
+function toCurrencyUnused(v: string): number | null {
   if (!v || v.trim() === "" || v.trim() === "$0.00") return null;
   const n = Number(v.replace(/[$,]/g, ""));
   return isNaN(n) ? null : n;
 }
+void toCurrencyUnused;
+
 
 // Strip any currency prefix/symbol (Rp, $, IDR, USD, commas, spaces) before parsing.
 function toMoney(v: string): number | null {

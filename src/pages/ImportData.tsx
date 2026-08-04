@@ -62,6 +62,66 @@ async function readFileText(file: File): Promise<string> {
   });
 }
 
+function normaliseHeader(v: string): string {
+  return v.replace(/^\uFEFF/, "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+/**
+ * Map target column names to CSV column indices using the header row.
+ * Protects against shifted imports when the source file carries an extra
+ * leading index column or reordered columns.
+ */
+function buildColumnMap(headerLine: string, aliases: Record<string, string[]>): Record<string, number> {
+  const headers = parseCSVLine(headerLine).map(normaliseHeader);
+  const map: Record<string, number> = {};
+  for (const [target, names] of Object.entries(aliases)) {
+    for (const name of names) {
+      const idx = headers.indexOf(normaliseHeader(name));
+      if (idx !== -1) { map[target] = idx; break; }
+    }
+  }
+  return map;
+}
+
+const RENTAL_ALIASES: Record<string, string[]> = {
+  date: ["date", "month", "period"],
+  region: ["region", "reid_region"],
+  location: ["location", "micro_location", "area"],
+  type: ["type", "property_type"],
+  mgmt: ["mgmt", "management", "mgmt_type"],
+  beds: ["beds", "bedrooms"],
+  count: ["count", "properties", "property_count"],
+  occupancy: ["occupancy", "occupancy_pct", "occupancy_rate"],
+  rate_usd: ["rate_usd", "rate", "adr", "adr_usd", "average_daily_rate"],
+  monthly_usd: ["monthly_usd", "monthly", "monthly_revenue_usd"],
+  total_usd: ["total_usd", "total", "total_revenue_usd"],
+};
+
+const PROPERTY_ALIASES: Record<string, string[]> = {
+  uqid: ["uqid", "uq_id", "unique_id"],
+  id: ["id", "listing_id", "ref"],
+  region: ["region", "reid_region"],
+  location: ["location", "micro_location", "area"],
+  contract_type: ["contract_type", "contract", "tenure"],
+  property_type: ["property_type", "type"],
+  years: ["years", "lease_years", "term"],
+  bedrooms: ["bedrooms", "beds"],
+  bathrooms: ["bathrooms", "baths"],
+  land_size_sqm: ["land_size_sqm", "land_size", "land_sqm"],
+  build_size_sqm: ["build_size_sqm", "build_size", "building_size_sqm", "internal_sqm"],
+  fsr: ["fsr"],
+  price_idr: ["price_idr", "idr_price"],
+  price_usd: ["price_usd", "usd_price", "price"],
+  price_per_sqm_usd: ["price_per_sqm_usd", "price_per_sqm", "usd_per_sqm"],
+  price_per_year_usd: ["price_per_year_usd", "price_per_year", "usd_per_year"],
+  availability: ["availability", "status"],
+  sold_date: ["sold_date", "sold"],
+  scrape_date: ["scrape_date", "scraped", "captured"],
+  days_listed: ["days_listed", "days_on_market", "dom"],
+  off_plan: ["off_plan", "offplan"],
+};
+
+
 export default function ImportData() {
   const { authenticated, checking, error } = useAdminAuth();
   const [status, setStatus] = useState("");

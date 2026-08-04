@@ -320,7 +320,7 @@ export default function ImportData() {
 
       <h1 className="text-2xl font-bold mb-4">Import Rental Data</h1>
       <p className="text-muted-foreground font-extralight mb-4">
-        Select a CSV file. Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
+        Select a CSV file. Columns are matched by header name, so an extra index column will not shift the data. Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
       </p>
       <div className="mb-4 space-y-2">
         <input

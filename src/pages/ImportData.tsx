@@ -224,24 +224,35 @@ export default function ImportData() {
 
       setRentalStatus(`Parsing ${lines.length - 1} rows...`);
 
+      const map = buildColumnMap(lines[0], RENTAL_ALIASES);
+      const required = ["date", "region", "location", "type"];
+      const missing = required.filter((k) => map[k] === undefined);
+      if (missing.length > 0) {
+        throw new Error(
+          `CSV header not recognised. Missing column(s): ${missing.join(", ")}. Include a header row with date, region, location, type, mgmt, beds, count, occupancy, rate_usd, monthly_usd, total_usd.`,
+        );
+      }
+      const at = (row: string[], key: string) => (map[key] === undefined ? "" : row[map[key]] ?? "");
+
       const rows = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
-        if (cols.length < 11) continue;
+        if (cols.length < 4) continue;
         rows.push({
-          date: cols[0]?.trim() || null,
-          region: cols[1]?.trim() || null,
-          location: cols[2]?.trim() || null,
-          type: cols[3]?.trim() || null,
-          mgmt: cols[4]?.trim() || null,
-          beds: toNum(cols[5]),
-          count: toNum(cols[6]),
-          occupancy: toPercent(cols[7]),
-          rate_usd: toCurrency(cols[8]),
-          monthly_usd: toCurrency(cols[9]),
-          total_usd: toCurrency(cols[10]),
+          date: at(cols, "date").trim() || null,
+          region: at(cols, "region").trim() || null,
+          location: at(cols, "location").trim() || null,
+          type: at(cols, "type").trim() || null,
+          mgmt: at(cols, "mgmt").trim() || null,
+          beds: toNum(at(cols, "beds")),
+          count: toNum(at(cols, "count")),
+          occupancy: toPercent(at(cols, "occupancy")),
+          rate_usd: toMoney(at(cols, "rate_usd")),
+          monthly_usd: toMoney(at(cols, "monthly_usd")),
+          total_usd: toMoney(at(cols, "total_usd")),
         });
       }
+
 
       const deduped = new Map<string, typeof rows[0]>();
       for (const row of rows) {

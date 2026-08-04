@@ -148,34 +148,41 @@ export default function ImportData() {
 
       setStatus(`Parsing ${lines.length - 1} rows...`);
 
+      const map = buildColumnMap(lines[0], PROPERTY_ALIASES);
+      const at = (row: string[], key: string, fallback: number) => {
+        const idx = map[key] ?? fallback;
+        return row[idx] ?? "";
+      };
+
       const rows = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
         if (cols.length < 5) continue;
         rows.push({
-          uqid: parseInt(cols[0]) || i,
-          id: cols[1] || null,
-          region: cols[2] || null,
-          location: cols[3] || null,
-          contract_type: cols[4] || null,
-          property_type: cols[5] || null,
-          years: toNum(cols[6]),
-          bedrooms: toNum(cols[7]),
-          bathrooms: toNum(cols[8]),
-          land_size_sqm: toNum(cols[9]),
-          build_size_sqm: toNum(cols[10]),
-          fsr: cols[11] || null,
-          price_idr: toMoney(cols[12]),
-          price_usd: toMoney(cols[13]),
-          price_per_sqm_usd: toMoney(cols[14]),
-          price_per_year_usd: toMoney(cols[15]),
-          availability: cols[16] || null,
-          sold_date: cols[17] || null,
-          scrape_date: cols[18] || null,
-          days_listed: toNum(cols[19]),
-          off_plan: cols[20] || null,
+          uqid: parseInt(at(cols, "uqid", 0)) || i,
+          id: at(cols, "id", 1).trim() || null,
+          region: at(cols, "region", 2).trim() || null,
+          location: at(cols, "location", 3).trim() || null,
+          contract_type: at(cols, "contract_type", 4).trim() || null,
+          property_type: at(cols, "property_type", 5).trim() || null,
+          years: toNum(at(cols, "years", 6)),
+          bedrooms: toNum(at(cols, "bedrooms", 7)),
+          bathrooms: toNum(at(cols, "bathrooms", 8)),
+          land_size_sqm: toNum(at(cols, "land_size_sqm", 9)),
+          build_size_sqm: toNum(at(cols, "build_size_sqm", 10)),
+          fsr: at(cols, "fsr", 11).trim() || null,
+          price_idr: toMoney(at(cols, "price_idr", 12)),
+          price_usd: toMoney(at(cols, "price_usd", 13)),
+          price_per_sqm_usd: toMoney(at(cols, "price_per_sqm_usd", 14)),
+          price_per_year_usd: toMoney(at(cols, "price_per_year_usd", 15)),
+          availability: at(cols, "availability", 16).trim() || null,
+          sold_date: at(cols, "sold_date", 17).trim() || null,
+          scrape_date: at(cols, "scrape_date", 18).trim() || null,
+          days_listed: toNum(at(cols, "days_listed", 19)),
+          off_plan: at(cols, "off_plan", 20).trim() || null,
         });
       }
+
 
       setStatus(`Uploading ${rows.length} rows in batches...`);
       const chunkSize = 2000;

@@ -32,11 +32,7 @@ function toNum(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function toCurrency(v: string): number | null {
-  if (!v || v.trim() === "" || v.trim() === "$0.00") return null;
-  const n = Number(v.replace(/[$,]/g, ""));
-  return isNaN(n) ? null : n;
-}
+
 
 // Strip any currency prefix/symbol (Rp, $, IDR, USD, commas, spaces) before parsing.
 function toMoney(v: string): number | null {
@@ -61,6 +57,66 @@ async function readFileText(file: File): Promise<string> {
     reader.readAsText(file);
   });
 }
+
+function normaliseHeader(v: string): string {
+  return v.replace(/^\uFEFF/, "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+/**
+ * Map target column names to CSV column indices using the header row.
+ * Protects against shifted imports when the source file carries an extra
+ * leading index column or reordered columns.
+ */
+function buildColumnMap(headerLine: string, aliases: Record<string, string[]>): Record<string, number> {
+  const headers = parseCSVLine(headerLine).map(normaliseHeader);
+  const map: Record<string, number> = {};
+  for (const [target, names] of Object.entries(aliases)) {
+    for (const name of names) {
+      const idx = headers.indexOf(normaliseHeader(name));
+      if (idx !== -1) { map[target] = idx; break; }
+    }
+  }
+  return map;
+}
+
+const RENTAL_ALIASES: Record<string, string[]> = {
+  date: ["date", "month", "period"],
+  region: ["region", "reid_region"],
+  location: ["location", "micro_location", "area"],
+  type: ["type", "property_type"],
+  mgmt: ["mgmt", "management", "mgmt_type"],
+  beds: ["beds", "bedrooms"],
+  count: ["count", "properties", "property_count"],
+  occupancy: ["occupancy", "occupancy_pct", "occupancy_rate"],
+  rate_usd: ["rate_usd", "rate", "adr", "adr_usd", "average_daily_rate"],
+  monthly_usd: ["monthly_usd", "monthly", "monthly_revenue_usd"],
+  total_usd: ["total_usd", "total", "total_revenue_usd"],
+};
+
+const PROPERTY_ALIASES: Record<string, string[]> = {
+  uqid: ["uqid", "uq_id", "unique_id"],
+  id: ["id", "listing_id", "ref"],
+  region: ["region", "reid_region"],
+  location: ["location", "micro_location", "area"],
+  contract_type: ["contract_type", "contract", "tenure"],
+  property_type: ["property_type", "type"],
+  years: ["years", "lease_years", "term"],
+  bedrooms: ["bedrooms", "beds"],
+  bathrooms: ["bathrooms", "baths"],
+  land_size_sqm: ["land_size_sqm", "land_size", "land_sqm"],
+  build_size_sqm: ["build_size_sqm", "build_size", "building_size_sqm", "internal_sqm"],
+  fsr: ["fsr"],
+  price_idr: ["price_idr", "idr_price"],
+  price_usd: ["price_usd", "usd_price", "price"],
+  price_per_sqm_usd: ["price_per_sqm_usd", "price_per_sqm", "usd_per_sqm"],
+  price_per_year_usd: ["price_per_year_usd", "price_per_year", "usd_per_year"],
+  availability: ["availability", "status"],
+  sold_date: ["sold_date", "sold"],
+  scrape_date: ["scrape_date", "scraped", "captured"],
+  days_listed: ["days_listed", "days_on_market", "dom"],
+  off_plan: ["off_plan", "offplan"],
+};
+
 
 export default function ImportData() {
   const { authenticated, checking, error } = useAdminAuth();
@@ -88,34 +144,41 @@ export default function ImportData() {
 
       setStatus(`Parsing ${lines.length - 1} rows...`);
 
+      const map = buildColumnMap(lines[0], PROPERTY_ALIASES);
+      const at = (row: string[], key: string, fallback: number) => {
+        const idx = map[key] ?? fallback;
+        return row[idx] ?? "";
+      };
+
       const rows = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
         if (cols.length < 5) continue;
         rows.push({
-          uqid: parseInt(cols[0]) || i,
-          id: cols[1] || null,
-          region: cols[2] || null,
-          location: cols[3] || null,
-          contract_type: cols[4] || null,
-          property_type: cols[5] || null,
-          years: toNum(cols[6]),
-          bedrooms: toNum(cols[7]),
-          bathrooms: toNum(cols[8]),
-          land_size_sqm: toNum(cols[9]),
-          build_size_sqm: toNum(cols[10]),
-          fsr: cols[11] || null,
-          price_idr: toMoney(cols[12]),
-          price_usd: toMoney(cols[13]),
-          price_per_sqm_usd: toMoney(cols[14]),
-          price_per_year_usd: toMoney(cols[15]),
-          availability: cols[16] || null,
-          sold_date: cols[17] || null,
-          scrape_date: cols[18] || null,
-          days_listed: toNum(cols[19]),
-          off_plan: cols[20] || null,
+          uqid: parseInt(at(cols, "uqid", 0)) || i,
+          id: at(cols, "id", 1).trim() || null,
+          region: at(cols, "region", 2).trim() || null,
+          location: at(cols, "location", 3).trim() || null,
+          contract_type: at(cols, "contract_type", 4).trim() || null,
+          property_type: at(cols, "property_type", 5).trim() || null,
+          years: toNum(at(cols, "years", 6)),
+          bedrooms: toNum(at(cols, "bedrooms", 7)),
+          bathrooms: toNum(at(cols, "bathrooms", 8)),
+          land_size_sqm: toNum(at(cols, "land_size_sqm", 9)),
+          build_size_sqm: toNum(at(cols, "build_size_sqm", 10)),
+          fsr: at(cols, "fsr", 11).trim() || null,
+          price_idr: toMoney(at(cols, "price_idr", 12)),
+          price_usd: toMoney(at(cols, "price_usd", 13)),
+          price_per_sqm_usd: toMoney(at(cols, "price_per_sqm_usd", 14)),
+          price_per_year_usd: toMoney(at(cols, "price_per_year_usd", 15)),
+          availability: at(cols, "availability", 16).trim() || null,
+          sold_date: at(cols, "sold_date", 17).trim() || null,
+          scrape_date: at(cols, "scrape_date", 18).trim() || null,
+          days_listed: toNum(at(cols, "days_listed", 19)),
+          off_plan: at(cols, "off_plan", 20).trim() || null,
         });
       }
+
 
       setStatus(`Uploading ${rows.length} rows in batches...`);
       const chunkSize = 2000;
@@ -157,24 +220,35 @@ export default function ImportData() {
 
       setRentalStatus(`Parsing ${lines.length - 1} rows...`);
 
+      const map = buildColumnMap(lines[0], RENTAL_ALIASES);
+      const required = ["date", "region", "location", "type"];
+      const missing = required.filter((k) => map[k] === undefined);
+      if (missing.length > 0) {
+        throw new Error(
+          `CSV header not recognised. Missing column(s): ${missing.join(", ")}. Include a header row with date, region, location, type, mgmt, beds, count, occupancy, rate_usd, monthly_usd, total_usd.`,
+        );
+      }
+      const at = (row: string[], key: string) => (map[key] === undefined ? "" : row[map[key]] ?? "");
+
       const rows = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = parseCSVLine(lines[i]);
-        if (cols.length < 11) continue;
+        if (cols.length < 4) continue;
         rows.push({
-          date: cols[0]?.trim() || null,
-          region: cols[1]?.trim() || null,
-          location: cols[2]?.trim() || null,
-          type: cols[3]?.trim() || null,
-          mgmt: cols[4]?.trim() || null,
-          beds: toNum(cols[5]),
-          count: toNum(cols[6]),
-          occupancy: toPercent(cols[7]),
-          rate_usd: toCurrency(cols[8]),
-          monthly_usd: toCurrency(cols[9]),
-          total_usd: toCurrency(cols[10]),
+          date: at(cols, "date").trim() || null,
+          region: at(cols, "region").trim() || null,
+          location: at(cols, "location").trim() || null,
+          type: at(cols, "type").trim() || null,
+          mgmt: at(cols, "mgmt").trim() || null,
+          beds: toNum(at(cols, "beds")),
+          count: toNum(at(cols, "count")),
+          occupancy: toPercent(at(cols, "occupancy")),
+          rate_usd: toMoney(at(cols, "rate_usd")),
+          monthly_usd: toMoney(at(cols, "monthly_usd")),
+          total_usd: toMoney(at(cols, "total_usd")),
         });
       }
+
 
       const deduped = new Map<string, typeof rows[0]>();
       for (const row of rows) {
@@ -246,7 +320,7 @@ export default function ImportData() {
 
       <h1 className="text-2xl font-bold mb-4">Import Rental Data</h1>
       <p className="text-muted-foreground font-extralight mb-4">
-        Select a CSV file. Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
+        Select a CSV file. Columns are matched by header name, so an extra index column will not shift the data. Append upserts on date+region+location+type+mgmt+beds. Replace wipes the table first, then imports.
       </p>
       <div className="mb-4 space-y-2">
         <input

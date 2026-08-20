@@ -40,7 +40,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   const triggerClass = compact
     ? "h-8 w-full rounded-lg bg-secondary text-xs"
-    : "h-8 w-[6.5rem] rounded-lg bg-secondary px-2 text-xs";
+    : "h-8 min-w-0 flex-1 rounded-lg bg-secondary px-2 text-xs";
 
   const resetButton = (
     <Button

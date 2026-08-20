@@ -27,6 +27,7 @@ import AdminUsers from "./pages/AdminUsers";
 import AdminAlerts from "./pages/AdminAlerts";
 import CampaignConversation from "./pages/CampaignConversation";
 import AdminAffiliates from "./pages/AdminAffiliates";
+import DashboardV2 from "./pages/DashboardV2";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 

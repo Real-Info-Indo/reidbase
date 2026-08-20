@@ -29,7 +29,7 @@ Confirmed against the database:
 - Rental property supply chart currently sums bedroom counts across every month in the rentals table (about 2.09m). It will instead use only the latest month present in the filtered set (June 2026), which gives 1 bed 21,749, 2 bed 13,608, 3 bed 11,016, 4 bed 4,779, 5 bed 2,099, 6 bed 2,668.
 - Rental records scorecard uses the same all-months sum today. It will use the same latest-month basis as the chart, so it will read 55,919 rather than 2,094,225.
 - Available properties scorecard: display the full number with thousands separators (11,429 rather than the abbreviated form).
-- Clearance rate: currently sold records divided by all records in the filtered property set, as a percentage. Availability holds only two values, Sold (16,533) and Available (11,429), so unfiltered this is 59.1%. The calculation is correct as written; no change proposed. Flag if you want it based on a period rather than the whole table.
+- Clearance rate: change to a period-based calculation, defaulting to the trailing 12 months. Sold properties in the period divided by (available properties in the period plus sold properties in the period), as a percentage. The period follows the dashboard date filters when set, otherwise the trailing 12-month window already used by the charts. On the current data that window is July 2025 to June 2026, with 4,274 sold and 1,459 available, giving 74.6% rather than the 59.1% shown today.
 
 ## Technical notes
 

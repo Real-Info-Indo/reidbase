@@ -209,7 +209,16 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   const s = data.secondary ?? {};
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
+          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
+        </DashboardCard>
+        <DashboardCard title="New and sold property volume" subtitle="Record volume per period">
+          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+      </div>
+
       <KpiRow>
         <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
@@ -217,8 +226,11 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
       </KpiRow>
 
-      <DashboardCard title="Supporting metrics" subtitle="Calculated across the current filter selection">
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">
+        <DashboardCard title="Development status" subtitle="Completed against off-plan">
+          <DonutChart data={data.status_split} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricTile label="Days listed" value={formatDays(s.days_listed)} />
           <MetricTile label="Price per sqm" value={formatUsdExact(s.price_per_sqm)} />
           <MetricTile label="Build size" value={formatSqm(s.build_size)} />
@@ -228,21 +240,10 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
           <MetricTile label="Lease term" value={formatYears(s.lease_term)} />
           <MetricTile label="Average gross yield" value={formatPercent(s.gross_yield)} />
         </div>
-      </DashboardCard>
-
-      <ChartGrid>
-        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
-          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
-        </DashboardCard>
-        <DashboardCard title="New and sold property volume" subtitle="Record volume per period">
-          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-        <DashboardCard title="Development status" subtitle="Completed against off-plan" className="lg:col-span-2">
-          <DonutChart data={data.status_split} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-      </ChartGrid>
+      </div>
     </div>
   );
+
 }
 
 /** Single panel of the comparison module. Uses the location-report payload. */

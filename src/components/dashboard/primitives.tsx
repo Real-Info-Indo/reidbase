@@ -100,7 +100,7 @@ export function DashboardCard({
   className?: string;
   style?: React.CSSProperties;
   /** Chart rows behind this card, enabling the CSV and PNG menu. */
-  exportData?: Array<Record<string, unknown>> | null;
+  exportData?: Array<object> | null;
 }) {
   const cardRef = useRef<HTMLElement>(null);
   const [busy, setBusy] = useState(false);

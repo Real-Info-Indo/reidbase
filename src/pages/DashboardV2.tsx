@@ -173,19 +173,6 @@ export default function DashboardV2() {
       </nav>
 
       <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
-        <div data-export-ignore="true" className="absolute right-3 top-2 flex justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void downloadPdf()}
-            disabled={exporting}
-            className="gap-2 rounded-full bg-card text-xs font-normal"
-          >
-            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-            {exporting ? "Preparing PDF" : "Download PDF"}
-          </Button>
-        </div>
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}
@@ -196,6 +183,19 @@ export default function DashboardV2() {
                 options={options}
                 onChange={setFilters}
                 variant={filterVariant(active)}
+                rightActions={(
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+                    onClick={() => void downloadPdf()}
+                    disabled={exporting}
+                  >
+                    {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                    {exporting ? "Preparing PDF" : "Download PDF"}
+                  </Button>
+                )}
               />
             </div>
           </header>

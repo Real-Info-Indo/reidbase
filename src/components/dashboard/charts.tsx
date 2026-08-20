@@ -111,7 +111,7 @@ export function MonthBarChart({
       <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
+        <YAxis tick={Y_AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
         <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>

@@ -209,7 +209,9 @@ export function DonutChart({
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={rows} dataKey="value" nameKey="name" innerRadius="58%" outerRadius="82%" paddingAngle={2}>
+        <Pie data={rows} dataKey="value" nameKey="name" innerRadius="40%" outerRadius="80%" paddingAngle={2} cornerRadius={6}>
+
+
           {rows.map((row, i) => (
             <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
           ))}

@@ -75,6 +75,7 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/alerts" element={<AdminAlerts />} />
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
+        <Route path="/dashboard-v2" element={<DashboardV2 />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

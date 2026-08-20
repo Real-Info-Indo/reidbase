@@ -80,12 +80,12 @@ export function DashboardCard({
   return (
     <section
       className={cn(
-        "rounded-xl bg-card p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
+        "rounded-2xl bg-card p-5 shadow-[0_2px_10px_rgba(0,0,0,0.05)]",
         className,
       )}
     >
       {title && (
-        <header className="mb-3">
+        <header className="mb-4">
           <h3 className="text-sm font-bold leading-tight text-foreground">{title}</h3>
           {subtitle && (
             <p className="mt-0.5 text-xs font-extralight text-muted-foreground">{subtitle}</p>
@@ -94,6 +94,18 @@ export function DashboardCard({
       )}
       {children}
     </section>
+  );
+}
+
+/** Left title block sitting beside the KPI row, matching the reference dashboards. */
+export function ModuleTitle({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="flex flex-col justify-center px-1 py-2">
+      <h2 className="text-2xl font-light leading-tight text-foreground lg:text-3xl">{title}</h2>
+      <p className="mt-2 max-w-[16rem] text-xs font-extralight leading-snug text-muted-foreground">
+        {subtitle}
+      </p>
+    </div>
   );
 }
 
@@ -109,16 +121,16 @@ export function KpiCard({
   accent: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+    <div className="flex items-center gap-3 rounded-2xl bg-card px-4 py-5 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
       <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-        style={{ backgroundColor: `${accent}26` }}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+        style={{ backgroundColor: accent }}
       >
-        <Icon className="h-4 w-4" style={{ color: accent }} />
+        <Icon className="h-5 w-5" style={{ color: "hsl(var(--card))" }} />
       </span>
-      <div className="min-w-0">
-        <p className="truncate text-2xl font-bold leading-none text-foreground">{value}</p>
-        <p className="mt-1 truncate text-xs font-extralight text-muted-foreground">{label}</p>
+      <div className="min-w-0 flex-1 text-right">
+        <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
+        <p className="mt-1 truncate text-2xl font-bold leading-none text-foreground">{value}</p>
       </div>
     </div>
   );
@@ -126,14 +138,13 @@ export function KpiCard({
 
 export function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-secondary/60 px-3 py-2.5">
-      <p className="text-sm font-bold leading-tight text-foreground">{value}</p>
-      <p className="mt-0.5 text-[0.68rem] font-extralight leading-tight text-muted-foreground">
-        {label}
-      </p>
+    <div className="rounded-xl bg-card px-4 py-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+      <p className="text-xs font-extralight leading-tight text-muted-foreground">{label}</p>
+      <p className="mt-1 text-lg font-bold leading-tight text-foreground">{value}</p>
     </div>
   );
 }
+
 
 export function EmptyChart({ message = "No data for these filters" }: { message?: string }) {
   return (

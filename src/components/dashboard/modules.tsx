@@ -12,6 +12,7 @@ import {
   DashboardCard,
   KpiCard,
   MetricTile,
+  ModuleTitle,
   type ModuleTheme,
   formatCount,
   formatDays,
@@ -27,19 +28,36 @@ interface ModuleProps {
   theme: ModuleTheme;
 }
 
-function KpiRow({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{children}</div>;
+function KpiRow({
+  title,
+  subtitle,
+  children,
+}: {
+  title?: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  if (!title) return <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{children}</div>;
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]">
+      <div className="col-span-2 lg:col-span-1">
+        <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function ChartGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{children}</div>;
+  return <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">{children}</div>;
 }
+
 
 export function MarketOverviewModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
-    <div className="space-y-3">
-      <KpiRow>
+    <div className="space-y-4">
+      <KpiRow title="Market Overview" subtitle="Market snapshot of key supply and demand metrics">
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
@@ -66,8 +84,8 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
 export function SupplyTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
-    <div className="space-y-3">
-      <KpiRow>
+    <div className="space-y-4">
+      <KpiRow title="Supply Trends" subtitle="Key supply metrics of available properties">
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
@@ -97,8 +115,8 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
 export function SalesTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
-    <div className="space-y-3">
-      <KpiRow>
+    <div className="space-y-4">
+      <KpiRow title="Sales Trends" subtitle="Key sales and demand metrics of transacted properties">
         <KpiCard label="Sold properties" value={formatCount(k.sold_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Discount rate" value={formatPercent(k.discount_rate)} icon={Percent} accent={theme.accent} />
@@ -128,8 +146,8 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
 export function PropertyTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
-    <div className="space-y-3">
-      <KpiRow>
+    <div className="space-y-4">
+      <KpiRow title="Property Trends" subtitle="Key metrics of property sizing and tenure">
         <KpiCard label="Price per sqm" value={formatUsdExact(k.price_per_sqm)} icon={Ruler} accent={theme.accent} />
         <KpiCard label="Median build size" value={formatSqm(k.median_build_size)} icon={Building2} accent={theme.accent} />
         <KpiCard label="Median floor space ratio" value={formatPercent(k.median_fsr)} icon={Percent} accent={theme.accent} />
@@ -159,8 +177,8 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
 export function RentalTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
-    <div className="space-y-3">
-      <KpiRow>
+    <div className="space-y-4">
+      <KpiRow title="Rental Trends" subtitle="Key supply and demand metrics of operating properties">
         <KpiCard label="Rental records" value={formatCount(k.rental_properties)} icon={Building2} accent={theme.accent} />
         <KpiCard label="Average daily rate" value={formatUsdExact(k.average_rate)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Average occupancy" value={formatPercent(k.average_occupancy)} icon={Percent} accent={theme.accent} />
@@ -191,7 +209,16 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   const s = data.secondary ?? {};
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
+          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
+        </DashboardCard>
+        <DashboardCard title="New and sold property volume" subtitle="Record volume per period">
+          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+      </div>
+
       <KpiRow>
         <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
@@ -199,8 +226,11 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
       </KpiRow>
 
-      <DashboardCard title="Supporting metrics" subtitle="Calculated across the current filter selection">
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">
+        <DashboardCard title="Development status" subtitle="Completed against off-plan">
+          <DonutChart data={data.status_split} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <MetricTile label="Days listed" value={formatDays(s.days_listed)} />
           <MetricTile label="Price per sqm" value={formatUsdExact(s.price_per_sqm)} />
           <MetricTile label="Build size" value={formatSqm(s.build_size)} />
@@ -210,21 +240,10 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
           <MetricTile label="Lease term" value={formatYears(s.lease_term)} />
           <MetricTile label="Average gross yield" value={formatPercent(s.gross_yield)} />
         </div>
-      </DashboardCard>
-
-      <ChartGrid>
-        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
-          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
-        </DashboardCard>
-        <DashboardCard title="New and sold property volume" subtitle="Record volume per period">
-          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-        <DashboardCard title="Development status" subtitle="Completed against off-plan" className="lg:col-span-2">
-          <DonutChart data={data.status_split} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-      </ChartGrid>
+      </div>
     </div>
   );
+
 }
 
 /** Single panel of the comparison module. Uses the location-report payload. */
@@ -232,7 +251,7 @@ export function ComparisonPanel({ data, theme, title }: ModuleProps & { title: s
   const k = data.kpis ?? {};
   const s = data.secondary ?? {};
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="grid grid-cols-3 gap-2">
         <MetricTile label="Available price" value={formatUsd(k.median_listing_price)} />
         <MetricTile label="Sold price" value={formatUsd(k.median_sold_price)} />

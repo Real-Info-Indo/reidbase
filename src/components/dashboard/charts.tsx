@@ -24,8 +24,20 @@ function ChartFrame({ children }: { children: React.ReactNode }) {
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
 }
 
-const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
-const Y_AXIS = { ...AXIS, textAnchor: "start" as const };
+const TICK_STYLE = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
+const AXIS = TICK_STYLE;
+const Y_AXIS_MARGIN_LEFT = 80;
+
+function makeYTick(format: Fmt) {
+  return function YTick({ y, payload }: { x: number; y: number; payload: { value: string | number } }) {
+    return (
+      <text x={0} y={y} dy={4} textAnchor="start" {...TICK_STYLE}>
+        {format(Number(payload.value))}
+      </text>
+    );
+  };
+}
+
 const GRID = "hsl(var(--border))";
 
 const tooltipStyle = {

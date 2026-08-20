@@ -297,6 +297,7 @@ export function BedsBarChart({
   format,
   axisFormat,
   layout = "vertical",
+  barCategoryGap = "10%",
 }: {
   data: BedsPoint[] | null | undefined;
   colour: string;
@@ -304,6 +305,7 @@ export function BedsBarChart({
   axisFormat?: Fmt;
   /** "vertical" renders horizontal bars (bedrooms on the Y axis). */
   layout?: "vertical" | "horizontal";
+  barCategoryGap?: string;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
@@ -315,7 +317,7 @@ export function BedsBarChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }} barCategoryGap="10%">
+          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }} barCategoryGap={barCategoryGap}>
             <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
             {layout === "vertical" ? (
               <>

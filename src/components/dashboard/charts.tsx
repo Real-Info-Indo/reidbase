@@ -179,12 +179,12 @@ export function BedsBarChart({
         {layout === "vertical" ? (
           <>
             <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => format(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} width={56} />
+            <YAxis type="category" dataKey="label" tick={Y_AXIS} tickLine={false} axisLine={false} width={56} />
           </>
         ) : (
           <>
             <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-            <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
+            <YAxis type="number" tick={Y_AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
           </>
         )}
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />

@@ -104,12 +104,12 @@ export function DashboardCard({
   );
 }
 
-/** Left title block sitting beside the KPI row, matching the reference dashboards. */
+/** Left title block sitting beside the KPI row. Same fixed height as score cards. */
 export function ModuleTitle({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="flex flex-col justify-center px-1 py-1">
-      <h2 className="text-xl font-light leading-tight text-foreground lg:text-2xl">{title}</h2>
-      <p className="mt-1 max-w-[16rem] text-xs font-extralight leading-snug text-muted-foreground">
+    <div className={cn("flex flex-col justify-between px-1", KPI_HEIGHT)}>
+      <h2 className="truncate text-lg font-light leading-none text-foreground">{title}</h2>
+      <p className="max-w-[16rem] text-[0.68rem] font-extralight leading-snug text-muted-foreground">
         {subtitle}
       </p>
     </div>

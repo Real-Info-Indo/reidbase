@@ -74,7 +74,7 @@ export function MonthLineChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+      <AreaChart data={rows} margin={{ top: 6, right: 8, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
@@ -84,11 +84,10 @@ export function MonthLineChart({
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
         <YAxis
-          tick={Y_AXIS}
+          tick={makeYTick(format)}
           tickLine={false}
           axisLine={false}
-          width={56}
-          tickFormatter={(v) => format(Number(v))}
+          width={0}
           domain={baseline ? ["auto", "auto"] : undefined}
         />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />

@@ -19,11 +19,12 @@ function triggerDownload(href: string, filename: string) {
 }
 
 /** Convert an array of flat records into a CSV string with a UTF-8 BOM. */
-export function toCsv(rows: Array<Record<string, unknown>> | Array<unknown>): string {
+export function toCsv(rows: Array<object>): string {
   if (!rows.length) return "";
+  const typed = rows as Array<Record<string, unknown>>;
   const columns = Array.from(
-    rows.reduce<Set<string>>((set, row) => {
-      Object.keys(row as Record<string, unknown>).forEach((key) => set.add(key));
+    typed.reduce<Set<string>>((set, row) => {
+      Object.keys(row).forEach((key) => set.add(key));
       return set;
     }, new Set<string>()),
   );
@@ -33,12 +34,12 @@ export function toCsv(rows: Array<Record<string, unknown>> | Array<unknown>): st
     return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   const lines = [columns.join(",")];
-  rows.forEach((row) => lines.push(columns.map((c) => escape((row as Record<string, unknown>)[c])).join(",")));
+  typed.forEach((row) => lines.push(columns.map((c) => escape(row[c])).join(",")));
   return `\uFEFF${lines.join("\n")}`;
 }
 
 export function downloadChartCsv(
-  rows: Array<Record<string, unknown>> | Array<unknown> | null | undefined,
+  rows: Array<object> | null | undefined,
   name: string,
 ): boolean {
   if (!rows || rows.length === 0) return false;

@@ -152,7 +152,7 @@ export default function DashboardV2() {
       } as React.CSSProperties}
     >
       {/* Module tabs: evenly distributed, fully justified, rounded on the bottom */}
-      <nav className="grid w-full grid-cols-4 gap-1 px-3 pt-0 lg:grid-cols-7">
+      <nav className="grid w-full grid-cols-4 px-3 pt-0 lg:grid-cols-7">
         {MODULES.map((m) => {
           const on = m.key === active;
           return (

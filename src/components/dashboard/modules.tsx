@@ -90,12 +90,12 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
             className="h-full"
             style={{ "--chart-h": "calc(var(--chart-base) * 2 + 77px)" } as React.CSSProperties}
           >
-            <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} />
+            <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} barCategoryGap="20%" />
           </DashboardCard>
         </div>
         <div className="lg:col-span-2">
           <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure">
-            <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} />
+          <TenureBedsChart data={data.available_by_beds} colours={[theme.light, theme.accent]} format={formatCount} />
           </DashboardCard>
         </div>
       </div>

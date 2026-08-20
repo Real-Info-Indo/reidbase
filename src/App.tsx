@@ -70,6 +70,7 @@ const AppRoutes = () => {
           <Route path="/appraisal-request" element={<AppraisalRequest />} />
           <Route path="/dashboard-v2" element={<DashboardV2 />} />
         </Route>
+        <Route path="/__pietest" element={<PieTest />} />
         <Route path="/import-data" element={<ImportData />} />
         <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />

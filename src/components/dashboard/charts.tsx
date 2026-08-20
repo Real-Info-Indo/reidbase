@@ -365,7 +365,7 @@ export function TenureBedsChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="5%" barGap={2}>
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
@@ -388,7 +388,6 @@ export function TenureBedsChart({
               stackId={stacked ? "tenure" : undefined}
               fill={colours[1]}
               radius={[0, 0, 0, 0]}
-              maxBarSize={30}
             />
             <Bar
               dataKey="freehold"
@@ -396,7 +395,6 @@ export function TenureBedsChart({
               stackId={stacked ? "tenure" : undefined}
               fill={colours[0]}
               radius={[4, 4, 0, 0]}
-              maxBarSize={30}
             />
           </BarChart>
         </ResponsiveContainer>

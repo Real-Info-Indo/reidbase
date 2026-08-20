@@ -72,7 +72,7 @@ export function MonthLineChart({
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
         <YAxis
-          tick={AXIS}
+          tick={Y_AXIS}
           tickLine={false}
           axisLine={false}
           width={56}

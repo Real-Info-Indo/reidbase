@@ -1,5 +1,13 @@
-import { type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { Download, MoreVertical, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { downloadChartCsv, downloadElementPng } from "@/lib/dashboardExport";
 
 /** Per-module accent palettes taken from the dashboard specification. */
 export const MODULE_THEMES = {

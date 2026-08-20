@@ -28,6 +28,7 @@ import AdminAlerts from "./pages/AdminAlerts";
 import CampaignConversation from "./pages/CampaignConversation";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import DashboardV2 from "./pages/DashboardV2";
+
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 
@@ -67,7 +68,9 @@ const AppRoutes = () => {
           <Route path="/market-reports" element={<MarketReports />} />
           <Route path="/location-reports" element={<LocationReports />} />
           <Route path="/appraisal-request" element={<AppraisalRequest />} />
-          <Route path="/dashboard-v2" element={<DashboardV2 />} />
+        <Route path="/dashboard-v2" element={<DashboardV2 />} />
+
+
         </Route>
         <Route path="/import-data" element={<ImportData />} />
         <Route path="/admin/chat-logs" element={<AdminChatLogs />} />

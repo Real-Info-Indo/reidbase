@@ -205,7 +205,6 @@ export function DonutChart({
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).filter((d) => d.value != null && d.value > 0);
   if (rows.length === 0) return <EmptyChart />;
-  const total = rows.reduce((sum, d) => sum + (d.value ?? 0), 0);
 
   const renderShareLabel = useCallback(
     ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
@@ -238,8 +237,8 @@ export function DonutChart({
           data={rows}
           dataKey="value"
           nameKey="name"
-          innerRadius="45%"
-          outerRadius="95%"
+          innerRadius="40%"
+          outerRadius="100%"
           paddingAngle={2}
           cornerRadius={6}
           label={renderShareLabel}
@@ -252,12 +251,13 @@ export function DonutChart({
         <Legend
           verticalAlign="bottom"
           height={28}
-          formatter={(name: string) => {
-            const row = rows.find((r) => r.name === name);
-            const share = row && total ? ((row.value ?? 0) / total) * 100 : null;
-            return `${name} ${share != null ? `${share.toFixed(1)}%` : ""}`;
+          formatter={(value: string) => (
+            <span className="text-muted-foreground">{value}</span>
+          )}
+          wrapperStyle={{
+            fontSize: 11,
+            transform: "translateY(8px)",
           }}
-          wrapperStyle={{ fontSize: 11 }}
         />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
       </PieChart>

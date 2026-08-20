@@ -38,11 +38,10 @@ function KpiRow({
   subtitle?: string;
   children: React.ReactNode;
 }) {
-  if (!title) return <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">{children}</div>;
   return (
-    <div className="grid grid-cols-2 gap-2 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]">
+    <div className={MODULE_GRID}>
       <div className="col-span-2 lg:col-span-1">
-        <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+        <ModuleTitle title={title ?? ""} subtitle={subtitle ?? ""} />
       </div>
       {children}
     </div>

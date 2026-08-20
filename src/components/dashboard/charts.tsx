@@ -195,16 +195,20 @@ export function MonthBarChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 

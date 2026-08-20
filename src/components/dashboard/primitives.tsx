@@ -92,15 +92,34 @@ export function DashboardCard({
   children,
   className,
   style,
+  exportData,
 }: {
   title?: string;
   subtitle?: string;
   children: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  /** Chart rows behind this card, enabling the CSV and PNG menu. */
+  exportData?: Array<Record<string, unknown>> | null;
 }) {
+  const cardRef = useRef<HTMLElement>(null);
+  const [busy, setBusy] = useState(false);
+  const name = title ?? "chart";
+  const hasMenu = Boolean(title);
+
+  const onPng = async () => {
+    if (!cardRef.current || busy) return;
+    setBusy(true);
+    try {
+      await downloadElementPng(cardRef.current, name);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <section
+      ref={cardRef}
       style={style}
       className={cn(
         "rounded-2xl bg-card p-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]",
@@ -108,10 +127,37 @@ export function DashboardCard({
       )}
     >
       {title && (
-        <header className="mb-2">
-          <h3 className="text-sm font-bold leading-tight text-foreground">{title}</h3>
-          {subtitle && (
-            <p className="mt-0.5 text-xs font-extralight text-muted-foreground">{subtitle}</p>
+        <header className="mb-2 flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold leading-tight text-foreground">{title}</h3>
+            {subtitle && (
+              <p className="mt-0.5 text-xs font-extralight text-muted-foreground">{subtitle}</p>
+            )}
+          </div>
+          {hasMenu && (
+            <div data-export-ignore="true" className="-mr-1 -mt-1 shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label={`${name} options`}
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem
+                    disabled={!exportData || exportData.length === 0}
+                    onSelect={() => downloadChartCsv(exportData, name)}
+                  >
+                    <Table2 className="mr-2 h-4 w-4" />
+                    Export
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled={busy} onSelect={() => void onPng()}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </header>
       )}

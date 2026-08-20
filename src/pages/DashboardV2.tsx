@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { AdminGate } from "@/components/AdminGate";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -14,7 +12,7 @@ import {
   type ServerModuleKey,
 } from "@/lib/dashboardApi";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { MODULE_THEMES } from "@/components/dashboard/primitives";
+import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
 import {
   ComparisonPanel,
   LocationReportModule,
@@ -40,7 +38,6 @@ function filterVariant(key: DashboardModuleKey): "properties" | "rentals" {
 }
 
 export default function DashboardV2() {
-  const navigate = useNavigate();
   const { authenticated, checking, error } = useAdminAuth();
 
   const [active, setActive] = useState<DashboardModuleKey>("market-overview");

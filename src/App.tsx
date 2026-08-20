@@ -77,6 +77,7 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/alerts" element={<AdminAlerts />} />
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
+        <Route path="/__pie-test" element={<PieTest />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

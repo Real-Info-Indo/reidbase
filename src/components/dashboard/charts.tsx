@@ -24,8 +24,20 @@ function ChartFrame({ children }: { children: React.ReactNode }) {
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
 }
 
-const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
-const Y_AXIS = { ...AXIS, textAnchor: "start" as const };
+const TICK_STYLE = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
+const AXIS = TICK_STYLE;
+const Y_AXIS_MARGIN_LEFT = 80;
+
+function makeYTick(format: Fmt) {
+  return function YTick({ y, payload }: { x: number; y: number; payload: { value: string | number } }) {
+    return (
+      <text x={0} y={y} dy={4} textAnchor="start" {...TICK_STYLE}>
+        {format(Number(payload.value))}
+      </text>
+    );
+  };
+}
+
 const GRID = "hsl(var(--border))";
 
 const tooltipStyle = {
@@ -62,7 +74,7 @@ export function MonthLineChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+      <AreaChart data={rows} margin={{ top: 6, right: 8, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
@@ -72,11 +84,10 @@ export function MonthLineChart({
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
         <YAxis
-          tick={Y_AXIS}
+          tick={makeYTick(format)}
           tickLine={false}
           axisLine={false}
-          width={56}
-          tickFormatter={(v) => format(Number(v))}
+          width={0}
           domain={baseline ? ["auto", "auto"] : undefined}
         />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
@@ -108,10 +119,10 @@ export function MonthBarChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+      <BarChart data={rows} margin={{ top: 6, right: 8, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={Y_AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
+        <YAxis tick={makeYTick(format)} tickLine={false} axisLine={false} width={0} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
         <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>
@@ -174,17 +185,17 @@ export function BedsBarChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
+      <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
         {layout === "vertical" ? (
           <>
             <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => format(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={Y_AXIS} tickLine={false} axisLine={false} width={56} />
+            <YAxis type="category" dataKey="label" tick={makeYTick(format)} tickLine={false} axisLine={false} width={0} />
           </>
         ) : (
           <>
             <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-            <YAxis type="number" tick={Y_AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
+            <YAxis type="number" tick={makeYTick(format)} tickLine={false} axisLine={false} width={0} />
           </>
         )}
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
@@ -210,10 +221,10 @@ export function TenureBedsChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+      <BarChart data={rows} margin={{ top: 6, right: 8, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-        <YAxis tick={Y_AXIS} tickLine={false} axisLine={false} width={56} tickFormatter={(v) => format(Number(v))} />
+        <YAxis tick={makeYTick(format)} tickLine={false} axisLine={false} width={0} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
         <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
         <Bar
@@ -251,10 +262,10 @@ export function VolumeLinesChart({
 
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <LineChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+      <LineChart data={rows} margin={{ top: 6, right: 8, left: Y_AXIS_MARGIN_LEFT, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={Y_AXIS} tickLine={false} axisLine={false} width={48} tickFormatter={(v) => format(Number(v))} />
+        <YAxis tick={makeYTick(format)} tickLine={false} axisLine={false} width={0} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
         <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
         <Line type="monotone" dataKey="available" name="Available" stroke={colours[0]} strokeWidth={2} dot={false} connectNulls />

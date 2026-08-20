@@ -1,0 +1,10 @@
+REVOKE ALL ON FUNCTION public.reid_month(text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.reid_filtered_properties(jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.reid_filtered_rentals(jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.reid_dashboard_filter_options() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.reid_dashboard_metrics(text, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.reid_month(text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.reid_filtered_properties(jsonb) TO service_role;
+GRANT EXECUTE ON FUNCTION public.reid_filtered_rentals(jsonb) TO service_role;
+GRANT EXECUTE ON FUNCTION public.reid_dashboard_filter_options() TO service_role;
+GRANT EXECUTE ON FUNCTION public.reid_dashboard_metrics(text, jsonb) TO service_role;

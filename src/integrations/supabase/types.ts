@@ -797,6 +797,67 @@ export type Database = {
         Args: { _conversation_id: string; _kind: string; _wix_user_id: string }
         Returns: number
       }
+      reid_dashboard_filter_options: { Args: never; Returns: Json }
+      reid_dashboard_metrics: {
+        Args: { p_filters?: Json; p_module: string }
+        Returns: Json
+      }
+      reid_filtered_properties: {
+        Args: { f: Json }
+        Returns: {
+          availability: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          build_size_sqm: number | null
+          contract_type: string | null
+          days_listed: number | null
+          fsr: string | null
+          id: string | null
+          land_size_sqm: number | null
+          location: string | null
+          off_plan: string | null
+          price_idr: number | null
+          price_per_sqm_usd: number | null
+          price_per_year_usd: number | null
+          price_usd: number | null
+          property_type: string | null
+          region: string | null
+          scrape_date: string | null
+          sold_date: string | null
+          uqid: number
+          years: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reid_properties"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      reid_filtered_rentals: {
+        Args: { f: Json }
+        Returns: {
+          beds: number | null
+          count: number | null
+          date: string | null
+          id: number
+          location: string | null
+          mgmt: string | null
+          monthly_usd: number | null
+          occupancy: number | null
+          rate_usd: number | null
+          region: string | null
+          total_usd: number | null
+          type: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reid_rentals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      reid_month: { Args: { t: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

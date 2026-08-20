@@ -157,9 +157,9 @@ export default function DashboardV2() {
       <div className="mx-auto max-w-[1500px] px-3 pb-4 pt-3">
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
-            {/* White space above the page title */}
-            <div className="col-span-2 hidden lg:block" />
-            <div className="col-span-2 flex justify-end lg:col-span-4">
+            {/* Title column spacer to align filters with the first score card */}
+            <div className="col-span-2 hidden lg:col-span-1 lg:block" />
+            <div className="col-span-2 flex justify-start lg:col-span-4 lg:col-start-2">
               <FilterBar
                 filters={filters}
                 options={options}

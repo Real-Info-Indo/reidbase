@@ -16,6 +16,7 @@ import {
   ModuleTitle,
   type ModuleTheme,
   formatCount,
+  formatCountExact,
   formatDays,
   formatPercent,
   formatSqm,
@@ -61,25 +62,33 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
   return (
     <div className="space-y-3">
       <KpiRow title="Market Overview" subtitle="Market snapshot of key supply and demand metrics">
-        <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
+        <KpiCard label="Available properties" value={formatCountExact(k.available_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
-        <KpiCard label="Rental records" value={formatCount(k.rental_records)} icon={Building2} accent={theme.accent} />
+        <KpiCard label="Rental records" value={formatCountExact(k.rental_records)} icon={Building2} accent={theme.accent} />
       </KpiRow>
-      <ChartGrid>
-        <DashboardCard title="Ownership type" subtitle="Share of listings by tenure">
-          <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
-          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
-        </DashboardCard>
-        <DashboardCard title="Rental property supply" subtitle="Operating records by bedroom count">
-          <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} />
-        </DashboardCard>
-        <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure">
-          <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-      </ChartGrid>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <DashboardCard title="Ownership type" subtitle="Share of listings by tenure">
+            <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} square />
+          </DashboardCard>
+        </div>
+        <div className="lg:col-span-2">
+          <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
+            <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
+          </DashboardCard>
+        </div>
+        <div className="lg:col-span-1">
+          <DashboardCard title="Rental property supply" subtitle="Operating records by bedroom count">
+            <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} />
+          </DashboardCard>
+        </div>
+        <div className="lg:col-span-2">
+          <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure">
+            <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} />
+          </DashboardCard>
+        </div>
+      </div>
     </div>
   );
 }

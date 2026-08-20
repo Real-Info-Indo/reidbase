@@ -20,8 +20,19 @@ import type { BedsPoint, BedsTenurePoint, MonthPoint, SlicePoint, VolumePoint } 
 import { EmptyChart, formatMonth } from "./primitives";
 
 /** Charts fill a viewport-derived frame so modules fit without page scrolling. */
-function ChartFrame({ children }: { children: React.ReactNode }) {
+function ChartFrame({ children, square = false }: { children: React.ReactNode; square?: boolean }) {
+  if (square) {
+    return (
+      <div className="mx-auto aspect-square w-full max-h-[var(--chart-h,200px)]">
+        {children}
+      </div>
+    );
+  }
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
+}
+
+function ChartFrameInner({ children }: { children: React.ReactNode }) {
+  return <div className="h-full w-full">{children}</div>;
 }
 
 const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
@@ -129,37 +140,41 @@ export function MonthLineChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
-            <stop offset="100%" stopColor={colour} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis
-          tick={AXIS}
-          tickLine={false}
-          axisLine={false}
-          width={width}
-          tickMargin={4}
-          tickFormatter={(v) => tickFmt(Number(v))}
-          domain={baseline ? ["auto", "auto"] : undefined}
-        />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke={colour}
-          strokeWidth={2}
-          fill={`url(#${gradientId})`}
-          dot={false}
-          connectNulls
-        />
-      </AreaChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
+                <stop offset="100%" stopColor={colour} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis
+              tick={AXIS}
+              tickLine={false}
+              axisLine={false}
+              width={width}
+              tickMargin={4}
+              tickFormatter={(v) => tickFmt(Number(v))}
+              domain={baseline ? ["auto", "auto"] : undefined}
+            />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={colour}
+              strokeWidth={2}
+              fill={`url(#${gradientId})`}
+              dot={false}
+              connectNulls
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 
@@ -180,16 +195,20 @@ export function MonthBarChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 
@@ -197,10 +216,12 @@ export function DonutChart({
   data,
   colours,
   format,
+  square = false,
 }: {
   data: SlicePoint[] | null | undefined;
   colours: string[];
   format: Fmt;
+  square?: boolean;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).filter((d) => d.value != null && d.value > 0);
@@ -231,37 +252,41 @@ export function DonutChart({
   );
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={rows}
-          dataKey="value"
-          nameKey="name"
-          innerRadius="40%"
-          outerRadius="100%"
-          paddingAngle={2}
-          cornerRadius={6}
-          label={renderShareLabel}
-          labelLine={false}
-        >
-          {rows.map((row, i) => (
-            <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
-          ))}
-        </Pie>
-        <Legend
-          verticalAlign="bottom"
-          height={28}
-          formatter={(value: string) => (
-            <span className="text-muted-foreground">{value}</span>
-          )}
-          wrapperStyle={{
-            fontSize: 11,
-            transform: "translateY(8px)",
-          }}
-        />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
-      </PieChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame square={square}>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={rows}
+              dataKey="value"
+              nameKey="name"
+              innerRadius="40%"
+              outerRadius="100%"
+              paddingAngle={2}
+              cornerRadius={6}
+              label={renderShareLabel}
+              labelLine={false}
+            >
+              {rows.map((row, i) => (
+                <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
+              ))}
+            </Pie>
+            <Legend
+              verticalAlign="bottom"
+              height={28}
+              formatter={(value: string) => (
+                <span className="text-muted-foreground">{value}</span>
+              )}
+              wrapperStyle={{
+                fontSize: 11,
+                transform: "translateY(8px)",
+              }}
+            />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 
@@ -286,27 +311,31 @@ export function BedsBarChart({
   const catWidth = categoryWidth(rows.map((r) => r.label));
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
-        {layout === "vertical" ? (
-          <>
-            <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
-          tickMargin={4} interval={0} />
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
+            {layout === "vertical" ? (
+              <>
+                <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
+                <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
+              tickMargin={4} interval={0} />
 
-          </>
-        ) : (
-          <>
-            <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-            <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={numericWidth}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-          </>
-        )}
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+              </>
+            ) : (
+              <>
+                <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
+                <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={numericWidth}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              </>
+            )}
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 
@@ -332,32 +361,46 @@ export function TenureBedsChart({
   const width = axisWidth([0, ...peaks], tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
-        <Bar
-          dataKey="freehold"
-          name="Freehold"
-          stackId={stacked ? "tenure" : undefined}
-          fill={colours[0]}
-          radius={[4, 4, 0, 0]}
-          maxBarSize={30}
-        />
-        <Bar
-          dataKey="leasehold"
-          name="Leasehold"
-          stackId={stacked ? "tenure" : undefined}
-          fill={colours[1]}
-          radius={[4, 4, 0, 0]}
-          maxBarSize={30}
-        />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Legend
+              verticalAlign="bottom"
+              height={28}
+              formatter={(value: string) => (
+                <span className="text-muted-foreground">{value}</span>
+              )}
+              wrapperStyle={{
+                fontSize: 11,
+                transform: "translateY(8px)",
+              }}
+            />
+            <Bar
+              dataKey="leasehold"
+              name="Leasehold"
+              stackId={stacked ? "tenure" : undefined}
+              fill={colours[1]}
+              radius={[0, 0, 0, 0]}
+              maxBarSize={30}
+            />
+            <Bar
+              dataKey="freehold"
+              name="Freehold"
+              stackId={stacked ? "tenure" : undefined}
+              fill={colours[0]}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={30}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 
@@ -381,17 +424,21 @@ export function VolumeLinesChart({
   );
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <LineChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
-        <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
-        <Line type="monotone" dataKey="available" name="Available" stroke={colours[0]} strokeWidth={2} dot={false} connectNulls />
-        <Line type="monotone" dataKey="sold" name="Sold" stroke={colours[1]} strokeWidth={2} dot={false} connectNulls />
-      </LineChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
+            <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
+            <Line type="monotone" dataKey="available" name="Available" stroke={colours[0]} strokeWidth={2} dot={false} connectNulls />
+            <Line type="monotone" dataKey="sold" name="Sold" stroke={colours[1]} strokeWidth={2} dot={false} connectNulls />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }

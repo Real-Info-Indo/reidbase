@@ -43,6 +43,11 @@ export function formatCount(v: number | null | undefined): string {
   return Math.round(v).toLocaleString("en-GB");
 }
 
+export function formatCountExact(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return "No data";
+  return Math.round(v).toLocaleString("en-GB");
+}
+
 export function formatPercent(v: number | null | undefined): string {
   if (v == null || !Number.isFinite(v)) return "No data";
   return `${v.toFixed(1)}%`;

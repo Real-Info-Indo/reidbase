@@ -154,7 +154,7 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-4 pt-3">
+      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-5 pt-8">
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}
@@ -186,7 +186,7 @@ export default function DashboardV2() {
         )}
       </div>
 
-      <footer className="flex w-full items-center justify-between border-t border-border/40 px-4 py-2 text-[0.68rem] font-extralight text-muted-foreground">
+      <footer className="flex w-full items-center justify-between border-t border-border/40 px-4 pb-2 text-[0.68rem] font-extralight text-muted-foreground">
         <span>Source: REID Database</span>
         <span>© Copyright 2026</span>
       </footer>

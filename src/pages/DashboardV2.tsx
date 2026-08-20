@@ -130,7 +130,7 @@ export default function DashboardV2() {
 
   return (
     <div
-      className="min-h-screen w-full overflow-x-hidden bg-background font-sans"
+      className="flex min-h-screen w-full flex-col overflow-x-hidden bg-background font-sans"
       style={{ "--chart-h": "clamp(112px, calc((100vh - 400px) / 2), 210px)" } as React.CSSProperties}
     >
       {/* Module tabs: evenly distributed, fully justified, rounded on the bottom */}
@@ -154,7 +154,7 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto max-w-[1500px] px-3 pb-4 pt-3">
+      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-4 pt-3">
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}
@@ -184,13 +184,14 @@ export default function DashboardV2() {
         ) : (
           <div className={loading ? "opacity-60 transition-opacity" : "transition-opacity"}>{body}</div>
         )}
-
-        <footer className="mt-3 flex items-center justify-between text-[0.68rem] font-extralight text-muted-foreground">
-          <span>Source: REID Database</span>
-          <span>© Copyright 2026</span>
-        </footer>
       </div>
+
+      <footer className="flex w-full items-center justify-between border-t border-border/40 px-4 py-2 text-[0.68rem] font-extralight text-muted-foreground">
+        <span>Source: REID Database</span>
+        <span>© Copyright 2026</span>
+      </footer>
     </div>
   );
 }
+
 

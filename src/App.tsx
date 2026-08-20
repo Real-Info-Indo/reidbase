@@ -28,7 +28,6 @@ import AdminAlerts from "./pages/AdminAlerts";
 import CampaignConversation from "./pages/CampaignConversation";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import DashboardV2 from "./pages/DashboardV2";
-import PieTest from "./pages/__PieTest";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 
@@ -77,7 +76,6 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/alerts" element={<AdminAlerts />} />
         <Route path="/admin/affiliates" element={<AdminAffiliates />} />
-        <Route path="/__pie-test" element={<PieTest />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

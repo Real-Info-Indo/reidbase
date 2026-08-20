@@ -69,15 +69,16 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
       </KpiRow>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="lg:col-span-1">
-          <DashboardCard title="Ownership type" subtitle="Share of listings by tenure">
-            <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} square />
+          <DashboardCard title="Ownership type" subtitle="Share of listings by tenure" className="flex aspect-square flex-col">
+            <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} fill />
           </DashboardCard>
         </div>
         <div className="lg:col-span-1">
-          <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
-            <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
+          <DashboardCard title="Median sold price" subtitle="Trailing 12 months" className="flex h-full flex-col">
+            <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient fill />
           </DashboardCard>
         </div>
+
         <div className="lg:col-span-1 lg:row-span-2">
           <DashboardCard
             title="Rental property supply"

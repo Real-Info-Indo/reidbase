@@ -83,14 +83,17 @@ export function DashboardCard({
   subtitle,
   children,
   className,
+  style,
 }: {
   title?: string;
   subtitle?: string;
   children: ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   return (
     <section
+      style={style}
       className={cn(
         "rounded-2xl bg-card p-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]",
         className,

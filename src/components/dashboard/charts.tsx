@@ -23,13 +23,14 @@ import { EmptyChart, formatMonth } from "./primitives";
 function ChartFrame({ children, square = false }: { children: React.ReactNode; square?: boolean }) {
   if (square) {
     return (
-      <div className="mx-auto aspect-square w-full max-h-[var(--chart-h,200px)]">
+      <div className="mx-auto aspect-square h-[var(--chart-h,200px)] max-w-full">
         {children}
       </div>
     );
   }
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
 }
+
 
 function ChartFrameInner({ children }: { children: React.ReactNode }) {
   return <div className="h-full w-full">{children}</div>;
@@ -364,7 +365,7 @@ export function TenureBedsChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="5%" barGap={2}>
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
@@ -387,7 +388,6 @@ export function TenureBedsChart({
               stackId={stacked ? "tenure" : undefined}
               fill={colours[1]}
               radius={[0, 0, 0, 0]}
-              maxBarSize={30}
             />
             <Bar
               dataKey="freehold"
@@ -395,7 +395,6 @@ export function TenureBedsChart({
               stackId={stacked ? "tenure" : undefined}
               fill={colours[0]}
               radius={[4, 4, 0, 0]}
-              maxBarSize={30}
             />
           </BarChart>
         </ResponsiveContainer>

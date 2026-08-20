@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Download, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { downloadElementPdf } from "@/lib/dashboardExport";
 import { AdminGate } from "@/components/AdminGate";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -50,6 +52,8 @@ export default function DashboardV2() {
   const [panelA, setPanelA] = useState<ModulePayload | null>(null);
   const [panelB, setPanelB] = useState<ModulePayload | null>(null);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isComparison = active === "comparison-report";
@@ -83,6 +87,17 @@ export default function DashboardV2() {
   }, [authenticated, active, filters, compareA, compareB, isComparison]);
 
   useEffect(() => { void load(); }, [load]);
+
+  const downloadPdf = useCallback(async () => {
+    if (!contentRef.current || exporting) return;
+    setExporting(true);
+    try {
+      const label = MODULES.find((m) => m.key === active)?.label ?? "dashboard";
+      await downloadElementPdf(contentRef.current, `dashboard-${label}`);
+    } finally {
+      setExporting(false);
+    }
+  }, [active, exporting]);
 
   const body = useMemo(() => {
     if (isComparison) {
@@ -157,7 +172,20 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12">
+      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
+        <div data-export-ignore="true" className="mb-2 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void downloadPdf()}
+            disabled={exporting}
+            className="gap-2 rounded-full bg-card text-xs font-normal"
+          >
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            {exporting ? "Preparing PDF" : "Download PDF"}
+          </Button>
+        </div>
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}

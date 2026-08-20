@@ -195,7 +195,7 @@ export default function DashboardV2() {
           <div className={loading ? "opacity-60 transition-opacity" : "transition-opacity"}>{body}</div>
         )}
 
-        <footer className="mt-6 flex items-center justify-between text-[0.68rem] font-extralight text-muted-foreground">
+        <footer className="mt-3 flex items-center justify-between text-[0.68rem] font-extralight text-muted-foreground">
           <span>Source: REID Database</span>
           <span>© Copyright 2026</span>
         </footer>

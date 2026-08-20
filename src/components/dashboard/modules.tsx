@@ -19,9 +19,12 @@ import {
   formatDays,
   formatPercent,
   formatSqm,
+  formatSqmAxis,
   formatUsd,
+  formatUsdAxis,
   formatUsdExact,
   formatYears,
+  formatYearsAxis,
 } from "./primitives";
 
 interface ModuleProps {
@@ -155,16 +158,16 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
       </KpiRow>
       <ChartGrid>
         <DashboardCard title="Price per sqm" subtitle="Median USD per sqm per period">
-          <MonthBarChart data={data.price_per_sqm_series} colour={theme.accent} format={formatUsdExact} />
+          <MonthBarChart data={data.price_per_sqm_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
         <DashboardCard title="Average build size" subtitle="Mean internal size per period">
-          <MonthLineChart data={data.build_size_series} colour={theme.accent} format={formatSqm} gradient />
+          <MonthLineChart data={data.build_size_series} colour={theme.accent} format={formatSqm} axisFormat={formatSqmAxis} gradient />
         </DashboardCard>
         <DashboardCard title="Average lease term" subtitle="Mean remaining leasehold years">
-          <MonthLineChart data={data.lease_series} colour={theme.accent} format={formatYears} />
+          <MonthLineChart data={data.lease_series} colour={theme.accent} format={formatYears} axisFormat={formatYearsAxis} />
         </DashboardCard>
         <DashboardCard title="Price per year" subtitle="Mean leasehold cost per year">
-          <MonthBarChart data={data.price_per_year_series} colour={theme.accent} format={formatUsdExact} />
+          <MonthBarChart data={data.price_per_year_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
         <DashboardCard title="Floor space ratio" subtitle="Mean build to land ratio per period" className="lg:col-span-2">
           <MonthLineChart data={data.fsr_series} colour={theme.accent} format={formatPercent} gradient />
@@ -186,7 +189,7 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
       </KpiRow>
       <ChartGrid>
         <DashboardCard title="Average daily rate" subtitle="Mean ADR per period">
-          <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} />
+          <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
         <DashboardCard title="Average occupancy" subtitle="Mean occupancy per period">
           <MonthLineChart data={data.occupancy_series} colour={theme.accent} format={formatPercent} gradient />
@@ -198,7 +201,7 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
           <DonutChart data={data.type_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
         </DashboardCard>
         <DashboardCard title="Monthly revenue" subtitle="Mean revenue per property per period" className="lg:col-span-2">
-          <MonthBarChart data={data.revenue_series} colour={theme.accent} format={formatUsdExact} />
+          <MonthBarChart data={data.revenue_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
       </ChartGrid>
     </div>

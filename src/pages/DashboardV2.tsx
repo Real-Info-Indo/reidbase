@@ -131,7 +131,10 @@ export default function DashboardV2() {
   return (
     <div
       className="flex min-h-screen w-full flex-col overflow-x-hidden bg-background font-sans"
-      style={{ "--chart-h": "clamp(112px, calc((100vh - 400px) / 2), 210px)" } as React.CSSProperties}
+      style={{
+        "--chart-base": "clamp(112px, calc((100vh - 400px) / 2), 210px)",
+        "--chart-h": "var(--chart-base)",
+      } as React.CSSProperties}
     >
       {/* Module tabs: evenly distributed, fully justified, rounded on the bottom */}
       <nav className="grid w-full grid-cols-4 gap-1 px-3 pt-0 lg:grid-cols-7">

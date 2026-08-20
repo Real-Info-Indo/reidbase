@@ -40,10 +40,10 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   const triggerClass = compact
     ? "h-8 w-full rounded-lg bg-secondary text-xs"
-    : "h-9 w-[9.5rem] rounded-lg bg-secondary text-xs";
+    : "h-9 w-[7.5rem] rounded-lg bg-secondary px-2 text-xs";
 
   return (
-    <div className={compact ? "grid grid-cols-2 gap-2" : "flex flex-wrap items-center gap-2"}>
+    <div className={compact ? "grid grid-cols-2 gap-2" : "flex flex-nowrap items-center gap-1.5"}>
       <Select value={filters.region ?? ANY} onValueChange={(v) => clear("region", v)}>
         <SelectTrigger className={triggerClass}><SelectValue placeholder="Region" /></SelectTrigger>
         <SelectContent>

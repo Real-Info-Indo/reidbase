@@ -14,6 +14,13 @@ export const MODULE_THEMES = {
 
 export type ModuleTheme = (typeof MODULE_THEMES)[keyof typeof MODULE_THEMES];
 
+/** Shared page grid: title column plus four equal score card columns. */
+export const MODULE_GRID =
+  "grid grid-cols-2 gap-2 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]";
+
+/** Fixed score card height so the row never changes with the sidebar state. */
+export const KPI_HEIGHT = "h-[66px]";
+
 // ---- Formatters (USD, British English, one decimal on rates) ----
 
 export function formatUsd(v: number | null | undefined, compact = true): string {
@@ -121,7 +128,7 @@ export function KpiCard({
   accent: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-card px-3 py-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+    <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
       <span
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
         style={{ backgroundColor: accent }}

@@ -20,8 +20,19 @@ import type { BedsPoint, BedsTenurePoint, MonthPoint, SlicePoint, VolumePoint } 
 import { EmptyChart, formatMonth } from "./primitives";
 
 /** Charts fill a viewport-derived frame so modules fit without page scrolling. */
-function ChartFrame({ children }: { children: React.ReactNode }) {
+function ChartFrame({ children, square = false }: { children: React.ReactNode; square?: boolean }) {
+  if (square) {
+    return (
+      <div className="mx-auto aspect-square w-full max-h-[var(--chart-h,200px)]">
+        {children}
+      </div>
+    );
+  }
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
+}
+
+function ChartFrameInner({ children }: { children: React.ReactNode }) {
+  return <div className="h-full w-full">{children}</div>;
 }
 
 const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;

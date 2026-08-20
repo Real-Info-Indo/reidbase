@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { AdminGate } from "@/components/AdminGate";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
@@ -14,7 +12,7 @@ import {
   type ServerModuleKey,
 } from "@/lib/dashboardApi";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { MODULE_THEMES } from "@/components/dashboard/primitives";
+import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
 import {
   ComparisonPanel,
   LocationReportModule,
@@ -40,7 +38,6 @@ function filterVariant(key: DashboardModuleKey): "properties" | "rentals" {
 }
 
 export default function DashboardV2() {
-  const navigate = useNavigate();
   const { authenticated, checking, error } = useAdminAuth();
 
   const [active, setActive] = useState<DashboardModuleKey>("market-overview");
@@ -133,11 +130,11 @@ export default function DashboardV2() {
 
   return (
     <div
-      className="min-h-screen w-full overflow-x-hidden bg-background"
+      className="min-h-screen w-full overflow-x-hidden bg-background font-sans"
       style={{ "--chart-h": "clamp(112px, calc((100vh - 400px) / 2), 210px)" } as React.CSSProperties}
     >
-      {/* Module tabs, styled as folder tabs across the top */}
-      <nav className="flex w-full items-end gap-1 overflow-x-auto px-2 pt-1.5">
+      {/* Module tabs: evenly distributed, fully justified, rounded on the bottom */}
+      <nav className="grid w-full grid-cols-4 gap-1 px-3 pt-0 lg:grid-cols-7">
         {MODULES.map((m) => {
           const on = m.key === active;
           return (
@@ -147,8 +144,8 @@ export default function DashboardV2() {
               onClick={() => setActive(m.key)}
               className={
                 on
-                  ? "shrink-0 rounded-t-2xl bg-card px-4 py-2.5 text-sm font-bold text-foreground shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
-                  : "shrink-0 rounded-t-2xl bg-secondary/70 px-4 py-2 text-sm font-extralight text-muted-foreground transition-colors hover:bg-secondary"
+                  ? "w-full truncate rounded-b-2xl bg-card px-3 py-2.5 text-sm font-bold text-foreground shadow-[0_2px_10px_rgba(0,0,0,0.05)]"
+                  : "w-full truncate rounded-b-2xl bg-secondary/70 px-3 py-2.5 text-sm font-extralight text-muted-foreground transition-colors hover:bg-secondary"
               }
             >
               {m.label}
@@ -157,10 +154,12 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto max-w-[1500px] px-3 pb-4 pt-2">
-        <header className="mb-2 flex flex-wrap items-center justify-end gap-2">
-          {!isComparison && (
-            <div className="mr-auto flex flex-1 justify-center lg:justify-end">
+      <div className="mx-auto max-w-[1500px] px-3 pb-4 pt-3">
+        {!isComparison && (
+          <header className={`${MODULE_GRID} mb-2`}>
+            {/* White space above the page title */}
+            <div className="col-span-2 hidden lg:block" />
+            <div className="col-span-2 flex justify-end lg:col-span-4">
               <FilterBar
                 filters={filters}
                 options={options}
@@ -168,17 +167,8 @@ export default function DashboardV2() {
                 variant={filterVariant(active)}
               />
             </div>
-          )}
-          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => void load()} disabled={loading}>
-            <RefreshCw className={loading ? "h-3.5 w-3.5 animate-spin" : "h-3.5 w-3.5"} />
-            Refresh
-          </Button>
-        </header>
-
+          </header>
+        )}
 
         {loadError && (
           <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">

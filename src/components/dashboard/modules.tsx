@@ -11,6 +11,7 @@ import {
 import {
   DashboardCard,
   KpiCard,
+  MODULE_GRID,
   MetricTile,
   ModuleTitle,
   type ModuleTheme,
@@ -37,11 +38,10 @@ function KpiRow({
   subtitle?: string;
   children: React.ReactNode;
 }) {
-  if (!title) return <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">{children}</div>;
   return (
-    <div className="grid grid-cols-2 gap-2 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]">
+    <div className={MODULE_GRID}>
       <div className="col-span-2 lg:col-span-1">
-        <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+        <ModuleTitle title={title ?? ""} subtitle={subtitle ?? ""} />
       </div>
       {children}
     </div>
@@ -210,21 +210,22 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
   const s = data.secondary ?? {};
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
-          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
-        </DashboardCard>
-        <DashboardCard title="New and sold property volume" subtitle="Record volume per period">
-          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
-        </DashboardCard>
-      </div>
-
-      <KpiRow>
+      <KpiRow title="Location Report" subtitle="Micro-location snapshot of supply, sales and rental metrics">
         <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
       </KpiRow>
+
+      <ChartGrid>
+        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
+          <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
+        </DashboardCard>
+        <DashboardCard title="New and sold property volume" subtitle="Record volume per period" className="lg:col-span-2">
+          <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+      </ChartGrid>
+
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">
         <DashboardCard title="Development status" subtitle="Completed against off-plan">

@@ -20,10 +20,7 @@ import type { BedsPoint, BedsTenurePoint, MonthPoint, SlicePoint, VolumePoint } 
 import { EmptyChart, formatMonth } from "./primitives";
 
 /** Charts fill a viewport-derived frame so modules fit without page scrolling. */
-function ChartFrame({ children, square = false, fill = false }: { children: React.ReactNode; square?: boolean; fill?: boolean }) {
-  if (fill) {
-    return <div className="min-h-0 w-full flex-1">{children}</div>;
-  }
+function ChartFrame({ children, square = false }: { children: React.ReactNode; square?: boolean }) {
   if (square) {
     return (
       <div className="mx-auto aspect-square h-[var(--chart-h,200px)] max-w-full">
@@ -33,7 +30,6 @@ function ChartFrame({ children, square = false, fill = false }: { children: Reac
   }
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
 }
-
 
 
 function ChartFrameInner({ children }: { children: React.ReactNode }) {
@@ -130,7 +126,6 @@ export function MonthLineChart({
   axisFormat,
   gradient = false,
   baseline = false,
-  fill = false,
 }: {
   data: MonthPoint[] | null | undefined;
   colour: string;
@@ -138,7 +133,6 @@ export function MonthLineChart({
   axisFormat?: Fmt;
   gradient?: boolean;
   baseline?: boolean;
-  fill?: boolean;
 }) {
   const gradientId = useId().replace(/:/g, "");
   if (!hasData(data)) return <EmptyChart />;
@@ -147,7 +141,7 @@ export function MonthLineChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame fill={fill}>
+    <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
@@ -224,13 +218,11 @@ export function DonutChart({
   colours,
   format,
   square = false,
-  fill = false,
 }: {
   data: SlicePoint[] | null | undefined;
   colours: string[];
   format: Fmt;
   square?: boolean;
-  fill?: boolean;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).filter((d) => d.value != null && d.value > 0);
@@ -261,7 +253,7 @@ export function DonutChart({
   );
 
   return (
-    <ChartFrame square={square} fill={fill}>
+    <ChartFrame square={square}>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -323,7 +315,7 @@ export function BedsBarChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }} barCategoryGap="10%">
+          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
             <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
             {layout === "vertical" ? (
               <>
@@ -373,7 +365,7 @@ export function TenureBedsChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="10%" barGap={2}>
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="5%" barGap={2}>
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}

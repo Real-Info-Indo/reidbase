@@ -58,7 +58,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.region ?? ANY} onValueChange={(v) => clear("region", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Region" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All regions</SelectItem>
+        <SelectItem value={ANY}>Region</SelectItem>
         {(options?.regions ?? []).map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
       </SelectContent>
     </Select>
@@ -68,7 +68,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.location ?? ANY} onValueChange={(v) => clear("location", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Location" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All locations</SelectItem>
+        <SelectItem value={ANY}>Location</SelectItem>
         {(options?.locations ?? []).map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
       </SelectContent>
     </Select>
@@ -78,7 +78,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.contract ?? ANY} onValueChange={(v) => clear("contract", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Contract" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All contracts</SelectItem>
+        <SelectItem value={ANY}>Contract</SelectItem>
         {(options?.contracts ?? []).map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
       </SelectContent>
     </Select>
@@ -88,7 +88,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.ptype ?? ANY} onValueChange={(v) => clear("ptype", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Property" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All properties</SelectItem>
+        <SelectItem value={ANY}>Property</SelectItem>
         {(options?.ptypes ?? []).map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
       </SelectContent>
     </Select>
@@ -98,7 +98,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.beds ?? ANY} onValueChange={(v) => clear("beds", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Bedrooms" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All bedrooms</SelectItem>
+        <SelectItem value={ANY}>Bedrooms</SelectItem>
         {(options?.beds ?? []).map((b) => <SelectItem key={b} value={String(b)}>{b} bedrooms</SelectItem>)}
       </SelectContent>
     </Select>
@@ -115,7 +115,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     >
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Price" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All prices</SelectItem>
+        <SelectItem value={ANY}>Price</SelectItem>
         {PRICE_BANDS.map((b) => (
           <SelectItem key={b.label} value={bandKey(b.min, b.max)}>{b.label}</SelectItem>
         ))}
@@ -134,7 +134,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     >
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Size" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All sizes</SelectItem>
+        <SelectItem value={ANY}>Size</SelectItem>
         {SIZE_BANDS.map((b) => (
           <SelectItem key={b.label} value={bandKey(b.min, b.max)}>{b.label}</SelectItem>
         ))}
@@ -146,7 +146,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     <Select value={filters.date_from ?? ANY} onValueChange={(v) => clear("date_from", v)}>
       <SelectTrigger className={triggerClass}><SelectValue placeholder="Date" /></SelectTrigger>
       <SelectContent>
-        <SelectItem value={ANY}>All dates</SelectItem>
+        <SelectItem value={ANY}>Date</SelectItem>
         {(options?.months ?? []).slice().reverse().map((m) => (
           <SelectItem key={m} value={m}>{formatMonth(m)}</SelectItem>
         ))}

@@ -11,6 +11,7 @@ import {
 import {
   DashboardCard,
   KpiCard,
+  MODULE_GRID,
   MetricTile,
   ModuleTitle,
   type ModuleTheme,

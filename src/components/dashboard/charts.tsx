@@ -257,8 +257,9 @@ export function BedsBarChart({
         {layout === "vertical" ? (
           <>
             <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} width={catWidth}
-          tickMargin={4} />
+            <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
+          tickMargin={4} interval={0} />
+
           </>
         ) : (
           <>

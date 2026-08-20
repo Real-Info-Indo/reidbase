@@ -158,7 +158,17 @@ export default function DashboardV2() {
       </nav>
 
       <div className="mx-auto max-w-[1500px] px-3 pb-4 pt-2">
-        <header className="mb-3 flex flex-wrap items-center justify-end gap-2">
+        <header className="mb-2 flex flex-wrap items-center justify-end gap-2">
+          {!isComparison && (
+            <div className="mr-auto flex flex-1 justify-center lg:justify-end">
+              <FilterBar
+                filters={filters}
+                options={options}
+                onChange={setFilters}
+                variant={filterVariant(active)}
+              />
+            </div>
+          )}
           <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -169,16 +179,6 @@ export default function DashboardV2() {
           </Button>
         </header>
 
-        {!isComparison && (
-          <div className="mb-5 flex justify-center lg:justify-end">
-            <FilterBar
-              filters={filters}
-              options={options}
-              onChange={setFilters}
-              variant={filterVariant(active)}
-            />
-          </div>
-        )}
 
         {loadError && (
           <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">

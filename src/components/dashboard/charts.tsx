@@ -19,7 +19,11 @@ import {
 import type { BedsPoint, BedsTenurePoint, MonthPoint, SlicePoint, VolumePoint } from "@/lib/dashboardApi";
 import { EmptyChart, formatMonth } from "./primitives";
 
-const HEIGHT = 220;
+/** Charts fill a viewport-derived frame so modules fit without page scrolling. */
+function ChartFrame({ children }: { children: React.ReactNode }) {
+  return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
+}
+
 const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
 const GRID = "hsl(var(--border))";
 
@@ -56,7 +60,7 @@ export function MonthLineChart({
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -85,7 +89,7 @@ export function MonthLineChart({
           connectNulls
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }
 
@@ -102,7 +106,7 @@ export function MonthBarChart({
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
@@ -110,7 +114,7 @@ export function MonthBarChart({
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
         <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }
 
@@ -129,7 +133,7 @@ export function DonutChart({
   const total = rows.reduce((sum, d) => sum + (d.value ?? 0), 0);
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie data={rows} dataKey="value" nameKey="name" innerRadius="58%" outerRadius="82%" paddingAngle={2}>
           {rows.map((row, i) => (
@@ -148,7 +152,7 @@ export function DonutChart({
         />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
       </PieChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }
 
@@ -168,7 +172,7 @@ export function BedsBarChart({
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
         {layout === "vertical" ? (
@@ -185,7 +189,7 @@ export function BedsBarChart({
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
         <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
       </BarChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }
 
@@ -204,7 +208,7 @@ export function TenureBedsChart({
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
@@ -228,7 +232,7 @@ export function TenureBedsChart({
           maxBarSize={30}
         />
       </BarChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }
 
@@ -245,7 +249,7 @@ export function VolumeLinesChart({
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
 
   return (
-    <ResponsiveContainer width="100%" height={HEIGHT}>
+    <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <LineChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
@@ -255,6 +259,6 @@ export function VolumeLinesChart({
         <Line type="monotone" dataKey="available" name="Available" stroke={colours[0]} strokeWidth={2} dot={false} connectNulls />
         <Line type="monotone" dataKey="sold" name="Sold" stroke={colours[1]} strokeWidth={2} dot={false} connectNulls />
       </LineChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></ChartFrame>
   );
 }

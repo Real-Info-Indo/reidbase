@@ -160,3 +160,28 @@ export function EmptyChart({ message = "No data for these filters" }: { message?
     </div>
   );
 }
+
+// ---- Compact axis formatters (units live in subtitles and tooltips) ----
+
+/** Numeric only, no "sqm" suffix. */
+export function formatSqmAxis(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return "";
+  return Math.round(v).toLocaleString("en-GB");
+}
+
+/** Numeric only, no "yrs" suffix. */
+export function formatYearsAxis(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return "";
+  return v >= 10 ? String(Math.round(v)) : v.toFixed(1);
+}
+
+/** Compact USD for axes: $12.5K, $1.25M. */
+export function formatUsdAxis(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return "";
+  const abs = Math.abs(v);
+  if (abs >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(2)}B`;
+  if (abs >= 1_000_000) return `$${(v / 1_000_000).toFixed(2)}M`;
+  if (abs >= 10_000) return `$${Math.round(v / 1_000)}K`;
+  if (abs >= 1_000) return `$${(v / 1_000).toFixed(1)}K`;
+  return `$${Math.round(v).toLocaleString("en-GB")}`;
+}

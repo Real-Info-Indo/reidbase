@@ -41,10 +41,37 @@ function hasData(rows: unknown[] | null | undefined): boolean {
   return Array.isArray(rows) && rows.length > 0;
 }
 
+const AXIS_FONT = '11px Poppins, ui-sans-serif, system-ui, sans-serif';
+/** Gap between the label and the plot area, plus safety against sub-pixel clipping. */
+const AXIS_PAD = 10;
+
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+
+/** Measure a label at the real axis font; falls back to a character estimate. */
+function measureLabel(text: string): number {
+  if (measureCtx === undefined) {
+    try {
+      const ctx = document.createElement("canvas").getContext("2d");
+      if (ctx) ctx.font = AXIS_FONT;
+      measureCtx = ctx;
+    } catch {
+      measureCtx = null;
+    }
+  }
+  if (measureCtx) return measureCtx.measureText(text).width;
+  return text.length * 7.2;
+}
+
+function widestLabel(labels: string[], min: number, max: number): number {
+  if (labels.length === 0) return min;
+  const widest = Math.max(...labels.map((l) => measureLabel(l)));
+  return Math.min(max, Math.max(min, Math.ceil(widest) + AXIS_PAD));
+}
+
 /**
- * Estimate the Y axis gutter from the widest label the chart will actually
- * render, so short numeric axes sit tight against the card title edge and
- * longer labels stay on one line.
+ * Reserve the Y axis gutter from the widest tick the chart could render, so
+ * short numeric axes sit tight against the card title edge and longer labels
+ * such as "$1.25M" never clip.
  */
 function axisWidth(values: Array<number | null | undefined>, fmt: Fmt): number {
   const nums = values.filter((v): v is number => v != null && Number.isFinite(v));
@@ -52,16 +79,31 @@ function axisWidth(values: Array<number | null | undefined>, fmt: Fmt): number {
   const max = Math.max(...nums);
   const min = Math.min(...nums);
   const samples = [max, min, min + (max - min) / 2];
-  const longest = Math.max(...samples.map((v) => fmt(v).length));
-  return Math.min(62, Math.max(28, Math.round(longest * 6.3) + 8));
+  if (min < 0) samples.push(-Math.abs(max));
+  return widestLabel(samples.map((v) => fmt(v)), 30, 72);
 }
 
-/** Longest category label width (single line, 11px). */
+/** Longest category label width, with headroom so recharts never wraps it. */
 function categoryWidth(labels: string[]): number {
-  if (labels.length === 0) return 32;
-  const longest = Math.max(...labels.map((l) => l.length));
-  return Math.min(70, Math.max(28, Math.round(longest * 6.3) + 8));
+  return widestLabel(labels, 32, 90) + 2;
 }
+
+/** Single-line category tick so labels never wrap onto two rows. */
+function CategoryTick({ x, y, payload }: any) {
+  return (
+    <text
+      x={x}
+      y={y}
+      dy={4}
+      textAnchor="end"
+      fontSize={AXIS.fontSize}
+      fill={AXIS.fill}
+    >
+      {payload?.value}
+    </text>
+  );
+}
+
 
 /** Smooth line, optional gradient fill under the curve. */
 export function MonthLineChart({
@@ -215,8 +257,9 @@ export function BedsBarChart({
         {layout === "vertical" ? (
           <>
             <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} width={catWidth}
-          tickMargin={4} />
+            <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
+          tickMargin={4} interval={0} />
+
           </>
         ) : (
           <>

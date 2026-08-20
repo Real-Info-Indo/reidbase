@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useCallback, useId } from "react";
 import {
   Area,
   AreaChart,
@@ -44,6 +44,7 @@ function hasData(rows: unknown[] | null | undefined): boolean {
 const AXIS_FONT = '11px Poppins, ui-sans-serif, system-ui, sans-serif';
 /** Gap between the label and the plot area, plus safety against sub-pixel clipping. */
 const AXIS_PAD = 10;
+const RADIAN = Math.PI / 180;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
 

@@ -130,6 +130,7 @@ export function MonthLineChart({
   axisFormat,
   gradient = false,
   baseline = false,
+  fill = false,
 }: {
   data: MonthPoint[] | null | undefined;
   colour: string;
@@ -137,6 +138,7 @@ export function MonthLineChart({
   axisFormat?: Fmt;
   gradient?: boolean;
   baseline?: boolean;
+  fill?: boolean;
 }) {
   const gradientId = useId().replace(/:/g, "");
   if (!hasData(data)) return <EmptyChart />;
@@ -222,11 +224,13 @@ export function DonutChart({
   colours,
   format,
   square = false,
+  fill = false,
 }: {
   data: SlicePoint[] | null | undefined;
   colours: string[];
   format: Fmt;
   square?: boolean;
+  fill?: boolean;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).filter((d) => d.value != null && d.value > 0);
@@ -257,7 +261,7 @@ export function DonutChart({
   );
 
   return (
-    <ChartFrame square={square}>
+    <ChartFrame square={square} fill={fill}>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -369,7 +373,7 @@ export function TenureBedsChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="5%" barGap={2}>
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }} barCategoryGap="10%" barGap={2}>
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}

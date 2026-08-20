@@ -311,27 +311,31 @@ export function BedsBarChart({
   const catWidth = categoryWidth(rows.map((r) => r.label));
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
-        {layout === "vertical" ? (
-          <>
-            <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
-            <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
-          tickMargin={4} interval={0} />
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
+            {layout === "vertical" ? (
+              <>
+                <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
+                <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
+              tickMargin={4} interval={0} />
 
-          </>
-        ) : (
-          <>
-            <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-            <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={numericWidth}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-          </>
-        )}
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+              </>
+            ) : (
+              <>
+                <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
+                <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={numericWidth}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              </>
+            )}
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 

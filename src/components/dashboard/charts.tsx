@@ -147,7 +147,7 @@ export function MonthLineChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame>
+    <ChartFrame fill={fill}>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>

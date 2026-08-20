@@ -251,9 +251,11 @@ export function DonutChart({
         <Legend
           verticalAlign="bottom"
           height={28}
+          formatter={(value: string) => (
+            <span className="text-muted-foreground">{value}</span>
+          )}
           wrapperStyle={{
             fontSize: 11,
-            color: "hsl(var(--muted-foreground))",
             transform: "translateY(8px)",
           }}
         />

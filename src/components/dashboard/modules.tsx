@@ -27,13 +27,30 @@ interface ModuleProps {
   theme: ModuleTheme;
 }
 
-function KpiRow({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{children}</div>;
+function KpiRow({
+  title,
+  subtitle,
+  children,
+}: {
+  title?: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  if (!title) return <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{children}</div>;
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]">
+      <div className="col-span-2 lg:col-span-1">
+        <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function ChartGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{children}</div>;
+  return <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">{children}</div>;
 }
+
 
 export function MarketOverviewModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};

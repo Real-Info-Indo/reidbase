@@ -208,10 +208,12 @@ export function DonutChart({
   data,
   colours,
   format,
+  square = false,
 }: {
   data: SlicePoint[] | null | undefined;
   colours: string[];
   format: Fmt;
+  square?: boolean;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).filter((d) => d.value != null && d.value > 0);
@@ -242,37 +244,41 @@ export function DonutChart({
   );
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={rows}
-          dataKey="value"
-          nameKey="name"
-          innerRadius="40%"
-          outerRadius="100%"
-          paddingAngle={2}
-          cornerRadius={6}
-          label={renderShareLabel}
-          labelLine={false}
-        >
-          {rows.map((row, i) => (
-            <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
-          ))}
-        </Pie>
-        <Legend
-          verticalAlign="bottom"
-          height={28}
-          formatter={(value: string) => (
-            <span className="text-muted-foreground">{value}</span>
-          )}
-          wrapperStyle={{
-            fontSize: 11,
-            transform: "translateY(8px)",
-          }}
-        />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
-      </PieChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame square={square}>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={rows}
+              dataKey="value"
+              nameKey="name"
+              innerRadius="40%"
+              outerRadius="100%"
+              paddingAngle={2}
+              cornerRadius={6}
+              label={renderShareLabel}
+              labelLine={false}
+            >
+              {rows.map((row, i) => (
+                <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
+              ))}
+            </Pie>
+            <Legend
+              verticalAlign="bottom"
+              height={28}
+              formatter={(value: string) => (
+                <span className="text-muted-foreground">{value}</span>
+              )}
+              wrapperStyle={{
+                fontSize: 11,
+                transform: "translateY(8px)",
+              }}
+            />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 

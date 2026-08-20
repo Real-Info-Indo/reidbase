@@ -23,13 +23,14 @@ import { EmptyChart, formatMonth } from "./primitives";
 function ChartFrame({ children, square = false }: { children: React.ReactNode; square?: boolean }) {
   if (square) {
     return (
-      <div className="mx-auto aspect-square w-full max-h-[var(--chart-h,200px)]">
+      <div className="mx-auto aspect-square h-[var(--chart-h,200px)] max-w-full">
         {children}
       </div>
     );
   }
   return <div className="h-[var(--chart-h,200px)] w-full">{children}</div>;
 }
+
 
 function ChartFrameInner({ children }: { children: React.ReactNode }) {
   return <div className="h-full w-full">{children}</div>;

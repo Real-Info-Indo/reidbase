@@ -73,13 +73,18 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
             <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} square />
           </DashboardCard>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-1">
           <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
             <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
           </DashboardCard>
         </div>
-        <div className="lg:col-span-1">
-          <DashboardCard title="Rental property supply" subtitle="Operating records by bedroom count">
+        <div className="lg:col-span-1 lg:row-span-2">
+          <DashboardCard
+            title="Rental property supply"
+            subtitle="Operating records by bedroom count"
+            className="h-full"
+            style={{ "--chart-h": "calc(var(--chart-h) * 2 + 77px)" } as React.CSSProperties}
+          >
             <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} />
           </DashboardCard>
         </div>
@@ -89,6 +94,7 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
           </DashboardCard>
         </div>
       </div>
+
     </div>
   );
 }

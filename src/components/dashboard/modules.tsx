@@ -75,11 +75,10 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
           <DashboardCard
             title="Ownership type"
             subtitle="Share of listings by tenure"
-            className="aspect-square h-full shrink-0"
-          >
+            className="aspect-square h-full shrink-0" exportData={data.ownership}>
             <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} square />
           </DashboardCard>
-          <DashboardCard title="Median sold price" subtitle="Trailing 12 months" className="h-full min-w-0 flex-1">
+          <DashboardCard title="Median sold price" subtitle="Trailing 12 months" className="h-full min-w-0 flex-1" exportData={data.sold_price_series}>
             <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
           </DashboardCard>
         </div>
@@ -88,13 +87,12 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
             title="Rental property supply"
             subtitle="Operating records by bedroom count"
             className="h-full"
-            style={{ "--chart-h": "calc(var(--chart-base) * 2 + 77px)" } as React.CSSProperties}
-          >
+            style={{ "--chart-h": "calc(var(--chart-base) * 2 + 77px)" } as React.CSSProperties} exportData={data.rental_supply_by_beds}>
             <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} barCategoryGap="20%" />
           </DashboardCard>
         </div>
         <div className="lg:col-span-2">
-          <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure">
+          <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure" exportData={data.available_by_beds}>
             <TenureBedsChart data={data.available_by_beds} colours={[theme.light, theme.accent]} format={formatCount} />
           </DashboardCard>
         </div>
@@ -116,19 +114,19 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="New listings, latest period" value={formatCount(k.new_listings)} icon={Building2} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Available supply" subtitle="Bedroom count by tenure">
+        <DashboardCard title="Available supply" subtitle="Bedroom count by tenure" exportData={data.available_by_beds}>
           <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} stacked={false} />
         </DashboardCard>
-        <DashboardCard title="Development status" subtitle="Completed against off-plan">
+        <DashboardCard title="Development status" subtitle="Completed against off-plan" exportData={data.development_status}>
           <DonutChart data={data.development_status} colours={[theme.accent, theme.light]} format={formatCount} />
         </DashboardCard>
-        <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count">
+        <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count" exportData={data.listing_price_by_beds}>
           <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />
         </DashboardCard>
-        <DashboardCard title="Supply growth" subtitle="New available listings per period">
+        <DashboardCard title="Supply growth" subtitle="New available listings per period" exportData={data.supply_growth}>
           <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
-        <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="lg:col-span-2">
+        <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="lg:col-span-2" exportData={data.clearance_series}>
           <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} />
         </DashboardCard>
       </ChartGrid>
@@ -147,19 +145,19 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Days listed" value={formatDays(k.days_listed)} icon={Clock} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Sale price" subtitle="Median sold price per period">
+        <DashboardCard title="Sale price" subtitle="Median sold price per period" exportData={data.sale_price_series}>
           <MonthBarChart data={data.sale_price_series} colour={theme.accent} format={formatUsd} />
         </DashboardCard>
-        <DashboardCard title="Ownership type" subtitle="Tenure split of sold properties">
+        <DashboardCard title="Ownership type" subtitle="Tenure split of sold properties" exportData={data.ownership}>
           <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} />
         </DashboardCard>
-        <DashboardCard title="Sales volume" subtitle="Units sold per period">
+        <DashboardCard title="Sales volume" subtitle="Units sold per period" exportData={data.sales_volume_series}>
           <MonthLineChart data={data.sales_volume_series} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
-        <DashboardCard title="Discount rate" subtitle="Gap between median asking and median sold price">
+        <DashboardCard title="Discount rate" subtitle="Gap between median asking and median sold price" exportData={data.discount_series}>
           <MonthLineChart data={data.discount_series} colour={theme.accent} format={formatPercent} baseline />
         </DashboardCard>
-        <DashboardCard title="Sales volume by bedrooms" subtitle="Units sold by bedroom count" className="lg:col-span-2">
+        <DashboardCard title="Sales volume by bedrooms" subtitle="Units sold by bedroom count" className="lg:col-span-2" exportData={data.sales_volume_by_beds}>
           <BedsBarChart data={data.sales_volume_by_beds} colour={theme.accent} format={formatCount} />
         </DashboardCard>
       </ChartGrid>
@@ -178,19 +176,19 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Price per year" value={formatUsdExact(k.price_per_year)} icon={CircleDollarSign} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Price per sqm" subtitle="Median USD per sqm per period">
+        <DashboardCard title="Price per sqm" subtitle="Median USD per sqm per period" exportData={data.price_per_sqm_series}>
           <MonthBarChart data={data.price_per_sqm_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
-        <DashboardCard title="Average build size" subtitle="Mean internal size per period">
+        <DashboardCard title="Average build size" subtitle="Mean internal size per period" exportData={data.build_size_series}>
           <MonthLineChart data={data.build_size_series} colour={theme.accent} format={formatSqm} axisFormat={formatSqmAxis} gradient />
         </DashboardCard>
-        <DashboardCard title="Average lease term" subtitle="Mean remaining leasehold years">
+        <DashboardCard title="Average lease term" subtitle="Mean remaining leasehold years" exportData={data.lease_series}>
           <MonthLineChart data={data.lease_series} colour={theme.accent} format={formatYears} axisFormat={formatYearsAxis} />
         </DashboardCard>
-        <DashboardCard title="Price per year" subtitle="Mean leasehold cost per year">
+        <DashboardCard title="Price per year" subtitle="Mean leasehold cost per year" exportData={data.price_per_year_series}>
           <MonthBarChart data={data.price_per_year_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
-        <DashboardCard title="Floor space ratio" subtitle="Mean build to land ratio per period" className="lg:col-span-2">
+        <DashboardCard title="Floor space ratio" subtitle="Mean build to land ratio per period" className="lg:col-span-2" exportData={data.fsr_series}>
           <MonthLineChart data={data.fsr_series} colour={theme.accent} format={formatPercent} gradient />
         </DashboardCard>
       </ChartGrid>
@@ -209,19 +207,19 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Total revenue" value={formatUsd(k.total_revenue)} icon={TrendingUp} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Average daily rate" subtitle="Mean ADR per period">
+        <DashboardCard title="Average daily rate" subtitle="Mean ADR per period" exportData={data.adr_series}>
           <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
-        <DashboardCard title="Average occupancy" subtitle="Mean occupancy per period">
+        <DashboardCard title="Average occupancy" subtitle="Mean occupancy per period" exportData={data.occupancy_series}>
           <MonthLineChart data={data.occupancy_series} colour={theme.accent} format={formatPercent} gradient />
         </DashboardCard>
-        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed">
+        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" exportData={data.mgmt_split}>
           <DonutChart data={data.mgmt_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
         </DashboardCard>
-        <DashboardCard title="Property type" subtitle="Share of operating records">
+        <DashboardCard title="Property type" subtitle="Share of operating records" exportData={data.type_split}>
           <DonutChart data={data.type_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
         </DashboardCard>
-        <DashboardCard title="Monthly revenue" subtitle="Mean revenue per property per period" className="lg:col-span-2">
+        <DashboardCard title="Monthly revenue" subtitle="Mean revenue per property per period" className="lg:col-span-2" exportData={data.revenue_series}>
           <MonthBarChart data={data.revenue_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
       </ChartGrid>
@@ -242,17 +240,17 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
       </KpiRow>
 
       <ChartGrid>
-        <DashboardCard title="Median sold price" subtitle="Trailing 12 months">
+        <DashboardCard title="Median sold price" subtitle="Trailing 12 months" exportData={data.sold_price_series}>
           <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
         </DashboardCard>
-        <DashboardCard title="New and sold property volume" subtitle="Record volume per period" className="lg:col-span-2">
+        <DashboardCard title="New and sold property volume" subtitle="Record volume per period" className="lg:col-span-2" exportData={data.volume_series}>
           <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
         </DashboardCard>
       </ChartGrid>
 
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">
-        <DashboardCard title="Development status" subtitle="Completed against off-plan">
+        <DashboardCard title="Development status" subtitle="Completed against off-plan" exportData={data.status_split}>
           <DonutChart data={data.status_split} colours={[theme.accent, theme.light]} format={formatCount} />
         </DashboardCard>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -282,7 +280,7 @@ export function ComparisonPanel({ data, theme, title }: ModuleProps & { title: s
         <MetricTile label="Sold price" value={formatUsd(k.median_sold_price)} />
         <MetricTile label="Record count" value={formatCount(s.record_count)} />
       </div>
-      <DashboardCard title="Sold price movement" subtitle={title}>
+      <DashboardCard title="Sold price movement" subtitle={title} exportData={data.sold_price_series}>
         <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
       </DashboardCard>
       <div className="grid grid-cols-3 gap-2">

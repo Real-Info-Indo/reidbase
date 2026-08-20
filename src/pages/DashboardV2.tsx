@@ -172,8 +172,8 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
-        <div data-export-ignore="true" className="mb-2 flex justify-end">
+      <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
+        <div data-export-ignore="true" className="absolute right-3 top-2 flex justify-end">
           <Button
             type="button"
             variant="outline"

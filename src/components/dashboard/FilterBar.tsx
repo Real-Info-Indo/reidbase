@@ -171,16 +171,16 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
   }
 
   return (
-    <div className="flex items-start gap-1.5">
-      {regionSelect}
-      {locationSelect}
-      {variant === "properties" && contractSelect}
-      {propertySelect}
-      {bedroomsSelect}
-      {variant === "properties" && priceSelect}
-      {variant === "properties" && sizeSelect}
-      <div className="flex flex-col items-end gap-0.5">
-        {resetButton}
+    <div className="flex w-full flex-col gap-1">
+      <div className="flex justify-end">{resetButton}</div>
+      <div className="flex items-start gap-1.5">
+        {regionSelect}
+        {locationSelect}
+        {variant === "properties" && contractSelect}
+        {propertySelect}
+        {bedroomsSelect}
+        {variant === "properties" && priceSelect}
+        {variant === "properties" && sizeSelect}
         {dateSelect}
       </div>
     </div>

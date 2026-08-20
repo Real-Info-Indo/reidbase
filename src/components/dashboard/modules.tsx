@@ -16,6 +16,7 @@ import {
   ModuleTitle,
   type ModuleTheme,
   formatCount,
+  formatCountExact,
   formatDays,
   formatPercent,
   formatSqm,

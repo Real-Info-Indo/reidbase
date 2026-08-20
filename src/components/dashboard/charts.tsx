@@ -349,32 +349,46 @@ export function TenureBedsChart({
   const width = axisWidth([0, ...peaks], tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
-        <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-          tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-        <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
-        <Bar
-          dataKey="freehold"
-          name="Freehold"
-          stackId={stacked ? "tenure" : undefined}
-          fill={colours[0]}
-          radius={[4, 4, 0, 0]}
-          maxBarSize={30}
-        />
-        <Bar
-          dataKey="leasehold"
-          name="Leasehold"
-          stackId={stacked ? "tenure" : undefined}
-          fill={colours[1]}
-          radius={[4, 4, 0, 0]}
-          maxBarSize={30}
-        />
-      </BarChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
+              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
+            <Legend
+              verticalAlign="bottom"
+              height={28}
+              formatter={(value: string) => (
+                <span className="text-muted-foreground">{value}</span>
+              )}
+              wrapperStyle={{
+                fontSize: 11,
+                transform: "translateY(8px)",
+              }}
+            />
+            <Bar
+              dataKey="leasehold"
+              name="Leasehold"
+              stackId={stacked ? "tenure" : undefined}
+              fill={colours[1]}
+              radius={[0, 0, 0, 0]}
+              maxBarSize={30}
+            />
+            <Bar
+              dataKey="freehold"
+              name="Freehold"
+              stackId={stacked ? "tenure" : undefined}
+              fill={colours[0]}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={30}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 

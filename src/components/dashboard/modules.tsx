@@ -95,7 +95,7 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
         </div>
         <div className="lg:col-span-2">
           <DashboardCard title="Available property supply" subtitle="Available listings by bedroom count and tenure">
-          <TenureBedsChart data={data.available_by_beds} colours={[theme.light, theme.accent]} format={formatCount} />
+            <TenureBedsChart data={data.available_by_beds} colours={[theme.light, theme.accent]} format={formatCount} />
           </DashboardCard>
         </div>
       </div>

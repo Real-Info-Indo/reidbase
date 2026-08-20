@@ -159,7 +159,7 @@ export default function DashboardV2() {
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}
             <div className="col-span-2 hidden lg:col-span-1 lg:block" />
-            <div className="col-span-2 flex justify-start lg:col-span-4 lg:col-start-2">
+            <div className="col-span-2 w-full lg:col-span-4 lg:col-start-2">
               <FilterBar
                 filters={filters}
                 options={options}

@@ -25,6 +25,8 @@ function ChartFrame({ children }: { children: React.ReactNode }) {
 }
 
 const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
+const YAXIS = { ...AXIS, textAnchor: "start" as const, width: 32 };
+const YAXIS_CAT = { ...AXIS, textAnchor: "start" as const, width: 40 };
 const GRID = "hsl(var(--border))";
 
 const tooltipStyle = {

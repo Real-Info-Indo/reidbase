@@ -140,37 +140,41 @@ export function MonthLineChart({
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
-    <ChartFrame><ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
-            <stop offset="100%" stopColor={colour} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-        <YAxis
-          tick={AXIS}
-          tickLine={false}
-          axisLine={false}
-          width={width}
-          tickMargin={4}
-          tickFormatter={(v) => tickFmt(Number(v))}
-          domain={baseline ? ["auto", "auto"] : undefined}
-        />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
-        <Area
-          type="monotone"
-          dataKey="value"
-          stroke={colour}
-          strokeWidth={2}
-          fill={`url(#${gradientId})`}
-          dot={false}
-          connectNulls
-        />
-      </AreaChart>
-    </ResponsiveContainer></ChartFrame>
+    <ChartFrame>
+      <ChartFrameInner>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={rows} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={colour} stopOpacity={gradient ? 0.35 : 0} />
+                <stop offset="100%" stopColor={colour} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid stroke={GRID} vertical={false} />
+            <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis
+              tick={AXIS}
+              tickLine={false}
+              axisLine={false}
+              width={width}
+              tickMargin={4}
+              tickFormatter={(v) => tickFmt(Number(v))}
+              domain={baseline ? ["auto", "auto"] : undefined}
+            />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={colour}
+              strokeWidth={2}
+              fill={`url(#${gradientId})`}
+              dot={false}
+              connectNulls
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartFrameInner>
+    </ChartFrame>
   );
 }
 

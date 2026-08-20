@@ -31,9 +31,11 @@ interface FilterBarProps {
   /** Rentals have no contract, price or size dimension. */
   variant?: "properties" | "rentals";
   compact?: boolean;
+  /** Optional action buttons rendered next to the reset button. */
+  rightActions?: React.ReactNode;
 }
 
-export function FilterBar({ filters, options, onChange, variant = "properties", compact = false }: FilterBarProps) {
+export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions }: FilterBarProps) {
   const set = (patch: Partial<DashboardFilters>) => onChange({ ...filters, ...patch });
   const clear = (key: keyof DashboardFilters, value: string) =>
     value === ANY ? set({ [key]: undefined } as Partial<DashboardFilters>) : set({ [key]: value } as Partial<DashboardFilters>);
@@ -172,7 +174,10 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="flex justify-end">{resetButton}</div>
+      <div className="flex justify-end gap-2">
+        {rightActions}
+        {resetButton}
+      </div>
       <div className="flex items-start gap-1.5">
         {regionSelect}
         {locationSelect}

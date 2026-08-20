@@ -154,7 +154,7 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-5 pt-8">
+      <div className="mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12">
         {!isComparison && (
           <header className={`${MODULE_GRID} mb-2`}>
             {/* Title column spacer to align filters with the first score card */}

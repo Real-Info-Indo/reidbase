@@ -12,6 +12,7 @@ import {
   DashboardCard,
   KpiCard,
   MetricTile,
+  ModuleTitle,
   type ModuleTheme,
   formatCount,
   formatDays,
@@ -56,7 +57,7 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
     <div className="space-y-3">
-      <KpiRow>
+      <KpiRow title="Market Overview" subtitle="Market snapshot of key supply and demand metrics">
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
@@ -84,7 +85,7 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
     <div className="space-y-3">
-      <KpiRow>
+      <KpiRow title="Supply Trends" subtitle="Key supply metrics of available properties">
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
@@ -115,7 +116,7 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
     <div className="space-y-3">
-      <KpiRow>
+      <KpiRow title="Sales Trends" subtitle="Key sales and demand metrics of transacted properties">
         <KpiCard label="Sold properties" value={formatCount(k.sold_properties)} icon={Home} accent={theme.accent} />
         <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Discount rate" value={formatPercent(k.discount_rate)} icon={Percent} accent={theme.accent} />
@@ -146,7 +147,7 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
     <div className="space-y-3">
-      <KpiRow>
+      <KpiRow title="Property Trends" subtitle="Key metrics of property sizing and tenure">
         <KpiCard label="Price per sqm" value={formatUsdExact(k.price_per_sqm)} icon={Ruler} accent={theme.accent} />
         <KpiCard label="Median build size" value={formatSqm(k.median_build_size)} icon={Building2} accent={theme.accent} />
         <KpiCard label="Median floor space ratio" value={formatPercent(k.median_fsr)} icon={Percent} accent={theme.accent} />
@@ -177,7 +178,7 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
   return (
     <div className="space-y-3">
-      <KpiRow>
+      <KpiRow title="Rental Trends" subtitle="Key supply and demand metrics of operating properties">
         <KpiCard label="Rental records" value={formatCount(k.rental_properties)} icon={Building2} accent={theme.accent} />
         <KpiCard label="Average daily rate" value={formatUsdExact(k.average_rate)} icon={CircleDollarSign} accent={theme.accent} />
         <KpiCard label="Average occupancy" value={formatPercent(k.average_occupancy)} icon={Percent} accent={theme.accent} />

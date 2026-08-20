@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useCallback, useId } from "react";
 import {
   Area,
   AreaChart,
@@ -44,6 +44,7 @@ function hasData(rows: unknown[] | null | undefined): boolean {
 const AXIS_FONT = '11px Poppins, ui-sans-serif, system-ui, sans-serif';
 /** Gap between the label and the plot area, plus safety against sub-pixel clipping. */
 const AXIS_PAD = 10;
+const RADIAN = Math.PI / 180;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
 
@@ -206,12 +207,44 @@ export function DonutChart({
   if (rows.length === 0) return <EmptyChart />;
   const total = rows.reduce((sum, d) => sum + (d.value ?? 0), 0);
 
+  const renderShareLabel = useCallback(
+    ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+      const share = (percent * 100).toFixed(1);
+      if (Number(share) < 3) return null;
+      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+      return (
+        <text
+          x={x}
+          y={y}
+          fill="hsl(var(--muted-foreground))"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={11}
+          fontWeight={700}
+        >
+          {`${share}%`}
+        </text>
+      );
+    },
+    [],
+  );
+
   return (
     <ChartFrame><ResponsiveContainer width="100%" height="100%">
       <PieChart>
-        <Pie data={rows} dataKey="value" nameKey="name" innerRadius="40%" outerRadius="80%" paddingAngle={2} cornerRadius={6}>
-
-
+        <Pie
+          data={rows}
+          dataKey="value"
+          nameKey="name"
+          innerRadius="45%"
+          outerRadius="95%"
+          paddingAngle={2}
+          cornerRadius={6}
+          label={renderShareLabel}
+          labelLine={false}
+        >
           {rows.map((row, i) => (
             <Cell key={row.name} fill={colours[i % colours.length]} stroke="none" />
           ))}

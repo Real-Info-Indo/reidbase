@@ -323,7 +323,7 @@ export function BedsBarChart({
     <ChartFrame>
       <ChartFrameInner>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }}>
+          <BarChart data={rows} layout={layout} margin={{ top: 6, right: 12, left: 0, bottom: 0 }} barCategoryGap="10%">
             <CartesianGrid stroke={GRID} vertical={layout === "vertical"} horizontal={layout === "horizontal"} />
             {layout === "vertical" ? (
               <>

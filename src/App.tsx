@@ -75,8 +75,8 @@ const AppRoutes = () => {
 
         </Route>
         <Route path="/import-data" element={<ImportData />} />
-        <Route path="/calendar-test" element={<CalendarTest />} />
         <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+
 
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/appraisals" element={<AdminAppraisals />} />

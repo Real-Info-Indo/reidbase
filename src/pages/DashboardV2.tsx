@@ -163,7 +163,7 @@ export default function DashboardV2() {
       default:
         return null;
     }
-  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB]);
+  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB, defaultFilters]);
 
   if (!authenticated) return <AdminGate checking={checking} error={error} />;
 

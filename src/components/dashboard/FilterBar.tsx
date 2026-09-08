@@ -149,9 +149,9 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
             aria-label={`${label} maximum`}
           />
         </div>
-        <div className="relative">
-          <span className="pointer-events-none absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
-          <span className="pointer-events-none absolute -right-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
+        <div className="relative px-2">
+          <span className="pointer-events-none absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-muted-foreground/70 bg-background" />
+          <span className="pointer-events-none absolute right-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-muted-foreground/70 bg-background" />
           <Slider
             min={0}
             max={SLIDER_STEPS}

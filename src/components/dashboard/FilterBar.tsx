@@ -283,8 +283,22 @@ function DateRangeFilter({ from, to, latestMonth, options, onApply, className }:
           selected={selected}
           onSelect={onSelect}
           initialFocus
+          captionLayout="dropdown"
+          fromYear={minYear}
+          toYear={maxYear}
           className="p-3 pointer-events-auto"
+          classNames={{
+            caption_label: "flex items-center gap-1 text-sm font-medium",
+            dropdown: "h-7 rounded-md border border-input bg-background px-1 text-xs",
+            dropdown_month: "mr-1",
+            dropdown_year: "ml-1",
+            day_range_start: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-l-md",
+            day_range_end: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-r-md",
+            day_range_middle: "bg-primary/20 text-foreground aria-selected:bg-primary/20",
+            cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+          }}
         />
+
       </PopoverContent>
     </Popover>
   );

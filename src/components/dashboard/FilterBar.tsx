@@ -205,11 +205,13 @@ interface DateRangeFilterProps {
   from: string | undefined;
   to: string | undefined;
   latestMonth: string | undefined;
+  options: FilterOptions | null;
   onApply: (from: string | undefined, to: string | undefined) => void;
   className: string;
 }
 
-function DateRangeFilter({ from, to, latestMonth, onApply, className }: DateRangeFilterProps) {
+function DateRangeFilter({ from, to, latestMonth, options, onApply, className }: DateRangeFilterProps) {
+
   const [open, setOpen] = useState(false);
   const selected: DateRange | undefined = parseIso(from) || parseIso(to)
     ? { from: parseIso(from), to: parseIso(to) }

@@ -132,13 +132,17 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
             aria-label={`${label} maximum`}
           />
         </div>
-        <Slider
-          min={0}
-          max={SLIDER_STEPS}
-          step={1}
-          value={[toPos(range[0]), toPos(range[1])]}
-          onValueChange={(v) => commit([toVal(v[0]), toVal(v[1])])}
-        />
+        <div className="relative">
+          <span className="pointer-events-none absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
+          <span className="pointer-events-none absolute -right-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
+          <Slider
+            min={0}
+            max={SLIDER_STEPS}
+            step={1}
+            value={[toPos(range[0]), toPos(range[1])]}
+            onValueChange={(v) => commit([toVal(v[0]), toVal(v[1])])}
+          />
+        </div>
         <div className="mt-2 flex justify-between text-[0.65rem] text-muted-foreground tabular-nums">
           <span>{format(range[0])}</span>
           <span>{format(range[1])}</span>

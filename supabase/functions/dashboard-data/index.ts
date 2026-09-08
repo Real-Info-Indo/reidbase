@@ -93,9 +93,10 @@ Deno.serve(async (req) => {
     }
 
     const filters = sanitiseFilters(body.filters);
-    const { data, error } = await supabase.rpc("reid_dashboard_metrics", {
+    const { data, error } = await supabase.rpc("reid_dashboard_metrics_cached", {
       p_module: moduleKey,
       p_filters: filters,
+      p_max_age_seconds: 900,
     });
     if (error) throw new Error(error.message);
 

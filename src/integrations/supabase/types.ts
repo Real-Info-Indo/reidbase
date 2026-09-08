@@ -486,6 +486,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reid_dashboard_cache: {
+        Row: {
+          computed_at: string
+          filters_key: string
+          module: string
+          payload: Json
+        }
+        Insert: {
+          computed_at?: string
+          filters_key: string
+          module: string
+          payload: Json
+        }
+        Update: {
+          computed_at?: string
+          filters_key?: string
+          module?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       reid_properties: {
         Row: {
           availability: string | null
@@ -800,6 +821,10 @@ export type Database = {
       reid_dashboard_filter_options: { Args: never; Returns: Json }
       reid_dashboard_metrics: {
         Args: { p_filters?: Json; p_module: string }
+        Returns: Json
+      }
+      reid_dashboard_metrics_cached: {
+        Args: { p_filters: Json; p_max_age_seconds?: number; p_module: string }
         Returns: Json
       }
       reid_filtered_properties: {

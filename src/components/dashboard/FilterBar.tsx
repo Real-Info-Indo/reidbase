@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar as CalendarIcon, ChevronDown, RotateCcw } from "lucide-react";
 import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
-import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -213,22 +212,30 @@ interface DateRangeFilterProps {
 function DateRangeFilter({ from, to, latestMonth, options, onApply, className }: DateRangeFilterProps) {
 
   const [open, setOpen] = useState(false);
-  const selected: DateRange | undefined = parseIso(from) || parseIso(to)
-    ? { from: parseIso(from), to: parseIso(to) }
-    : undefined;
-
   const anchor = parseIso(latestMonth) ?? new Date();
   const endOfAnchor = endOfMonth(anchor);
 
+  const fromDate = parseIso(from);
+  const toDate = parseIso(to);
+
+  const [startMonth, setStartMonth] = useState<Date>(fromDate ?? subMonths(endOfAnchor, 1));
+  const [endMonth, setEndMonth] = useState<Date>(toDate ?? endOfAnchor);
+
+  useEffect(() => {
+    if (open) {
+      setStartMonth(fromDate ?? subMonths(endOfAnchor, 1));
+      setEndMonth(toDate ?? endOfAnchor);
+    }
+  }, [open, from, to, latestMonth]);
+
   const active = Boolean(from || to);
   const display = active
-    ? `${parseIso(from) ? format(parseIso(from) as Date, "dd/MM/yyyy") : "Start"} – ${parseIso(to) ? format(parseIso(to) as Date, "dd/MM/yyyy") : "Now"}`
+    ? `${fromDate ? format(fromDate, "dd/MM/yyyy") : "Start"} – ${toDate ? format(toDate, "dd/MM/yyyy") : "Now"}`
     : "Date range";
 
   const years = (options?.months ?? []).map((m) => Number(m.split("-")[0]));
   const minYear = years.length ? Math.min(...years) : new Date().getFullYear() - 5;
   const maxYear = years.length ? Math.max(...years) : new Date().getFullYear() + 1;
-
 
   const applyPreset = (months: number) => {
     const start = startOfMonth(subMonths(endOfAnchor, months - 1));
@@ -236,13 +243,45 @@ function DateRangeFilter({ from, to, latestMonth, options, onApply, className }:
     setOpen(false);
   };
 
-  const onSelect = (range: DateRange | undefined) => {
-    if (!range?.from) {
-      onApply(undefined, undefined);
+  const handleStartSelect = (date: Date | undefined) => {
+    if (!date) {
+      onApply(undefined, to);
       return;
     }
-    onApply(toIso(range.from), range.to ? toIso(range.to) : undefined);
+    if (toDate && date > toDate) {
+      onApply(toIso(date), undefined);
+    } else {
+      onApply(toIso(date), to);
+    }
   };
+
+  const handleEndSelect = (date: Date | undefined) => {
+    if (!date) {
+      onApply(from, undefined);
+      return;
+    }
+    if (fromDate && date < fromDate) {
+      onApply(toIso(date), undefined);
+    } else {
+      onApply(from, toIso(date));
+    }
+  };
+
+  const inRange = (date: Date) => {
+    if (!fromDate || !toDate) return false;
+    return date > fromDate && date < toDate;
+  };
+
+  const calendarClassNames = {
+    caption_label: "flex items-center gap-1 text-sm font-medium",
+    dropdown: "h-7 rounded-md border border-input bg-background px-1 text-xs",
+    dropdown_month: "mr-1",
+    dropdown_year: "ml-1",
+    cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+  };
+
+  const modifiers = { inRange };
+  const modifiersClassNames = { inRange: "bg-primary/20 text-foreground rounded-none" };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -276,29 +315,40 @@ function DateRangeFilter({ from, to, latestMonth, options, onApply, className }:
             All time
           </Button>
         </div>
-        <Calendar
-          mode="range"
-          numberOfMonths={2}
-          defaultMonth={selected?.from ?? subMonths(endOfAnchor, 1)}
-          selected={selected}
-          onSelect={onSelect}
-          initialFocus
-          captionLayout="dropdown"
-          fromYear={minYear}
-          toYear={maxYear}
-          className="p-3 pointer-events-auto"
-          classNames={{
-            caption_label: "flex items-center gap-1 text-sm font-medium",
-            dropdown: "h-7 rounded-md border border-input bg-background px-1 text-xs",
-            dropdown_month: "mr-1",
-            dropdown_year: "ml-1",
-            day_range_start: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-l-md",
-            day_range_end: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-r-md",
-            day_range_middle: "bg-primary/20 text-foreground aria-selected:bg-primary/20",
-            cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-          }}
-        />
-
+        <div className="flex gap-4 p-3 pointer-events-auto">
+          <div className="flex flex-col">
+            <span className="mb-2 text-xs font-medium text-muted-foreground">Start date</span>
+            <Calendar
+              mode="single"
+              month={startMonth}
+              onMonthChange={setStartMonth}
+              selected={fromDate}
+              onSelect={handleStartSelect}
+              captionLayout="dropdown"
+              fromYear={minYear}
+              toYear={maxYear}
+              classNames={calendarClassNames}
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="mb-2 text-xs font-medium text-muted-foreground">End date</span>
+            <Calendar
+              mode="single"
+              month={endMonth}
+              onMonthChange={setEndMonth}
+              selected={toDate}
+              onSelect={handleEndSelect}
+              captionLayout="dropdown"
+              fromYear={minYear}
+              toYear={maxYear}
+              classNames={calendarClassNames}
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
+            />
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

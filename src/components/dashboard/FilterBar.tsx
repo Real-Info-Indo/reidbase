@@ -53,20 +53,34 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
   const active = minValue !== undefined || maxValue !== undefined;
 
   // Map between real values and linear slider positions (0..SLIDER_STEPS).
-  // For exponential scales with min 0, use one step as the log-domain floor;
-  // position 0 still maps to the true minimum.
-  const logMin = min <= 0 ? step : min;
+  // For the price slider, give the $100k-$500k band 50% of the track, with 25%
+  // reserved for $0-$100k and 25% for $500k-$5M.
+  const LOW_KNEE = 100_000;
+  const HIGH_KNEE = 500_000;
+  const LOW_SHARE = 0.25;
+  const MID_SHARE = 0.50;
+
   const toPos = (v: number): number => {
     const clamped = Math.min(max, Math.max(min, v));
     if (!exponential) return ((clamped - min) / (max - min)) * SLIDER_STEPS;
-    if (clamped <= logMin) return clamped <= min ? 0 : 1;
-    return (Math.log(clamped / logMin) / Math.log(max / logMin)) * SLIDER_STEPS;
+    if (clamped <= LOW_KNEE) {
+      return (clamped / LOW_KNEE) * LOW_SHARE * SLIDER_STEPS;
+    }
+    if (clamped <= HIGH_KNEE) {
+      return (LOW_SHARE + ((clamped - LOW_KNEE) / (HIGH_KNEE - LOW_KNEE)) * MID_SHARE) * SLIDER_STEPS;
+    }
+    return (LOW_SHARE + MID_SHARE + ((clamped - HIGH_KNEE) / (max - HIGH_KNEE)) * (1 - LOW_SHARE - MID_SHARE)) * SLIDER_STEPS;
   };
   const toVal = (p: number): number => {
     let v: number;
-    if (!exponential) v = min + (p / SLIDER_STEPS) * (max - min);
-    else if (p <= 0) v = min;
-    else v = logMin * Math.pow(max / logMin, p / SLIDER_STEPS);
+    const share = p / SLIDER_STEPS;
+    if (!exponential) v = min + share * (max - min);
+    else if (share <= LOW_SHARE) v = (share / LOW_SHARE) * LOW_KNEE;
+    else if (share <= LOW_SHARE + MID_SHARE) {
+      v = LOW_KNEE + ((share - LOW_SHARE) / MID_SHARE) * (HIGH_KNEE - LOW_KNEE);
+    } else {
+      v = HIGH_KNEE + ((share - LOW_SHARE - MID_SHARE) / (1 - LOW_SHARE - MID_SHARE)) * (max - HIGH_KNEE);
+    }
     return Math.min(max, Math.max(min, Math.round(v / step) * step));
   };
 
@@ -149,18 +163,14 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
             aria-label={`${label} maximum`}
           />
         </div>
-        <div className="relative px-2">
-          <span className="pointer-events-none absolute left-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-muted-foreground/70 bg-background" />
-          <span className="pointer-events-none absolute right-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-muted-foreground/70 bg-background" />
-          <Slider
-            min={0}
-            max={SLIDER_STEPS}
-            step={1}
-            value={[toPos(range[0]), toPos(range[1])]}
-            onValueChange={preview}
-            onValueCommit={commitPositions}
-          />
-        </div>
+        <Slider
+          min={0}
+          max={SLIDER_STEPS}
+          step={1}
+          value={[toPos(range[0]), toPos(range[1])]}
+          onValueChange={preview}
+          onValueCommit={commitPositions}
+        />
         <div className="mt-2 flex justify-between text-[0.65rem] text-muted-foreground tabular-nums">
           <span>{format(range[0])}</span>
           <span>{format(range[1])}</span>

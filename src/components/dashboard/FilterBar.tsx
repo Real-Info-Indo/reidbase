@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { ChevronDown, RotateCcw } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronDown, RotateCcw } from "lucide-react";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import type { DashboardFilters, FilterOptions } from "@/lib/dashboardApi";
-import { formatMonth } from "./primitives";
+
 
 const ANY = "__any__";
 

@@ -1,27 +1,83 @@
-import { RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import type { DashboardFilters, FilterOptions } from "@/lib/dashboardApi";
 import { formatMonth } from "./primitives";
 
 const ANY = "__any__";
 
-const PRICE_BANDS: { label: string; min?: string; max?: string }[] = [
-  { label: "Under $250k", max: "250000" },
-  { label: "$250k to $500k", min: "250000", max: "500000" },
-  { label: "$500k to $1M", min: "500000", max: "1000000" },
-  { label: "Over $1M", min: "1000000" },
-];
+const PRICE_MIN = 0;
+const PRICE_MAX = 5_000_000;
+const PRICE_STEP = 1_000;
+const SIZE_MIN = 0;
+const SIZE_MAX = 1_000;
+const SIZE_STEP = 5;
 
-const SIZE_BANDS: { label: string; min?: string; max?: string }[] = [
-  { label: "Under 100 sqm", max: "100" },
-  { label: "100 to 200 sqm", min: "100", max: "200" },
-  { label: "200 to 400 sqm", min: "200", max: "400" },
-  { label: "Over 400 sqm", min: "400" },
-];
+function formatPrice(v: number): string {
+  return `$${v.toLocaleString("en-US")}`;
+}
 
-function bandKey(min?: string, max?: string): string {
-  return min || max ? `${min ?? ""}-${max ?? ""}` : ANY;
+function formatSize(v: number): string {
+  return `${v.toLocaleString("en-US")} sqm`;
+}
+
+interface RangeSliderProps {
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  minValue: string | undefined;
+  maxValue: string | undefined;
+  format: (v: number) => string;
+  onApply: (min: number | undefined, max: number | undefined) => void;
+  className: string;
+}
+
+function RangeSlider({ label, min, max, step, minValue, maxValue, format, onApply, className }: RangeSliderProps) {
+  const from = minValue !== undefined ? Number(minValue) : min;
+  const to = maxValue !== undefined ? Number(maxValue) : max;
+  const active = minValue !== undefined || maxValue !== undefined;
+  const [range, setRange] = useState<[number, number]>([from, to]);
+  const [open, setOpen] = useState(false);
+
+  const display = active ? `${format(from)} – ${format(to)}` : label;
+
+  const commit = (next: [number, number]) => {
+    setRange(next);
+    onApply(
+      next[0] > min ? next[0] : undefined,
+      next[1] < max ? next[1] : undefined,
+    );
+  };
+
+  return (
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setRange([from, to]); }}>
+      <PopoverTrigger asChild>
+        <button type="button" className={`${className} flex items-center justify-between gap-1 border border-input font-medium`}>
+          <span className="truncate">{display}</span>
+          <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64 p-3" align="start">
+        <div className="mb-2 flex items-center justify-between text-xs font-medium">
+          <span>{label}</span>
+          <span className="text-muted-foreground">
+            {format(range[0])} – {format(range[1])}
+          </span>
+        </div>
+        <Slider
+          min={min}
+          max={max}
+          step={step}
+          value={range}
+          onValueChange={(v) => commit([v[0], v[1]])}
+        />
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 interface FilterBarProps {

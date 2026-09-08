@@ -94,7 +94,19 @@ export interface FilterOptions {
   months: string[];
 }
 
+export function getTrailingDateRange(
+  options: FilterOptions,
+  months = 12,
+): { date_from: string; date_to: string } {
+  const latest = options.months[options.months.length - 1] ?? format(new Date(), "yyyy-MM");
+  const anchor = new Date(`${latest}T00:00:00`);
+  const end = endOfMonth(anchor);
+  const start = startOfMonth(subMonths(end, months - 1));
+  return { date_from: format(start, "yyyy-MM-dd"), date_to: format(end, "yyyy-MM-dd") };
+}
+
 async function callDashboard<T>(body: Record<string, unknown>): Promise<T> {
+
   const { data, error } = await supabase.functions.invoke("dashboard-data", {
     body,
     headers: await wixAuthHeader(),

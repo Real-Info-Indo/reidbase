@@ -205,11 +205,13 @@ interface DateRangeFilterProps {
   from: string | undefined;
   to: string | undefined;
   latestMonth: string | undefined;
+  options: FilterOptions | null;
   onApply: (from: string | undefined, to: string | undefined) => void;
   className: string;
 }
 
-function DateRangeFilter({ from, to, latestMonth, onApply, className }: DateRangeFilterProps) {
+function DateRangeFilter({ from, to, latestMonth, options, onApply, className }: DateRangeFilterProps) {
+
   const [open, setOpen] = useState(false);
   const selected: DateRange | undefined = parseIso(from) || parseIso(to)
     ? { from: parseIso(from), to: parseIso(to) }
@@ -222,6 +224,11 @@ function DateRangeFilter({ from, to, latestMonth, onApply, className }: DateRang
   const display = active
     ? `${parseIso(from) ? format(parseIso(from) as Date, "dd/MM/yyyy") : "Start"} – ${parseIso(to) ? format(parseIso(to) as Date, "dd/MM/yyyy") : "Now"}`
     : "Date range";
+
+  const years = (options?.months ?? []).map((m) => Number(m.split("-")[0]));
+  const minYear = years.length ? Math.min(...years) : new Date().getFullYear() - 5;
+  const maxYear = years.length ? Math.max(...years) : new Date().getFullYear() + 1;
+
 
   const applyPreset = (months: number) => {
     const start = startOfMonth(subMonths(endOfAnchor, months - 1));
@@ -276,8 +283,22 @@ function DateRangeFilter({ from, to, latestMonth, onApply, className }: DateRang
           selected={selected}
           onSelect={onSelect}
           initialFocus
+          captionLayout="dropdown"
+          fromYear={minYear}
+          toYear={maxYear}
           className="p-3 pointer-events-auto"
+          classNames={{
+            caption_label: "flex items-center gap-1 text-sm font-medium",
+            dropdown: "h-7 rounded-md border border-input bg-background px-1 text-xs",
+            dropdown_month: "mr-1",
+            dropdown_year: "ml-1",
+            day_range_start: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-l-md",
+            day_range_end: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-r-md",
+            day_range_middle: "bg-primary/20 text-foreground aria-selected:bg-primary/20",
+            cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+          }}
         />
+
       </PopoverContent>
     </Popover>
   );
@@ -410,10 +431,12 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
       from={filters.date_from}
       to={filters.date_to}
       latestMonth={options?.months?.[options.months.length - 1]}
+      options={options}
       onApply={(f, t) => set({ date_from: f, date_to: t })}
       className={triggerClass}
     />
   );
+
 
 
   if (compact) {

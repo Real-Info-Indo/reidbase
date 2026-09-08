@@ -29,7 +29,9 @@ import CampaignConversation from "./pages/CampaignConversation";
 import AdminAffiliates from "./pages/AdminAffiliates";
 import DashboardV2 from "./pages/DashboardV2";
 
+
 import { PageViewTracker } from "@/components/PageViewTracker";
+
 import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 
 const queryClient = new QueryClient();
@@ -74,6 +76,8 @@ const AppRoutes = () => {
         </Route>
         <Route path="/import-data" element={<ImportData />} />
         <Route path="/admin/chat-logs" element={<AdminChatLogs />} />
+
+
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/appraisals" element={<AdminAppraisals />} />
         <Route path="/admin/users" element={<AdminUsers />} />

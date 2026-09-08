@@ -102,7 +102,7 @@ html, body, #root {
 .rdp-caption_dropdowns {
   @apply flex items-center gap-1;
 }
-.rdp-caption_dropdowns .rdp-caption_label {
+.rdp-caption_dropdowns div[aria-hidden="true"] {
   @apply hidden;
 }
 .rdp-caption_dropdowns select {
@@ -110,6 +110,7 @@ html, body, #root {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-position: right 0.35rem center;
 }
+
 
 
 

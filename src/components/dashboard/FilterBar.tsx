@@ -53,15 +53,20 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
   const active = minValue !== undefined || maxValue !== undefined;
 
   // Map between real values and linear slider positions (0..SLIDER_STEPS).
+  // For exponential scales with min 0, use one step as the log-domain floor;
+  // position 0 still maps to the true minimum.
+  const logMin = min <= 0 ? step : min;
   const toPos = (v: number): number => {
     const clamped = Math.min(max, Math.max(min, v));
-    if (!exponential || min <= 0) return ((clamped - min) / (max - min)) * SLIDER_STEPS;
-    return (Math.log(clamped / min) / Math.log(max / min)) * SLIDER_STEPS;
+    if (!exponential) return ((clamped - min) / (max - min)) * SLIDER_STEPS;
+    if (clamped <= logMin) return clamped <= min ? 0 : 1;
+    return (Math.log(clamped / logMin) / Math.log(max / logMin)) * SLIDER_STEPS;
   };
   const toVal = (p: number): number => {
     let v: number;
-    if (!exponential || min <= 0) v = min + (p / SLIDER_STEPS) * (max - min);
-    else v = min * Math.pow(max / min, p / SLIDER_STEPS);
+    if (!exponential) v = min + (p / SLIDER_STEPS) * (max - min);
+    else if (p <= 0) v = min;
+    else v = logMin * Math.pow(max / logMin, p / SLIDER_STEPS);
     return Math.min(max, Math.max(min, Math.round(v / step) * step));
   };
 
@@ -239,6 +244,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
         price_max: hi !== undefined ? String(hi) : undefined,
       })}
       className={triggerClass}
+      exponential
     />
   );
 

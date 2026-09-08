@@ -129,14 +129,15 @@ export default function DashboardV2() {
           <div className="space-y-3">
             <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
               <p className="mb-2 text-sm font-bold">Selection A</p>
-              <FilterBar filters={compareA} options={options} onChange={setCompareA} compact />
+              <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
             </div>
             {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
           </div>
           <div className="space-y-3">
             <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
               <p className="mb-2 text-sm font-bold">Selection B</p>
-              <FilterBar filters={compareB} options={options} onChange={setCompareB} compact />
+              <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
+
             </div>
             {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
           </div>

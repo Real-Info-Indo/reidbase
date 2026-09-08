@@ -225,6 +225,11 @@ function DateRangeFilter({ from, to, latestMonth, options, onApply, className }:
     ? `${parseIso(from) ? format(parseIso(from) as Date, "dd/MM/yyyy") : "Start"} – ${parseIso(to) ? format(parseIso(to) as Date, "dd/MM/yyyy") : "Now"}`
     : "Date range";
 
+  const years = (options?.months ?? []).map((m) => Number(m.split("-")[0]));
+  const minYear = years.length ? Math.min(...years) : new Date().getFullYear() - 5;
+  const maxYear = years.length ? Math.max(...years) : new Date().getFullYear() + 1;
+
+
   const applyPreset = (months: number) => {
     const start = startOfMonth(subMonths(endOfAnchor, months - 1));
     onApply(toIso(start), toIso(endOfAnchor));

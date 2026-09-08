@@ -293,9 +293,12 @@ interface FilterBarProps {
   compact?: boolean;
   /** Optional action buttons rendered next to the reset button. */
   rightActions?: React.ReactNode;
+  /** Filters to restore when the user hits Reset. Defaults to cleared filters. */
+  defaultFilters?: DashboardFilters;
 }
 
-export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions }: FilterBarProps) {
+export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions, defaultFilters }: FilterBarProps) {
+
   const set = (patch: Partial<DashboardFilters>) => onChange({ ...filters, ...patch });
   const clear = (key: keyof DashboardFilters, value: string) =>
     value === ANY ? set({ [key]: undefined } as Partial<DashboardFilters>) : set({ [key]: value } as Partial<DashboardFilters>);
@@ -309,12 +312,13 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
       variant="ghost"
       size="sm"
       className={compact ? "col-span-2 h-8 gap-1.5 text-xs" : "h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"}
-      onClick={() => onChange({})}
+      onClick={() => onChange(defaultFilters ?? {})}
     >
       <RotateCcw className="h-3 w-3" />
       Reset
     </Button>
   );
+
 
   const regionSelect = (
     <Select value={filters.region ?? ANY} onValueChange={(v) => clear("region", v)}>

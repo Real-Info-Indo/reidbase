@@ -7,12 +7,14 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   fetchFilterOptions,
   fetchModuleMetrics,
+  getTrailingDateRange,
   type DashboardFilters,
   type DashboardModuleKey,
   type FilterOptions,
   type ModulePayload,
   type ServerModuleKey,
 } from "@/lib/dashboardApi";
+
 import { FilterBar } from "@/components/dashboard/FilterBar";
 import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
 import {
@@ -56,14 +58,29 @@ export default function DashboardV2() {
   const contentRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const hasSetDefaultDates = useRef(false);
 
   const isComparison = active === "comparison-report";
   const theme = MODULE_THEMES[active];
+
+  const defaultFilters = useMemo<DashboardFilters>(() => {
+    if (!options) return {};
+    return getTrailingDateRange(options);
+  }, [options]);
 
   useEffect(() => {
     if (!authenticated) return;
     fetchFilterOptions().then(setOptions).catch(() => setOptions(null));
   }, [authenticated]);
+
+  useEffect(() => {
+    if (!options || hasSetDefaultDates.current) return;
+    hasSetDefaultDates.current = true;
+    setFilters((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+    setCompareA((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+    setCompareB((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+  }, [options, defaultFilters]);
+
 
   const load = useCallback(async () => {
     if (!authenticated) return;
@@ -112,14 +129,15 @@ export default function DashboardV2() {
           <div className="space-y-3">
             <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
               <p className="mb-2 text-sm font-bold">Selection A</p>
-              <FilterBar filters={compareA} options={options} onChange={setCompareA} compact />
+              <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
             </div>
             {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
           </div>
           <div className="space-y-3">
             <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
               <p className="mb-2 text-sm font-bold">Selection B</p>
-              <FilterBar filters={compareB} options={options} onChange={setCompareB} compact />
+              <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
+
             </div>
             {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
           </div>
@@ -145,7 +163,7 @@ export default function DashboardV2() {
       default:
         return null;
     }
-  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB]);
+  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB, defaultFilters]);
 
   if (!authenticated) return <AdminGate checking={checking} error={error} />;
 
@@ -189,7 +207,9 @@ export default function DashboardV2() {
                 options={options}
                 onChange={setFilters}
                 variant={filterVariant(active)}
+                defaultFilters={defaultFilters}
                 rightActions={(
+
                   <Button
                     type="button"
                     variant="ghost"

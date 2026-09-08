@@ -54,6 +54,7 @@ export default function DashboardV2() {
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const requestIdRef = useRef(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isComparison = active === "comparison-report";
@@ -66,6 +67,7 @@ export default function DashboardV2() {
 
   const load = useCallback(async () => {
     if (!authenticated) return;
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setLoadError(null);
     try {
@@ -74,15 +76,19 @@ export default function DashboardV2() {
           fetchModuleMetrics("location-report", compareA),
           fetchModuleMetrics("location-report", compareB),
         ]);
+        if (requestId !== requestIdRef.current) return;
         setPanelA(a);
         setPanelB(b);
       } else {
-        setPayload(await fetchModuleMetrics(active as ServerModuleKey, filters));
+        const nextPayload = await fetchModuleMetrics(active as ServerModuleKey, filters);
+        if (requestId !== requestIdRef.current) return;
+        setPayload(nextPayload);
       }
     } catch (e) {
+      if (requestId !== requestIdRef.current) return;
       setLoadError((e as Error).message || "Unable to load dashboard data");
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [authenticated, active, filters, compareA, compareB, isComparison]);
 

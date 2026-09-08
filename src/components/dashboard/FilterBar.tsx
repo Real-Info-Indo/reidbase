@@ -412,10 +412,12 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
       from={filters.date_from}
       to={filters.date_to}
       latestMonth={options?.months?.[options.months.length - 1]}
+      options={options}
       onApply={(f, t) => set({ date_from: f, date_to: t })}
       className={triggerClass}
     />
   );
+
 
 
   if (compact) {

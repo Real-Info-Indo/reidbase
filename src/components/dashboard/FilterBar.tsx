@@ -163,41 +163,37 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
   );
 
   const priceSelect = (
-    <Select
-      value={bandKey(filters.price_min, filters.price_max)}
-      onValueChange={(v) => {
-        if (v === ANY) return set({ price_min: undefined, price_max: undefined });
-        const band = PRICE_BANDS.find((b) => bandKey(b.min, b.max) === v);
-        set({ price_min: band?.min, price_max: band?.max });
-      }}
-    >
-      <SelectTrigger className={triggerClass}><SelectValue placeholder="Price" /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ANY}>Price</SelectItem>
-        {PRICE_BANDS.map((b) => (
-          <SelectItem key={b.label} value={bandKey(b.min, b.max)}>{b.label}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <RangeSlider
+      label="Price"
+      min={PRICE_MIN}
+      max={PRICE_MAX}
+      step={PRICE_STEP}
+      minValue={filters.price_min}
+      maxValue={filters.price_max}
+      format={formatPrice}
+      onApply={(lo, hi) => set({
+        price_min: lo !== undefined ? String(lo) : undefined,
+        price_max: hi !== undefined ? String(hi) : undefined,
+      })}
+      className={triggerClass}
+    />
   );
 
   const sizeSelect = (
-    <Select
-      value={bandKey(filters.size_min, filters.size_max)}
-      onValueChange={(v) => {
-        if (v === ANY) return set({ size_min: undefined, size_max: undefined });
-        const band = SIZE_BANDS.find((b) => bandKey(b.min, b.max) === v);
-        set({ size_min: band?.min, size_max: band?.max });
-      }}
-    >
-      <SelectTrigger className={triggerClass}><SelectValue placeholder="Size" /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ANY}>Size</SelectItem>
-        {SIZE_BANDS.map((b) => (
-          <SelectItem key={b.label} value={bandKey(b.min, b.max)}>{b.label}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <RangeSlider
+      label="Size"
+      min={SIZE_MIN}
+      max={SIZE_MAX}
+      step={SIZE_STEP}
+      minValue={filters.size_min}
+      maxValue={filters.size_max}
+      format={formatSize}
+      onApply={(lo, hi) => set({
+        size_min: lo !== undefined ? String(lo) : undefined,
+        size_max: hi !== undefined ? String(hi) : undefined,
+      })}
+      className={triggerClass}
+    />
   );
 
   const dateSelect = (

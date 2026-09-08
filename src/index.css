@@ -102,17 +102,14 @@ html, body, #root {
 .rdp-caption_dropdowns {
   @apply flex items-center gap-1;
 }
-.rdp-dropdown {
-  @apply relative inline-flex items-center;
+.rdp-caption_dropdowns .rdp-caption_label {
+  @apply hidden;
 }
-.rdp-dropdown select {
-  @apply absolute inset-0 h-full w-full cursor-pointer opacity-0;
+.rdp-caption_dropdowns select {
+  @apply h-7 cursor-pointer appearance-none rounded-md border border-input bg-background bg-no-repeat px-2 pr-5 text-xs hover:bg-accent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.35rem center;
 }
-.rdp-dropdown .rdp-caption_label {
-  @apply flex h-7 cursor-pointer select-none items-center rounded-md border border-input bg-background px-2 text-xs hover:bg-accent;
-}
-.rdp-dropdown_icon {
-  @apply ml-1 h-3 w-3 opacity-50;
-}
+
 
 

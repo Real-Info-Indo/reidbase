@@ -58,14 +58,29 @@ export default function DashboardV2() {
   const contentRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const hasSetDefaultDates = useRef(false);
 
   const isComparison = active === "comparison-report";
   const theme = MODULE_THEMES[active];
+
+  const defaultFilters = useMemo<DashboardFilters>(() => {
+    if (!options) return {};
+    return getTrailingDateRange(options);
+  }, [options]);
 
   useEffect(() => {
     if (!authenticated) return;
     fetchFilterOptions().then(setOptions).catch(() => setOptions(null));
   }, [authenticated]);
+
+  useEffect(() => {
+    if (!options || hasSetDefaultDates.current) return;
+    hasSetDefaultDates.current = true;
+    setFilters((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+    setCompareA((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+    setCompareB((prev) => (prev.date_from || prev.date_to ? prev : { ...prev, ...defaultFilters }));
+  }, [options, defaultFilters]);
+
 
   const load = useCallback(async () => {
     if (!authenticated) return;

@@ -312,12 +312,13 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
       variant="ghost"
       size="sm"
       className={compact ? "col-span-2 h-8 gap-1.5 text-xs" : "h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"}
-      onClick={() => onChange({})}
+      onClick={() => onChange(defaultFilters ?? {})}
     >
       <RotateCcw className="h-3 w-3" />
       Reset
     </Button>
   );
+
 
   const regionSelect = (
     <Select value={filters.region ?? ANY} onValueChange={(v) => clear("region", v)}>

@@ -64,7 +64,6 @@ const AppRoutes = () => {
         <Route path="/widget-minimal" element={<ChatWidgetMinimal />} />
         <Route path="/shared/:id" element={<SharedConversation />} />
         <Route path="/campaign/:slug" element={<CampaignConversation />} />
-        <Route path="/date-filter-test" element={<DateFilterTest />} />
         <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
           <Route path="/" element={<NewAnalysis />} />
           <Route path="/dashboard" element={<Dashboard />} />

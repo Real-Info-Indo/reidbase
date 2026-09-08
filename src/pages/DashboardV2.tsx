@@ -207,7 +207,9 @@ export default function DashboardV2() {
                 options={options}
                 onChange={setFilters}
                 variant={filterVariant(active)}
+                defaultFilters={defaultFilters}
                 rightActions={(
+
                   <Button
                     type="button"
                     variant="ghost"

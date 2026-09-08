@@ -87,6 +87,23 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
     );
   };
 
+  const preview = (positions: number[]) => {
+    const next: [number, number] = [
+      toVal(positions[0] ?? 0),
+      toVal(positions[1] ?? SLIDER_STEPS),
+    ];
+    setRange(next);
+    setMinText(String(next[0]));
+    setMaxText(String(next[1]));
+  };
+
+  const commitPositions = (positions: number[]) => {
+    commit([
+      toVal(positions[0] ?? 0),
+      toVal(positions[1] ?? SLIDER_STEPS),
+    ]);
+  };
+
   const commitText = (raw: string, end: "min" | "max") => {
     const parsed = parse(raw);
     if (parsed === undefined) return;
@@ -140,7 +157,8 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
             max={SLIDER_STEPS}
             step={1}
             value={[toPos(range[0]), toPos(range[1])]}
-            onValueChange={(v) => commit([toVal(v[0]), toVal(v[1])])}
+            onValueChange={preview}
+            onValueCommit={commitPositions}
           />
         </div>
         <div className="mt-2 flex justify-between text-[0.65rem] text-muted-foreground tabular-nums">

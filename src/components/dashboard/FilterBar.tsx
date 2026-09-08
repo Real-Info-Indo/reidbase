@@ -180,7 +180,108 @@ function RangeSlider({ label, min, max, step, minValue, maxValue, format, onAppl
   );
 }
 
+const DATE_PRESETS: { label: string; months: number }[] = [
+  { label: "Last quarter", months: 3 },
+  { label: "Last 6 months", months: 6 },
+  { label: "Last year", months: 12 },
+  { label: "Last 2 years", months: 24 },
+  { label: "Last 3 years", months: 36 },
+];
+
+function toIso(d: Date): string {
+  return format(d, "yyyy-MM-dd");
+}
+
+function parseIso(v: string | undefined): Date | undefined {
+  if (!v) return undefined;
+  const d = new Date(`${v}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+interface DateRangeFilterProps {
+  from: string | undefined;
+  to: string | undefined;
+  latestMonth: string | undefined;
+  onApply: (from: string | undefined, to: string | undefined) => void;
+  className: string;
+}
+
+function DateRangeFilter({ from, to, latestMonth, onApply, className }: DateRangeFilterProps) {
+  const [open, setOpen] = useState(false);
+  const selected: DateRange | undefined = parseIso(from) || parseIso(to)
+    ? { from: parseIso(from), to: parseIso(to) }
+    : undefined;
+
+  const anchor = parseIso(latestMonth) ?? new Date();
+  const endOfAnchor = endOfMonth(anchor);
+
+  const active = Boolean(from || to);
+  const display = active
+    ? `${parseIso(from) ? format(parseIso(from) as Date, "dd/MM/yyyy") : "Start"} – ${parseIso(to) ? format(parseIso(to) as Date, "dd/MM/yyyy") : "Now"}`
+    : "Date range";
+
+  const applyPreset = (months: number) => {
+    const start = startOfMonth(subMonths(endOfAnchor, months - 1));
+    onApply(toIso(start), toIso(endOfAnchor));
+    setOpen(false);
+  };
+
+  const onSelect = (range: DateRange | undefined) => {
+    if (!range?.from) {
+      onApply(undefined, undefined);
+      return;
+    }
+    onApply(toIso(range.from), range.to ? toIso(range.to) : undefined);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button type="button" className={`${className} flex items-center justify-between gap-1 border border-input font-medium`}>
+          <span className="truncate">{display}</span>
+          <CalendarIcon className="h-3 w-3 shrink-0 opacity-50" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <div className="flex flex-col gap-1 border-b p-2 sm:flex-row sm:flex-wrap">
+          {DATE_PRESETS.map((p) => (
+            <Button
+              key={p.label}
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 justify-start px-2 text-xs"
+              onClick={() => applyPreset(p.months)}
+            >
+              {p.label}
+            </Button>
+          ))}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 justify-start px-2 text-xs"
+            onClick={() => { onApply(undefined, undefined); setOpen(false); }}
+          >
+            All time
+          </Button>
+        </div>
+        <Calendar
+          mode="range"
+          numberOfMonths={2}
+          defaultMonth={selected?.from ?? subMonths(endOfAnchor, 1)}
+          selected={selected}
+          onSelect={onSelect}
+          initialFocus
+          className="p-3 pointer-events-auto"
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 interface FilterBarProps {
+
   filters: DashboardFilters;
   options: FilterOptions | null;
   onChange: (next: DashboardFilters) => void;

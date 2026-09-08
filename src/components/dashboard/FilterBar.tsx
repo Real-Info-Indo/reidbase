@@ -34,47 +34,119 @@ interface RangeSliderProps {
   format: (v: number) => string;
   onApply: (min: number | undefined, max: number | undefined) => void;
   className: string;
+  /** When true, slider position maps exponentially to value, giving finer control at the low end. */
+  exponential?: boolean;
+  /** Parser for manual input; defaults to stripping non-numeric characters. */
+  parse?: (raw: string) => number | undefined;
 }
 
-function RangeSlider({ label, min, max, step, minValue, maxValue, format, onApply, className }: RangeSliderProps) {
+const SLIDER_STEPS = 500;
+
+function defaultParse(raw: string): number | undefined {
+  const n = Number(raw.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && raw.trim() !== "" ? n : undefined;
+}
+
+function RangeSlider({ label, min, max, step, minValue, maxValue, format, onApply, className, exponential = false, parse = defaultParse }: RangeSliderProps) {
   const from = minValue !== undefined ? Number(minValue) : min;
   const to = maxValue !== undefined ? Number(maxValue) : max;
   const active = minValue !== undefined || maxValue !== undefined;
+
+  // Map between real values and linear slider positions (0..SLIDER_STEPS).
+  // For exponential scales with min 0, use one step as the log-domain floor;
+  // position 0 still maps to the true minimum.
+  const logMin = min <= 0 ? step : min;
+  const toPos = (v: number): number => {
+    const clamped = Math.min(max, Math.max(min, v));
+    if (!exponential) return ((clamped - min) / (max - min)) * SLIDER_STEPS;
+    if (clamped <= logMin) return clamped <= min ? 0 : 1;
+    return (Math.log(clamped / logMin) / Math.log(max / logMin)) * SLIDER_STEPS;
+  };
+  const toVal = (p: number): number => {
+    let v: number;
+    if (!exponential) v = min + (p / SLIDER_STEPS) * (max - min);
+    else if (p <= 0) v = min;
+    else v = logMin * Math.pow(max / logMin, p / SLIDER_STEPS);
+    return Math.min(max, Math.max(min, Math.round(v / step) * step));
+  };
+
   const [range, setRange] = useState<[number, number]>([from, to]);
+  const [minText, setMinText] = useState(String(from));
+  const [maxText, setMaxText] = useState(String(to));
   const [open, setOpen] = useState(false);
 
   const display = active ? `${format(from)} – ${format(to)}` : label;
 
   const commit = (next: [number, number]) => {
     setRange(next);
+    setMinText(String(next[0]));
+    setMaxText(String(next[1]));
     onApply(
       next[0] > min ? next[0] : undefined,
       next[1] < max ? next[1] : undefined,
     );
   };
 
+  const commitText = (raw: string, end: "min" | "max") => {
+    const parsed = parse(raw);
+    if (parsed === undefined) return;
+    const clamped = Math.min(max, Math.max(min, Math.round(parsed / step) * step));
+    const next: [number, number] = end === "min"
+      ? [Math.min(clamped, range[1]), range[1]]
+      : [range[0], Math.max(clamped, range[0])];
+    commit(next);
+  };
+
+  const inputClass = "h-7 w-24 rounded-md border border-input bg-background px-2 text-xs tabular-nums";
+
   return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) setRange([from, to]); }}>
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) { setRange([from, to]); setMinText(String(from)); setMaxText(String(to)); } }}>
       <PopoverTrigger asChild>
         <button type="button" className={`${className} flex items-center justify-between gap-1 border border-input font-medium`}>
           <span className="truncate">{display}</span>
           <ChevronDown className="h-3 w-3 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-3" align="start">
-        <div className="mb-2 flex items-center justify-between text-xs font-medium">
-          <span>{label}</span>
-          <span className="text-muted-foreground">
-            {format(range[0])} – {format(range[1])}
-          </span>
+      <PopoverContent className="w-72 p-3" align="start">
+        <div className="mb-2 text-xs font-medium">{label}</div>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            className={inputClass}
+            value={minText}
+            onChange={(e) => setMinText(e.target.value)}
+            onBlur={(e) => commitText(e.target.value, "min")}
+            onKeyDown={(e) => { if (e.key === "Enter") commitText((e.target as HTMLInputElement).value, "min"); }}
+            aria-label={`${label} minimum`}
+          />
+          <span className="text-muted-foreground">–</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            className={inputClass}
+            value={maxText}
+            onChange={(e) => setMaxText(e.target.value)}
+            onBlur={(e) => commitText(e.target.value, "max")}
+            onKeyDown={(e) => { if (e.key === "Enter") commitText((e.target as HTMLInputElement).value, "max"); }}
+            aria-label={`${label} maximum`}
+          />
         </div>
-        <Slider
-          min={min}
-          max={max}
-          step={step}
-          value={range}
-          onValueChange={(v) => commit([v[0], v[1]])}
-        />
+        <div className="relative">
+          <span className="pointer-events-none absolute -left-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
+          <span className="pointer-events-none absolute -right-1 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-muted-foreground/50" />
+          <Slider
+            min={0}
+            max={SLIDER_STEPS}
+            step={1}
+            value={[toPos(range[0]), toPos(range[1])]}
+            onValueChange={(v) => commit([toVal(v[0]), toVal(v[1])])}
+          />
+        </div>
+        <div className="mt-2 flex justify-between text-[0.65rem] text-muted-foreground tabular-nums">
+          <span>{format(range[0])}</span>
+          <span>{format(range[1])}</span>
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -176,6 +248,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
         price_max: hi !== undefined ? String(hi) : undefined,
       })}
       className={triggerClass}
+      exponential
     />
   );
 

@@ -7,12 +7,14 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   fetchFilterOptions,
   fetchModuleMetrics,
+  getTrailingDateRange,
   type DashboardFilters,
   type DashboardModuleKey,
   type FilterOptions,
   type ModulePayload,
   type ServerModuleKey,
 } from "@/lib/dashboardApi";
+
 import { FilterBar } from "@/components/dashboard/FilterBar";
 import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
 import {

@@ -139,11 +139,11 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
         <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count" className="h-full" exportData={data.listing_price_by_beds}>
           <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />
         </DashboardCard>
-        <DashboardCard title="Supply growth" subtitle="New available listings per period" className="h-full" exportData={data.supply_growth}>
-          <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
-        </DashboardCard>
         <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="h-full lg:col-span-2" exportData={data.clearance_series}>
           <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} gradient />
+        </DashboardCard>
+        <DashboardCard title="Supply growth" subtitle="New available listings per period" className="h-full" exportData={data.supply_growth}>
+          <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
       </div>
     </div>

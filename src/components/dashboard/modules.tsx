@@ -10,6 +10,7 @@ import {
 } from "./charts";
 import {
   DashboardCard,
+  KPI_HEIGHT,
   KpiCard,
   MODULE_GRID,
   MetricTile,

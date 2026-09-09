@@ -73,6 +73,11 @@ export function formatPercent(v: number | null | undefined): string {
   return `${v.toFixed(1)}%`;
 }
 
+export function formatPercentAxis(v: number | null | undefined): string {
+  if (v == null || !Number.isFinite(v)) return "No data";
+  return `${Math.round(v)}%`;
+}
+
 export function formatSqm(v: number | null | undefined): string {
   if (v == null || !Number.isFinite(v)) return "No data";
   return `${Math.round(v).toLocaleString("en-GB")} sqm`;

@@ -84,9 +84,9 @@ export function MarketOverviewModule({ data, prior, theme }: ModuleProps) {
     <div className="space-y-3">
       <KpiRow moduleKey="market-overview">
         <KpiCard label="Available properties" value={formatCountExact(k.available_properties)} icon={Home} accent={theme.accent} />
-        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
-        <KpiCard label="Rental records" value={formatCountExact(k.rental_records)} icon={Building2} accent={theme.accent} />
+        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.median_sold_price, p.median_sold_price)} />
+        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} change={pctChange(k.clearance_rate, p.clearance_rate)} />
+        <KpiCard label="Rental records" value={formatCountExact(k.rental_records)} icon={Building2} accent={theme.accent} change={pctChange(k.rental_records, p.rental_records)} />
       </KpiRow>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div
@@ -131,9 +131,9 @@ export function SupplyTrendsModule({ data, prior, theme }: ModuleProps) {
     <div className="space-y-3">
       <KpiRow moduleKey="supply-trends">
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
-        <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
-        <KpiCard label="New listings, latest period" value={formatCount(k.new_listings)} icon={Building2} accent={theme.accent} />
+        <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.median_listing_price, p.median_listing_price)} />
+        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} change={pctChange(k.clearance_rate, p.clearance_rate)} />
+        <KpiCard label="New listings, latest period" value={formatCount(k.new_listings)} icon={Building2} accent={theme.accent} change={pctChange(k.new_listings, p.new_listings)} />
       </KpiRow>
       <div className="space-y-3">
         <div className="flex flex-col gap-3 lg:flex-row" style={{ height: "calc(var(--chart-base) + 77px)" }}>
@@ -166,10 +166,10 @@ export function SalesTrendsModule({ data, prior, theme }: ModuleProps) {
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="sales-trends">
-        <KpiCard label="Sold properties" value={formatCount(k.sold_properties)} icon={Home} accent={theme.accent} />
-        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
+        <KpiCard label="Sold properties" value={formatCount(k.sold_properties)} icon={Home} accent={theme.accent} change={pctChange(k.sold_properties, p.sold_properties)} />
+        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.median_sold_price, p.median_sold_price)} />
         <KpiCard label="Discount rate" value={formatPercent(k.discount_rate)} icon={Percent} accent={theme.accent} />
-        <KpiCard label="Days listed" value={formatDays(k.days_listed)} icon={Clock} accent={theme.accent} />
+        <KpiCard label="Days listed" value={formatDays(k.days_listed)} icon={Clock} accent={theme.accent} change={pctChange(k.days_listed, p.days_listed)} />
       </KpiRow>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
         <DashboardCard
@@ -208,10 +208,10 @@ export function PropertyTrendsModule({ data, prior, theme }: ModuleProps) {
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="property-trends">
-        <KpiCard label="Price per sqm" value={formatUsdExact(k.price_per_sqm)} icon={Ruler} accent={theme.accent} />
-        <KpiCard label="Median build size" value={formatSqm(k.median_build_size)} icon={Building2} accent={theme.accent} />
-        <KpiCard label="Median floor space ratio" value={formatPercent(k.median_fsr)} icon={Percent} accent={theme.accent} />
-        <KpiCard label="Price per year" value={formatUsdExact(k.price_per_year)} icon={CircleDollarSign} accent={theme.accent} />
+        <KpiCard label="Price per sqm" value={formatUsdExact(k.price_per_sqm)} icon={Ruler} accent={theme.accent} change={pctChange(k.price_per_sqm, p.price_per_sqm)} />
+        <KpiCard label="Median build size" value={formatSqm(k.median_build_size)} icon={Building2} accent={theme.accent} change={pctChange(k.median_build_size, p.median_build_size)} />
+        <KpiCard label="Median floor space ratio" value={formatPercent(k.median_fsr)} icon={Percent} accent={theme.accent} change={pctChange(k.median_fsr, p.median_fsr)} />
+        <KpiCard label="Price per year" value={formatUsdExact(k.price_per_year)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.price_per_year, p.price_per_year)} />
       </KpiRow>
       <ChartGrid>
         <DashboardCard title="Price per sqm" subtitle="Median USD per sqm per period" exportData={data.price_per_sqm_series}>
@@ -240,10 +240,10 @@ export function RentalTrendsModule({ data, prior, theme }: ModuleProps) {
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="rental-trends">
-        <KpiCard label="Rental records" value={formatCount(k.rental_properties)} icon={Building2} accent={theme.accent} />
-        <KpiCard label="Average daily rate" value={formatUsdExact(k.average_rate)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Average occupancy" value={formatPercent(k.average_occupancy)} icon={Percent} accent={theme.accent} />
-        <KpiCard label="Total revenue" value={formatUsd(k.total_revenue)} icon={TrendingUp} accent={theme.accent} />
+        <KpiCard label="Rental records" value={formatCount(k.rental_properties)} icon={Building2} accent={theme.accent} change={pctChange(k.rental_properties, p.rental_properties)} />
+        <KpiCard label="Average daily rate" value={formatUsdExact(k.average_rate)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.average_rate, p.average_rate)} />
+        <KpiCard label="Average occupancy" value={formatPercent(k.average_occupancy)} icon={Percent} accent={theme.accent} change={pctChange(k.average_occupancy, p.average_occupancy)} />
+        <KpiCard label="Total revenue" value={formatUsd(k.total_revenue)} icon={TrendingUp} accent={theme.accent} change={pctChange(k.total_revenue, p.total_revenue)} />
       </KpiRow>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
         <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" className="aspect-square h-full" exportData={data.mgmt_split}>
@@ -273,9 +273,9 @@ export function LocationReportModule({ data, prior, theme }: ModuleProps) {
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="location-report">
-        <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
+        <KpiCard label="Median listing price" value={formatUsd(k.median_listing_price)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.median_listing_price, p.median_listing_price)} />
+        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} change={pctChange(k.median_sold_price, p.median_sold_price)} />
+        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} change={pctChange(k.clearance_rate, p.clearance_rate)} />
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
       </KpiRow>
 

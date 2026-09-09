@@ -234,14 +234,14 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Total revenue" value={formatUsd(k.total_revenue)} icon={TrendingUp} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Average daily rate" subtitle="Mean ADR per period" exportData={data.adr_series}>
-          <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
+        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" exportData={data.mgmt_split}>
+          <DonutChart data={data.mgmt_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
         </DashboardCard>
         <DashboardCard title="Monthly revenue" subtitle="Mean revenue per property per period" exportData={data.revenue_series}>
           <MonthBarChart data={data.revenue_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
-        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" exportData={data.mgmt_split}>
-          <DonutChart data={data.mgmt_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
+        <DashboardCard title="Average daily rate" subtitle="Mean ADR per period" exportData={data.adr_series}>
+          <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
         <DashboardCard title="Property type" subtitle="Share of operating records" exportData={data.type_split}>
           <DonutChart data={data.type_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />

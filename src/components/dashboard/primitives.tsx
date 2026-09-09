@@ -236,7 +236,7 @@ export function MetricTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-card px-3 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
       <p className="text-xs font-extralight leading-tight text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-xl font-bold leading-tight text-foreground">{value}</p>
+      <p className="mt-0.5 text-2xl font-bold leading-tight text-foreground">{value}</p>
     </div>
   );
 }

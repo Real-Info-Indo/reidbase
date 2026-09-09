@@ -130,11 +130,11 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="New listings, latest period" value={formatCount(k.new_listings)} icon={Building2} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Available supply" subtitle="Bedroom count by tenure" exportData={data.available_by_beds}>
-          <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} stacked={false} />
-        </DashboardCard>
         <DashboardCard title="Development status" subtitle="Completed against off-plan" exportData={data.development_status}>
           <DonutChart data={data.development_status} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+        <DashboardCard title="Available supply" subtitle="Bedroom count by tenure" exportData={data.available_by_beds}>
+          <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} stacked={false} />
         </DashboardCard>
         <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count" exportData={data.listing_price_by_beds}>
           <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />

@@ -16,7 +16,7 @@ import {
 } from "@/lib/dashboardApi";
 
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
+import { MODULE_GRID, MODULE_THEMES, MODULE_TITLES, ModuleTitle } from "@/components/dashboard/primitives";
 import {
   ComparisonPanel,
   LocationReportModule,

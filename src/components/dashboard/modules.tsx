@@ -104,7 +104,7 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
             subtitle="Operating records by bedroom count"
             className="h-full"
             style={{ "--chart-h": "calc(var(--chart-base) * 2 + 77px)" } as React.CSSProperties} exportData={data.rental_supply_by_beds}>
-            <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} barCategoryGap="5%" maxBarSize={40} />
+            <BedsBarChart data={data.rental_supply_by_beds} colour={theme.accent} format={formatCount} barCategoryGap="2.5%" maxBarSize={40} />
           </DashboardCard>
         </div>
         <div className="lg:col-span-2">

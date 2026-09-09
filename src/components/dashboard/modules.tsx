@@ -16,6 +16,7 @@ import {
   MODULE_GRID,
   MODULE_TITLES,
   MetricTile,
+  pctChange,
   ModuleTitle,
   type ModuleTheme,
   formatCount,
@@ -34,6 +35,8 @@ import {
 
 interface ModuleProps {
   data: ModulePayload;
+  /** Same-length period ending the day before the selected start date. */
+  prior?: ModulePayload | null;
   theme: ModuleTheme;
 }
 
@@ -74,8 +77,9 @@ function ChartGrid({ children }: { children: React.ReactNode }) {
 }
 
 
-export function MarketOverviewModule({ data, theme }: ModuleProps) {
+export function MarketOverviewModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="market-overview">
@@ -120,8 +124,9 @@ export function MarketOverviewModule({ data, theme }: ModuleProps) {
   );
 }
 
-export function SupplyTrendsModule({ data, theme }: ModuleProps) {
+export function SupplyTrendsModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="supply-trends">
@@ -155,8 +160,9 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
   );
 }
 
-export function SalesTrendsModule({ data, theme }: ModuleProps) {
+export function SalesTrendsModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="sales-trends">
@@ -196,8 +202,9 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
   );
 }
 
-export function PropertyTrendsModule({ data, theme }: ModuleProps) {
+export function PropertyTrendsModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="property-trends">
@@ -227,8 +234,9 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
   );
 }
 
-export function RentalTrendsModule({ data, theme }: ModuleProps) {
+export function RentalTrendsModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="rental-trends">
@@ -258,8 +266,9 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
   );
 }
 
-export function LocationReportModule({ data, theme }: ModuleProps) {
+export function LocationReportModule({ data, prior, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const p = prior?.kpis ?? {};
   const s = data.secondary ?? {};
   return (
     <div className="space-y-3">

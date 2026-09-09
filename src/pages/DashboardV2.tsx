@@ -198,9 +198,14 @@ export default function DashboardV2() {
 
       <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
         {!isComparison && (
-          <header className={`${MODULE_GRID} mb-2`}>
-            {/* Title column spacer to align filters with the first score card */}
-            <div className="col-span-2 hidden lg:col-span-1 lg:block" />
+          <header className={`${MODULE_GRID} mb-2 items-start`}>
+            <div className="col-span-2 hidden lg:col-span-1 lg:block">
+              <ModuleTitle
+                title={MODULE_TITLES[active].title}
+                subtitle={MODULE_TITLES[active].subtitle}
+                className="h-auto justify-start"
+              />
+            </div>
             <div className="col-span-2 w-full lg:col-span-4 lg:col-start-2">
               <FilterBar
                 filters={filters}

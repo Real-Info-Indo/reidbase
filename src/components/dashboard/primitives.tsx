@@ -237,7 +237,7 @@ export function KpiCard({
         >
           {positive ? "▲" : "▼"}
           {positive ? "+" : ""}
-          {(change as number).toFixed(1)}%
+          {(change as number).toFixed(1)}% YoY
         </span>
       )}
       <div className="min-w-0 flex-1 text-right">

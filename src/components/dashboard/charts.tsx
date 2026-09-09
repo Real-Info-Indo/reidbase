@@ -164,7 +164,7 @@ export function MonthLineChart({
             />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
             <Area
-              type="monotone"
+              type="natural"
               dataKey="value"
               stroke={colour}
               strokeWidth={2}

@@ -212,7 +212,7 @@ export default function DashboardV2() {
                 variant="ghost"
                 size="sm"
                 className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
-                onClick={() => onChange(defaultFilters ?? {})}
+                onClick={() => setFilters(defaultFilters ?? {})}
               >
                 <RotateCcw className="h-3 w-3" />
                 Reset

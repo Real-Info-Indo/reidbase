@@ -188,32 +188,39 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className={cn("relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3", isComparison ? "pt-6" : "pt-12")} ref={contentRef}>
-        {!isComparison && (
-          <header className="mb-2 space-y-1">
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
-                onClick={() => setFilters(defaultFilters ?? {})}
-              >
-                <RotateCcw className="h-3 w-3" />
-                Reset
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
-                onClick={() => void downloadPdf()}
-                disabled={exporting}
-              >
-                {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                {exporting ? "Preparing PDF" : "Download PDF"}
-              </Button>
-            </div>
+      <div className={cn("relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12")} ref={contentRef}>
+        <header className="mb-2 space-y-1">
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+              onClick={() => {
+                if (isComparison) {
+                  setCompareA(defaultFilters ?? {});
+                  setCompareB(defaultFilters ?? {});
+                } else {
+                  setFilters(defaultFilters ?? {});
+                }
+              }}
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+              onClick={() => void downloadPdf()}
+              disabled={exporting}
+            >
+              {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+              {exporting ? "Preparing PDF" : "Download PDF"}
+            </Button>
+          </div>
+          {!isComparison ? (
             <div className={`${MODULE_GRID} items-start`}>
               <div className="col-span-2 hidden lg:col-span-1 lg:block">
                 <ModuleTitle
@@ -232,8 +239,19 @@ export default function DashboardV2() {
                 />
               </div>
             </div>
-          </header>
-        )}
+          ) : (
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+              <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-1 text-xs font-bold">Neighbourhood 1</p>
+                <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} showReset={false} />
+              </div>
+              <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-1 text-xs font-bold">Neighbourhood 2</p>
+                <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} showReset={false} />
+              </div>
+            </div>
+          )}
+        </header>
 
         {loadError && (
           <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">

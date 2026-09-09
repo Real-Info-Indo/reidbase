@@ -58,6 +58,8 @@ export interface VolumePoint {
 
 export interface ModulePayload {
   kpis?: Record<string, number | null>;
+  /** YoY percentage change per KPI key, vs the 12 months prior to the start date. */
+  kpis_yoy?: Record<string, number | null>;
   secondary?: Record<string, number | null>;
   ownership?: SlicePoint[] | null;
   development_status?: SlicePoint[] | null;

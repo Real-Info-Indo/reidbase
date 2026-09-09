@@ -210,12 +210,17 @@ export function KpiCard({
   value,
   icon: Icon,
   accent,
+  change,
 }: {
   label: string;
   value: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   accent: string;
+  /** YoY percentage change; positive renders green, negative red. */
+  change?: number | null;
 }) {
+  const hasChange = change != null && Number.isFinite(change);
+  const positive = hasChange && (change as number) >= 0;
   return (
     <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
       <span
@@ -224,6 +229,17 @@ export function KpiCard({
       >
         <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
       </span>
+      {hasChange && (
+        <span
+          className="flex shrink-0 items-center gap-0.5 self-end pb-1 text-[0.65rem] font-semibold leading-none"
+          style={{ color: positive ? "#16a34a" : "#dc2626" }}
+          title="Change vs the 12 months prior to the start date"
+        >
+          {positive ? "▲" : "▼"}
+          {positive ? "+" : ""}
+          {(change as number).toFixed(1)}%
+        </span>
+      )}
       <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
         <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>

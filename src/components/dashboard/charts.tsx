@@ -54,8 +54,9 @@ function hasData(rows: unknown[] | null | undefined): boolean {
 }
 
 const AXIS_FONT = '10px Poppins, ui-sans-serif, system-ui, sans-serif';
-/** Gap between the label and the plot area, plus safety against sub-pixel clipping. */
-const AXIS_PAD = 10;
+/** Compact gap between the label and plot area, with sub-pixel clipping safety. */
+const AXIS_PAD = 6;
+const Y_AXIS_TICK_MARGIN = 1;
 const RADIAN = Math.PI / 180;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
@@ -79,6 +80,13 @@ function widestLabel(labels: string[], min: number, max: number): number {
   if (labels.length === 0) return min;
   const widest = Math.max(...labels.map((l) => measureLabel(l)));
   return Math.min(max, Math.max(min, Math.ceil(widest) + AXIS_PAD));
+}
+
+/** Remove redundant trailing decimal zeros from vertical-axis labels only. */
+function formatAxisLabel(label: string): string {
+  return label
+    .replace(/(\.\d*?[1-9])0+(?=[^\d]|$)/, "$1")
+    .replace(/\.0+(?=[^\d]|$)/, "");
 }
 
 /**
@@ -137,7 +145,8 @@ export function MonthLineChart({
   const gradientId = useId().replace(/:/g, "");
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
-  const tickFmt = axisFormat ?? format;
+  const valueFmt = axisFormat ?? format;
+  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
@@ -158,7 +167,7 @@ export function MonthLineChart({
               tickLine={false}
               axisLine={false}
               width={width}
-              tickMargin={4}
+              tickMargin={Y_AXIS_TICK_MARGIN}
               tickFormatter={(v) => tickFmt(Number(v))}
               domain={baseline ? ["auto", "auto"] : undefined}
             />
@@ -192,7 +201,8 @@ export function MonthBarChart({
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
-  const tickFmt = axisFormat ?? format;
+  const valueFmt = axisFormat ?? format;
+  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
   const width = axisWidth(rows.map((r) => r.value), tickFmt);
 
   return (
@@ -203,7 +213,7 @@ export function MonthBarChart({
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              tickMargin={Y_AXIS_TICK_MARGIN} tickFormatter={(v) => tickFmt(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
             <Bar dataKey="value" fill={colour} radius={[4, 4, 0, 0]} maxBarSize={28} />
           </BarChart>
@@ -311,7 +321,8 @@ export function BedsBarChart({
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
-  const tickFmt = axisFormat ?? format;
+  const valueFmt = axisFormat ?? format;
+  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
   const numericWidth = axisWidth(rows.map((r) => r.value), tickFmt);
   const catWidth = categoryWidth(rows.map((r) => r.label));
 
@@ -325,14 +336,14 @@ export function BedsBarChart({
               <>
                 <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => tickFmt(Number(v))} />
                 <YAxis type="category" dataKey="label" tick={<CategoryTick />} tickLine={false} axisLine={false} width={catWidth}
-              tickMargin={4} interval={0} />
+              tickMargin={Y_AXIS_TICK_MARGIN} interval={0} />
 
               </>
             ) : (
               <>
                 <XAxis type="category" dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
                 <YAxis type="number" tick={AXIS} tickLine={false} axisLine={false} width={numericWidth}
-              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              tickMargin={Y_AXIS_TICK_MARGIN} tickFormatter={(v) => tickFmt(Number(v))} />
               </>
             )}
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
@@ -359,7 +370,8 @@ export function TenureBedsChart({
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
-  const tickFmt = axisFormat ?? format;
+  const valueFmt = axisFormat ?? format;
+  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
   const peaks = rows.map((r) =>
     stacked ? (r.freehold ?? 0) + (r.leasehold ?? 0) : Math.max(r.freehold ?? 0, r.leasehold ?? 0),
   );
@@ -373,7 +385,7 @@ export function TenureBedsChart({
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              tickMargin={Y_AXIS_TICK_MARGIN} tickFormatter={(v) => tickFmt(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
             <Legend
               verticalAlign="bottom"
@@ -420,7 +432,8 @@ export function VolumeLinesChart({
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
-  const tickFmt = axisFormat ?? format;
+  const valueFmt = axisFormat ?? format;
+  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
   const width = axisWidth(
     rows.flatMap((r) => [r.available, r.sold]),
     tickFmt,
@@ -434,7 +447,7 @@ export function VolumeLinesChart({
             <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} interval="preserveStartEnd" />
             <YAxis tick={AXIS} tickLine={false} axisLine={false} width={width}
-              tickMargin={4} tickFormatter={(v) => tickFmt(Number(v))} />
+              tickMargin={Y_AXIS_TICK_MARGIN} tickFormatter={(v) => tickFmt(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} />
             <Legend verticalAlign="bottom" height={26} wrapperStyle={{ fontSize: 11 }} />
             <Line type="monotone" dataKey="available" name="Available" stroke={colours[0]} strokeWidth={2} dot={false} connectNulls />

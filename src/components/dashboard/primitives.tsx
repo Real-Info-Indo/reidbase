@@ -229,7 +229,7 @@ export function YoyChange({ change }: { change: number | null | undefined }) {
       : "hsl(var(--muted-foreground))";
   return (
     <span
-      className="mt-0.5 flex items-center justify-end gap-0.5 text-[0.65rem] font-light leading-none"
+      className="flex items-center gap-0.5 text-[0.65rem] font-light leading-none"
       style={{ color: colour }}
       title="Change against the 12 months prior to the selected start date"
     >
@@ -262,8 +262,10 @@ export function KpiCard({
       </span>
       <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
-        <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
-        <YoyChange change={change} />
+        <div className="mt-0.5 flex items-center justify-end gap-1.5">
+          <p className="truncate text-xl font-bold leading-none text-foreground">{value}</p>
+          <YoyChange change={change} />
+        </div>
       </div>
     </div>
   );

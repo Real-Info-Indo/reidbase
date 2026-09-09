@@ -161,9 +161,14 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Discount rate" value={formatPercent(k.discount_rate)} icon={Percent} accent={theme.accent} />
         <KpiCard label="Days listed" value={formatDays(k.days_listed)} icon={Clock} accent={theme.accent} />
       </KpiRow>
-      <ChartGrid>
-        <DashboardCard title="Ownership type" subtitle="Tenure split of sold properties" exportData={data.ownership}>
-          <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} />
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
+        <DashboardCard
+          title="Ownership type"
+          subtitle="Tenure split of sold properties"
+          className="aspect-square h-[calc(var(--chart-base)_+_77px)]"
+          exportData={data.ownership}
+        >
+          <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} square />
         </DashboardCard>
         <DashboardCard title="Sale price" subtitle="Median sold price per period" exportData={data.sale_price_series}>
           <MonthBarChart data={data.sale_price_series} colour={theme.accent} format={formatUsd} />
@@ -171,13 +176,18 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
         <DashboardCard title="Sales volume" subtitle="Units sold per period" exportData={data.sales_volume_series}>
           <MonthLineChart data={data.sales_volume_series} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
-        <DashboardCard title="Discount rate" subtitle="Gap between median asking and median sold price" exportData={data.discount_series}>
+        <DashboardCard
+          title="Discount rate"
+          subtitle="Gap between median asking and median sold price"
+          className="h-[calc(var(--chart-base)_+_77px)]"
+          exportData={data.discount_series}
+        >
           <MonthLineChart data={data.discount_series} colour={theme.accent} format={formatPercent} baseline gradient />
         </DashboardCard>
         <DashboardCard title="Sales volume by bedrooms" subtitle="Units sold by bedroom count" className="lg:col-span-2" exportData={data.sales_volume_by_beds}>
           <BedsBarChart data={data.sales_volume_by_beds} colour={theme.accent} format={formatCount} />
         </DashboardCard>
-      </ChartGrid>
+      </div>
     </div>
   );
 }

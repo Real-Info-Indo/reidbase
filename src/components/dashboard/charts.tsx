@@ -391,7 +391,7 @@ export function TenureBedsChart({
               name="Leasehold"
               stackId={stacked ? "tenure" : undefined}
               fill={colours[1]}
-              radius={[0, 0, 0, 0]}
+              radius={[4, 4, 0, 0]}
             />
             <Bar
               dataKey="freehold"

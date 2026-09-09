@@ -298,6 +298,7 @@ export function BedsBarChart({
   axisFormat,
   layout = "vertical",
   barCategoryGap = "10%",
+  maxBarSize = 22,
 }: {
   data: BedsPoint[] | null | undefined;
   colour: string;
@@ -306,6 +307,7 @@ export function BedsBarChart({
   /** "vertical" renders horizontal bars (bedrooms on the Y axis). */
   layout?: "vertical" | "horizontal";
   barCategoryGap?: string;
+  maxBarSize?: number;
 }) {
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
@@ -334,7 +336,7 @@ export function BedsBarChart({
               </>
             )}
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => format(Number(v))} cursor={{ fill: "hsl(var(--muted))" }} />
-            <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={22} />
+            <Bar dataKey="value" fill={colour} radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={maxBarSize} />
           </BarChart>
         </ResponsiveContainer>
       </ChartFrameInner>

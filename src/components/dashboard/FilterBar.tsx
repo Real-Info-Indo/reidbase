@@ -493,7 +493,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   if (compact) {
     return (
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {regionSelect}
         {locationSelect}
         {variant === "properties" && contractSelect}
@@ -501,7 +501,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
         {bedroomsSelect}
         {variant === "properties" && priceSelect}
         {variant === "properties" && sizeSelect}
-        {dateSelect}
+        <div className="col-span-2">{dateSelect}</div>
         {resetButton}
       </div>
     );

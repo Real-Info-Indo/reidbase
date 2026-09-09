@@ -377,7 +377,7 @@ export function TenureBedsChart({
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
   const valueFmt = axisFormat ?? format;
-  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
+  const tickFmt = (v: number | null | undefined) => yAxisTickFormatter(v, valueFmt);
   const peaks = rows.map((r) =>
     stacked ? (r.freehold ?? 0) + (r.leasehold ?? 0) : Math.max(r.freehold ?? 0, r.leasehold ?? 0),
   );

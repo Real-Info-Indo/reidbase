@@ -509,10 +509,12 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="flex justify-end gap-2">
-        {rightActions}
-        {resetButton}
-      </div>
+      {(rightActions || showReset) && (
+        <div className="flex justify-end gap-2">
+          {rightActions}
+          {showReset && resetButton}
+        </div>
+      )}
       <div className="flex items-start gap-1.5">
         {regionSelect}
         {locationSelect}

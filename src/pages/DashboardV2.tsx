@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { downloadElementPdf } from "@/lib/dashboardExport";
 import { AdminGate } from "@/components/AdminGate";
@@ -205,35 +205,48 @@ export default function DashboardV2() {
 
       <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
         {!isComparison && (
-          <header className={`${MODULE_GRID} mb-2 items-start`}>
-            <div className="col-span-2 hidden lg:col-span-1 lg:block">
-              <ModuleTitle
-                title={MODULE_TITLES[active].title}
-                subtitle={MODULE_TITLES[active].subtitle}
-              />
+          <header className="mb-2 space-y-1">
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+                onClick={() => setFilters(defaultFilters ?? {})}
+              >
+                <RotateCcw className="h-3 w-3" />
+                Reset
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+                onClick={() => void downloadPdf()}
+                disabled={exporting}
+              >
+                {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                {exporting ? "Preparing PDF" : "Download PDF"}
+              </Button>
             </div>
-            <div className="col-span-2 w-full lg:col-span-4 lg:col-start-2">
-              <FilterBar
-                filters={filters}
-                options={options}
-                onChange={setFilters}
-                variant={filterVariant(active)}
-                defaultFilters={defaultFilters}
-                rightActions={(
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
-                    onClick={() => void downloadPdf()}
-                    disabled={exporting}
-                  >
-                    {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                    {exporting ? "Preparing PDF" : "Download PDF"}
-                  </Button>
-                )}
-              />
+            <div className={`${MODULE_GRID} items-start`}>
+              <div className="col-span-2 hidden lg:col-span-1 lg:block">
+                <ModuleTitle
+                  title={MODULE_TITLES[active].title}
+                  subtitle={MODULE_TITLES[active].subtitle}
+                  className="h-auto justify-start"
+                />
+              </div>
+              <div className="col-span-2 w-full lg:col-span-4 lg:col-start-2">
+                <FilterBar
+                  filters={filters}
+                  options={options}
+                  onChange={setFilters}
+                  variant={filterVariant(active)}
+                  defaultFilters={defaultFilters}
+                  showReset={false}
+                />
+              </div>
             </div>
           </header>
         )}

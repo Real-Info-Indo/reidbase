@@ -366,9 +366,11 @@ interface FilterBarProps {
   rightActions?: React.ReactNode;
   /** Filters to restore when the user hits Reset. Defaults to cleared filters. */
   defaultFilters?: DashboardFilters;
+  /** Whether to show the built-in Reset button. */
+  showReset?: boolean;
 }
 
-export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions, defaultFilters }: FilterBarProps) {
+export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions, defaultFilters, showReset = true }: FilterBarProps) {
 
   const set = (patch: Partial<DashboardFilters>) => onChange({ ...filters, ...patch });
   const clear = (key: keyof DashboardFilters, value: string) =>
@@ -507,10 +509,12 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   return (
     <div className="flex w-full flex-col gap-1">
-      <div className="flex justify-end gap-2">
-        {rightActions}
-        {resetButton}
-      </div>
+      {(rightActions || showReset) && (
+        <div className="flex justify-end gap-2">
+          {rightActions}
+          {showReset && resetButton}
+        </div>
+      )}
       <div className="flex items-start gap-1.5">
         {regionSelect}
         {locationSelect}

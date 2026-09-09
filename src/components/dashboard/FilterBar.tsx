@@ -366,9 +366,11 @@ interface FilterBarProps {
   rightActions?: React.ReactNode;
   /** Filters to restore when the user hits Reset. Defaults to cleared filters. */
   defaultFilters?: DashboardFilters;
+  /** Whether to show the built-in Reset button. */
+  showReset?: boolean;
 }
 
-export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions, defaultFilters }: FilterBarProps) {
+export function FilterBar({ filters, options, onChange, variant = "properties", compact = false, rightActions, defaultFilters, showReset = true }: FilterBarProps) {
 
   const set = (patch: Partial<DashboardFilters>) => onChange({ ...filters, ...patch });
   const clear = (key: keyof DashboardFilters, value: string) =>

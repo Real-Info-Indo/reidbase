@@ -883,6 +883,7 @@ export type Database = {
         }
       }
       reid_month: { Args: { t: string }; Returns: string }
+      reid_yoy: { Args: { cur: number; prior: number }; Returns: number }
     }
     Enums: {
       [_ in never]: never

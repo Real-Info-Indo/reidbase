@@ -234,9 +234,11 @@ export function KpiCard({
 
 export function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl bg-card px-3 py-2 text-center shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+    <div className="flex flex-col rounded-xl bg-card px-3 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
       <p className="text-xs font-extralight leading-tight text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-3xl font-bold leading-tight text-foreground">{value}</p>
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-3xl font-bold leading-tight text-foreground">{value}</p>
+      </div>
     </div>
   );
 }

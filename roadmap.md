@@ -1,1 +1,1 @@
-- Swap Supply growth and Clearance rate positions in Supply Trends dashboard (keep sizes)
+- [x] Simplify Comparison Report controls and rename both neighbourhood sections

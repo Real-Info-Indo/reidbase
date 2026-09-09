@@ -502,7 +502,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
         {variant === "properties" && priceSelect}
         {variant === "properties" && sizeSelect}
         <div className="col-span-2">{dateSelect}</div>
-        {resetButton}
+        {showReset && resetButton}
       </div>
     );
   }

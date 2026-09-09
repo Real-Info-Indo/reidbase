@@ -253,8 +253,8 @@ export function KpiCard({
   change?: number | null;
 }) {
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
-      <div className="flex min-w-[7rem] items-center gap-2">
+    <div className={cn("flex items-stretch gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
+      <div className="flex min-w-[7rem] items-end gap-2 self-stretch">
         <span
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
           style={{ backgroundColor: accent }}
@@ -263,7 +263,7 @@ export function KpiCard({
         </span>
         <YoyChange change={change} />
       </div>
-      <div className="min-w-0 flex-1 text-right">
+      <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
         <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
       </div>

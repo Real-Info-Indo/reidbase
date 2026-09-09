@@ -36,7 +36,7 @@ function ChartFrameInner({ children }: { children: React.ReactNode }) {
   return <div className="h-full w-full">{children}</div>;
 }
 
-const AXIS = { fontSize: 11, fill: "hsl(var(--muted-foreground))" } as const;
+const AXIS = { fontSize: 10, fill: "hsl(var(--muted-foreground))" } as const;
 const GRID = "hsl(var(--border))";
 
 const tooltipStyle = {
@@ -53,7 +53,7 @@ function hasData(rows: unknown[] | null | undefined): boolean {
   return Array.isArray(rows) && rows.length > 0;
 }
 
-const AXIS_FONT = '11px Poppins, ui-sans-serif, system-ui, sans-serif';
+const AXIS_FONT = '10px Poppins, ui-sans-serif, system-ui, sans-serif';
 /** Gap between the label and the plot area, plus safety against sub-pixel clipping. */
 const AXIS_PAD = 10;
 const RADIAN = Math.PI / 180;

@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Download, MoreVertical, Table2 } from "lucide-react";
+import { Download, MoreVertical, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardModuleKey } from "@/lib/dashboardApi";
 import {
@@ -205,65 +205,26 @@ export function ModuleTitle({
   );
 }
 
-/** Percentage change between the current and prior-year value, or null when not comparable. */
-export function pctChange(
-  current: number | null | undefined,
-  prior: number | null | undefined,
-): number | null {
-  if (current == null || prior == null) return null;
-  if (!Number.isFinite(current) || !Number.isFinite(prior) || prior === 0) return null;
-  return ((current - prior) / Math.abs(prior)) * 100;
-}
-
-/** Small arrow plus percentage, green for positive and red for negative. */
-export function YoyChange({ change }: { change: number | null | undefined }) {
-  if (change == null || !Number.isFinite(change)) return null;
-  const rounded = Math.round(change * 10) / 10;
-  const positive = rounded > 0;
-  const negative = rounded < 0;
-  const Arrow = positive ? ArrowUpRight : negative ? ArrowDownRight : ArrowRight;
-  const colour = positive
-    ? "hsl(142 62% 34%)"
-    : negative
-      ? "hsl(0 70% 46%)"
-      : "hsl(var(--muted-foreground))";
-  return (
-    <span
-      className="flex items-center gap-0.5 text-[0.65rem] font-light leading-none"
-      style={{ color: colour }}
-      title="Change against the 12 months prior to the selected start date"
-    >
-      <Arrow className="h-3 w-3 shrink-0" />
-      {`${positive ? "+" : ""}${rounded.toFixed(1)}% YoY`}
-    </span>
-  );
-}
-
 export function KpiCard({
   label,
   value,
   icon: Icon,
   accent,
-  change,
 }: {
   label: string;
   value: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   accent: string;
-  change?: number | null;
 }) {
   return (
-    <div className={cn("flex items-stretch gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
-      <div className="flex min-w-[7rem] items-end gap-2 self-stretch">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: accent }}
-        >
-          <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
-        </span>
-        <YoyChange change={change} />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-between self-stretch text-right">
+    <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+        style={{ backgroundColor: accent }}
+      >
+        <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
+      </span>
+      <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
         <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
       </div>

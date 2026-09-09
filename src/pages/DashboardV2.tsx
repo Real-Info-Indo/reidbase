@@ -8,7 +8,6 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
   fetchFilterOptions,
   fetchModuleMetrics,
-  getPriorYearFilters,
   getTrailingDateRange,
   type DashboardFilters,
   type DashboardModuleKey,
@@ -53,7 +52,6 @@ export default function DashboardV2() {
   const [compareB, setCompareB] = useState<DashboardFilters>({});
 
   const [payload, setPayload] = useState<ModulePayload | null>(null);
-  const [priorPayload, setPriorPayload] = useState<ModulePayload | null>(null);
   const [panelA, setPanelA] = useState<ModulePayload | null>(null);
   const [panelB, setPanelB] = useState<ModulePayload | null>(null);
   const [loading, setLoading] = useState(false);
@@ -100,16 +98,9 @@ export default function DashboardV2() {
         setPanelA(a);
         setPanelB(b);
       } else {
-        const priorFilters = getPriorYearFilters(filters);
-        const [nextPayload, nextPrior] = await Promise.all([
-          fetchModuleMetrics(active as ServerModuleKey, filters),
-          priorFilters
-            ? fetchModuleMetrics(active as ServerModuleKey, priorFilters).catch(() => null)
-            : Promise.resolve(null),
-        ]);
+        const nextPayload = await fetchModuleMetrics(active as ServerModuleKey, filters);
         if (requestId !== requestIdRef.current) return;
         setPayload(nextPayload);
-        setPriorPayload(nextPrior);
       }
     } catch (e) {
       if (requestId !== requestIdRef.current) return;
@@ -150,21 +141,21 @@ export default function DashboardV2() {
 
     switch (active) {
       case "market-overview":
-        return <MarketOverviewModule data={payload} prior={priorPayload} theme={theme} />;
+        return <MarketOverviewModule data={payload} theme={theme} />;
       case "supply-trends":
-        return <SupplyTrendsModule data={payload} prior={priorPayload} theme={theme} />;
+        return <SupplyTrendsModule data={payload} theme={theme} />;
       case "sales-trends":
-        return <SalesTrendsModule data={payload} prior={priorPayload} theme={theme} />;
+        return <SalesTrendsModule data={payload} theme={theme} />;
       case "property-trends":
-        return <PropertyTrendsModule data={payload} prior={priorPayload} theme={theme} />;
+        return <PropertyTrendsModule data={payload} theme={theme} />;
       case "rental-trends":
-        return <RentalTrendsModule data={payload} prior={priorPayload} theme={theme} />;
+        return <RentalTrendsModule data={payload} theme={theme} />;
       case "location-report":
-        return <LocationReportModule data={payload} prior={priorPayload} theme={theme} />;
+        return <LocationReportModule data={payload} theme={theme} />;
       default:
         return null;
     }
-  }, [active, isComparison, options, panelA, panelB, payload, priorPayload, theme, compareA, compareB, defaultFilters, downloadPdf, exporting]);
+  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB, defaultFilters, downloadPdf, exporting]);
 
   if (!authenticated) return <AdminGate checking={checking} error={error} />;
 

@@ -229,20 +229,22 @@ export function KpiCard({
       >
         <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
       </span>
-      {hasChange && (
-        <span
-          className="flex shrink-0 items-center gap-0.5 self-end text-[0.65rem] leading-none"
-          style={{ color: positive ? "#16a34a" : "#dc2626" }}
-          title="Change vs the 12 months prior to the start date"
-        >
-          {positive ? "▲" : "▼"}
-          {positive ? "+" : ""}
-          {(change as number).toFixed(1)}% YoY
-        </span>
-      )}
-      <div className="min-w-0 flex-1 text-right">
-        <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
-        <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
+      <div className="flex min-w-0 flex-1 items-end justify-end gap-2">
+        {hasChange && (
+          <span
+            className="flex shrink-0 items-center gap-0.5 text-[0.65rem] leading-none"
+            style={{ color: positive ? "#16a34a" : "#dc2626" }}
+            title="Change vs the 12 months prior to the start date"
+          >
+            {positive ? "▲" : "▼"}
+            {positive ? "+" : ""}
+            {(change as number).toFixed(1)}% YoY
+          </span>
+        )}
+        <div className="min-w-0 text-right">
+          <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
+          <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
+        </div>
       </div>
     </div>
   );

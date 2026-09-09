@@ -202,7 +202,7 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
+      <div className={cn("relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3", isComparison ? "pt-6" : "pt-12")} ref={contentRef}>
         {!isComparison && (
           <header className="mb-2 space-y-1">
             <div className="flex justify-end gap-2">

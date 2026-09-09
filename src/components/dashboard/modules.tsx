@@ -76,13 +76,14 @@ function ChartGrid({ children }: { children: React.ReactNode }) {
 
 export function MarketOverviewModule({ data, theme }: ModuleProps) {
   const k = data.kpis ?? {};
+  const y = data.kpis_yoy ?? {};
   return (
     <div className="space-y-3">
       <KpiRow moduleKey="market-overview">
         <KpiCard label="Available properties" value={formatCountExact(k.available_properties)} icon={Home} accent={theme.accent} />
-        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} />
-        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
-        <KpiCard label="Rental records" value={formatCountExact(k.rental_records)} icon={Building2} accent={theme.accent} />
+        <KpiCard label="Median sold price" value={formatUsd(k.median_sold_price)} icon={CircleDollarSign} accent={theme.accent} change={y.median_sold_price} />
+        <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} change={y.clearance_rate} />
+        <KpiCard label="Rental records" value={formatCountExact(k.rental_records)} icon={Building2} accent={theme.accent} change={y.rental_records} />
       </KpiRow>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div

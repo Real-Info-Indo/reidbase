@@ -305,25 +305,25 @@ export function ComparisonPanel({ data, theme, title }: ModuleProps & { title: s
   const k = data.kpis ?? {};
   const s = data.secondary ?? {};
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="grid grid-cols-3 gap-2">
-        <MetricTile label="Available price" value={formatUsd(k.median_listing_price)} />
-        <MetricTile label="Sold price" value={formatUsd(k.median_sold_price)} />
-        <MetricTile label="Record count" value={formatCount(s.record_count)} />
+        <MetricTile label="Available price" value={formatUsd(k.median_listing_price)} compact />
+        <MetricTile label="Sold price" value={formatUsd(k.median_sold_price)} compact />
+        <MetricTile label="Record count" value={formatCount(s.record_count)} compact />
       </div>
       <DashboardCard title="Sold price movement" subtitle={title} exportData={data.sold_price_series}>
         <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
       </DashboardCard>
       <div className="grid grid-cols-3 gap-2">
-        <MetricTile label="Clearance rate" value={formatPercent(k.clearance_rate)} />
-        <MetricTile label="Price per sqm" value={formatUsdExact(s.price_per_sqm)} />
-        <MetricTile label="Lease term" value={formatYears(s.lease_term)} />
-        <MetricTile label="Discount rate" value={formatPercent(s.discount_rate)} />
-        <MetricTile label="Build size" value={formatSqm(s.build_size)} />
-        <MetricTile label="Price per year" value={formatUsdExact(s.price_per_year)} />
-        <MetricTile label="Days listed" value={formatDays(s.days_listed)} />
-        <MetricTile label="Average occupancy" value={formatPercent(s.average_occupancy)} />
-        <MetricTile label="Average gross yield" value={formatPercent(s.gross_yield)} />
+        <MetricTile label="Clearance rate" value={formatPercent(k.clearance_rate)} compact />
+        <MetricTile label="Price per sqm" value={formatUsdExact(s.price_per_sqm)} compact />
+        <MetricTile label="Lease term" value={formatYears(s.lease_term)} compact />
+        <MetricTile label="Discount rate" value={formatPercent(s.discount_rate)} compact />
+        <MetricTile label="Build size" value={formatSqm(s.build_size)} compact />
+        <MetricTile label="Price per year" value={formatUsdExact(s.price_per_year)} compact />
+        <MetricTile label="Days listed" value={formatDays(s.days_listed)} compact />
+        <MetricTile label="Average occupancy" value={formatPercent(s.average_occupancy)} compact />
+        <MetricTile label="Average gross yield" value={formatPercent(s.gross_yield)} compact />
       </div>
     </div>
   );

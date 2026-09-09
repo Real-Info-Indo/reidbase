@@ -377,14 +377,14 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
     value === ANY ? set({ [key]: undefined } as Partial<DashboardFilters>) : set({ [key]: value } as Partial<DashboardFilters>);
 
   const triggerClass = compact
-    ? "h-8 w-full rounded-lg bg-secondary text-xs"
+    ? "h-7 w-full rounded-md bg-secondary px-1.5 text-[0.7rem]"
     : "h-8 min-w-0 flex-1 rounded-lg bg-secondary px-2 text-xs";
 
   const resetButton = (
     <Button
       variant="ghost"
       size="sm"
-      className={compact ? "col-span-2 h-8 gap-1.5 text-xs" : "h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"}
+      className={compact ? "col-span-3 h-7 gap-1 text-[0.7rem] text-muted-foreground" : "h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"}
       onClick={() => onChange(defaultFilters ?? {})}
     >
       <RotateCcw className="h-3 w-3" />
@@ -493,7 +493,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
 
   if (compact) {
     return (
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {regionSelect}
         {locationSelect}
         {variant === "properties" && contractSelect}
@@ -501,7 +501,7 @@ export function FilterBar({ filters, options, onChange, variant = "properties", 
         {bedroomsSelect}
         {variant === "properties" && priceSelect}
         {variant === "properties" && sizeSelect}
-        {dateSelect}
+        <div className="col-span-2">{dateSelect}</div>
         {resetButton}
       </div>
     );

@@ -232,12 +232,12 @@ export function KpiCard({
   );
 }
 
-export function MetricTile({ label, value }: { label: string; value: string }) {
+export function MetricTile({ label, value, compact = false }: { label: string; value: string; compact?: boolean }) {
   return (
-    <div className="flex flex-col rounded-xl bg-card px-3 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
-      <p className="text-xs font-extralight leading-tight text-muted-foreground">{label}</p>
-      <div className="flex flex-1 items-center justify-start">
-        <p className="text-3xl font-bold leading-tight text-foreground">{value}</p>
+    <div className={cn("flex flex-col rounded-xl bg-card px-3 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", compact && "px-2 py-1.5")}>
+      <p className={cn("font-extralight leading-tight text-muted-foreground", compact ? "text-[0.65rem]" : "text-xs")}>{label}</p>
+      <div className={cn("flex flex-1 items-center justify-start", compact && "min-h-[24px]")}>
+        <p className={cn("font-bold leading-tight text-foreground", compact ? "text-xl" : "text-3xl")}>{value}</p>
       </div>
     </div>
   );

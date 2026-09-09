@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Loader2, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { downloadElementPdf } from "@/lib/dashboardExport";
 import { AdminGate } from "@/components/AdminGate";
@@ -125,25 +126,24 @@ export default function DashboardV2() {
   const body = useMemo(() => {
     if (isComparison) {
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <ModuleTitle
             title={MODULE_TITLES["comparison-report"].title}
             subtitle={MODULE_TITLES["comparison-report"].subtitle}
             className="h-auto justify-start"
           />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="space-y-3">
-              <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                <p className="mb-2 text-sm font-bold">Selection A</p>
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+            <div className="space-y-2">
+              <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-1 text-xs font-bold">Selection A</p>
                 <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
               </div>
               {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
             </div>
-            <div className="space-y-3">
-              <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                <p className="mb-2 text-sm font-bold">Selection B</p>
+            <div className="space-y-2">
+              <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-1 text-xs font-bold">Selection B</p>
                 <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
-
               </div>
               {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
             </div>
@@ -203,7 +203,7 @@ export default function DashboardV2() {
         })}
       </nav>
 
-      <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
+      <div className={cn("relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3", isComparison ? "pt-6" : "pt-12")} ref={contentRef}>
         {!isComparison && (
           <header className="mb-2 space-y-1">
             <div className="flex justify-end gap-2">

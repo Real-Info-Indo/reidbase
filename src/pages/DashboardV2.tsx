@@ -233,7 +233,6 @@ export default function DashboardV2() {
               <div className="col-span-2 hidden lg:col-span-1 lg:block">
                 <ModuleTitle
                   title={MODULE_TITLES[active].title}
-                  subtitle={MODULE_TITLES[active].subtitle}
                   className="h-auto justify-start"
                 />
               </div>

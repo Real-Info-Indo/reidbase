@@ -1,5 +1,5 @@
 import { Building2, CircleDollarSign, Clock, Home, Percent, Ruler, TrendingUp } from "lucide-react";
-import type { ModulePayload } from "@/lib/dashboardApi";
+import type { DashboardModuleKey, ModulePayload } from "@/lib/dashboardApi";
 import {
   BedsBarChart,
   DonutChart,
@@ -13,6 +13,7 @@ import {
   KPI_HEIGHT,
   KpiCard,
   MODULE_GRID,
+  MODULE_TITLES,
   MetricTile,
   ModuleTitle,
   type ModuleTheme,
@@ -37,17 +38,26 @@ interface ModuleProps {
 function KpiRow({
   title,
   subtitle,
+  moduleKey,
   children,
 }: {
   title?: string;
   subtitle?: string;
+  moduleKey?: DashboardModuleKey;
   children: React.ReactNode;
 }) {
+  const pageSubtitle = subtitle ?? (moduleKey ? MODULE_TITLES[moduleKey].subtitle : undefined);
   return (
     <div className={MODULE_GRID}>
       <div className="col-span-2 lg:col-span-1">
         {title ? (
-          <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+          <ModuleTitle title={title} subtitle={subtitle} />
+        ) : pageSubtitle ? (
+          <div className={cn("flex flex-col justify-start px-1", KPI_HEIGHT)}>
+            <p className="max-w-[16rem] text-[0.68rem] font-extralight leading-snug text-muted-foreground">
+              {pageSubtitle}
+            </p>
+          </div>
         ) : (
           <div className={KPI_HEIGHT} />
         )}

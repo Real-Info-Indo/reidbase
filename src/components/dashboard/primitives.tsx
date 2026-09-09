@@ -23,6 +23,17 @@ export const MODULE_THEMES = {
 
 export type ModuleTheme = (typeof MODULE_THEMES)[keyof typeof MODULE_THEMES];
 
+/** Page titles shared between the filter header and each module's KPI row. */
+export const MODULE_TITLES: Record<DashboardModuleKey, { title: string; subtitle: string }> = {
+  "market-overview": { title: "Market Overview", subtitle: "Market snapshot of key supply and demand metrics" },
+  "supply-trends": { title: "Supply Trends", subtitle: "Key supply metrics of available properties" },
+  "sales-trends": { title: "Sales Trends", subtitle: "Key sales and demand metrics of transacted properties" },
+  "property-trends": { title: "Property Trends", subtitle: "Key metrics of property sizing and tenure" },
+  "rental-trends": { title: "Rental Trends", subtitle: "Key supply and demand metrics of operating properties" },
+  "location-report": { title: "Location Report", subtitle: "Micro-location snapshot of supply, sales and rental metrics" },
+  "comparison-report": { title: "Comparison Report", subtitle: "Side-by-side location comparison" },
+};
+
 /** Shared page grid: title column plus four equal score card columns. */
 export const MODULE_GRID =
   "grid grid-cols-2 gap-2 lg:grid-cols-[minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]";

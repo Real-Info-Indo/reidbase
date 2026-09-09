@@ -205,16 +205,52 @@ export function ModuleTitle({
   );
 }
 
+/** Percentage change between the current and prior-year value, or null when not comparable. */
+export function pctChange(
+  current: number | null | undefined,
+  prior: number | null | undefined,
+): number | null {
+  if (current == null || prior == null) return null;
+  if (!Number.isFinite(current) || !Number.isFinite(prior) || prior === 0) return null;
+  return ((current - prior) / Math.abs(prior)) * 100;
+}
+
+/** Small arrow plus percentage, green for positive and red for negative. */
+export function YoyChange({ change }: { change: number | null | undefined }) {
+  if (change == null || !Number.isFinite(change)) return null;
+  const rounded = Math.round(change * 10) / 10;
+  const positive = rounded > 0;
+  const negative = rounded < 0;
+  const Arrow = positive ? ArrowUpRight : negative ? ArrowDownRight : ArrowRight;
+  const colour = positive
+    ? "hsl(142 62% 34%)"
+    : negative
+      ? "hsl(0 70% 46%)"
+      : "hsl(var(--muted-foreground))";
+  return (
+    <span
+      className="mt-0.5 flex items-center justify-end gap-0.5 text-[0.65rem] font-light leading-none"
+      style={{ color: colour }}
+      title="Change against the 12 months prior to the selected start date"
+    >
+      <Arrow className="h-3 w-3 shrink-0" />
+      {`${positive ? "+" : ""}${rounded.toFixed(1)}% YoY`}
+    </span>
+  );
+}
+
 export function KpiCard({
   label,
   value,
   icon: Icon,
   accent,
+  change,
 }: {
   label: string;
   value: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   accent: string;
+  change?: number | null;
 }) {
   return (
     <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
@@ -227,6 +263,7 @@ export function KpiCard({
       <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
         <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
+        <YoyChange change={change} />
       </div>
     </div>
   );

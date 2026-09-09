@@ -172,7 +172,7 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
           <MonthLineChart data={data.sales_volume_series} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
         <DashboardCard title="Discount rate" subtitle="Gap between median asking and median sold price" exportData={data.discount_series}>
-          <MonthLineChart data={data.discount_series} colour={theme.accent} format={formatPercent} baseline />
+          <MonthLineChart data={data.discount_series} colour={theme.accent} format={formatPercent} baseline gradient />
         </DashboardCard>
         <DashboardCard title="Sales volume by bedrooms" subtitle="Units sold by bedroom count" className="lg:col-span-2" exportData={data.sales_volume_by_beds}>
           <BedsBarChart data={data.sales_volume_by_beds} colour={theme.accent} format={formatCount} />

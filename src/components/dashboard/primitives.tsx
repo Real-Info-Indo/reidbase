@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Download, MoreVertical, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DashboardModuleKey } from "@/lib/dashboardApi";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,17 @@ export const MODULE_THEMES = {
 } as const;
 
 export type ModuleTheme = (typeof MODULE_THEMES)[keyof typeof MODULE_THEMES];
+
+/** Page titles shared between the filter header and each module's KPI row. */
+export const MODULE_TITLES: Record<DashboardModuleKey, { title: string; subtitle: string }> = {
+  "market-overview": { title: "Market Overview", subtitle: "Market snapshot of key supply and demand metrics" },
+  "supply-trends": { title: "Supply Trends", subtitle: "Key supply metrics of available properties" },
+  "sales-trends": { title: "Sales Trends", subtitle: "Key sales and demand metrics of transacted properties" },
+  "property-trends": { title: "Property Trends", subtitle: "Key metrics of property sizing and tenure" },
+  "rental-trends": { title: "Rental Trends", subtitle: "Key supply and demand metrics of operating properties" },
+  "location-report": { title: "Location Report", subtitle: "Micro-location snapshot of supply, sales and rental metrics" },
+  "comparison-report": { title: "Comparison Report", subtitle: "Side-by-side location comparison" },
+};
 
 /** Shared page grid: title column plus four equal score card columns. */
 export const MODULE_GRID =
@@ -167,9 +179,17 @@ export function DashboardCard({
 }
 
 /** Left title block sitting beside the KPI row. Same fixed height as score cards. */
-export function ModuleTitle({ title, subtitle }: { title: string; subtitle: string }) {
+export function ModuleTitle({
+  title,
+  subtitle,
+  className,
+}: {
+  title: string;
+  subtitle: string;
+  className?: string;
+}) {
   return (
-    <div className={cn("flex flex-col justify-between px-1", KPI_HEIGHT)}>
+    <div className={cn("flex flex-col justify-between px-1", KPI_HEIGHT, className)}>
       <h2 className="truncate text-lg font-light leading-none text-foreground">{title}</h2>
       <p className="max-w-[16rem] text-[0.68rem] font-extralight leading-snug text-muted-foreground">
         {subtitle}

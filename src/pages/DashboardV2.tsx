@@ -16,7 +16,7 @@ import {
 } from "@/lib/dashboardApi";
 
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { MODULE_GRID, MODULE_THEMES } from "@/components/dashboard/primitives";
+import { MODULE_GRID, MODULE_THEMES, MODULE_TITLES, ModuleTitle } from "@/components/dashboard/primitives";
 import {
   ComparisonPanel,
   LocationReportModule,
@@ -125,21 +125,28 @@ export default function DashboardV2() {
   const body = useMemo(() => {
     if (isComparison) {
       return (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="space-y-3">
-            <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="mb-2 text-sm font-bold">Selection A</p>
-              <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
+        <div className="space-y-3">
+          <ModuleTitle
+            title={MODULE_TITLES["comparison-report"].title}
+            subtitle={MODULE_TITLES["comparison-report"].subtitle}
+            className="h-auto justify-start"
+          />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="space-y-3">
+              <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-2 text-sm font-bold">Selection A</p>
+                <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
+              </div>
+              {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
             </div>
-            {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
-          </div>
-          <div className="space-y-3">
-            <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="mb-2 text-sm font-bold">Selection B</p>
-              <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
+            <div className="space-y-3">
+              <div className="rounded-xl bg-card p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <p className="mb-2 text-sm font-bold">Selection B</p>
+                <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
 
+              </div>
+              {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
             </div>
-            {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
           </div>
         </div>
       );
@@ -198,9 +205,14 @@ export default function DashboardV2() {
 
       <div className="relative mx-auto w-full max-w-[1500px] flex-1 px-3 pb-3 pt-12" ref={contentRef}>
         {!isComparison && (
-          <header className={`${MODULE_GRID} mb-2`}>
-            {/* Title column spacer to align filters with the first score card */}
-            <div className="col-span-2 hidden lg:col-span-1 lg:block" />
+          <header className={`${MODULE_GRID} mb-2 items-start`}>
+            <div className="col-span-2 hidden lg:col-span-1 lg:block">
+              <ModuleTitle
+                title={MODULE_TITLES[active].title}
+                subtitle={MODULE_TITLES[active].subtitle}
+                className="h-auto justify-start"
+              />
+            </div>
             <div className="col-span-2 w-full lg:col-span-4 lg:col-start-2">
               <FilterBar
                 filters={filters}

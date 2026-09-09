@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Loader2, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { downloadElementPdf } from "@/lib/dashboardExport";
 import { AdminGate } from "@/components/AdminGate";

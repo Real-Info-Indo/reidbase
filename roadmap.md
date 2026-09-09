@@ -1,0 +1,1 @@
+- Swap Supply growth and Clearance rate positions in Supply Trends dashboard (keep sizes)

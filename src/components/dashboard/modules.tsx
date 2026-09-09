@@ -270,14 +270,14 @@ export function LocationReportModule({ data, theme }: ModuleProps) {
         <KpiCard label="Available properties" value={formatCount(k.available_properties)} icon={Home} accent={theme.accent} />
       </KpiRow>
 
-      <ChartGrid>
+      <div className="grid grid-cols-1 gap-3">
         <DashboardCard title="Median sold price" subtitle="Trailing 12 months" exportData={data.sold_price_series}>
           <MonthLineChart data={data.sold_price_series} colour={theme.accent} format={formatUsd} gradient />
         </DashboardCard>
-        <DashboardCard title="New and sold property volume" subtitle="Record volume per period" className="lg:col-span-2" exportData={data.volume_series}>
+        <DashboardCard title="New and sold property volume" subtitle="Record volume per period" exportData={data.volume_series}>
           <VolumeLinesChart data={data.volume_series} colours={[theme.accent, theme.light]} format={formatCount} />
         </DashboardCard>
-      </ChartGrid>
+      </div>
 
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)]">

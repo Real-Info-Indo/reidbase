@@ -130,22 +130,26 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Clearance rate" value={formatPercent(k.clearance_rate)} icon={TrendingUp} accent={theme.accent} />
         <KpiCard label="New listings, latest period" value={formatCount(k.new_listings)} icon={Building2} accent={theme.accent} />
       </KpiRow>
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
-        <DashboardCard title="Development status" subtitle="Completed against off-plan" className="aspect-square" exportData={data.development_status}>
-          <DonutChart data={data.development_status} colours={[theme.accent, theme.light]} format={formatCount} square />
-        </DashboardCard>
-        <DashboardCard title="Available supply" subtitle="Bedroom count by tenure" className="h-full" exportData={data.available_by_beds}>
-          <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} stacked={false} />
-        </DashboardCard>
-        <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count" className="h-full" exportData={data.listing_price_by_beds}>
-          <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />
-        </DashboardCard>
-        <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="h-full lg:col-span-2" exportData={data.clearance_series}>
-          <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} axisFormat={formatPercentAxis} gradient />
-        </DashboardCard>
-        <DashboardCard title="Supply growth" subtitle="New available listings per period" className="h-full" exportData={data.supply_growth}>
-          <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
-        </DashboardCard>
+      <div className="space-y-3">
+        <div className="flex flex-col gap-3 lg:flex-row" style={{ height: "calc(var(--chart-base) + 77px)" }}>
+          <DashboardCard title="Development status" subtitle="Completed against off-plan" className="aspect-square h-full shrink-0" exportData={data.development_status}>
+            <DonutChart data={data.development_status} colours={[theme.accent, theme.light]} format={formatCount} square />
+          </DashboardCard>
+          <DashboardCard title="Available supply" subtitle="Bedroom count by tenure" className="h-full min-w-0 flex-1" exportData={data.available_by_beds}>
+            <TenureBedsChart data={data.available_by_beds} colours={[theme.accent, theme.light]} format={formatCount} stacked={false} />
+          </DashboardCard>
+          <DashboardCard title="Listing price" subtitle="Median asking price by bedroom count" className="h-full min-w-0 flex-1" exportData={data.listing_price_by_beds}>
+            <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />
+          </DashboardCard>
+        </div>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
+          <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="h-full lg:col-span-2" exportData={data.clearance_series}>
+            <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} axisFormat={formatPercentAxis} gradient />
+          </DashboardCard>
+          <DashboardCard title="Supply growth" subtitle="New available listings per period" className="h-full" exportData={data.supply_growth}>
+            <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
+          </DashboardCard>
+        </div>
       </div>
     </div>
   );

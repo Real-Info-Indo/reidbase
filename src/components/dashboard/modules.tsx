@@ -22,6 +22,7 @@ import {
   formatCountExact,
   formatDays,
   formatPercent,
+  formatPercentAxis,
   formatSqm,
   formatSqmAxis,
   formatUsd,
@@ -140,7 +141,7 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
           <BedsBarChart data={data.listing_price_by_beds} colour={theme.accent} format={formatUsd} />
         </DashboardCard>
         <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="h-full lg:col-span-2" exportData={data.clearance_series}>
-          <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} gradient />
+          <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} axisFormat={formatPercentAxis} gradient />
         </DashboardCard>
         <DashboardCard title="Supply growth" subtitle="New available listings per period" className="h-full" exportData={data.supply_growth}>
           <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />

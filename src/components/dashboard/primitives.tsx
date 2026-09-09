@@ -231,7 +231,7 @@ export function KpiCard({
       </span>
       {hasChange && (
         <span
-          className="flex shrink-0 items-center gap-0.5 self-center text-[0.65rem] leading-none"
+          className="flex shrink-0 items-center gap-0.5 self-end pb-1 text-[0.65rem] leading-none"
           style={{ color: positive ? "#16a34a" : "#dc2626" }}
           title="Change vs the 12 months prior to the start date"
         >

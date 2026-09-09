@@ -1,6 +1,7 @@
 import { useRef, useState, type ReactNode } from "react";
 import { Download, MoreVertical, Table2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DashboardModuleKey } from "@/lib/dashboardApi";
 import {
   DropdownMenu,
   DropdownMenuContent,

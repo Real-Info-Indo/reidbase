@@ -210,7 +210,7 @@ export function PropertyTrendsModule({ data, theme }: ModuleProps) {
           <MonthLineChart data={data.build_size_series} colour={theme.accent} format={formatSqm} axisFormat={formatSqmAxis} gradient />
         </DashboardCard>
         <DashboardCard title="Average lease term" subtitle="Mean remaining leasehold years" exportData={data.lease_series}>
-          <MonthLineChart data={data.lease_series} colour={theme.accent} format={formatYears} axisFormat={formatYearsAxis} />
+          <MonthLineChart data={data.lease_series} colour={theme.accent} format={formatYears} axisFormat={formatYearsAxis} gradient />
         </DashboardCard>
         <DashboardCard title="Price per year" subtitle="Mean leasehold cost per year" exportData={data.price_per_year_series}>
           <MonthBarChart data={data.price_per_year_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />

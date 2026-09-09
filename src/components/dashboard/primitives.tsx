@@ -254,18 +254,18 @@ export function KpiCard({
 }) {
   return (
     <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]", KPI_HEIGHT)}>
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-        style={{ backgroundColor: accent }}
-      >
-        <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
-      </span>
+      <div className="flex min-w-[7rem] items-center gap-2">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          style={{ backgroundColor: accent }}
+        >
+          <Icon className="h-4 w-4" style={{ color: "hsl(var(--card))" }} />
+        </span>
+        <YoyChange change={change} />
+      </div>
       <div className="min-w-0 flex-1 text-right">
         <p className="truncate text-xs font-extralight text-muted-foreground">{label}</p>
-        <div className="mt-0.5 flex items-center justify-end gap-1.5">
-          <p className="truncate text-xl font-bold leading-none text-foreground">{value}</p>
-          <YoyChange change={change} />
-        </div>
+        <p className="mt-0.5 truncate text-xl font-bold leading-none text-foreground">{value}</p>
       </div>
     </div>
   );

@@ -185,15 +185,17 @@ export function ModuleTitle({
   className,
 }: {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   className?: string;
 }) {
   return (
     <div className={cn("flex flex-col justify-between px-1", KPI_HEIGHT, className)}>
       <h2 className="truncate text-lg font-light leading-none text-foreground">{title}</h2>
-      <p className="max-w-[16rem] text-[0.68rem] font-extralight leading-snug text-muted-foreground">
-        {subtitle}
-      </p>
+      {subtitle && (
+        <p className="max-w-[16rem] text-[0.68rem] font-extralight leading-snug text-muted-foreground">
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }

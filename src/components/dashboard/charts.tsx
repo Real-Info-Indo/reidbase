@@ -439,7 +439,7 @@ export function VolumeLinesChart({
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: formatMonth(d.month) }));
   const valueFmt = axisFormat ?? format;
-  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
+  const tickFmt = (v: number | null | undefined) => yAxisTickFormatter(v, valueFmt);
   const width = axisWidth(
     rows.flatMap((r) => [r.available, r.sold]),
     tickFmt,

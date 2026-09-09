@@ -89,6 +89,12 @@ function formatAxisLabel(label: string): string {
     .replace(/\.0+(?=[^\d]|$)/, "");
 }
 
+/** Hide the zero baseline tick so vertical axes start cleanly. */
+function yAxisTickFormatter(v: number | null | undefined, fmt: Fmt): string {
+  if (v === 0) return "";
+  return formatAxisLabel(fmt(v));
+}
+
 /**
  * Reserve the Y axis gutter from the widest tick the chart could render, so
  * short numeric axes sit tight against the card title edge and longer labels

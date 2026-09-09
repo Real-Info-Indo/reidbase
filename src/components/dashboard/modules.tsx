@@ -45,7 +45,11 @@ function KpiRow({
   return (
     <div className={MODULE_GRID}>
       <div className="col-span-2 lg:col-span-1">
-        <ModuleTitle title={title ?? ""} subtitle={subtitle ?? ""} />
+        {title ? (
+          <ModuleTitle title={title} subtitle={subtitle ?? ""} />
+        ) : (
+          <div className={KPI_HEIGHT} />
+        )}
       </div>
       {children}
     </div>

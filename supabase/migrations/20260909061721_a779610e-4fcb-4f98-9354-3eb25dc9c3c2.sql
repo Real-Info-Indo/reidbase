@@ -1,0 +1,1 @@
+truncate public.reid_dashboard_cache;

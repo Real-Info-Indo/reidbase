@@ -143,7 +143,7 @@ export function SupplyTrendsModule({ data, theme }: ModuleProps) {
           <MonthLineChart data={data.supply_growth} colour={theme.accent} format={formatCount} gradient />
         </DashboardCard>
         <DashboardCard title="Clearance rate" subtitle="Sold share of total records per period" className="lg:col-span-2" exportData={data.clearance_series}>
-          <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} />
+          <MonthLineChart data={data.clearance_series} colour={theme.accent} format={formatPercent} gradient />
         </DashboardCard>
       </ChartGrid>
     </div>

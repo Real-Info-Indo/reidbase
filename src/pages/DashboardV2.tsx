@@ -127,25 +127,46 @@ export default function DashboardV2() {
     if (isComparison) {
       return (
         <div className="space-y-2">
-          <ModuleTitle
-            title={MODULE_TITLES["comparison-report"].title}
-            subtitle={MODULE_TITLES["comparison-report"].subtitle}
-            className="h-auto justify-start"
-          />
+          <div className="flex justify-end gap-2" data-export-ignore="true">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+              onClick={() => {
+                setCompareA(defaultFilters);
+                setCompareB(defaultFilters);
+              }}
+            >
+              <RotateCcw className="h-3 w-3" />
+              Reset
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-1.5 text-[0.65rem] text-muted-foreground"
+              onClick={() => void downloadPdf()}
+              disabled={exporting}
+            >
+              {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+              {exporting ? "Preparing PDF" : "Download PDF"}
+            </Button>
+          </div>
           <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
             <div className="space-y-2">
               <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                <p className="mb-1 text-xs font-bold">Selection A</p>
-                <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} />
+                <p className="mb-1 text-xs font-bold">Neighbourhood 1</p>
+                <FilterBar filters={compareA} options={options} onChange={setCompareA} compact defaultFilters={defaultFilters} showReset={false} />
               </div>
-              {panelA && <ComparisonPanel data={panelA} theme={theme} title="Selection A" />}
+              {panelA && <ComparisonPanel data={panelA} theme={theme} title="Neighbourhood 1" />}
             </div>
             <div className="space-y-2">
               <div className="rounded-xl bg-card p-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                <p className="mb-1 text-xs font-bold">Selection B</p>
-                <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} />
+                <p className="mb-1 text-xs font-bold">Neighbourhood 2</p>
+                <FilterBar filters={compareB} options={options} onChange={setCompareB} compact defaultFilters={defaultFilters} showReset={false} />
               </div>
-              {panelB && <ComparisonPanel data={panelB} theme={theme} title="Selection B" />}
+              {panelB && <ComparisonPanel data={panelB} theme={theme} title="Neighbourhood 2" />}
             </div>
           </div>
         </div>
@@ -170,7 +191,7 @@ export default function DashboardV2() {
       default:
         return null;
     }
-  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB, defaultFilters]);
+  }, [active, isComparison, options, panelA, panelB, payload, theme, compareA, compareB, defaultFilters, downloadPdf, exporting]);
 
   if (!authenticated) return <AdminGate checking={checking} error={error} />;
 

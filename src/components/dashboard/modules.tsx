@@ -162,11 +162,11 @@ export function SalesTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Days listed" value={formatDays(k.days_listed)} icon={Clock} accent={theme.accent} />
       </KpiRow>
       <ChartGrid>
-        <DashboardCard title="Sale price" subtitle="Median sold price per period" exportData={data.sale_price_series}>
-          <MonthBarChart data={data.sale_price_series} colour={theme.accent} format={formatUsd} />
-        </DashboardCard>
         <DashboardCard title="Ownership type" subtitle="Tenure split of sold properties" exportData={data.ownership}>
           <DonutChart data={data.ownership} colours={[theme.accent, theme.light]} format={formatCount} />
+        </DashboardCard>
+        <DashboardCard title="Sale price" subtitle="Median sold price per period" exportData={data.sale_price_series}>
+          <MonthBarChart data={data.sale_price_series} colour={theme.accent} format={formatUsd} />
         </DashboardCard>
         <DashboardCard title="Sales volume" subtitle="Units sold per period" exportData={data.sales_volume_series}>
           <MonthLineChart data={data.sales_volume_series} colour={theme.accent} format={formatCount} gradient />

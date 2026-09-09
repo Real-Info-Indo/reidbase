@@ -1,4 +1,4 @@
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { wixAuthHeader } from "@/lib/wixToken";
 
@@ -103,6 +103,20 @@ export function getTrailingDateRange(
   const end = endOfMonth(anchor);
   const start = startOfMonth(subMonths(end, months - 1));
   return { date_from: format(start, "yyyy-MM-dd"), date_to: format(end, "yyyy-MM-dd") };
+}
+
+/** Same-length period ending the day before date_from, i.e. the prior 12 months. */
+export function getPriorYearFilters(filters: DashboardFilters): DashboardFilters | null {
+  if (!filters.date_from) return null;
+  const from = new Date(`${filters.date_from}T00:00:00`);
+  if (Number.isNaN(from.getTime())) return null;
+  const priorTo = subDays(from, 1);
+  const priorFrom = subMonths(from, 12);
+  return {
+    ...filters,
+    date_from: format(priorFrom, "yyyy-MM-dd"),
+    date_to: format(priorTo, "yyyy-MM-dd"),
+  };
 }
 
 async function callDashboard<T>(body: Record<string, unknown>): Promise<T> {

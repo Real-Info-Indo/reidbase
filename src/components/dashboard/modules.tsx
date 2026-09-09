@@ -233,9 +233,9 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
         <KpiCard label="Average occupancy" value={formatPercent(k.average_occupancy)} icon={Percent} accent={theme.accent} />
         <KpiCard label="Total revenue" value={formatUsd(k.total_revenue)} icon={TrendingUp} accent={theme.accent} />
       </KpiRow>
-      <ChartGrid>
-        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" exportData={data.mgmt_split}>
-          <DonutChart data={data.mgmt_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[calc(var(--chart-base)_+_77px)_1fr_1fr]">
+        <DashboardCard title="Management type" subtitle="Professionally managed against individually managed" className="aspect-square h-full" exportData={data.mgmt_split}>
+          <DonutChart data={data.mgmt_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} square />
         </DashboardCard>
         <DashboardCard title="Monthly revenue" subtitle="Mean revenue per property per period" exportData={data.revenue_series}>
           <MonthBarChart data={data.revenue_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
@@ -243,13 +243,13 @@ export function RentalTrendsModule({ data, theme }: ModuleProps) {
         <DashboardCard title="Average daily rate" subtitle="Mean ADR per period" exportData={data.adr_series}>
           <MonthBarChart data={data.adr_series} colour={theme.accent} format={formatUsdExact} axisFormat={formatUsdAxis} />
         </DashboardCard>
-        <DashboardCard title="Property type" subtitle="Share of operating records" exportData={data.type_split}>
-          <DonutChart data={data.type_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} />
+        <DashboardCard title="Property type" subtitle="Share of operating records" className="aspect-square h-[calc(var(--chart-base)_+_77px)]" exportData={data.type_split}>
+          <DonutChart data={data.type_split} colours={[theme.accent, theme.light, theme.extra]} format={formatCount} square />
         </DashboardCard>
         <DashboardCard title="Average occupancy" subtitle="Mean occupancy per period" className="lg:col-span-2" exportData={data.occupancy_series}>
           <MonthLineChart data={data.occupancy_series} colour={theme.accent} format={formatPercent} gradient />
         </DashboardCard>
-      </ChartGrid>
+      </div>
     </div>
   );
 }

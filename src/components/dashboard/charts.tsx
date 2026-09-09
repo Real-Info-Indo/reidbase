@@ -328,7 +328,7 @@ export function BedsBarChart({
   if (!hasData(data)) return <EmptyChart />;
   const rows = (data ?? []).map((d) => ({ ...d, label: `${d.beds} bed` }));
   const valueFmt = axisFormat ?? format;
-  const tickFmt = (v: number | null | undefined) => formatAxisLabel(valueFmt(v));
+  const tickFmt = (v: number | null | undefined) => yAxisTickFormatter(v, valueFmt);
   const numericWidth = axisWidth(rows.map((r) => r.value), tickFmt);
   const catWidth = categoryWidth(rows.map((r) => r.label));
 

@@ -229,6 +229,22 @@ export function MonthBarChart({
   );
 }
 
+function contrastText(fill: string): string {
+  const rgb =
+    fill.startsWith("#") && fill.length === 7
+      ? [parseInt(fill.slice(1, 3), 16), parseInt(fill.slice(3, 5), 16), parseInt(fill.slice(5, 7), 16)]
+      : fill.startsWith("#") && fill.length === 4
+        ? [
+            parseInt(fill[1] + fill[1], 16),
+            parseInt(fill[2] + fill[2], 16),
+            parseInt(fill[3] + fill[3], 16),
+          ]
+        : [255, 255, 255];
+  const [r, g, b] = rgb;
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.55 ? "#1a1a1a" : "#ffffff";
+}
+
 export function DonutChart({
   data,
   colours,
@@ -245,17 +261,18 @@ export function DonutChart({
   if (rows.length === 0) return <EmptyChart />;
 
   const renderShareLabel = useCallback(
-    ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
       const share = (percent * 100).toFixed(1);
       if (Number(share) < 3) return null;
       const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
       const x = cx + radius * Math.cos(-midAngle * RADIAN);
       const y = cy + radius * Math.sin(-midAngle * RADIAN);
+      const fill = colours[index % colours.length];
       return (
         <text
           x={x}
           y={y}
-          fill="hsl(var(--muted-foreground))"
+          fill={contrastText(fill)}
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={11}
@@ -265,7 +282,7 @@ export function DonutChart({
         </text>
       );
     },
-    [],
+    [colours],
   );
 
   return (

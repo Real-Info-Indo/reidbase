@@ -5,7 +5,8 @@
 // and shared_conversations should go through this helper.
 
 import { supabase } from "@/integrations/supabase/client";
-import { wixAuthHeader } from "@/lib/wixToken";
+import { wixAuthHeader, clearStoredWixTokens } from "@/lib/wixToken";
+
 
 export interface UserDataError {
   error: string;

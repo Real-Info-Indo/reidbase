@@ -26,13 +26,22 @@ export async function invokeUserData<T = any>(
     headers,
   });
   if (error) {
+    // A rejected/expired Wix token must not keep failing every call: drop the
+    // dead tokens so the app falls back to the signed-out state.
+    const ctx = (error as { context?: Response }).context;
+    if (ctx?.status === 401) clearStoredWixTokens();
     return {
       data: null,
       error: { error: "invoke_failed", message: error.message },
     };
   }
   if (data && typeof data === "object" && "error" in (data as any)) {
-    return { data: null, error: data as UserDataError };
+    const err = data as UserDataError;
+    if (err.error === "invalid_token" || err.error === "missing_token") {
+      clearStoredWixTokens();
+    }
+    return { data: null, error: err };
   }
+
   return { data: data as T, error: null };
 }

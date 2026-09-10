@@ -71,7 +71,12 @@ export async function getFreshWixAccessToken(): Promise<string | null> {
   if (!isExpired) return stored.accessToken.value;
 
   const refreshToken = stored.refreshToken;
-  if (!refreshToken?.value) return stored.accessToken.value;
+  if (!refreshToken?.value) {
+    // Expired access token with nothing to renew from: treat as signed out
+    // rather than sending a token Wix will reject with a 401.
+    clearStoredWixTokens();
+    return null;
+  }
 
   try {
     // Make sure the SDK has the latest stored tokens, then renew.
@@ -85,8 +90,10 @@ export async function getFreshWixAccessToken(): Promise<string | null> {
   } catch (err) {
     console.warn("Wix token renewal failed:", err);
   }
-  return stored.accessToken.value;
+  clearStoredWixTokens();
+  return null;
 }
+
 
 /** Async — always returns a fresh Authorization header when possible. */
 export async function wixAuthHeader(): Promise<Record<string, string>> {

@@ -35,6 +35,19 @@ function writeStoredTokens(tokens: any) {
   }
 }
 
+/** Drop dead tokens so we stop sending a token Wix will reject. */
+export function clearStoredWixTokens() {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem("wix-oauth-data");
+    localStorage.removeItem("wix-member");
+    localStorage.removeItem("reid-user-tier");
+  } catch {
+    // ignore storage failures
+  }
+}
+
+
 /** Synchronous read — may return a stale token. Prefer getFreshWixAccessToken. */
 export function getWixAccessToken(): string | null {
   const tokens = readStoredTokens();

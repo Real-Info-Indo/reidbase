@@ -3,3 +3,7 @@
 - [x] Verify anonymous download auditing, campaign aggregation and signed-out administrator protection
 - [x] Verify all campaign selections and CSV export at desktop and phone widths using intercepted responses with real totals and anonymised profiles
 - [ ] Verify signed-in analytics display and CSV download: requires an active Wix administrator session
+- [x] Move campaign analytics to a dedicated top tab with campaign-specific CSV export
+- [x] Add campaign engagement and acquisition metrics using recorded activity
+- [x] Explain email visitor attribution and verify campaign analytics changes with synthetic desktop/mobile responses and calculation tests
+- [x] Explain Wix Email Marketing attribution without treating recipient links as verified identity

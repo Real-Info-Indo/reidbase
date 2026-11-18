@@ -8,6 +8,13 @@
       "when": 1794988465197,
       "tag": "0000_launch_campaign_analytics",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794992693842,
+      "tag": "0001_campaign_engagement_metrics",
+      "breakpoints": true
     }
   ]
 }

@@ -22,27 +22,11 @@ import { AdminGate } from "@/components/AdminGate";
 import { invokeAdmin } from "@/lib/adminApi";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CampaignAnalytics } from "@/components/CampaignAnalytics";
+import { campaignExportRows, type LaunchCampaign } from "@/lib/campaignMetrics";
 
 type RangePreset = "7" | "30" | "90" | "180" | "365" | "custom";
-
-interface LaunchCampaign {
-  slug: string;
-  title: string;
-  visitors: number;
-  page_views: number;
-  identified_users: number;
-  anonymous_visits: number;
-  downloads: number;
-  visitor_details: {
-    wix_user_id: string;
-    display_name: string | null;
-    email: string | null;
-    page_views: number;
-    downloads: number;
-    first_seen: string;
-    last_seen: string;
-  }[];
-}
 
 function downloadCsv(filename: string, rows: (string | number)[][]) {
   const esc = (v: string | number) => {
@@ -187,6 +171,7 @@ export default function AdminAnalytics() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [selectedCampaign, setSelectedCampaign] = useState("q3-report");
+  const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
 
   // ── Date range ──
@@ -309,7 +294,6 @@ export default function AdminAnalytics() {
   const topReferrers = data?.top_referrers ?? [];
   const topCampaigns = data?.top_campaigns ?? [];
   const launchCampaigns = data?.launch_campaigns ?? [];
-  const activeCampaign = launchCampaigns.find((campaign) => campaign.slug === selectedCampaign);
   const retention = data?.retention_snapshot;
   const cohorts = data?.weekly_retention_cohorts ?? [];
 
@@ -332,6 +316,10 @@ export default function AdminAnalytics() {
       return;
     }
     const stamp = new Date().toISOString().slice(0, 10);
+    if (activeTab === "campaigns") {
+      downloadCsv(`reid-campaign-analytics-${stamp}.csv`, campaignExportRows(launchCampaigns, rangeLabel));
+      return;
+    }
     const sections: { name: string; rows: (string | number)[][] }[] = [];
 
     sections.push({
@@ -546,6 +534,15 @@ export default function AdminAnalytics() {
           </div>
         </div>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList aria-label="Analytics views" className="max-w-full">
+            <TabsTrigger value="overview">Platform analytics</TabsTrigger>
+            <TabsTrigger value="campaigns">Campaign analytics</TabsTrigger>
+          </TabsList>
+          <TabsContent value="campaigns">
+            <CampaignAnalytics campaigns={launchCampaigns} selected={selectedCampaign} onSelect={setSelectedCampaign} period={rangeLabel} loading={loading} />
+          </TabsContent>
+          <TabsContent value="overview" className="space-y-6">
         {/* KPI cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
@@ -594,73 +591,6 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
         </div>
-
-        <section className="space-y-4 border-y border-border py-6" aria-label="Launch campaigns">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Launch campaigns</h2>
-            <p className="text-xs text-muted-foreground">{rangeLabel}</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Visits count browser sessions, not distinct people. Downloads count successful report link requests, not confirmed file saves.
-            Historical downloads may be incomplete where tracking was unavailable.
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-muted-foreground">
-                  {["Campaign", "Visits", "Page views", "Identified users", "Anonymous visits", "Downloads"].map((label) => (
-                    <th key={label} className="py-2 pr-4 font-medium whitespace-nowrap">{label}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {launchCampaigns.map((campaign) => (
-                  <tr key={campaign.slug} className="border-b border-border last:border-b-0">
-                    <td className="py-3 pr-4 whitespace-nowrap">
-                      <Button variant="link" className="h-auto p-0 text-sm" onClick={() => setSelectedCampaign(campaign.slug)}>{campaign.title}</Button>
-                    </td>
-                    {[campaign.visitors, campaign.page_views, campaign.identified_users, campaign.anonymous_visits, campaign.downloads].map((value, i) => (
-                      <td key={i} className="py-3 pr-4 tabular-nums">{value.toLocaleString()}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!launchCampaigns.length && <p className="py-4 text-sm text-muted-foreground">{loading ? "Loading campaign metrics" : "No campaign metrics available"}</p>}
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <h3 className="text-sm font-medium text-foreground">Identified visitors</h3>
-            <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-              <SelectTrigger className="w-[180px]" aria-label="Visitor campaign"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {launchCampaigns.map((campaign) => <SelectItem key={campaign.slug} value={campaign.slug}>{campaign.title}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <p className="text-xs text-muted-foreground">Names and emails are available only for verified signed-in users, including sign-in within the same session. Anonymous visitors cannot be identified.</p>
-          <div className="max-h-80 overflow-auto">
-            {activeCampaign?.visitor_details.length ? (
-              <table className="w-full min-w-[680px] text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-muted-foreground">
-                    {["Name", "Email", "Page views", "Downloads", "Last activity (WITA)"].map((label) => <th key={label} className="py-2 pr-4 font-medium whitespace-nowrap">{label}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeCampaign.visitor_details.map((visitor) => (
-                    <tr key={visitor.wix_user_id} className="border-b border-border last:border-b-0">
-                      <td className="py-3 pr-4">{visitor.display_name || "Name unavailable"}</td>
-                      <td className="py-3 pr-4 whitespace-nowrap">{visitor.email || "Email unavailable"}</td>
-                      <td className="py-3 pr-4 tabular-nums">{visitor.page_views}</td>
-                      <td className="py-3 pr-4 tabular-nums">{visitor.downloads}</td>
-                      <td className="py-3 pr-4 whitespace-nowrap">{new Intl.DateTimeFormat("en-GB", { dateStyle: "short", timeStyle: "short", timeZone: TZ }).format(new Date(visitor.last_seen))}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : <p className="py-3 text-sm text-muted-foreground">No identified visitors in this period</p>}
-          </div>
-        </section>
 
         {/* Charts row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -924,6 +854,8 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
         </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

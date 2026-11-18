@@ -90,7 +90,7 @@ const MARKET_TRENDS_CANNED_REPLY = [
   "",
   "Want to go deeper? Try asking:",
   "",
-  "- How are prices and rental yields performing in [region] for a [number] bedroom villa?",
+  "- How are villa prices and rental yields performing across the main Bali regions?",
   "- What gross yield can I expect from a leasehold villa in Q3 2026?",
   "- Which regions have the fastest growing rental supply, and what does that mean for rates?",
   "- How long are properties taking to sell in my area?",

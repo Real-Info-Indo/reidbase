@@ -640,7 +640,7 @@ export default function AdminAnalytics() {
           <p className="text-xs text-muted-foreground">Names and emails are available only for verified signed-in users, including sign-in within the same session. Anonymous visitors cannot be identified.</p>
           <div className="max-h-80 overflow-auto">
             {activeCampaign?.visitor_details.length ? (
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[680px] text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
                     {["Name", "Email", "Page views", "Downloads", "Last activity (WITA)"].map((label) => <th key={label} className="py-2 pr-4 font-medium whitespace-nowrap">{label}</th>)}
@@ -650,7 +650,7 @@ export default function AdminAnalytics() {
                   {activeCampaign.visitor_details.map((visitor) => (
                     <tr key={visitor.wix_user_id} className="border-b border-border last:border-b-0">
                       <td className="py-3 pr-4">{visitor.display_name || "Name unavailable"}</td>
-                      <td className="py-3 pr-4 break-all">{visitor.email || "Email unavailable"}</td>
+                      <td className="py-3 pr-4 whitespace-nowrap">{visitor.email || "Email unavailable"}</td>
                       <td className="py-3 pr-4 tabular-nums">{visitor.page_views}</td>
                       <td className="py-3 pr-4 tabular-nums">{visitor.downloads}</td>
                       <td className="py-3 pr-4 whitespace-nowrap">{new Intl.DateTimeFormat("en-GB", { dateStyle: "short", timeStyle: "short", timeZone: TZ }).format(new Date(visitor.last_seen))}</td>

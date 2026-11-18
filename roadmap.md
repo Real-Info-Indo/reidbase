@@ -1,4 +1,5 @@
 - [x] Simplify Comparison Report controls and rename both neighbourhood sections
 - [x] Add launch campaign visit and download metrics with identifiable visitor details
 - [x] Verify anonymous download auditing, campaign aggregation and signed-out administrator protection
+- [x] Verify all campaign selections and CSV export at desktop and phone widths using intercepted responses with real totals and anonymised profiles
 - [ ] Verify signed-in analytics display and CSV download: requires an active Wix administrator session

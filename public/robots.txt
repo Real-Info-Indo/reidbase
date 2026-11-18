@@ -31,5 +31,6 @@ Disallow: /callback
 Disallow: /login
 Disallow: /widget
 Disallow: /widget-minimal
+Disallow: /report-pages/
 
 Sitemap: https://ai.realinfo.id/sitemap.xml

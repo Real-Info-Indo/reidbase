@@ -1,0 +1,19 @@
+# REID
+
+> REID is a Bali property market intelligence platform for investors, developers and property professionals. It covers sale prices, price per sqm, yield, occupancy, average daily rate (ADR) and clearance rates by micro-location, with all prices in USD.
+
+## Main pages
+- [AI analyst](https://ai.realinfo.id/): ask questions about the Bali property market in four modes: Data Analyst, Sales Assistant, Marketing Assistant and Portfolio Analyst.
+- [Market reports](https://ai.realinfo.id/market-reports): quarterly and half-year Bali property market reports (Q3 2026, H1 2026, Q1 2026, Q3 2025) as PDF downloads.
+- [Location reports](https://ai.realinfo.id/location-reports): reports for 10 Bali regions, including Canggu, Uluwatu and Ubud.
+- [Market dashboard](https://ai.realinfo.id/dashboard): interactive market intelligence dashboard.
+- [Property appraisal](https://ai.realinfo.id/appraisal-request): request a valuation for a villa or property.
+
+## Report summaries
+- [Q3 2026 market report](https://ai.realinfo.id/campaign/q3-report)
+- [H1 2026 market report](https://ai.realinfo.id/campaign/h1-report)
+- [Q1 2026 market report](https://ai.realinfo.id/campaign/q1-report)
+
+## About
+- Publisher: REID, https://www.realinfo.id
+- Pricing: https://www.realinfo.id/pricing

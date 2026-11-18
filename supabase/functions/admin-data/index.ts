@@ -169,11 +169,18 @@ Deno.serve(async (req) => {
             ? (data as Record<string, unknown>)
             : {};
 
+        const { data: launchCampaigns, error: campaignError } = await supabase.rpc("admin_campaign_analytics", {
+          p_from: fromIso,
+          p_to: toIso,
+        });
+        if (campaignError) throw campaignError;
+
         return jsonResponse({
           source: "server_aggregated",
           truncated: false,
           range: { from: fromIso, to: toIso },
           ...aggregates,
+          launch_campaigns: launchCampaigns ?? [],
         });
       }
 

@@ -9,6 +9,10 @@
 // CAMPAIGN_REPORTS can be requested, so the `reports` Storage bucket stays
 // private.
 
+import { getServiceClient } from "../_shared/entitlements.ts";
+import { verifyWixToken } from "../_shared/wix-auth.ts";
+import { campaignDownloadEvent } from "../_shared/campaign-analytics.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -51,7 +55,7 @@ Deno.serve(async (req) => {
     return jsonResponse(405, { error: "method_not_allowed" });
   }
 
-  let body: { slug?: string };
+  let body: { slug?: string; session_id?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -68,8 +72,9 @@ Deno.serve(async (req) => {
     return jsonResponse(404, { error: "campaign_not_found" });
   }
 
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!SUPABASE_URL || !SERVICE_ROLE) return jsonResponse(500, { error: "configuration_error" });
 
   // We only need a signed URL — call Storage REST directly to avoid pulling
   // the supabase-js dependency for a single endpoint.
@@ -105,6 +110,19 @@ Deno.serve(async (req) => {
   // name instead of rendering inline.
   const url = new URL(`${SUPABASE_URL}/storage/v1${signed.signedURL}`);
   url.searchParams.set("download", entry.downloadAs);
+
+  // Audit only successful signed-URL requests, never client-declared downloads.
+  // Invalid or absent optional authentication must not block public reports.
+  let verifiedUserId: string | null = null;
+  try {
+    const identity = await verifyWixToken(req.headers.get("Authorization"));
+    verifiedUserId = identity.wixUserId;
+  } catch {
+    // Anonymous download. Do not infer identity from the request body.
+  }
+  const { error: auditError } = await getServiceClient().from("analytics_events")
+    .insert(campaignDownloadEvent(slug, body.session_id, verifiedUserId));
+  if (auditError) console.error("Campaign download audit failed:", auditError.code);
 
   return jsonResponse(200, {
     ok: true,

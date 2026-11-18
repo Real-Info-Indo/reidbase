@@ -807,6 +807,10 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: Json
       }
+      admin_campaign_analytics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       admin_user_aggregates: { Args: never; Returns: Json }
       check_and_increment_free_prompt: {
         Args: { p_daily_limit?: number; p_wix_user_id: string }

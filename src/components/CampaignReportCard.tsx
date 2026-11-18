@@ -3,7 +3,9 @@ import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getCampaign, type Campaign } from "@/lib/campaigns";
-import { trackFeature } from "@/lib/analytics";
+import { getSessionId } from "@/lib/analytics";
+import { wixAuthHeader } from "@/lib/wixToken";
+import { Button } from "@/components/ui/button";
 
 /**
  * Compact report card used inside campaign conversations. Rendered for both
@@ -19,14 +21,14 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
     setDownloading(true);
     try {
       const { data, error } = await supabase.functions.invoke("download-public-report", {
-        body: { slug: campaign.slug },
+        body: { slug: campaign.slug, session_id: getSessionId() },
+        headers: await wixAuthHeader(),
       });
       if (error || !data?.ok || !data?.url) {
         toast.error("Download unavailable. Please try again later.");
         return;
       }
       window.open(data.url as string, "_blank", "noopener,noreferrer");
-      trackFeature("campaign_report_download", { slug: campaign.slug });
     } finally {
       setDownloading(false);
     }
@@ -45,7 +47,7 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
           <h3 className="text-sm font-semibold text-foreground leading-tight truncate">{campaign.report.title}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{campaign.report.subtitle}</p>
         </div>
-        <button
+        <Button
           onClick={handleDownload}
           disabled={downloading}
           className="shrink-0 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60"
@@ -61,7 +63,7 @@ export function CampaignReportCard({ campaign }: { campaign: Campaign }) {
               Download report
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

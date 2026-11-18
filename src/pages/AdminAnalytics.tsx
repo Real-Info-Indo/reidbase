@@ -25,6 +25,25 @@ import { cn } from "@/lib/utils";
 
 type RangePreset = "7" | "30" | "90" | "180" | "365" | "custom";
 
+interface LaunchCampaign {
+  slug: string;
+  title: string;
+  visitors: number;
+  page_views: number;
+  identified_users: number;
+  anonymous_visits: number;
+  downloads: number;
+  visitor_details: {
+    wix_user_id: string;
+    display_name: string | null;
+    email: string | null;
+    page_views: number;
+    downloads: number;
+    first_seen: string;
+    last_seen: string;
+  }[];
+}
+
 function downloadCsv(filename: string, rows: (string | number)[][]) {
   const esc = (v: string | number) => {
     const s = String(v ?? "");
@@ -42,6 +61,7 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
 
 // ---- Server aggregate payload shape (admin-data, action: "analytics") ----
 interface AggregatePayload {
+  launch_campaigns?: LaunchCampaign[];
   source: "server_aggregated";
   truncated: boolean;
   range: { from: string; to: string };
@@ -166,6 +186,7 @@ export default function AdminAnalytics() {
   const [rangePreset, setRangePreset] = useState<RangePreset>("30");
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
+  const [selectedCampaign, setSelectedCampaign] = useState("q3-report");
   const navigate = useNavigate();
 
   // ── Date range ──
@@ -287,6 +308,8 @@ export default function AdminAnalytics() {
 
   const topReferrers = data?.top_referrers ?? [];
   const topCampaigns = data?.top_campaigns ?? [];
+  const launchCampaigns = data?.launch_campaigns ?? [];
+  const activeCampaign = launchCampaigns.find((campaign) => campaign.slug === selectedCampaign);
   const retention = data?.retention_snapshot;
   const cohorts = data?.weekly_retention_cohorts ?? [];
 
@@ -369,6 +392,22 @@ export default function AdminAnalytics() {
         ...funnelSteps.map((s, i) => [
           i + 1, s.label, s.value, s.rateFromPrevious === null ? "" : s.rateFromPrevious.toFixed(1),
         ]),
+      ],
+    });
+    sections.push({
+      name: "launch_campaigns",
+      rows: [
+        ["Campaign", "Visits (sessions)", "Page views", "Identified users", "Anonymous visits", "Download requests"],
+        ...launchCampaigns.map((c) => [c.title, c.visitors, c.page_views, c.identified_users, c.anonymous_visits, c.downloads]),
+      ],
+    });
+    sections.push({
+      name: "launch_campaign_visitors",
+      rows: [
+        ["Campaign", "Name", "Email", "Page views", "Download requests", "First activity", "Last activity"],
+        ...launchCampaigns.flatMap((c) => c.visitor_details.map((v) => [
+          c.title, v.display_name ?? "", v.email ?? "", v.page_views, v.downloads, v.first_seen, v.last_seen,
+        ])),
       ],
     });
     sections.push({
@@ -555,6 +594,73 @@ export default function AdminAnalytics() {
             </CardContent>
           </Card>
         </div>
+
+        <section className="space-y-4 border-y border-border py-6" aria-label="Launch campaigns">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Launch campaigns</h2>
+            <p className="text-xs text-muted-foreground">{rangeLabel}</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Visits count browser sessions, not distinct people. Downloads count successful report link requests, not confirmed file saves.
+            Historical downloads may be incomplete where tracking was unavailable.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground">
+                  {["Campaign", "Visits", "Page views", "Identified users", "Anonymous visits", "Downloads"].map((label) => (
+                    <th key={label} className="py-2 pr-4 font-medium whitespace-nowrap">{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {launchCampaigns.map((campaign) => (
+                  <tr key={campaign.slug} className="border-b border-border last:border-b-0">
+                    <td className="py-3 pr-4 whitespace-nowrap">
+                      <Button variant="link" className="h-auto p-0 text-sm" onClick={() => setSelectedCampaign(campaign.slug)}>{campaign.title}</Button>
+                    </td>
+                    {[campaign.visitors, campaign.page_views, campaign.identified_users, campaign.anonymous_visits, campaign.downloads].map((value, i) => (
+                      <td key={i} className="py-3 pr-4 tabular-nums">{value.toLocaleString()}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!launchCampaigns.length && <p className="py-4 text-sm text-muted-foreground">{loading ? "Loading campaign metrics" : "No campaign metrics available"}</p>}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <h3 className="text-sm font-medium text-foreground">Identified visitors</h3>
+            <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
+              <SelectTrigger className="w-[180px]" aria-label="Visitor campaign"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {launchCampaigns.map((campaign) => <SelectItem key={campaign.slug} value={campaign.slug}>{campaign.title}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-xs text-muted-foreground">Names and emails are available only for verified signed-in users, including sign-in within the same session. Anonymous visitors cannot be identified.</p>
+          <div className="max-h-80 overflow-auto">
+            {activeCampaign?.visitor_details.length ? (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-muted-foreground">
+                    {["Name", "Email", "Page views", "Downloads", "Last activity (WITA)"].map((label) => <th key={label} className="py-2 pr-4 font-medium whitespace-nowrap">{label}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeCampaign.visitor_details.map((visitor) => (
+                    <tr key={visitor.wix_user_id} className="border-b border-border last:border-b-0">
+                      <td className="py-3 pr-4">{visitor.display_name || "Name unavailable"}</td>
+                      <td className="py-3 pr-4 break-all">{visitor.email || "Email unavailable"}</td>
+                      <td className="py-3 pr-4 tabular-nums">{visitor.page_views}</td>
+                      <td className="py-3 pr-4 tabular-nums">{visitor.downloads}</td>
+                      <td className="py-3 pr-4 whitespace-nowrap">{new Intl.DateTimeFormat("en-GB", { dateStyle: "short", timeStyle: "short", timeZone: TZ }).format(new Date(visitor.last_seen))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : <p className="py-3 text-sm text-muted-foreground">No identified visitors in this period</p>}
+          </div>
+        </section>
 
         {/* Charts row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

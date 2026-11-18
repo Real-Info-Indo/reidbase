@@ -3,7 +3,7 @@ import { getFreshWixAccessToken } from "@/lib/wixToken";
 
 const SESSION_KEY = "reid-session-id";
 
-function getSessionId(): string {
+export function getSessionId(): string {
   let id = sessionStorage.getItem(SESSION_KEY);
   if (!id) {
     id = crypto.randomUUID();

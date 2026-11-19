@@ -43,6 +43,36 @@ export default function CampaignConversation() {
     if (campaign) trackFeature("campaign_view", { slug: campaign.slug });
   }, [campaign?.slug]);
 
+  // Point link-preview tags (og:image etc) at the campaign report cover so
+  // shared links show the report artwork. Restores site defaults on leave.
+  useEffect(() => {
+    if (!campaign?.report) return;
+    const imageUrl = `${window.location.origin}${campaign.report.thumbnail}`;
+    const tags: Array<[string, string, string]> = [
+      ["property", "og:title", campaign.title],
+      ["property", "og:description", "Bali property market intelligence from REID."],
+      ["property", "og:image", imageUrl],
+      ["name", "twitter:title", campaign.title],
+      ["name", "twitter:image", imageUrl],
+    ];
+    const previous = tags.map(([attr, key, content]) => {
+      let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      const old = el.getAttribute("content") ?? "";
+      el.setAttribute("content", content);
+      return { el, old };
+    });
+    document.title = `${campaign.title} | REID`;
+    return () => {
+      previous.forEach(({ el, old }) => el.setAttribute("content", old));
+      document.title = "REID | Bali Property Market Intelligence and AI Analyst";
+    };
+  }, [campaign?.slug]);
+
   // If a logged-in user lands here, forward them straight into a real,
   // editable conversation seeded with the campaign content.
   useEffect(() => {
